@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ZoDream.Archiver (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ZoDream.Archiver (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

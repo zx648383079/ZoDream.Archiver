@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="ZoDream.Archiver.Pages.StartupPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    xmlns:win="using:CommunityToolkit.WinUI.Controls"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <vm:StartupViewModel />
+    </Page.DataContext>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.RowSpan="2"
+            Width="200"
+            VerticalAlignment="Center">
+            <Image Source="/Assets/Logo.png" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{Binding Version}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="欢迎使用" />
+            <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="介绍" />
+
+            <win:SettingsCard
+                Margin="0,40,0,0"
+                Command="{Binding OpenCommand}"
+                Description="选择一个已存在文件"
+                Header="打开文件"
+                IsActionIconVisible="False"
+                IsClickEnabled="True">
+                <win:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE838;" />
+                </win:SettingsCard.HeaderIcon>
+            </win:SettingsCard>
+            <win:SettingsCard
+                Command="{Binding CreateCommand}"
+                Description="创建新的"
+                Header="创建新"
+                IsActionIconVisible="False"
+                IsClickEnabled="True">
+                <win:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE710;" />
+                </win:SettingsCard.HeaderIcon>
+            </win:SettingsCard>
+        </StackPanel>
+    </Grid>
+</Page>
