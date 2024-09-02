@@ -40,6 +40,11 @@ namespace ZoDream.Archiver.ViewModels
             picker.FileTypeFilter.Add("*");
             App.ViewModel.InitializePicker(picker);
             var items = await picker.PickSingleFileAsync();
+            if (items is null)
+            {
+                return;
+            }
+            App.ViewModel.Navigate<WorkspacePage>(items);
         }
 
         private void TapOpenFolder(object? _)
@@ -65,7 +70,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private void TapCreate(object? _)
         {
-            App.ViewModel.Navigate<WorkspacePage>();
+            App.ViewModel.Navigate<CompressPage>();
         }
     }
 }

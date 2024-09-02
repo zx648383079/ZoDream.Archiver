@@ -9,6 +9,12 @@ namespace ZoDream.Shared.Models
         {
             Name = name;
         }
+
+        public ReadOnlyEntry(string name, long length)
+            :this (name)
+        {
+            Length = length;
+        }
         public ReadOnlyEntry(
             string name, long length, long compressedLength, 
             bool isEncrypted, DateTime? createdTime) : this(name, length, isEncrypted, createdTime)
@@ -17,9 +23,8 @@ namespace ZoDream.Shared.Models
         }
 
         public ReadOnlyEntry(
-            string name, long length, DateTime? createdTime): this(name)
+            string name, long length, DateTime? createdTime): this(name, length)
         {
-            Length = length;
             CreatedTime = createdTime;
         }
 

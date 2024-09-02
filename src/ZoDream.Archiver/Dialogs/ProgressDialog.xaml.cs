@@ -17,24 +17,15 @@ using ZoDream.Archiver.ViewModels;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace ZoDream.Archiver.Pages
+namespace ZoDream.Archiver.Dialogs
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class WorkspacePage : Page
+    public sealed partial class ProgressDialog : ContentDialog
     {
-        public WorkspacePage()
+        public ProgressDialog()
         {
             this.InitializeComponent();
         }
 
-        public WorkspaceViewModel ViewModel => (WorkspaceViewModel)DataContext;
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-            ViewModel.LoadAsync(e.Parameter);
-        }
+        public ProgressDialogViewModel ViewModel => (ProgressDialogViewModel)DataContext;
     }
 }

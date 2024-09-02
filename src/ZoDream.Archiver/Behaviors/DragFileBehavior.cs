@@ -4,7 +4,7 @@ using System;
 using System.Windows.Input;
 using Windows.ApplicationModel.DataTransfer;
 
-namespace ZoDream.TexturePacker.Behaviors
+namespace ZoDream.Archiver.Behaviors
 {
     public class DragFileBehavior: Behavior<FrameworkElement>
     {

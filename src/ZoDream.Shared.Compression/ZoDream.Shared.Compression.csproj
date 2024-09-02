@@ -16,11 +16,4 @@
     <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Zip\" />
-    <Folder Include="SevenZip\" />
-    <Folder Include="WinRar\" />
-    <Folder Include="Tar\" />
-  </ItemGroup>
-
 </Project>

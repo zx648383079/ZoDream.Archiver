@@ -15,5 +15,10 @@ namespace ZoDream.Archiver.ViewModels
         {
             _rootFrame.Navigate(typeof(T), parameter);
         }
+
+        public void NavigateBack()
+        {
+            _rootFrame.GoBack();
+        }
     }
 }

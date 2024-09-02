@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.IO;
 
 namespace ZoDream.Shared.Interfaces
 {
-    public interface IArchiveWriter
+    public interface IArchiveWriter: IDisposable
     {
+
+        public IReadOnlyEntry AddEntry(string name, string fullPath);
+        public IReadOnlyEntry AddEntry(string name, Stream input);
     }
 }

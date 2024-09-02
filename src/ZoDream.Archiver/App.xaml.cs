@@ -34,6 +34,7 @@ namespace ZoDream.Archiver
         public App()
         {
             this.InitializeComponent();
+            Current.RequestedTheme = ApplicationTheme.Light;
         }
 
         /// <summary>

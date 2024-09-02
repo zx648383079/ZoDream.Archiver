@@ -16,9 +16,17 @@
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Dialogs\CompressDialog.xaml" />
     <None Remove="Dialogs\ConfirmDialog.xaml" />
+    <None Remove="Dialogs\PasswordDialog.xaml" />
+    <None Remove="Dialogs\ProgressDialog.xaml" />
+    <None Remove="Pages\CompressPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
     <None Remove="Pages\WorkspacePage.xaml" />
+    <None Remove="Themes\BaseStyle.xaml" />
+    <None Remove="Themes\DarkTheme.xaml" />
+    <None Remove="Themes\InputStyle.xaml" />
+    <None Remove="Themes\LightTheme.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,7 +56,35 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
+    <ProjectReference Include="..\ZoDream.Shared.Encryption\ZoDream.Shared.Encryption.csproj" />
+    <ProjectReference Include="..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />
     <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Dialogs\ProgressDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Dialogs\CompressDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Dialogs\PasswordDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\InputStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\CompressPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Pages\WorkspacePage.xaml">
@@ -62,6 +98,17 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Dialogs\ConfirmDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+	  <Page Update="Themes\BaseStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+	  <Page Update="Themes\DarkTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+	<Page Update="Themes\LightTheme.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

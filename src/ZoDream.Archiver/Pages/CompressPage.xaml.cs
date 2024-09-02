@@ -12,7 +12,6 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using ZoDream.Archiver.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -22,19 +21,11 @@ namespace ZoDream.Archiver.Pages
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class WorkspacePage : Page
+    public sealed partial class CompressPage : Page
     {
-        public WorkspacePage()
+        public CompressPage()
         {
             this.InitializeComponent();
-        }
-
-        public WorkspaceViewModel ViewModel => (WorkspaceViewModel)DataContext;
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-            ViewModel.LoadAsync(e.Parameter);
         }
     }
 }

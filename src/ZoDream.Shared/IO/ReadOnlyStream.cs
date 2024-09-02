@@ -18,7 +18,9 @@ namespace ZoDream.Shared.IO
 
         public override long Position { 
             get => stream.Position; 
-            set => stream.Position = value; 
+            set {
+                Seek(value, SeekOrigin.Begin);
+            }
         }
 
         public override void Flush()

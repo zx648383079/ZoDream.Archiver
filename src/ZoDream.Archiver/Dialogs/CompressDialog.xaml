@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="ZoDream.Archiver.Dialogs.CompressDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    Title="压缩文件"
+    PrimaryButtonText="确认"
+    SecondaryButtonText="取消"
+    mc:Ignorable="d">
+    <ContentDialog.DataContext>
+        <vm:CompressDialogViewModel />
+    </ContentDialog.DataContext>
+
+    <StackPanel>
+        <TextBlock Text="FileName" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+            <Button Grid.Column="1" Command="{Binding OpenCommand}">
+                <FontIcon Glyph="&#xE8E5;" />
+            </Button>
+        </Grid>
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Type" />
+        <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Password" />
+        <TextBox Text="{Binding Password, Mode=TwoWay}" />
+        <TextBlock
+            Style="{StaticResource InputHeaderTb}"
+            Text="Dictionary"
+            Visibility="{Binding DictVisible}" />
+        <Grid Visibility="{Binding DictVisible}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding DictFileName, Mode=TwoWay}" />
+            <Button Grid.Column="1" Command="{Binding DictCommand}">
+                <FontIcon Glyph="&#xE8E5;" />
+            </Button>
+        </Grid>
+    </StackPanel>
+</ContentDialog>
