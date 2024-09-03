@@ -32,6 +32,14 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _fileItems, value);
         }
 
+        private EntryViewModel? _selectedItem;
+
+        public EntryViewModel? SelectedItem {
+            get => _selectedItem;
+            set => Set(ref _selectedItem, value);
+        }
+
+
         public ICommand AddCommand { get; private set; }
         public ICommand AddFolderCommand { get; private set; }
 
@@ -158,7 +166,12 @@ namespace ZoDream.Archiver.ViewModels
 
         private void TapDelete(object? _)
         {
-
+            if (SelectedItem is null)
+            {
+                return;
+            }
+            FileItems.Remove(SelectedItem);
+            SelectedItem = null;
         }
     }
 }
