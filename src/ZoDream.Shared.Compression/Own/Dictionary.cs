@@ -33,8 +33,8 @@ namespace ZoDream.Shared.Compression.Own
             if (code < 0)
             {
                 _reader.Seek(0, SeekOrigin.Begin);
+                code = _reader.ReadByte();
             }
-            code = _reader.ReadByte();
             return (byte)code;
         }
 

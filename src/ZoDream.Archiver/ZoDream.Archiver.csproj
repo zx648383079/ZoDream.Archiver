@@ -28,8 +28,10 @@
     <None Remove="Pages\WorkspacePage.xaml" />
     <None Remove="Themes\BaseStyle.xaml" />
     <None Remove="Themes\DarkTheme.xaml" />
+    <None Remove="Themes\Generic.xaml" />
     <None Remove="Themes\InputStyle.xaml" />
     <None Remove="Themes\LightTheme.xaml" />
+    <None Remove="Themes\TitleBar.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +72,12 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Themes\TitleBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Dialogs\ProgressDialog.xaml">

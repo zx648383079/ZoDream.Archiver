@@ -13,9 +13,10 @@ namespace ZoDream.Shared.Compression.Own
             : this(stream, OwnArchiveScheme.CreateKey(options))
         {
             _options = options;
+            WriteHeader(true, true);
         }
 
-        private IArchiveOptions? _options;
+        private readonly IArchiveOptions? _options;
         private bool _withName = false;
         private bool _multiple = false;
         private bool _nextPadding = false;

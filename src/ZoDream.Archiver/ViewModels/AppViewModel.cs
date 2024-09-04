@@ -7,11 +7,18 @@ using WinRT.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Dispatching;
 using ZoDream.Archiver.Pages;
+using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
     internal partial class AppViewModel
     {
+        public AppViewModel()
+        {
+            BackCommand = new RelayCommand(_ => {
+                NavigateBack();
+            });
+        }
         private Window _baseWindow;
         private IntPtr _baseWindowHandle;
         private AppWindow _appWindow;

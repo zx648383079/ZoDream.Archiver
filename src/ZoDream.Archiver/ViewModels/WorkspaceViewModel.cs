@@ -124,28 +124,39 @@ namespace ZoDream.Archiver.ViewModels
             }
             var app = App.ViewModel;
             using var fs = (await _storageFile.OpenReadAsync()).AsStreamForRead();
-            var reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
-            if (reader is null)
+            ReadBegin:
+            try
             {
-                await app.ConfirmAsync("不支持文件");
+                if (!TryReadEntry(fs)) 
+                {
+                    await app.ConfirmAsync("不支持文件");
+                    app.NavigateBack();
+                }
                 return;
             }
-            if (reader is not OwnArchiveReader)
+            catch (Exception)
             {
-                LoadEntry(reader);
-                reader.Dispose();
-                return;
+                
             }
-            reader?.Dispose();
             if (!await OpenPasswordAsync())
             {
                 app.NavigateBack();
                 return;
             }
+            goto ReadBegin;
+        }
+
+        private bool TryReadEntry(Stream fs)
+        {
             fs.Seek(0, SeekOrigin.Begin);
-            reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
+            var reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
+            if (reader is null)
+            {
+                return false;
+            }
             LoadEntry(reader!);
             reader?.Dispose();
+            return true;
         }
 
         private async Task<bool> OpenPasswordAsync()
