@@ -1,0 +1,10 @@
+<Project>
+	<Target Name="CopyExtraFiles" AfterTargets="AfterBuild" Condition="$(ProjectName.Contains('Wrapper'))">
+		<Message Text="Copying extra files for $(RuntimeIdentifier)($(TargetFramework))... " Importance="high" />
+		<Copy SourceFiles="$(SolutionDir)..\zodream\target\$(Configuration)\libzodream.dll" DestinationFolder="$(TargetDir)" ContinueOnError="false" />
+	</Target>
+	<Target Name="CopyExtraFiles" AfterTargets="AfterBuild" Condition="!$(ProjectName.Contains('Wrapper'))">
+		<Message Text="Copying extra files for $(RuntimeIdentifier)($(TargetFramework))... " Importance="high" />
+		<Copy SourceFiles="$(SolutionDir)..\zodream\target\$(Configuration)\libzodream.dll" DestinationFolder="$(TargetDir)AppX\runtimes\win-$(Platform)\native\" ContinueOnError="false" />
+	</Target>
+</Project>

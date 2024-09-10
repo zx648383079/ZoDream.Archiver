@@ -4,6 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
 	  <LangVersion>12</LangVersion>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
 
+	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
+	
 </Project>

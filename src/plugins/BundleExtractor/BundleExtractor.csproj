@@ -17,8 +17,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BundleFiles\" />
-    <Folder Include="CompressedFiles\" />
+    <Folder Include="Platforms\Android\" />
+    <Folder Include="Platforms\Mac\" />
+    <Folder Include="Platforms\Linux\" />
+    <Folder Include="Platforms\Ios\" />
+    <Folder Include="Platforms\Windows\" />
+    <Folder Include="Platforms\Ps4\" />
+    <Folder Include="Platforms\WebGL\" />
+    <Folder Include="Platforms\WiiU\" />
+    <Folder Include="Platforms\Switch\" />
   </ItemGroup>
 
 </Project>

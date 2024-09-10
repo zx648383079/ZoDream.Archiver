@@ -1,21 +1,50 @@
 ﻿using System;
 using System.IO;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.IO
 {
-    public class PartialStream(Stream stream, long beginPostion, long byteLength): ReadOnlyStream(stream)
+    public class PartialStream: Stream, IReadOnlyStream
     {
+        public PartialStream(Stream stream, long byteLength)
+            : this(stream, stream.Position, byteLength)
+        { 
+        }
 
-        private long _current = beginPostion;
+        public PartialStream(Stream stream, long beginPostion, long byteLength)
+        {
+            _byteLength = byteLength;
+            if (stream is not PartialStream ps)
+            {
+                BaseStream = stream;
+                _current = _beginPostion = beginPostion;
+                return;
+            }
+            BaseStream = ps.BaseStream;
+            _current = _beginPostion = beginPostion + ps._beginPostion;
+        }
 
-        private long EndPostion => beginPostion + byteLength;
+        private readonly Stream BaseStream;
 
-        public override long Length => byteLength;
+        private readonly long _beginPostion;
+        private readonly long _byteLength;
+
+        private long _current;
+
+        private long EndPostion => _beginPostion + _byteLength;
+
+        public override bool CanRead => BaseStream.CanRead;
+
+        public override bool CanSeek => BaseStream.CanSeek;
+
+        public override bool CanWrite => false;
+
+        public override long Length => _byteLength;
 
         public override long Position {
-            get => _current - beginPostion;
+            get => _current - _beginPostion;
             set {
-                Seek(value + beginPostion, SeekOrigin.Begin);
+                Seek(value + _beginPostion, SeekOrigin.Begin);
             }
         }
 
@@ -26,23 +55,38 @@ namespace ZoDream.Shared.IO
             {
                 return 0;
             }
-            stream.Seek(_current, SeekOrigin.Begin);
-            return stream.Read(buffer, offset, len);
+            BaseStream.Seek(_current, SeekOrigin.Begin);
+            var res = BaseStream.Read(buffer, offset, len);
+            _current += res;
+            return res;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            var min = beginPostion;
-            var max = beginPostion + byteLength;
+            var min = _beginPostion;
+            var max = _beginPostion + _byteLength;
             var pos = origin switch
             {
-                SeekOrigin.Current => stream.Position + offset,
-                SeekOrigin.End => beginPostion + byteLength + offset,
-                _ => beginPostion + offset,
+                SeekOrigin.Current => BaseStream.Position + offset,
+                SeekOrigin.End => _beginPostion + _byteLength + offset,
+                _ => _beginPostion + offset,
             };
             _current = Math.Min(Math.Max(pos, min), max);
             return _current - min;
         }
 
+        public override void Flush()
+        {
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new NotSupportedException();
+        }
     }
 }

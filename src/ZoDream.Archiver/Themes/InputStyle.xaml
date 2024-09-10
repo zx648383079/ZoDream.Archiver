@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cvt="using:ZoDream.Archiver.Converters">
     <cvt:SizeConverter x:Key="SizeCvt" />
+    <cvt:ToggleConverter x:Key="ToggleCvt" />
     <Style x:Name="HeaderIcon" TargetType="FontIcon">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />

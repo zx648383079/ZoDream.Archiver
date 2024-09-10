@@ -48,6 +48,16 @@
                 </win:SettingsCard.HeaderIcon>
             </win:SettingsCard>
             <win:SettingsCard
+                Command="{Binding OpenBundleCommand}"
+                Description="资源提取"
+                Header="批量提取"
+                IsActionIconVisible="False"
+                IsClickEnabled="True">
+                <win:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xF133;" />
+                </win:SettingsCard.HeaderIcon>
+            </win:SettingsCard>
+            <win:SettingsCard
                 Command="{Binding CreateCommand}"
                 Description="创建新的"
                 Header="创建新"

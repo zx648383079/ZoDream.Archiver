@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	  <WindowsSdkPackageVersion>10.0.26100.38</WindowsSdkPackageVersion>
     <RootNamespace>ZoDream.Archiver</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
@@ -14,6 +15,7 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
+	  <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\Logo.png" />
@@ -23,6 +25,7 @@
     <None Remove="Dialogs\ConfirmDialog.xaml" />
     <None Remove="Dialogs\PasswordDialog.xaml" />
     <None Remove="Dialogs\ProgressDialog.xaml" />
+    <None Remove="Pages\BundlePage.xaml" />
     <None Remove="Pages\CompressPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
     <None Remove="Pages\WorkspacePage.xaml" />
@@ -49,7 +52,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.0.240109" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
@@ -63,7 +66,10 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\plugins\BundleExtractor\BundleExtractor.csproj" />
+    <ProjectReference Include="..\plugins\WallpaperExtractor\WallpaperExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
+    <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Encryption\ZoDream.Shared.Encryption.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />
     <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
@@ -72,6 +78,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\BundlePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -139,4 +148,6 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
+
+	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
 </Project>

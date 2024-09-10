@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Text.RegularExpressions;
 
-namespace BundleExtractor.Models
+namespace ZoDream.BundleExtractor.Models
 {
     public readonly struct UnityVersion : IComparisonOperators<UnityVersion, UnityVersion, bool>, IEqualityOperators<UnityVersion, UnityVersion, bool>, IMinMaxValue<UnityVersion>, IEquatable<UnityVersion>, IComparable, IComparable<UnityVersion>
     {

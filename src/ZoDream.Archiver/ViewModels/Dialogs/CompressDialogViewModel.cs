@@ -107,7 +107,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 LeaveStreamOpen = false,
             };
-            var fs = File.OpenWrite(FileName);
+            var fs = File.Create(FileName);
             return TypeIndex switch
             {
                 4 => new OwnDictionaryWriter(fs, option),

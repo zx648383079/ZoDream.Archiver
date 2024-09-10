@@ -20,6 +20,7 @@ namespace ZoDream.Archiver.ViewModels
         public long CompressedLength { get; set; }
 
         public bool IsEncrypted { get; set; }
+        public bool IsDirectory { get; set; }
 
         public DateTime? CreatedTime { get; set; }
 
@@ -33,6 +34,14 @@ namespace ZoDream.Archiver.ViewModels
         public EntryViewModel(string fullPath)
         {
             FullPath = fullPath;
+            if (Directory.Exists(fullPath))
+            {
+                var folder = new DirectoryInfo(fullPath);
+                Name = folder.Name;
+                IsDirectory = true;
+                CreatedTime = folder.CreationTime;
+                return;
+            }
             var info = new FileInfo(fullPath);
             Name = info.Name;
             Length = info.Length;

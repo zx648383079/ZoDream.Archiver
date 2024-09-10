@@ -38,7 +38,7 @@ namespace ZoDream.Archiver.ViewModels
                 return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
             }
         }
-
+        public PluginViewModel Plugin { get; private set; } = new();
 
         public void Binding(Window window, Frame frame)
         {

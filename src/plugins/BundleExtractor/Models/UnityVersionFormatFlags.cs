@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BundleExtractor.Models
+namespace ZoDream.BundleExtractor.Models
 {
     [Flags]
     public enum UnityVersionFormatFlags

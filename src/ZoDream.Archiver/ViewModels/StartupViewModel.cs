@@ -15,6 +15,7 @@ namespace ZoDream.Archiver.ViewModels
         public StartupViewModel()
         {
             OpenCommand = new RelayCommand(TapOpen);
+            OpenBundleCommand = new RelayCommand(TapOpenBundle);
             CreateCommand = new RelayCommand(TapCreate);
             version = App.ViewModel.Version;
         }
@@ -27,6 +28,7 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         public ICommand OpenCommand { get; private set; }
+        public ICommand OpenBundleCommand { get; private set; }
 
         public ICommand CreateCommand { get; private set; }
 
@@ -67,7 +69,10 @@ namespace ZoDream.Archiver.ViewModels
             //await App.GetService<AppViewModel>().InitializeWorkspaceAsync(folder);
             //App.GetService<IRouter>().GoToAsync(Router.HomeRoute);
         }
-
+        private void TapOpenBundle(object? _)
+        {
+            App.ViewModel.Navigate<BundlePage>();
+        }
         private void TapCreate(object? _)
         {
             App.ViewModel.Navigate<CompressPage>();

@@ -1,10 +1,19 @@
 [package]
-name = "zodream"
+name = "libzodream"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-
-
 [lib]
-crate-type=["dylib"]
+crate-type=["lib", "cdylib"]
+
+[dependencies]
+lz4 = "1.26.0"
+skipjack = "0.2.0"
+safer-ffi.version = "0.1.12"
+safer-ffi.features = [
+    "async-fn",
+    "futures",
+]
+
+[features]
+headers = ["safer-ffi/headers"]

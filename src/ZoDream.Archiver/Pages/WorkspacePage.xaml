@@ -72,7 +72,10 @@
                             Style="{ThemeResource HeaderIcon}" />
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
-                            <FontIcon Glyph="&#xE72E;" Style="{ThemeResource HeaderStamp}" />
+                            <FontIcon
+                                Glyph="&#xE72E;"
+                                Style="{ThemeResource HeaderStamp}"
+                                Visibility="{Binding IsEncrypted, Converter={StaticResource ToggleCvt}}" />
                         </StackPanel>
                         <StackPanel
                             Grid.Row="1"

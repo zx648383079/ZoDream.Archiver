@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Compression;
-using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
@@ -31,7 +30,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private IArchiveOptions? _options;
         private IStorageFile _storageFile;
-        private readonly IArchiveScheme _scheme = new CompressScheme();
+        private IArchiveScheme? _scheme;
 
         private ObservableCollection<IReadOnlyEntry> _entryItems = [];
 
@@ -75,9 +74,16 @@ namespace ZoDream.Archiver.ViewModels
             var token = app.ShowProgress("解压中...");
             await Task.Factory.StartNew(async () => {
                 using var fs = (await _storageFile.OpenReadAsync()).AsStreamForRead();
-                using var reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, 
+                using var reader = _scheme?.Open(fs, _storageFile.Path, _storageFile.Name, 
                     _options);
-                reader?.ExtractToDirectory(folder.Path, app.UpdateProgress, token);
+                try
+                {
+                    reader?.ExtractToDirectory(folder.Path, app.UpdateProgress, token);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
                 app.CloseProgress();
             }, token);
         }
@@ -134,6 +140,12 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 return;
             }
+            catch (IndexOutOfRangeException)
+            {
+                await app.ConfirmAsync("文件解析失败");
+                app.NavigateBack();
+                return;
+            }
             catch (Exception)
             {
                 
@@ -148,8 +160,14 @@ namespace ZoDream.Archiver.ViewModels
 
         private bool TryReadEntry(Stream fs)
         {
-            fs.Seek(0, SeekOrigin.Begin);
-            var reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
+            IArchiveReader? reader;
+            if (_scheme is null)
+            {
+                reader = App.ViewModel.Plugin.TryGetReader(fs, _storageFile.Path, _options, out _scheme);
+            } else
+            {
+                reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
+            }
             if (reader is null)
             {
                 return false;
