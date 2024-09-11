@@ -36,7 +36,7 @@ namespace ZoDream.Shared.RustWrapper
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-    public unsafe delegate void LoggerFn(void* _0, int _1);
+    public unsafe delegate void LoggerFn(void* _0, int _1, byte /*const*/ * _2);
 
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Size = 16)]

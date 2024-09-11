@@ -4,10 +4,8 @@
 //     println!("Just called a Rust function from C!");
 // }
 
-use std::io::{Cursor, Read, Write};
 use ::safer_ffi::prelude::*;
 
-const BUFFER_SIZE: usize = 32 * 1024;
 
 #[derive_ReprC]
 #[repr(C)] 
@@ -115,24 +113,37 @@ fn max_but_with_a_weird_rust_name<'a> (
 fn lz4_decompress(
     input: c_slice::Ref<'_, u8>, 
     output: c_slice::Mut<'_, u8>,
-    mut cb: ::safer_ffi::closure::RefDynFnMut1<'_, (), usize>,
+    mut cb: ::safer_ffi::closure::RefDynFnMut2<'_, (), usize, char_p::Raw>,
     ) -> u32
 {
-    let mut cursor = Cursor::new(output.as_slice());
-    let mut decoder = lz4::Decoder::new(input.as_ref()).unwrap();
-    // decoder.read_to_end(&mut cursor).unwrap();
-    loop {
-        let mut buffer = [0; BUFFER_SIZE];
-        match decoder.read(&mut buffer) {
-            Ok(size) => {
-                cb.call(size);
-                if size == 0 {
-                    break;
-                }
-                cursor.write(&buffer[0..size]).unwrap();
-            }
-            Err(_) => {}
+    // match input.first() {
+    //     None => {},
+    //     Some(val) => cb.call(*val as usize, char_p::new("11111").as_ref().into())
+    // }
+    // let mut cursor: Cursor<&mut [u8]> = Cursor::new(output.as_slice());
+    let mut decoder = lz4::Decoder::new(input.as_slice()).unwrap();
+    let len = std::io::Read::read_to_end(&mut decoder, &mut output.as_slice().to_vec());
+    // const BUFFER_SIZE: usize = 32 * 1024;
+    // loop {
+    //     let mut buffer = [0; BUFFER_SIZE];
+    //     match decoder.read(&mut buffer) {
+    //         Ok(size) => {
+    //             cb.call(size);
+    //             if size == 0 {
+    //                 break;
+    //             }
+    //             cursor.write(&buffer[0..size]).unwrap();
+    //         }
+    //         Err(_) => {}
+    //     }
+    // }
+    // let _ = std::io::copy(&mut decoder, &mut cursor);
+    cb.call(input.len(), char_p::new("111711").as_ref().into());
+    match len {
+        Ok(size) => size as u32,
+        Err(err) => {
+            cb.call(input.len(), char_p::new(err.to_string()).as_ref().into());
+            0
         }
     }
-    cursor.position() as u32
 }

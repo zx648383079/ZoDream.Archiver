@@ -33,8 +33,9 @@ namespace ZoDream.Shared.RustWrapper
                         resLen = NativeMethods.lz4_decompress(input, output, new LoggerRef()
                         {
                             env_ptr = (void*)0xbad00,
-                            call = (void* _, int p) => {
-                                Debug.WriteLine($"logger call: {p}");
+                            call = (void* _, int p, byte * msgPtr) => {
+                                var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
+                                Debug.WriteLine($"logger call: {p}; {msg} ");
                             },
                         });
                     }

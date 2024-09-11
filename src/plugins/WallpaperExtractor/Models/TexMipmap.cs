@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using K4os.Compression.LZ4;
+using System.IO;
 using ZoDream.Shared.RustWrapper;
 
 namespace ZoDream.WallpaperExtractor.Models
@@ -16,7 +17,11 @@ namespace ZoDream.WallpaperExtractor.Models
             {
                 return buffer;
             }
-            return CompressHelper.Lz4Decompress(buffer, DecompressedBytesCount);
+            var target = new byte[DecompressedBytesCount];
+            LZ4Codec.Decode(buffer, target);
+            return target;
+            //var target = CompressHelper.Lz4Decompress(buffer, DecompressedBytesCount);
+            //return target;
         }
     }
 }

@@ -140,10 +140,6 @@ namespace ZoDream.WallpaperExtractor
             }
             var extension = imageFormat.GetFileExtension();
             fileName = CombineExtension(fileName, extension);
-            if (!bitmap.IsImmutable)
-            {
-                return;
-            }
             CreateDirectory(fileName);
             using var fs = File.Create(fileName);
             bitmap.Encode(fs, imageFormat.Parse(), 100);
