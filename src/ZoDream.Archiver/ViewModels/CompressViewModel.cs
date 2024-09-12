@@ -173,5 +173,18 @@ namespace ZoDream.Archiver.ViewModels
             FileItems.Remove(SelectedItem);
             SelectedItem = null;
         }
+
+        public void LoadAsync(object arg)
+        {
+            if (arg is IStorageItem file)
+            {
+                TapDrag([file]);
+                return;
+            }
+            if (arg is IReadOnlyList<IStorageItem> items)
+            {
+                TapDrag(items);
+            }
+        }
     }
 }

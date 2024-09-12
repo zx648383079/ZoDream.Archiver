@@ -42,6 +42,25 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="zodream.archiver">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.apk</uap:FileType>
+              <uap:FileType>.zip</uap:FileType>
+              <uap:FileType>.rar</uap:FileType>
+              <uap:FileType>.7z</uap:FileType>
+              <uap:FileType>.tar</uap:FileType>
+              <uap:FileType>.bundle</uap:FileType>
+              <uap:FileType>.pkg</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>ZoDream Archiver</uap:DisplayName>
+            <uap:Logo>Assets\Logo.png</uap:Logo>
+            <uap:InfoTip>Extract files</uap:InfoTip>
+            <uap:EditFlags OpenIsSafe="true"/>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

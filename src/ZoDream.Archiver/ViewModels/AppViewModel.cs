@@ -47,7 +47,7 @@ namespace ZoDream.Archiver.ViewModels
             var windowId = Win32Interop.GetWindowIdFromWindow(_baseWindowHandle);
             _appWindow = AppWindow.GetFromWindowId(windowId);
             _rootFrame = frame;
-            Navigate<StartupPage>();
+            Startup();
         }
 
         public double GetDpiScaleFactorFromWindow()

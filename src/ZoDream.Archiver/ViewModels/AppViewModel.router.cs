@@ -1,4 +1,9 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.AppLifecycle;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.Activation;
 using ZoDream.Archiver.Pages;
 
 namespace ZoDream.Archiver.ViewModels
@@ -23,6 +28,32 @@ namespace ZoDream.Archiver.ViewModels
         {
             _rootFrame.GoBack();
             BackEnabled = false;
+        }
+        /// <summary>
+        ///  起始页
+        /// </summary>
+        private void Startup()
+        {
+            var app = AppInstance.GetCurrent();
+            var args = app.GetActivatedEventArgs();
+            if (args.Kind != ExtendedActivationKind.File)
+            {
+                Navigate<StartupPage>();
+                return;
+            }
+            if (args.Data is FileActivatedEventArgs e)
+            {
+                Navigate<WorkspacePage>(e.Files);
+                //Task.Factory.StartNew(() => 
+                //{
+                //    Thread.Sleep(1000);
+                //    DispatcherQueue.TryEnqueue(() => {
+                //        _ = ConfirmAsync();
+                //    });
+                //});
+                return;
+            }
+            
         }
     }
 }

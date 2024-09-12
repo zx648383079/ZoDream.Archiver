@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="ZoDream.Archiver.Dialogs.ExtractDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    Title="提取文件"
+    PrimaryButtonText="确认"
+    SecondaryButtonText="取消"
+    mc:Ignorable="d">
+    <ContentDialog.DataContext>
+        <vm:ExtractDialogViewModel />
+    </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
+    <StackPanel>
+        <TextBlock Text="Destination Path" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+            <Button Grid.Column="1" Command="{Binding OpenCommand}">
+                <FontIcon Glyph="&#xE8DA;" />
+            </Button>
+        </Grid>
+
+        <StackPanel Visibility="{Binding IsSelected}">
+            <TextBlock Style="{StaticResource InputHeaderTb}" Text="Only Selected" />
+            <ToggleSwitch
+                IsOn="{Binding OnlySelected, Mode=TwoWay}"
+                OffContent="All"
+                OnContent="Only Selection" />
+        </StackPanel>
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Same File" />
+        <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+        <StackPanel Visibility="{Binding IsEncrypted}">
+            <TextBlock Style="{StaticResource InputHeaderTb}" Text="Password" />
+            <TextBox Text="{Binding Password, Mode=TwoWay}" />
+            <TextBlock Style="{StaticResource InputHeaderTb}" Text="Dictionary" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding DictFileName, Mode=TwoWay}" />
+                <Button Grid.Column="1" Command="{Binding DictCommand}">
+                    <FontIcon Glyph="&#xE8E5;" />
+                </Button>
+            </Grid>
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

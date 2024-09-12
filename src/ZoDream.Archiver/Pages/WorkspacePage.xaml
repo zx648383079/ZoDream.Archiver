@@ -38,10 +38,16 @@
                 Command="{Binding DeleteCommand}"
                 Icon="Delete"
                 Label="Delete" />
+
             <AppBarButton
                 Command="{Binding FindCommand}"
                 Icon="Find"
                 Label="Find" />
+            <AppBarButton
+                Command="{Binding StopFilterCommand}"
+                Icon="Filter"
+                Label="Stop Filter"
+                Visibility="{Binding IsFiltered, Converter={StaticResource ToggleCvt}}" />
             <AppBarButton
                 Command="{Binding InfoCommand}"
                 Icon="Setting"
@@ -50,7 +56,8 @@
         <ListView
             Grid.Row="1"
             AllowDrop="True"
-            ItemsSource="{Binding EntryItems}">
+            ItemsSource="{Binding FilteredItems}"
+            SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
             <ivy:Interaction.Behaviors>
                 <bhv:DragFileBehavior Command="{Binding DragCommand}" />
             </ivy:Interaction.Behaviors>

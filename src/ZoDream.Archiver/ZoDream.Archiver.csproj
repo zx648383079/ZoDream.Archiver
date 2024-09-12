@@ -13,6 +13,7 @@
 	  <LangVersion>12</LangVersion>
 	  <Nullable>Enable</Nullable>
     <UseWinUI>true</UseWinUI>
+	  <Version>1.0.0</Version>
     <EnableMsixTooling>true</EnableMsixTooling>
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
 	  <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
@@ -23,8 +24,10 @@
   <ItemGroup>
     <None Remove="Dialogs\CompressDialog.xaml" />
     <None Remove="Dialogs\ConfirmDialog.xaml" />
+    <None Remove="Dialogs\ExtractDialog.xaml" />
     <None Remove="Dialogs\PasswordDialog.xaml" />
     <None Remove="Dialogs\ProgressDialog.xaml" />
+    <None Remove="Dialogs\SearchDialog.xaml" />
     <None Remove="Pages\BundlePage.xaml" />
     <None Remove="Pages\CompressPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
@@ -79,6 +82,12 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\ExtractDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Dialogs\SearchDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\BundlePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

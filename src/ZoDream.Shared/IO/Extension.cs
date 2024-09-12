@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.IO
 {
@@ -20,6 +22,14 @@ namespace ZoDream.Shared.IO
                 len += res;
             }
             return len;
+        }
+
+        public static void ExtractToDirectory(this IArchiveReader reader, IReadOnlyEntry entry, string folder, Action<double>? progress = null, CancellationToken token = default)
+        {
+            var fileName = Path.Combine(folder, Path.GetFileName(entry.Name.Replace('/', '\\')));
+            using var fs = File.Create(fileName);
+            reader.ExtractTo(entry, fs);
+            progress?.Invoke(1);
         }
     }
 }
