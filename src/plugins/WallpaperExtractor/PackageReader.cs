@@ -142,7 +142,7 @@ namespace ZoDream.WallpaperExtractor
             foreach (var item in frameItems)
             {
                 var tex = imageItems[item.ImageId];
-                var bitmap = tex[0].Decode(header.Format).TryParse();
+                var bitmap = tex[0].Decode(header.Format).ToImage();
                 if (bitmap is null)
                 {
                     continue;
@@ -152,10 +152,9 @@ namespace ZoDream.WallpaperExtractor
                 var x = Math.Min(item.X, item.X + width);
                 var y = Math.Min(item.Y, item.Y + height);
                 var rotationAngle = -(Math.Atan2(Math.Sign(height), Math.Sign(width)) - Math.PI / 4);
-                var res = bitmap.Clip(
-                    SKRect.Create(x, y, width, height)
-                    );
-                gif.AddFrame(res.Rotate((float)(rotationAngle * 180 / Math.PI)), 
+                gif.AddFrame(bitmap.Clip(
+                    SKRectI.Create((int)x, (int)y, (int)width, (int)height)
+                    )?.Rotate((float)(rotationAngle * 180 / Math.PI)), 
                     (int)Math.Round(item.FrameTime * 100));
             }
         }

@@ -122,7 +122,7 @@ namespace ZoDream.WallpaperExtractor
         public static void Decode(this TexMipmap tex, TexFormat format, 
             Stream output, FreeImageFormat imageFormat)
         {
-            using var bitmap = tex.Decode(format).TryParse();
+            using var bitmap = tex.Decode(format).ToImage();
             if (bitmap == null)
             {
                 return;
@@ -133,7 +133,7 @@ namespace ZoDream.WallpaperExtractor
         public static void Decode(this TexMipmap tex, TexFormat format,
             FreeImageFormat imageFormat, string fileName)
         {
-            using var bitmap = tex.Decode(format).TryParse();
+            using var bitmap = tex.Decode(format).ToImage();
             if (bitmap == null)
             {
                 return;

@@ -4,6 +4,7 @@ namespace ZoDream.Shared.Drawing
 {
     public interface IImageData
     {
-        public SKBitmap? TryParse();
+        public SKBitmap? ToBitmap();
+        public SKImage? ToImage();
     }
 }

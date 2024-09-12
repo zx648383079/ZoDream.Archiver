@@ -1,13 +1,10 @@
 ﻿using SkiaSharp;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace ZoDream.Shared.Drawing
 {
     public class ByteImageData(byte[] buffer, int width, int height, SKColorType format) : BaseImageData
     {
-        public override SKBitmap? TryParse()
+        public override SKBitmap? ToBitmap()
         {
             var newInfo = new SKImageInfo(width, height, format);
             var data = SKData.CreateCopy(buffer);
@@ -23,6 +20,13 @@ namespace ZoDream.Shared.Drawing
             //    gcHandle.Free();
             //}, null);
             return bitmap;
+        }
+
+        public override SKImage? ToImage()
+        {
+            var newInfo = new SKImageInfo(width, height, format);
+            var data = SKData.CreateCopy(buffer);
+            return SKImage.FromPixels(newInfo, data);
         }
     }
 }

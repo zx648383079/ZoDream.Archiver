@@ -30,10 +30,25 @@ namespace ZoDream.Shared.Drawing
             int delay = -1,
             int quality = 100)
         {
+            if (bitmap is null)
+            {
+                return;
+            }
+            AddFrame(SKImage.FromBitmap(bitmap), delay, quality);
+        }
+
+        public void AddFrame(SKImage? bitmap,
+            int delay = -1,
+            int quality = 100)
+        {
+            if (bitmap is null)
+            {
+                return;
+            }
             AddFrame(bitmap, SKRectI.Create(0, 0, bitmap.Width, bitmap.Height), delay, quality);
         }
 
-        public void AddFrame(SKBitmap bitmap, 
+        public void AddFrame(SKImage bitmap, 
             SKRectI rect,
             int delay = -1, 
             int quality = 100)

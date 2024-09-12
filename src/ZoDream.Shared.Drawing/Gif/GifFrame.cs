@@ -12,11 +12,11 @@ namespace ZoDream.Shared.Drawing
         public IList<byte> ImageData { get; private set; } = [];
         public List<byte> ImageDescriptor { get; private set; } = new List<byte>(10);
         
-        public void Load(SKBitmap bitmap, int quality = 100)
+        public void Load(SKImage bitmap, int quality = 100)
         {
             Load(bitmap, SKRectI.Create(0, 0, bitmap.Width, bitmap.Height), quality);
         }
-        public void Load(SKBitmap bitmap, SKRectI rect, int quality = 100)
+        public void Load(SKImage bitmap, SKRectI rect, int quality = 100)
         {
             if (rect.Width != bitmap.Width || rect.Height != bitmap.Height)
             {
@@ -27,15 +27,20 @@ namespace ZoDream.Shared.Drawing
                 //    >= 40 => SKFilterQuality.Medium,
                 //    _ => SKFilterQuality.Low,
                 //}
-                );
+                )!;
+                if (bitmap is null)
+                {
+                    return;
+                }
             }
             var pixels = new byte[3 * bitmap.Width * bitmap.Height];
             int count = 0;
+            var pixmap = bitmap.PeekPixels();
             for (int th = 0; th < bitmap.Height; th++)
             {
                 for (int tw = 0; tw < bitmap.Width; tw++)
                 {
-                    var color = bitmap.GetPixel(tw, th);
+                    var color = pixmap.GetPixelColor(tw, th);
                     pixels[count] = color.Red;
                     count++;
                     pixels[count] = color.Green;

@@ -64,7 +64,7 @@ namespace ZoDream.Shared.Drawing
 
         public byte[] Encode(IImageData data)
         {
-            var res = data.TryParse()?.Encode(SKEncodedImageFormat.Png, 100);
+            var res = data.ToImage()?.Encode(SKEncodedImageFormat.Png, 100);
             if (res is null)
             {
                 return [];
@@ -74,12 +74,12 @@ namespace ZoDream.Shared.Drawing
 
         public void Encode(IImageData data, Stream output)
         {
-            data.TryParse()?.Encode(output, SKEncodedImageFormat.Png, 100);
+            data.ToImage()?.Encode(output, SKEncodedImageFormat.Png, 100);
         }
 
         public void Encode(IImageData data, string fileName)
         {
-            data.TryParse()?.SaveAs(fileName);
+            data.ToImage()?.SaveAs(fileName);
         }
     }
 }
