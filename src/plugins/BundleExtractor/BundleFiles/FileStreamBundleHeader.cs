@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.BundleFiles
 {
     public class FileStreamBundleHeader: BundleHeader
     {
-        private const string UnityFSMagic = "UnityFS";
+        internal const string UnityFSMagic = "UnityFS";
         protected override string MagicString => UnityFSMagic;
         /// <summary>
         /// Equal to file size, sometimes equal to uncompressed data size without the header

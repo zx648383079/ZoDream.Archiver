@@ -25,7 +25,7 @@ namespace ZoDream.Shared.IO
         }
 
         private readonly Stream BaseStream;
-
+        private readonly bool _leaveStreamOpen = true;
         private readonly long _beginPostion;
         private readonly long _byteLength;
 
@@ -55,7 +55,11 @@ namespace ZoDream.Shared.IO
             {
                 return 0;
             }
-            BaseStream.Seek(_current, SeekOrigin.Begin);
+            BaseStream.Skip(_current - BaseStream.Position);
+            //if (_current != BaseStream.Position)
+            //{
+            //    BaseStream.Seek(_current, SeekOrigin.Begin);
+            //}
             var res = BaseStream.Read(buffer, offset, len);
             _current += res;
             return res;
@@ -81,12 +85,21 @@ namespace ZoDream.Shared.IO
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(string.Empty);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(string.Empty);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (_leaveStreamOpen == false)
+            {
+                BaseStream.Dispose();
+            }
         }
     }
 }

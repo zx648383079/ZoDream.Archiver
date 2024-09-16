@@ -8,12 +8,9 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.WebFiles
 {
-    public sealed class WebFileEntry : ReadOnlyEntry
+    public sealed class WebFileEntry(string name, long length) : ReadOnlyEntry(name, length)
     {
-        public WebFileEntry(string name, long length) : base(name, length)
-        {
-        }
-
+        public int Offset { get; private set; }
         public static WebFileEntry Read(EndianReader reader)
         {
             return new(reader.ReadString(), reader.ReadInt32())
@@ -23,6 +20,6 @@ namespace ZoDream.BundleExtractor.WebFiles
         }
 
 
-        public int Offset { get; private set; }
+      
     }
 }

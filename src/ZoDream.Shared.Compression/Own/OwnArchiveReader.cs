@@ -18,7 +18,7 @@ namespace ZoDream.Shared.Compression.Own
             _options = options;
         }
 
-        private IArchiveOptions? _options;
+        private readonly IArchiveOptions? _options;
         private bool _withName = false;
         private bool _multiple = false;
         private bool _nextPadding = false;

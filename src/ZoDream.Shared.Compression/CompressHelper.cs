@@ -1,5 +1,4 @@
-﻿using SharpCompress.Archives;
-using SharpCompress.Common;
+﻿using SharpCompress.Common;
 using SharpCompress.Readers;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -26,5 +25,7 @@ namespace ZoDream.Shared.Compression
         {
             return new ReadOnlyEntry(item.Key ?? string.Empty, item.Size, item.CompressedSize, item.IsEncrypted, item.LastModifiedTime);
         }
+
+        
     }
 }

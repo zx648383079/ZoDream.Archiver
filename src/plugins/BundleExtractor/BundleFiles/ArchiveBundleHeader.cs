@@ -8,7 +8,7 @@ namespace ZoDream.BundleExtractor.BundleFiles
 {
     public class ArchiveBundleHeader : BundleHeader
     {
-        private const string UnityArchiveMagic = "UnityArchive";
+        internal const string UnityArchiveMagic = "UnityArchive";
         protected override string MagicString => UnityArchiveMagic;
     }
 }

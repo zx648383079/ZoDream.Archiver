@@ -148,7 +148,7 @@ namespace ZoDream.Shared.IO
         {
             if (isBigEndian)
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException("");
             }
 
             return base.ReadDecimal();

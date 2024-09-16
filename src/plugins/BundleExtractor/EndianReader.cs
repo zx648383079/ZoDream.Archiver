@@ -76,5 +76,15 @@ namespace ZoDream.BundleExtractor
         {
             reader.BaseStream.Position = checked(reader.BaseStream.Position + 3) & -4;
         }
+
+        public static void AlignStream(this EndianReader reader, int alignment)
+        {
+            var pos = reader.BaseStream.Position;
+            var mod = pos % alignment;
+            if (mod != 0)
+            {
+                reader.BaseStream.Seek(alignment - mod, System.IO.SeekOrigin.Current);
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace ZoDream.BundleExtractor.BundleFiles
 {
     public class RawBundleHeader: RawWebBundleHeader
     {
-        private const string UnityRawMagic = "UnityRaw";
+        internal const string UnityRawMagic = "UnityRaw";
         protected override string MagicString => UnityRawMagic;
     }
 }

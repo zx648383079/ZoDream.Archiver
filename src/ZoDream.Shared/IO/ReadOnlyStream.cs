@@ -35,12 +35,12 @@ namespace ZoDream.Shared.IO
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(string.Empty);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException(string.Empty);
         }
     }
 }

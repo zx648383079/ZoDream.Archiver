@@ -9,7 +9,7 @@ namespace ZoDream.Shared.Interfaces
 {
     public interface IBundleScheme
     {
-        public IBundleReader? Load(string folder, IArchiveOptions? options = null);
+        public IBundleReader? Load(IEnumerable<string> fileItems, IArchiveOptions? options = null);
 
     }
 }

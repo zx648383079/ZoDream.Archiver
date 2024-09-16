@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Dialogs;
+using ZoDream.BundleExtractor;
+using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -114,7 +119,35 @@ namespace ZoDream.Archiver.ViewModels
 
         private async void TapSaveAs(object? _)
         {
-            
+            var fileItems = FileItems.Select(i => i.FullPath).ToArray();
+            if (!fileItems.Any())
+            {
+                return;
+            }
+            var app = App.ViewModel;
+            var picker = new ExtractDialog();
+            var model = picker.ViewModel;
+            var res = await app.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
+                || !model.Verify())
+            {
+                return;
+            }
+
+            var options = new ArchiveOptions(model.Password, model.DictFileName);
+            var token = app.ShowProgress("解压中...");
+            await Task.Factory.StartNew(() => {
+                using var reader = new UnityBundleScheme().Load(fileItems, options);
+                try
+                {
+                    reader?.ExtractTo(model.FileName, token);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+                app.CloseProgress();
+            }, token);
         }
 
         private void TapDelete(object? _)

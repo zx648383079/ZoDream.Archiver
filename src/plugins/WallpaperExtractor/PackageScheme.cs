@@ -13,20 +13,48 @@ namespace ZoDream.WallpaperExtractor
 
         public bool IsReadable(Stream stream)
         {
-            var postion = stream.Position;
             var reader = new BinaryReader(stream);
-            var res = reader.ReadNString().StartsWith("PKG");
-            stream.Seek(postion, SeekOrigin.Begin);
-            return res;
+            return IsPackage(reader);
         }
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            if (!fileName.EndsWith(".pkg") || !IsReadable(stream))
+            var reader = new BinaryReader(stream);
+            if (fileName.EndsWith(".pkg") && IsPackage(reader))
             {
-                return null;
+                return new PackageReader(reader, options);
             }
-            return new PackageReader(new BinaryReader(stream), options);
+            if (fileName.EndsWith(".tex") && IsTex(reader))
+            {
+                return new TexReader(reader, fileName, options);
+            }
+            return null;
+        }
+
+        private bool IsPackage(BinaryReader reader)
+        {
+            var postion = reader.BaseStream.Position;
+            try
+            {
+                return reader.ReadNString().StartsWith("PKG");
+            }
+            finally
+            {
+                reader.BaseStream.Seek(postion, SeekOrigin.Begin);
+            }
+        }
+
+        private bool IsTex(BinaryReader reader)
+        {
+            var postion = reader.BaseStream.Position;
+            try
+            {
+                return reader.ReadNZeroString(16) == "TEXV0005";
+            }
+            finally
+            {
+                reader.BaseStream.Seek(postion, SeekOrigin.Begin);
+            }
         }
     }
 }

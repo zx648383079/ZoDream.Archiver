@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
     public interface IPlatformScheme
     {
-
+        public string Root { get; }
+        public bool TryLoad(IEnumerable<string> fileItems);
     }
 }

@@ -18,5 +18,12 @@ namespace ZoDream.WallpaperExtractor.Models
 
         public bool IsGift => (Flags & TexFlags.IsGif) == TexFlags.IsGif;
 
+
+
+        public int BVersion { get; set; }
+
+        public FreeImageFormat ImageFormat { get; set; }
+
+
     }
 }
