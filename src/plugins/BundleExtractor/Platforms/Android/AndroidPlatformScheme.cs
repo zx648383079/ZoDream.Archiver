@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Producers;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
@@ -16,7 +17,7 @@ namespace ZoDream.BundleExtractor.Platforms
         private const string AndroidUnityAssemblyName = "libunity.so";
 
         public string Root { get; private set; } = string.Empty;
-
+        public IProducerScheme Producer { get; private set; }
         public bool TryLoad(IEnumerable<string> fileItems)
         {
             foreach (var item in fileItems)
@@ -32,7 +33,12 @@ namespace ZoDream.BundleExtractor.Platforms
                     break;
                 }
             }
-            return string.IsNullOrWhiteSpace(Root);
+            if (!string.IsNullOrWhiteSpace(Root))
+            {
+                return false;
+            }
+            Producer = UnityBundleScheme.GetProducer(fileItems);
+            return true;
         }
 
         private string GetMatchFolder(string entry, params string[] folderNames)

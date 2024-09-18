@@ -75,6 +75,7 @@
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Encryption\ZoDream.Shared.Encryption.csproj" />
+    <ProjectReference Include="..\ZoDream.Shared.Logging\ZoDream.Shared.Logging.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />
     <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
   </ItemGroup>

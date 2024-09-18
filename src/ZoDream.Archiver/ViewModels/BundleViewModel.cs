@@ -137,6 +137,8 @@ namespace ZoDream.Archiver.ViewModels
             var options = new ArchiveOptions(model.Password, model.DictFileName);
             var token = app.ShowProgress("解压中...");
             await Task.Factory.StartNew(() => {
+                var watch = new Stopwatch();
+                watch.Start();
                 using var reader = new UnityBundleScheme().Load(fileItems, options);
                 try
                 {
@@ -146,6 +148,8 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     Debug.WriteLine(ex.Message);
                 }
+                watch.Stop();
+                Debug.WriteLine($"Use Time: {watch.Elapsed.TotalSeconds}");
                 app.CloseProgress();
             }, token);
         }

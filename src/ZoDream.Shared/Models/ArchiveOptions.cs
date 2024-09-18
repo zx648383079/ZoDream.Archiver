@@ -9,6 +9,11 @@ namespace ZoDream.Shared.Models
         public string? Password { get; set; }
         public string? Dictionary { get; set; }
 
+        public ArchiveOptions()
+        {
+            
+        }
+
         public ArchiveOptions(string password)
         {
             Password = password;

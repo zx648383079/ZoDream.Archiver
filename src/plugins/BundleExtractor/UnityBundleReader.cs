@@ -1,37 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor
 {
-    public class UnityBundleReader : IBundleReader
+    public partial class UnityBundleReader : IBundleReader
     {
-        private readonly IEnumerable<string> _fileItems;
-        private readonly IPlatformScheme _platform;
-        private readonly IArchiveOptions? _options;
+ 
 
-        public UnityBundleReader(IEnumerable<string> fileItems, 
+        public UnityBundleReader(
             IPlatformScheme platform, 
             IArchiveOptions? options)
         {
-            _fileItems = fileItems;
             _platform = platform;
             _options = options;
         }
 
-        
+        public UnityBundleReader(UnityBundleScheme scheme, IPlatformScheme platform,
+            IArchiveOptions? options): this(platform, options)
+        {
+            _scheme = scheme;
+        }
+
+        private readonly IPlatformScheme _platform;
+        private readonly IArchiveOptions? _options;
+        private readonly UnityBundleScheme? _scheme;
 
         public void ExtractTo(string folder, CancellationToken token = default)
         {
-            
+            foreach (var items in _platform.Producer.EnumerateChunk())
+            {
+                using var chunk = new BundleChunkReader(items, _scheme, _platform);
+                chunk.ExtractTo(folder, token);
+            }
         }
 
         public void Dispose()
         {
         }
+
+        private static Stream OpenRead(string fileName)
+        {
+            var name = Path.GetFileName(fileName);
+            if (!SplitFileRegex().IsMatch(name))
+            {
+                return File.OpenRead(fileName);
+            }
+            var folder = Path.GetDirectoryName(fileName);
+            var i = name.LastIndexOf('t');
+            var items =
+                Directory.GetFiles(folder, name[..i] + '*')
+                .OrderBy(j => int.Parse(Path.GetFileName(j)[(i + 1)..])).ToArray();
+            return MultipartFileStream.Open(items);
+        }
+
+
+        [GeneratedRegex(@"\.split\d+$")]
+        private static partial Regex SplitFileRegex();
     }
 }

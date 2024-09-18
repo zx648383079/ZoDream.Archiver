@@ -8,6 +8,12 @@ namespace ZoDream.BundleExtractor.Models
 {
     public class SplitStreamEntry(long length, long compressedLength)
     {
+        public SplitStreamEntry(long length, long compressedLength, 
+            CompressionType compression)
+            : this(length, compressedLength)
+        {
+            CompressionType = compression;
+        }
         public long Length { get; private set; } = length;
 
         public long CompressedLength { get; private set; } = compressedLength;

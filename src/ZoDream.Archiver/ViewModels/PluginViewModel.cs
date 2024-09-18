@@ -13,7 +13,7 @@ namespace ZoDream.Archiver.ViewModels
     public class PluginViewModel
     {
 
-        private IArchiveScheme[] PluginItems = [
+        private readonly IArchiveScheme[] PluginItems = [
             new PackageScheme(),
             new CompressScheme(),
         ];

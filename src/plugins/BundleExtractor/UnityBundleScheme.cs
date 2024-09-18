@@ -5,6 +5,9 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.BundleExtractor.Platforms;
 using System.Collections.Generic;
+using ZoDream.BundleExtractor.Producers;
+using ZoDream.BundleExtractor.CompressedFiles;
+using ZoDream.BundleExtractor.SerializedFiles;
 
 namespace ZoDream.BundleExtractor
 {
@@ -18,17 +21,40 @@ namespace ZoDream.BundleExtractor
             {
                 return null;
             }
-            return new UnityBundleReader(fileItems, platform, options);
+            return new UnityBundleReader(this, platform, options);
         }
 
-        private IPlatformScheme? GetPlatform(IEnumerable<string> fileItems)
+        internal static IPlatformScheme? GetPlatform(IEnumerable<string> fileItems)
         {
-            var platform = new AndroidPlatformScheme();
-            if (platform.TryLoad(fileItems))
+            IPlatformScheme[] platforms = [
+                new WindowsPlatformScheme(),
+                new AndroidPlatformScheme(),
+                new IosPlatformScheme(),
+            ];
+            foreach (var item in platforms)
             {
-                return platform;
+                if (item.TryLoad(fileItems))
+                {
+                    return item;
+                }
             }
             return null;
+        }
+
+        internal static IProducerScheme GetProducer(IEnumerable<string> fileItems)
+        {
+            IProducerScheme[] producers = [
+                new MiHoYoProducer(),
+                new PaperProducer()
+            ];
+            foreach (var item in producers)
+            {
+                if (item.TryLoad(fileItems))
+                {
+                    return item;
+                }
+            }
+            return new DefaultProducer();
         }
 
         #endregion
@@ -47,7 +73,23 @@ namespace ZoDream.BundleExtractor
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
             var reader = OpenBundle(stream);
-
+            if (reader is not null)
+            {
+                return reader;
+            }
+            IArchiveScheme[] schemes = [
+                new SerializedFileScheme(),
+                new BrotliFileScheme(),
+                new GZipFileScheme()
+                ];
+            foreach (var scheme in schemes) 
+            {
+                reader = scheme.Open(stream, filePath, fileName, options);
+                if (reader is not null)
+                {
+                    return reader;
+                }
+            }
             return reader;
         }
 

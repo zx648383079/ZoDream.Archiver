@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.BundleFiles
         public string? UnityWebMinimumRevision { get; set; }
         public virtual void Read(EndianReader reader)
         {
-            string signature = reader.ReadStringZeroTerm();
+            var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);
             Version = (BundleVersion)reader.ReadInt32();
             Debug.Assert(Version >= 0);

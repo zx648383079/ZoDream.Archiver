@@ -6,6 +6,7 @@
 	  <Nullable>enable</Nullable>
 	  <Version>1.0.0</Version>
 	  <BaseOutputPath>..\..\bin</BaseOutputPath>
+	  <RootNamespace>ZoDream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 	  <AssemblyName>ZoDream.$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
 
