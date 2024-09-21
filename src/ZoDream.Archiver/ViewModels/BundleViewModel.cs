@@ -142,7 +142,7 @@ namespace ZoDream.Archiver.ViewModels
                 using var reader = new UnityBundleScheme().Load(fileItems, options);
                 try
                 {
-                    reader?.ExtractTo(model.FileName, token);
+                    reader?.ExtractTo(model.FileName, model.ExtractMode, token);
                 }
                 catch (Exception ex)
                 {

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.WallpaperExtractor
 {
@@ -30,7 +31,7 @@ namespace ZoDream.WallpaperExtractor
             reader.BaseStream.CopyTo(output, e.Length);
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             var entries = ReadEntry();
             var i = 0;

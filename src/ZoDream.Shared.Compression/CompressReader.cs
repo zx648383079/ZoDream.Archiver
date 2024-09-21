@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Compression
 {
@@ -37,7 +38,9 @@ namespace ZoDream.Shared.Compression
             }
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder,
+            ArchiveExtractMode mode,
+            Action<double>? progressFn = null, CancellationToken token = default)
         {
             var i = 0D;
             while (_reader.MoveToNextEntry())
@@ -50,7 +53,7 @@ namespace ZoDream.Shared.Compression
                 {
                     continue;
                 }
-                _reader.WriteEntryToDirectory(folder);
+                _reader.WriteEntryToDirectory(folder, new() { Overwrite = mode == ArchiveExtractMode.Overwrite});
                 progressFn?.Invoke(i += .1);
             }
         }

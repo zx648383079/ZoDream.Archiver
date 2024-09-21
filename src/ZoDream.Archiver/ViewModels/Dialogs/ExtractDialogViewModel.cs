@@ -2,6 +2,7 @@
 using System;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
+using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -29,6 +30,8 @@ namespace ZoDream.Archiver.ViewModels
                 Set(ref _typeIndex, value);
             }
         }
+
+        public ArchiveExtractMode ExtractMode => (ArchiveExtractMode)(TypeIndex + 1);
 
         private string _fileName = string.Empty;
 

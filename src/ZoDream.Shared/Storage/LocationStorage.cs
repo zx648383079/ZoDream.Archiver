@@ -1,14 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Storage
 {
     public static class LocationStorage
     {
+
+        public static bool TryCreate(string fileName, ArchiveExtractMode mode, out string fullPath)
+        {
+            return TryCreate(fileName, Path.GetExtension(fileName), mode, out fullPath);
+        }
+
+        public static bool TryCreate(string fileName, string extension, ArchiveExtractMode mode, out string fullPath)
+        {
+            if (!string.IsNullOrWhiteSpace(extension) && fileName.EndsWith(extension))
+            {
+                fileName = fileName[..^extension.Length];
+            }
+            fullPath = fileName + extension;
+            if (mode == ArchiveExtractMode.Overwrite || !File.Exists(fullPath))
+            {
+                return true;
+            }
+            if (mode == ArchiveExtractMode.Skip)
+            {
+                return false;
+            }
+            if (mode == ArchiveExtractMode.Rename)
+            {
+                for (var i = 1;; i++)
+                {
+                    fullPath = $"{fileName}({i}){extension}";
+                    if (!File.Exists(fullPath))
+                    {
+                        return true;
+                    }
+                }
+            }
+            // TODO 询问是否覆盖
+            return false;
+        }
+
         /// <summary>
         /// 读文本文件
         /// </summary>

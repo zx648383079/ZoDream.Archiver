@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
@@ -16,6 +12,15 @@ namespace ZoDream.Shared.Drawing
         public static ushort From8BitTo16Bit(byte code) => (ushort)(code * 257);
 
         public static ushort From16BitToShort(byte a, byte b) => (ushort)((a << 8) | b);
+
+        public static byte FromHalfToByte(byte[] buffer, int startIndex)
+        {
+            return (byte)Math.Round((float)BitConverter.ToHalf(buffer, startIndex) * 255f);
+        }
+        public static byte FromFloatToByte(byte[] buffer, int startIndex)
+        {
+            return (byte)Math.Round(BitConverter.ToSingle(buffer, startIndex) * 255f);
+        }
 
         public static uint RotateRight(uint value, int count)
         {

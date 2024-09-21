@@ -257,7 +257,7 @@ namespace ZoDream.Shared.Compression.Own
             }
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             foreach (var _ in ReadFile(folder))
             {

@@ -66,6 +66,19 @@
         RGBA16161616,
 
         BGRA8888,
+        ARGB8888,
+        BGR888,
+        RGB161616,
+        R8,
+        R16,
+        RH, // R half 16b
+        RGH, // RG H 16 16
+        RGBAH,
+        RF, // R float 32b
+        RGF,
+        RGBF,
+        ARGBF,
+        RGB9e5F,
         L8,
         LA88,
         L16,

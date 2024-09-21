@@ -111,7 +111,7 @@ namespace ZoDream.Archiver.ViewModels
                     }
                     else
                     {
-                        reader?.ExtractToDirectory(model.FileName, app.UpdateProgress, token);
+                        reader?.ExtractToDirectory(model.FileName, model.ExtractMode, app.UpdateProgress, token);
                     }
                 }
                 catch (Exception ex)

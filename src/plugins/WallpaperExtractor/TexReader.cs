@@ -104,7 +104,7 @@ namespace ZoDream.WallpaperExtractor
             ExtractTo(_ => output);
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             ExtractTo(Path.Combine(folder, fileName));
         }

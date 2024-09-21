@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.IO
 {
@@ -69,6 +70,12 @@ namespace ZoDream.Shared.IO
         {
             var fileName = Path.Combine(folder, Path.GetFileName(entry.Name.Replace('/', '\\')));
             reader.ExtractTo(entry, fileName, progress, token);
+        }
+
+        public static void ExtractToDirectory(this IArchiveReader reader, string folder, Action<double>? progressFn = null,
+            CancellationToken token = default)
+        {
+            reader.ExtractToDirectory(folder, ArchiveExtractMode.Overwrite, progressFn, token);
         }
     }
 }
