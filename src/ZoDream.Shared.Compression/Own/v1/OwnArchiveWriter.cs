@@ -7,39 +7,29 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Compression.Own
 {
-    public class OwnArchiveWriter(Stream stream, IOwnKey key) : IArchiveWriter
+    public class OwnArchiveWriter : IArchiveWriter
     {
+
+        public OwnArchiveWriter(Stream stream, IOwnKey key, OwnFileHeader header)
+        {
+            BaseStream = stream;
+            _key = key;
+            _header = header;
+            _header.Write(stream);
+        }
+
         public OwnArchiveWriter(Stream stream, IArchiveOptions options)
-            : this(stream, OwnArchiveScheme.CreateKey(options))
+            : this(stream, OwnArchiveScheme.CreateKey(options), new OwnFileHeader(true))
         {
             _options = options;
-            WriteHeader(true, true);
         }
 
+        private readonly IOwnKey _key;
+        private readonly OwnFileHeader _header;
+        private readonly Stream BaseStream;
         private readonly IArchiveOptions? _options;
-        private bool _withName = false;
-        private bool _multiple = false;
         private bool _nextPadding = false;
         private readonly int _maxBufferLength = 4096;
-
-        public void WriteHeader(bool withName, bool multiple)
-        {
-            _withName = withName || multiple;
-            _multiple = multiple;
-            stream.WriteByte(0x23);
-            stream.WriteByte(0x5A);
-            if (multiple)
-            {
-                stream.WriteByte(3);
-            }
-            else
-            {
-                stream.WriteByte((byte)(withName ? 1 : 2));
-            }
-            stream.WriteByte(0x0A);
-        }
-
-
 
         private void WriteName(string fileName)
         {
@@ -53,7 +43,7 @@ namespace ZoDream.Shared.Compression.Own
         {
             if (length <= 250)
             {
-                stream.WriteByte((byte)length);
+                BaseStream.WriteByte((byte)length);
                 return;
             }
             var i = 0;
@@ -64,8 +54,8 @@ namespace ZoDream.Shared.Compression.Own
                 var plus = i * (i - basic);
                 if (length <= plus + 255)
                 {
-                    stream.WriteByte((byte)i);
-                    stream.WriteByte((byte)(length - plus));
+                    BaseStream.WriteByte((byte)i);
+                    BaseStream.WriteByte((byte)(length - plus));
                     return;
                 }
             }
@@ -90,7 +80,7 @@ namespace ZoDream.Shared.Compression.Own
                 }
                 if (rate == 0)
                 {
-                    stream.Write(buffer.Reverse().ToArray());
+                    BaseStream.Write(buffer.Reverse().ToArray());
                     break;
                 }
             }
@@ -101,12 +91,12 @@ namespace ZoDream.Shared.Compression.Own
         {
             for (int i = 0; i < max; i++)
             {
-                var code = key.ReadByte();
+                var code = _key.ReadByte();
                 buffer[i] = (byte)OwnHelper.Clamp(
                     _nextPadding ? (buffer[i] + code) : (buffer[i] - code)
                     , 256);
             }
-            stream.Write(buffer, 0, max);
+            BaseStream.Write(buffer, 0, max);
         }
 
         private void WriteStream(Stream input)
@@ -134,7 +124,7 @@ namespace ZoDream.Shared.Compression.Own
 
         public IReadOnlyEntry AddEntry(string name, Stream input)
         {
-            if (_withName)
+            if (_header.WithName)
             {
                 WriteName(name);
             }
@@ -144,10 +134,10 @@ namespace ZoDream.Shared.Compression.Own
 
         public void Dispose()
         {
-            key.Dispose();
+            _key.Dispose();
             if (_options?.LeaveStreamOpen == false)
             {
-                stream.Dispose();
+                BaseStream.Dispose();
             }
         }
     }

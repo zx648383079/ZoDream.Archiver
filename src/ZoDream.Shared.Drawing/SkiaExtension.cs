@@ -1,14 +1,30 @@
 ﻿using SkiaSharp;
 using System;
-using System.Drawing;
 using System.IO;
-using System.Security.Cryptography;
-using static System.Net.Mime.MediaTypeNames;
+using System.Numerics;
+using System.Reflection.Metadata;
 
 namespace ZoDream.Shared.Drawing
 {
     public static class SkiaExtension
     {
+
+        public static SKMatrix AsMatrix(this in Matrix3x2 transform)
+        {
+            return new SKMatrix
+            {
+                ScaleX = transform.M11,
+                SkewX = transform.M21,
+                TransX = transform.M31,
+                SkewY = transform.M12,
+                ScaleY = transform.M22,
+                TransY = transform.M32,
+                Persp0 = 0,
+                Persp1 = 0,
+                Persp2 = 1
+            };
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -161,6 +177,25 @@ namespace ZoDream.Shared.Drawing
             });
         }
 
+        public static SKImage? Clip(this SKImage source, SKPath path)
+        {
+            var rect = path.Bounds;
+            if (rect.IsEmpty || rect.Width < 1 || rect.Height < 1)
+            {
+                return null;
+            }
+            return MutateImage((int)rect.Width, (int)rect.Height, canvas => {
+                canvas.DrawImage(source, rect,
+                   SKRect.Create(0, 0, rect.Width, rect.Height), new SKPaint()
+                   {
+                       FilterQuality = SKFilterQuality.High
+                   });
+                path.Offset(-rect.Left, -rect.Top);
+                canvas.ClipPath(path, SKClipOperation.Difference);
+                canvas.Clear();
+            });
+        }
+
         public static SKImage? Clip(this SKImage source, SKRectI rect)
         {
             var target = SKImage.Create(new SKImageInfo(rect.Width, 
@@ -195,7 +230,13 @@ namespace ZoDream.Shared.Drawing
             action?.Invoke(surface.Canvas);
             return surface.Snapshot();
         }
-
+        public static SKImage Flip(this SKImage bitmap, bool isHorizontal = true)
+        {
+            return MutateImage(bitmap.Width, bitmap.Height, surface => {
+                surface.Flip(isHorizontal);
+                surface.DrawImage(bitmap, new SKPoint());
+            });
+        }
         public static SKImage Rotate(this SKImage bitmap, float angle)
         {
             var (rotatedWidth, rotatedHeight) = ComputedRotate(bitmap.Width, bitmap.Height, angle);

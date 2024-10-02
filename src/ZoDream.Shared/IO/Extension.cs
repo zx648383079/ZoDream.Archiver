@@ -60,6 +60,12 @@ namespace ZoDream.Shared.IO
             return len;
         }
 
+        public static void SaveAs(this Stream input, string fileName)
+        {
+            using var fs = File.Create(fileName);
+            input.CopyTo(fs);
+        }
+
         public static void ExtractTo(this IArchiveReader reader, IReadOnlyEntry entry, string fileName, Action<double>? progress = null, CancellationToken token = default)
         {
             using var fs = File.Create(fileName);
