@@ -229,15 +229,14 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 return;
             }
-            catch (IndexOutOfRangeException)
+            catch (Exception ex)
             {
-                await app.ConfirmAsync("文件解析失败");
-                app.NavigateBack();
-                return;
-            }
-            catch (Exception)
-            {
-                
+                if (ex is IndexOutOfRangeException || ex is ArgumentOutOfRangeException)
+                {
+                    await app.ConfirmAsync("文件解析失败");
+                    app.NavigateBack();
+                    return;
+                }
             }
             if (!await OpenPasswordAsync())
             {

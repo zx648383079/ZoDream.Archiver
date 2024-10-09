@@ -5,6 +5,7 @@ using ZoDream.Shared.Drawing;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.WallpaperExtractor
 {
@@ -36,14 +37,6 @@ namespace ZoDream.WallpaperExtractor
             return Encoding.UTF8.GetString(buffer.ToArray());
         }
 
-        public static void CreateDirectory(string fileName)
-        {
-            var folder = Path.GetDirectoryName(fileName);
-            if (!string.IsNullOrWhiteSpace(folder) && !Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-        }
 
         public static BitmapFormat Parse(this TexFormat format)
         {
@@ -140,7 +133,7 @@ namespace ZoDream.WallpaperExtractor
             }
             var extension = imageFormat.GetFileExtension();
             fileName = CombineExtension(fileName, extension);
-            CreateDirectory(fileName);
+            LocationStorage.CreateDirectory(fileName);
             using var fs = File.Create(fileName);
             bitmap.Encode(fs, imageFormat.Parse(), 100);
         }

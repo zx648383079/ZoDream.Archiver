@@ -8,12 +8,38 @@ namespace ZoDream.Shared.Storage
 {
     public static class LocationStorage
     {
+        /// <summary>
+        /// 根据文件路径创建缺少的文件夹
+        /// </summary>
+        /// <param name="fileName"></param>
+        public static void CreateDirectory(string fileName)
+        {
+            var folder = Path.GetDirectoryName(fileName);
+            if (!string.IsNullOrWhiteSpace(folder) && !Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+        }
 
+        /// <summary>
+        /// 根据模式是否能创建文件
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="mode"></param>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
         public static bool TryCreate(string fileName, ArchiveExtractMode mode, out string fullPath)
         {
             return TryCreate(fileName, Path.GetExtension(fileName), mode, out fullPath);
         }
-
+        /// <summary>
+        /// 根据模式是否能创建文件
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="extension"></param>
+        /// <param name="mode"></param>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
         public static bool TryCreate(string fileName, string extension, ArchiveExtractMode mode, out string fullPath)
         {
             if (!string.IsNullOrWhiteSpace(extension) && fileName.EndsWith(extension))
@@ -23,6 +49,7 @@ namespace ZoDream.Shared.Storage
             fullPath = fileName + extension;
             if (mode == ArchiveExtractMode.Overwrite || !File.Exists(fullPath))
             {
+                CreateDirectory(fullPath);
                 return true;
             }
             if (mode == ArchiveExtractMode.Skip)
@@ -36,6 +63,7 @@ namespace ZoDream.Shared.Storage
                     fullPath = $"{fileName}({i}){extension}";
                     if (!File.Exists(fullPath))
                     {
+                        CreateDirectory(fullPath);
                         return true;
                     }
                 }

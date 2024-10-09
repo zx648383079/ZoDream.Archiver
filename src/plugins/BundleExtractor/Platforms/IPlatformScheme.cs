@@ -10,5 +10,7 @@ namespace ZoDream.BundleExtractor.Platforms
 
         public IProducerScheme Producer { get; }
         public bool TryLoad(IEnumerable<string> fileItems);
+
+
     }
 }

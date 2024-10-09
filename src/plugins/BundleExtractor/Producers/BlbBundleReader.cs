@@ -10,6 +10,7 @@ using ZoDream.BundleExtractor.BundleFiles;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Producers
 {
@@ -35,7 +36,7 @@ namespace ZoDream.BundleExtractor.Producers
         private readonly long _headerLength;
         private readonly BlbBundleHeader _header = new();
         private readonly SplitStreamCollection _storageItems = [];
-
+        private long _dataBeginPosition;
         public void Dispose()
         {
             if (_options?.LeaveStreamOpen == false)
@@ -50,18 +51,17 @@ namespace ZoDream.BundleExtractor.Producers
             {
                 return;
             }
+            _reader.BaseStream.Position = _dataBeginPosition;
             using var ms = _storageItems.Create(_reader.BaseStream, ery.Offset, ery.Length);
             ms.CopyTo(output);
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             var entries = ReadEntry().ToArray();
             var i = 0;
-            var pos = _reader.BaseStream.Position;
             foreach (var item in entries)
             {
-                _reader.BaseStream.Position = pos;
                 using var fs = File.Create(Path.Combine(folder, item.Name));
                 ExtractTo(item, fs);
                 progressFn?.Invoke((double)(++i) / entries.Count());
@@ -98,7 +98,7 @@ namespace ZoDream.BundleExtractor.Producers
                 );
             }
             _reader.BaseStream.Position = nodesInfoOffset;
-
+            var items = new FileStreamEntry[nodesCount];
             for (var i = 0; i < nodesCount; i++)
             {
                 var offset = _reader.ReadInt32();
@@ -118,12 +118,14 @@ namespace ZoDream.BundleExtractor.Producers
                 _reader.BaseStream.Position = pathOffset;
                 var path = _reader.ReadStringZeroTerm();
                 _reader.BaseStream.Position = pos;
-                yield return new FileStreamEntry(path, size)
+                items[i] = new FileStreamEntry(path, size)
                 {
                     Offset = offset,
                     Flags = (NodeFlags)((flag & (1 << i)) * 4)
                 };
             }
+            _dataBeginPosition = _reader.BaseStream.Position;
+            return items;
         }
     }
 }

@@ -7,6 +7,8 @@ using WinRT.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Dispatching;
 using ZoDream.Shared.ViewModel;
+using ZoDream.Shared.Interfaces;
+using System.Threading.Tasks;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -39,6 +41,8 @@ namespace ZoDream.Archiver.ViewModels
         }
         public PluginViewModel Plugin { get; private set; } = new();
 
+        public ISettingContainer Setting { get; private set; } = new SettingContainer();
+
         public void Binding(Window window, Frame frame)
         {
             _baseWindow = window;
@@ -52,6 +56,11 @@ namespace ZoDream.Archiver.ViewModels
         public double GetDpiScaleFactorFromWindow()
         {
             return BaseXamlRoot.RasterizationScale;
+        }
+
+        public async Task InitializeAsync()
+        {
+            await Setting.LoadAsync();
         }
     }
 }

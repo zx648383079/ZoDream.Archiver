@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Producers
 {
@@ -47,7 +48,7 @@ namespace ZoDream.BundleExtractor.Producers
             throw new NotImplementedException();
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

@@ -12,7 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
 	  <ProjectReference Include="..\..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
+	  <ProjectReference Include="..\..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
+	  <ProjectReference Include="..\..\ZoDream.Shared.Media\ZoDream.Shared.Media.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared\ZoDream.Shared.csproj">
 		  <Private>false</Private>
 		  <ExcludeAssets>runtime</ExcludeAssets>
@@ -32,6 +38,7 @@
   <ItemGroup>
     <PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
     <PackageReference Include="LzhamWrapper" Version="0.0.1" />
+    <PackageReference Include="YamlDotNet" Version="16.1.3" />
   </ItemGroup>
 
 </Project>

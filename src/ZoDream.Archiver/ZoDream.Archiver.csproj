@@ -17,6 +17,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
 	  <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\Logo.png" />
@@ -28,6 +29,7 @@
     <None Remove="Dialogs\PasswordDialog.xaml" />
     <None Remove="Dialogs\ProgressDialog.xaml" />
     <None Remove="Dialogs\SearchDialog.xaml" />
+    <None Remove="Dialogs\SettingDialog.xaml" />
     <None Remove="Pages\BundlePage.xaml" />
     <None Remove="Pages\CompressPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
@@ -71,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\plugins\BundleExtractor\BundleExtractor.csproj" />
+    <ProjectReference Include="..\plugins\ChmExtractor\ChmExtractor.csproj" />
     <ProjectReference Include="..\plugins\WallpaperExtractor\WallpaperExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
@@ -83,6 +86,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\SettingDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\ExtractDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

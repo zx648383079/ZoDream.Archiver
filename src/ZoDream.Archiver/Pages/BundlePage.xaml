@@ -49,6 +49,10 @@
                 Command="{Binding DeleteCommand}"
                 Icon="Delete"
                 Label="Delete" />
+            <AppBarButton
+                Command="{Binding SettingCommand}"
+                Icon="Setting"
+                Label="Setting" />
         </CommandBar>
         <ListView
             Grid.Row="1"

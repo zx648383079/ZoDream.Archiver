@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -42,7 +43,13 @@ namespace ZoDream.Shared.IO
                 len += res;
             }
         }
-
+        /// <summary>
+        /// 复制指定长度的内容
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static long CopyTo(this Stream input, Stream output, long length)
         {
             var buffer = new byte[Math.Min(length, 1024 * 5)];
@@ -55,6 +62,38 @@ namespace ZoDream.Shared.IO
                     break;
                 }
                 output.Write(buffer, 0, res);
+                len += res;
+            }
+            return len;
+        }
+        /// <summary>
+        /// 读取并进行转换保存
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <param name="cb"></param>
+        /// <returns></returns>
+        public static long CopyTo(this Stream input, Stream output, 
+            Func<byte[], byte[]> cb)
+        {
+            var length = input.Length - input.Position;
+            var buffer = new byte[Math.Min(length, 1024 * 5)];
+            var len = 0L;
+            while (len < length)
+            {
+                var res = input.Read(buffer, 0, (int)Math.Min(buffer.Length, length - len));
+                if (res == 0)
+                {
+                    break;
+                }
+                var compressed = res == buffer.Length ? buffer : buffer.Take(res).ToArray();
+                var uncompressed = cb.Invoke(compressed);
+                res = uncompressed.Length;
+                if (res == 0)
+                {
+                    continue;
+                }
+                output.Write(uncompressed, 0, res);
                 len += res;
             }
             return len;

@@ -9,6 +9,7 @@ using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 using ZoDream.WallpaperExtractor.Models;
 
 namespace ZoDream.WallpaperExtractor
@@ -28,7 +29,7 @@ namespace ZoDream.WallpaperExtractor
         {
             var extension = header.IsGift ? "gif" : header.ImageFormat.GetFileExtension(); ;
             outputFile = PackageExtension.CombineExtension(outputFile, extension);
-            PackageExtension.CreateDirectory(outputFile);
+            LocationStorage.CreateDirectory(outputFile);
             return File.Create(outputFile);
         }
 

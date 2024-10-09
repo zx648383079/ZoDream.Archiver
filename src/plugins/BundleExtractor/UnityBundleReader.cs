@@ -6,6 +6,7 @@ using System.Threading;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
@@ -31,12 +32,12 @@ namespace ZoDream.BundleExtractor
         private readonly IArchiveOptions? _options;
         private readonly UnityBundleScheme? _scheme;
 
-        public void ExtractTo(string folder, CancellationToken token = default)
+        public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
             foreach (var items in _platform.Producer.EnumerateChunk())
             {
                 using var chunk = new BundleChunkReader(items, _scheme, _platform);
-                chunk.ExtractTo(folder, token);
+                chunk.ExtractTo(folder, mode, token);
             }
         }
 

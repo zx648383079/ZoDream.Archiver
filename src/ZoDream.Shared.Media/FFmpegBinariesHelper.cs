@@ -37,5 +37,22 @@ namespace ZoDream.Shared.Media
                 throw new NotSupportedException(); // fell free add support for platform of your choose
             }
         }
+
+        private static unsafe void RegisterFFmpegLogger()
+        {
+            // 设置记录ffmpeg日志级别
+            ffmpeg.av_log_set_level(ffmpeg.AV_LOG_VERBOSE);
+            av_log_set_callback_callback logCallback = (p0, level, format, vl) => {
+                if (level > ffmpeg.av_log_get_level()) return;
+
+                var lineSize = 1024;
+                var lineBuffer = stackalloc byte[lineSize];
+                var printPrefix = 1;
+                ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
+                var line = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
+                Console.Write(line);
+            };
+            ffmpeg.av_log_set_callback(logCallback);
+        }
     }
 }

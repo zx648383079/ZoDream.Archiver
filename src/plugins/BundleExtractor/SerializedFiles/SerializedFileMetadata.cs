@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.SerializedFiles
         public UnityVersion UnityVersion { get; set; }
         public BuildTarget TargetPlatform { get; set; }
         public bool EnableTypeTree { get; set; }
-        public SerializedType[] Types { get; set; } = Array.Empty<SerializedType>();
+        public SerializedType[] Types { get; set; } = [];
         /// <summary>
         /// Indicate that <see cref="ObjectInfo.FileID"/> is 8 bytes size<br/>
         /// Serialized files with this field enabled supposedly don't exist

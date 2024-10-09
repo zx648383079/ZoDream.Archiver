@@ -23,6 +23,7 @@ namespace ZoDream.Archiver.ViewModels
             DeleteCommand = new RelayCommand(TapDelete);
             SaveCommand = new RelayCommand(TapSaveAs);
             ViewCommand = new RelayCommand(TapView);
+            SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
         }
 
@@ -47,6 +48,19 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand SaveCommand { get; private set; }
         public ICommand DragCommand { get; private set; }
         public ICommand ViewCommand { get; private set; }
+
+        public ICommand SettingCommand { get; private set; }
+
+        private async void TapSetting(object? _)
+        {
+            var picker = new SettingDialog();
+            var res = await App.ViewModel.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
+            await picker.ViewModel.SaveAsync();
+        }
         private void TapView(object? _)
         {
 
@@ -125,6 +139,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             var app = App.ViewModel;
+
             var picker = new ExtractDialog();
             var model = picker.ViewModel;
             var res = await app.OpenDialogAsync(picker);
@@ -133,7 +148,6 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-
             var options = new ArchiveOptions(model.Password, model.DictFileName);
             var token = app.ShowProgress("解压中...");
             await Task.Factory.StartNew(() => {

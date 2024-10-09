@@ -28,7 +28,7 @@ namespace ZoDream.BundleExtractor.SerializedFiles
         public int RawTypeID { get; set; }
         public bool IsStrippedType { get; set; }
         /// <summary>
-        /// For <see cref="ClassIDType.MonoBehaviour"/> specifies script type
+        /// For <see cref="ElementIDType.MonoBehaviour"/> specifies script type
         /// </summary>
         public short ScriptTypeIndex { get; set; }
         /// <summary>

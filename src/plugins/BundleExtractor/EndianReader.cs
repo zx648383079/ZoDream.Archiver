@@ -59,9 +59,13 @@ namespace ZoDream.BundleExtractor
 
         public static T[] ReadArray<T>(this EndianReader reader, Func<EndianReader, T> cb)
         {
-            var count = reader.ReadInt32();
-            var array = new T[count];
-            for (int i = 0; i < count; i++)
+            return reader.ReadArray(reader.ReadInt32(), cb);
+        }
+
+        public static T[] ReadArray<T>(this EndianReader reader, int length, Func<EndianReader, T> cb)
+        {
+            var array = new T[length];
+            for (int i = 0; i < length; i++)
             {
                 array[i] = cb.Invoke(reader);
             }

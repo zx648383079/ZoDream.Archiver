@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.ChmExtractor;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.WallpaperExtractor;
@@ -14,6 +15,7 @@ namespace ZoDream.Archiver.ViewModels
     {
 
         private readonly IArchiveScheme[] PluginItems = [
+            new ChmScheme(),
             new PackageScheme(),
             new CompressScheme(),
         ];

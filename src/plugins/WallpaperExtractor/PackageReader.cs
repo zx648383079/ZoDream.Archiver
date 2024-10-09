@@ -1,5 +1,4 @@
-﻿using ZoDream.WallpaperExtractor.Models;
-using ZoDream.Shared.Interfaces;
+﻿using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using System.IO;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.WallpaperExtractor
 {
@@ -23,7 +23,7 @@ namespace ZoDream.WallpaperExtractor
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
-            if (entry is not PackageEntry e)
+            if (entry is not ArchiveEntry e)
             {
                 return;
             }
@@ -44,12 +44,12 @@ namespace ZoDream.WallpaperExtractor
                 var fileName = Path.Combine(folder, item.Name);
                 if (!item.Name.EndsWith(".tex"))
                 {
-                    ExtractTo(item, fileName);
+                    ExtractTo(item, fileName, mode);
                 }
                 else
                 {
                     new TexReader(
-                        new BinaryReader(ConvertTo((PackageEntry)item))
+                        new BinaryReader(ConvertTo((ArchiveEntry)item))
                         , item.Name, null)
                         .ExtractTo(fileName);
                 }
@@ -62,10 +62,10 @@ namespace ZoDream.WallpaperExtractor
             reader.BaseStream.Seek(_basePosition, SeekOrigin.Begin);
             reader.ReadNString();
             var count = reader.ReadInt32();
-            var entries = new PackageEntry[count];
+            var entries = new ArchiveEntry[count];
             for (var i = 0; i < count; i++)
             {
-                entries[i] = new PackageEntry(
+                entries[i] = new ArchiveEntry(
                     reader.ReadNString(),
                     reader.ReadInt32(),
                     reader.ReadInt32()
@@ -74,19 +74,22 @@ namespace ZoDream.WallpaperExtractor
             var begin = reader.BaseStream.Position;
             foreach (var item in entries)
             {
-                item.Offset += begin;
+                item.Move(begin);
             }
             return entries;
         }
 
-        private void ExtractTo(IReadOnlyEntry entry, string fileName)
+        private void ExtractTo(IReadOnlyEntry entry, string fileName, ArchiveExtractMode mode)
         {
-            PackageExtension.CreateDirectory(fileName);
-            using var fs = File.Create(fileName);
+            if (!LocationStorage.TryCreate(fileName, mode, out var fullPath))
+            {
+                return;
+            }
+            using var fs = File.Create(fullPath);
             ExtractTo(entry, fs);
         }
 
-        private PartialStream ConvertTo(PackageEntry entry)
+        private PartialStream ConvertTo(ArchiveEntry entry)
         {
             return new PartialStream(reader.BaseStream, entry.Offset, entry.Length);
         }

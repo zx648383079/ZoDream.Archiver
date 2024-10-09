@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.WebFiles
 {
@@ -32,7 +33,7 @@ namespace ZoDream.BundleExtractor.WebFiles
             reader.BaseStream.CopyTo(output, item.Length);
         }
 
-        public void ExtractToDirectory(string folder, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
             var items = ReadEntry().ToArray();
             var i = 0;

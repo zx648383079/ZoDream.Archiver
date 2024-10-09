@@ -78,9 +78,9 @@ namespace ZoDream.BundleExtractor
                 return reader;
             }
             IArchiveScheme[] schemes = [
-                new SerializedFileScheme(),
                 new BrotliFileScheme(),
-                new GZipFileScheme()
+                new GZipFileScheme(),
+                new SerializedFileScheme(),
                 ];
             foreach (var scheme in schemes) 
             {
