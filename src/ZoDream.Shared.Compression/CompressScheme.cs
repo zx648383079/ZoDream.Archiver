@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Compression
 {
@@ -23,13 +24,25 @@ namespace ZoDream.Shared.Compression
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
+            stream.Seek(0, SeekOrigin.Begin);
+            var leaveStreamOpen = options?.LeaveStreamOpen ?? true;
+            if (stream is not MultipartFileStream)
+            {
+                stream = TrySubvolumeStream(filePath, stream);
+                leaveStreamOpen = leaveStreamOpen || stream is not MultipartFileStream;
+            }
+            if (options is null || options.LeaveStreamOpen != leaveStreamOpen)
+            {
+                options = new ArchiveOptions(options)
+                {
+                    LeaveStreamOpen = leaveStreamOpen
+                };
+            }
             var reader = new OwnArchiveScheme().Open(stream, filePath, fileName, options);
             if (reader is not null)
             {
                 return reader;
             }
-            stream.Seek(0, SeekOrigin.Begin);
-            stream = IsSubvolume(filePath, stream);
             var reader2 = ReaderFactory.Open(stream, CompressHelper.Convert(options));
             if (reader2 is not null)
             {
@@ -38,10 +51,13 @@ namespace ZoDream.Shared.Compression
             return null;
         }
 
-        private Stream IsSubvolume(string fileName, Stream fileStream)
+        public static bool IsCryptographicException(Exception ex)
+        {
+            return ex is CryptographicException || ex is SharpCompress.Common.CryptographicException;
+        }
+        public Stream TrySubvolumeStream(string fileName, Stream fileStream)
         {
             var name = Path.GetFileName(fileName);
-
             var match = SubvolumeRegex().Match(name);
             if (!match.Success)
             {
@@ -54,21 +70,21 @@ namespace ZoDream.Shared.Compression
             if (!string.IsNullOrEmpty(match.Groups[2].Value))
             {
                 globe += "part*." + match.Groups[2].Value;
-                items = Directory.GetFiles(folder, globe)
+                items = [.. Directory.GetFiles(folder, globe)
                     .Where(i => PartRegex().IsMatch(i))
-                    .Order().ToArray();
+                    .Order()];
             } 
             else if (!string.IsNullOrEmpty(match.Groups[3].Value))
             {
                 globe += match.Groups[3].Value + ".*";
-                items = Directory.GetFiles(folder, globe)
+                items = [.. Directory.GetFiles(folder, globe)
                     .Where(i => NumberEndRegex().IsMatch(i))
-                    .Order().ToArray();
+                    .Order()];
             }
             else
             {
                 globe += "*";
-                items = Directory.GetFiles(folder, globe)
+                items = [.. Directory.GetFiles(folder, globe)
                     .Where(i => NumberPartRegex().IsMatch(i))
                     .OrderBy(i => {
                         var m = NumberPartRegex().Match(i);
@@ -77,14 +93,13 @@ namespace ZoDream.Shared.Compression
                             return 0;
                         }
                         return int.Parse(m.Groups[2].Value);
-                    }).ToArray();
+                    })];
             }
             if (items.Length <= 1)
             {
                 return fileStream;
             }
-            fileStream.Dispose();
-            return MultipartFileStream.Open(items);
+            return MultipartFileStream.Open(items, fileName, fileStream);
         }
 
         [GeneratedRegex(@"(\.part\d+\.(rar|zip|7z)|\.(zip|7z|rar)\.\d+|\.(z|r)\d+|\.(zip))$")]

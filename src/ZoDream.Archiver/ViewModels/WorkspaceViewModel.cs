@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using ZoDream.Archiver.Dialogs;
+using ZoDream.Shared;
+using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -231,7 +233,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             catch (Exception ex)
             {
-                if (ex is IndexOutOfRangeException || ex is ArgumentOutOfRangeException)
+                if (!CompressScheme.IsCryptographicException(ex))
                 {
                     await app.ConfirmAsync("文件解析失败");
                     app.NavigateBack();

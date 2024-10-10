@@ -29,6 +29,12 @@
         </Grid>
         <TextBlock Style="{StaticResource InputHeaderTb}" Text="Type" />
         <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Subvolume(MB)" />
+        <ComboBox
+            HorizontalAlignment="Stretch"
+            IsEditable="True"
+            ItemsSource="{Binding SubvolumeItems}"
+            Text="{Binding SubvolumeText, Mode=TwoWay}" />
         <TextBlock Style="{StaticResource InputHeaderTb}" Text="Password" />
         <TextBox Text="{Binding Password, Mode=TwoWay}" />
         <TextBlock

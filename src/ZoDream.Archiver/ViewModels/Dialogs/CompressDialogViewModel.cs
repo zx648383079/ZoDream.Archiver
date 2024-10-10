@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Converters;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.Compression.Tar;
 using ZoDream.Shared.Compression.Zip;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
@@ -38,6 +40,22 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
+        private string[] _subvolumeItems = ["100MB", "500MB", "1GB", "4GB", "8GB"];
+
+        public string[] SubvolumeItems {
+            get => _subvolumeItems;
+            set => Set(ref _subvolumeItems, value);
+        }
+
+
+        private string _subvolumeText = string.Empty;
+
+        public string SubvolumeText {
+            get => _subvolumeText;
+            set => Set(ref _subvolumeText, value);
+        }
+
+
         private string _fileName = string.Empty;
 
         public string FileName {
@@ -66,6 +84,9 @@ namespace ZoDream.Archiver.ViewModels
             get => _dictVisible;
             set => Set(ref _dictVisible, value);
         }
+
+
+        public long SubvolumeLength => SizeConverter.Parse(SubvolumeText, "M");
 
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }
@@ -107,7 +128,9 @@ namespace ZoDream.Archiver.ViewModels
             {
                 LeaveStreamOpen = false,
             };
-            var fs = File.Create(FileName);
+            var subvolume = SubvolumeLength;
+            Stream fs = subvolume > 0 ? new MultipartOutputStream(FileName, subvolume) :
+                File.Create(FileName);
             return TypeIndex switch
             {
                 4 => new OwnDictionaryWriter(fs, option),

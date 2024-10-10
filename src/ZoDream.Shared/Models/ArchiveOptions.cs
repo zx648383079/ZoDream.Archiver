@@ -14,6 +14,18 @@ namespace ZoDream.Shared.Models
             
         }
 
+        public ArchiveOptions(IArchiveOptions? options)
+        {
+            if (options is null)
+            {
+                return;
+            }
+            LeaveStreamOpen = options.LeaveStreamOpen;
+            LookForHeader = options.LookForHeader;
+            Dictionary = options.Dictionary;
+            Password = options.Password;
+        }
+
         public ArchiveOptions(string password)
         {
             Password = password;

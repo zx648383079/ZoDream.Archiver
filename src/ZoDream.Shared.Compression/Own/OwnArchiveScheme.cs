@@ -29,7 +29,7 @@ namespace ZoDream.Shared.Compression.Own
         {
             if (options?.Dictionary is null)
             {
-                throw new ArgumentNullException("dictionary Path is must");
+                throw new CryptographicException("dictionary Path is must");
             }
             var bin = new OwnDictionary(File.OpenRead(options.Dictionary));
             if (string.IsNullOrWhiteSpace(options.Password))
