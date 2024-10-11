@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.Shared.RustWrapper
 {
-    [StructLayout(LayoutKind.Sequential, Size = 16)]
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct OutputStreamRef
     {
         //public void* env_ptr;
@@ -18,5 +18,5 @@ namespace ZoDream.Shared.RustWrapper
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     //public unsafe delegate void WriteCallFn(void* _0, BufferRef input);
-    public unsafe delegate void WriteCallFn(void* _0, byte* ptr, uint count);
+    public unsafe delegate void WriteCallFn(byte* ptr, uint count);
 }

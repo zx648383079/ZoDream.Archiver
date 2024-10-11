@@ -15,27 +15,27 @@ namespace ZoDream.Shared.RustWrapper
         public byte[] Compress(byte[] buffer)
         {
             return Encryptor.Convert(buffer, (inputRef, outputRef) => {
-                return NativeMethods.compress_compressor(_instance, &inputRef, &outputRef);
+                return NativeMethods.compress_compressor(_instance, ref inputRef, ref outputRef);
             });
         }
 
         public void Compress(Stream input, Stream output)
         {
             Encryptor.Convert(input, output, (inputRef, outputRef) => {
-                return NativeMethods.compress_compressor(_instance, &inputRef, &outputRef);
+                return NativeMethods.compress_compressor(_instance, ref inputRef, ref outputRef);
             });
         }
 
         public byte[] Decompress(byte[] buffer)
         {
             return Encryptor.Convert(buffer, (inputRef, outputRef) => {
-                return NativeMethods.decompress_compressor(_instance, &inputRef, &outputRef);
+                return NativeMethods.decompress_compressor(_instance, ref inputRef, ref outputRef);
             });
         }
         public void Decompress(Stream input, Stream output)
         {
             Encryptor.Convert(input, output, (inputRef, outputRef) => {
-                return NativeMethods.decompress_compressor(_instance, &inputRef, &outputRef);
+                return NativeMethods.decompress_compressor(_instance, ref inputRef, ref outputRef);
             });
         }
 

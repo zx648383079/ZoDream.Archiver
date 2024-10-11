@@ -52,9 +52,13 @@ namespace ZoDream.Shared.RustWrapper
                     path += "arm64";
                 }
 
-                path += "/native/" + RustDllName + extension;
-
-                return NativeLibrary.Load(Path.Combine(AppContext.BaseDirectory, path), assembly, searchPath);
+                path += "/native";
+                var entry = Path.Combine(AppContext.BaseDirectory, path, RustDllName + extension);
+                if (!File.Exists(entry))
+                {
+                    entry = Path.Combine(AppContext.BaseDirectory, RustDllName + extension);
+                }
+                return NativeLibrary.Load(entry, assembly, searchPath);
             }
 
             return IntPtr.Zero;
