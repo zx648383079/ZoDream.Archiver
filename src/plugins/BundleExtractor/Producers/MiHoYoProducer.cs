@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Producers
 {
-    public class MiHoYoProducer : IProducerScheme
+    public class MiHoYoProducer : IBundleProducer
     {
         public IEnumerable<IEnumerable<string>> EnumerateChunk()
         {

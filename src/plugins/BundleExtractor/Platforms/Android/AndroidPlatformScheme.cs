@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Producers;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
-    public class AndroidPlatformScheme: IPlatformScheme
+    public class AndroidPlatformScheme: IBundlePlatform
     {
         private const string AssetName = "assets";
         private const string MetaName = "META-INF";
@@ -17,7 +18,7 @@ namespace ZoDream.BundleExtractor.Platforms
         private const string AndroidUnityAssemblyName = "libunity.so";
 
         public string Root { get; private set; } = string.Empty;
-        public IProducerScheme Producer { get; private set; }
+        public IBundleProducer Producer { get; private set; }
         public bool TryLoad(IEnumerable<string> fileItems)
         {
             foreach (var item in fileItems)

@@ -18,7 +18,7 @@ namespace ZoDream.Shared.RustWrapper
 
         static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
-            if (libraryName == __DllName)
+            if (libraryName == RustDllName)
             {
                 var path = "runtimes/";
                 var extension = "";
@@ -52,7 +52,7 @@ namespace ZoDream.Shared.RustWrapper
                     path += "arm64";
                 }
 
-                path += "/native/" + __DllName + extension;
+                path += "/native/" + RustDllName + extension;
 
                 return NativeLibrary.Load(Path.Combine(AppContext.BaseDirectory, path), assembly, searchPath);
             }

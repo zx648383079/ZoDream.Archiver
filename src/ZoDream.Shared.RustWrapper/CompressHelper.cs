@@ -10,6 +10,14 @@ namespace ZoDream.Shared.RustWrapper
 {
     public static class CompressHelper
     {
+
+        public static void StringToPtr(string s)
+        {
+            var ptr = Marshal.StringToCoTaskMemUTF8(s);
+            // var res = (byte*)ptr;
+            Marshal.FreeCoTaskMem(ptr);
+        }
+
         public static byte[] Lz4Decompress(byte[] buffer, int uncompressLength)
         {
             var res = new byte[uncompressLength];
@@ -20,12 +28,12 @@ namespace ZoDream.Shared.RustWrapper
                 {
                     fixed(byte* t = res)
                     {
-                        var input = new ByteArrayRef()
+                        var input = new BufferRef()
                         {
                             ptr = p,
                             len = (UIntPtr)buffer.Length,
                         };
-                        var output = new ByteArrayRef()
+                        var output = new BufferRef()
                         {
                             ptr = t,
                             len = (UIntPtr)res.Length,

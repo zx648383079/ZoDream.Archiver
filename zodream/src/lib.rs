@@ -4,108 +4,147 @@
 //     println!("Just called a Rust function from C!");
 // }
 
+use cipher::{KeyInit};
 use ::safer_ffi::prelude::*;
+use ::blowfish::Blowfish;
+
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct InputStream {
+    // read: extern "C" fn(c_slice::Ref<'_, u8>) -> u32,
+    read: extern "C" fn(&'_ * mut u8, u32) -> u32,
+}
+
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct OutputStream {
+    // write: extern "C" fn(c_slice::Ref<'_, u8>, u32),
+    write: extern "C" fn(&'_ * const u8, u32),
+}
 
 
 #[derive_ReprC]
-#[repr(C)] 
-pub struct Point {
-    x: i32,
-    y: i32,
+#[repr(i8)]
+pub enum CompressionID {
+    Unkown,
+    Lz4,
+}
+
+#[derive_ReprC]
+#[repr(i8)]
+pub enum EncryptionID {
+    Unkown,
+    Blowfish,
 }
 
 
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct Compressor {
+    id: CompressionID,
+}
+
 #[ffi_export]
-fn origin () -> Point
+fn find_compressor (id: CompressionID) -> repr_c::Box<Compressor>
 {
-    Point { x: 0, y: 0 }
+    Box::new(Compressor {id: id.into()})
+        .into()
 }
 
 #[ffi_export]
-fn logger() {
-    println!("Just called a Rust function from C!");
-}
-
-#[ffi_export]
-fn add(a: u32, b: u32) -> u32 {
-    a + b
-}
-
-#[ffi_export]
-fn get_str() -> repr_c::Box<String> {
-    Box::new(String::from("…")).into()
-}
-
-
-
-#[ffi_export]
-fn append(fst: char_p::Ref<'_>) -> repr_c::Box<String> {
-    let mut data = String::from("aa".to_owned());
-    data.push_str(fst.to_str());
-    Box::new(data).into()
-}
-
-#[ffi_export]
-fn returns_a_fn_ptr ()
-  -> extern "C" fn(u8) -> u16
+fn compress_compressor (ctor: &'_ Compressor, input: &'_ InputStream, output: &'_ OutputStream) -> u32
 {
-    extern "C"
-    fn f (n: u8)
-      -> u16
-    {
-        (n as u16) << 8
+    match ctor.id {
+        CompressionID::Lz4 => 1,
+        CompressionID::Unkown => 0
     }
-
-    f
+    // ctor.id.into_i8() as i32
 }
 
 #[ffi_export]
-fn call_in_the_background (
-    f: repr_c::Arc<dyn Send + Sync + Fn()>,
-)
+fn decompress_compressor (ctor: &'_ Compressor, input: &'_ InputStream, output: &'_ OutputStream) -> u32
 {
-    let f2 = f.clone();
-    ::std::thread::spawn(move || {
-        f2.call()
-    });
-    drop(f);
+    0
 }
 
 #[ffi_export]
-fn concat (
-    fst: char_p::Ref<'_>,
-    snd: char_p::Ref<'_>,
-) -> char_p::Box
+fn free_compressor (ctor: Option<repr_c::Box<Compressor>>)
 {
-    format!("{}{}", fst.to_str(), snd.to_str())
-        .try_into()
-        .unwrap()
+    drop(ctor)
 }
 
-/// Frees a string created by `concat`.
-#[ffi_export]
-fn free_char_p (_string: Option<char_p::Box>)
-{}
-
-#[ffi_export]
-fn with_concat (
-    fst: char_p::Ref<'_>,
-    snd: char_p::Ref<'_>,
-    mut cb: ::safer_ffi::closure::RefDynFnMut1<'_, (), char_p::Raw>,
-)
-{
-    let concat = concat(fst, snd);
-    cb.call(concat.as_ref().into());
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct Encryptor {
+    id: EncryptionID,
+    instance: Blowfish,
 }
 
-#[ffi_export(rename = "max")]
-fn max_but_with_a_weird_rust_name<'a> (
-    xs: c_slice::Ref<'a, i32>,
-) -> Option<&'a i32>
+
+#[ffi_export]
+fn find_encryptor (id: EncryptionID) -> repr_c::Box<Encryptor>
 {
-    xs.as_slice()
-        .iter()
-        .max()
+    let instance = Blowfish::new_from_slice("".as_bytes()).unwrap();
+    Box::new(Encryptor {id: id.into(), instance: instance})
+        .into()
+}
+
+#[ffi_export]
+fn find_encryptor_with_key (id: EncryptionID, key: char_p::Ref<'_>) -> repr_c::Box<Encryptor>
+{
+    let instance: Blowfish = Blowfish::new_from_slice(key.to_bytes()).unwrap();
+    Box::new(Encryptor {id: id.into(), instance: instance})
+        .into()
+}
+
+#[ffi_export]
+fn encrypt_encryptor (ctor: &'_ Encryptor, input: &'_ InputStream, output: &'_ OutputStream) -> u32
+{
+    const BLOCK_SIZE: usize = 1024;
+    let mut len = 0;
+    let mut buffer: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
+    // let buffer_ref = c_slice::Mut::from(buffer.as_mut_slice());
+    match ctor.id {
+        EncryptionID::Blowfish => {},
+        EncryptionID::Unkown => {
+            let mut l = BLOCK_SIZE;
+            while l == BLOCK_SIZE {
+                l = (input.read)(&mut buffer.as_mut_ptr(), BLOCK_SIZE as u32) as usize;
+                for i in 0..l {
+                    if buffer[i] > 128 {
+                        buffer[i] -= 9
+                    } else {
+                        buffer[i] += 9
+                    }
+                }
+                (output.write)(&buffer.as_ptr(), l as u32);
+                len += l;
+            }
+        },
+    }
+    len as u32
+    // ctor.id.into_i8() as i32
+}
+
+#[ffi_export]
+fn decrypt_encryptor (ctor: &'_ Encryptor, input: &'_ InputStream, output: &'_ OutputStream) -> u32
+{
+    match ctor.id {
+        EncryptionID::Blowfish => {
+
+            0
+        },
+        EncryptionID::Unkown => {
+
+            1
+        },
+    }
+}
+
+#[ffi_export]
+fn free_encryptor (ctor: Option<repr_c::Box<Encryptor>>)
+{
+    drop(ctor)
 }
 
 

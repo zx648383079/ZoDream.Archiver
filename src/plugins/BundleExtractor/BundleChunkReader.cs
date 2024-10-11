@@ -19,15 +19,15 @@ namespace ZoDream.BundleExtractor
 
         
         public BundleChunkReader(
-            IEnumerable<string> fileItems, 
-            IPlatformScheme platform)
+            IEnumerable<string> fileItems,
+            IBundlePlatform platform)
             : this(fileItems, null, platform)
         {
         }
 
         public BundleChunkReader(IEnumerable<string> fileItems,
             UnityBundleScheme? scheme,
-            IPlatformScheme platform)
+            IBundlePlatform platform)
         {
             _scheme = scheme ?? new();
             _fileItems = fileItems;
@@ -35,7 +35,7 @@ namespace ZoDream.BundleExtractor
         }
 
         private readonly IEnumerable<string> _fileItems;
-        private readonly IPlatformScheme _platform;
+        private readonly IBundlePlatform _platform;
         private readonly UnityBundleScheme _scheme;
 
         private readonly List<ISerializedFile> _assetItems = [];

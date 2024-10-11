@@ -6,8 +6,8 @@ namespace ZoDream.Shared.RustWrapper
     {
         
 
-        [DllImport(__DllName, ExactSpelling = true)]
-        public static unsafe extern int lz4_decompress(ByteArrayRef input, ByteArrayRef output, LoggerRef logger);
+        [DllImport(RustDllName, ExactSpelling = true)]
+        public static unsafe extern int lz4_decompress(BufferRef input, BufferRef output, LoggerRef logger);
 
 
 

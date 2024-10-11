@@ -1,10 +1,11 @@
 ﻿using BundleExtractor.Models;
 using System;
 using System.Collections.Generic;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Producers
 {
-    public class DefaultProducer : IProducerScheme
+    public class UnityProducer : IBundleProducer
     {
         public IList<DependencyDictionary> DependencyItems { get; private set; } = [];
 

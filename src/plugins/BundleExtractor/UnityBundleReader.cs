@@ -15,20 +15,20 @@ namespace ZoDream.BundleExtractor
  
 
         public UnityBundleReader(
-            IPlatformScheme platform, 
+            IBundlePlatform platform, 
             IArchiveOptions? options)
         {
             _platform = platform;
             _options = options;
         }
 
-        public UnityBundleReader(UnityBundleScheme scheme, IPlatformScheme platform,
+        public UnityBundleReader(UnityBundleScheme scheme, IBundlePlatform platform,
             IArchiveOptions? options): this(platform, options)
         {
             _scheme = scheme;
         }
 
-        private readonly IPlatformScheme _platform;
+        private readonly IBundlePlatform _platform;
         private readonly IArchiveOptions? _options;
         private readonly UnityBundleScheme? _scheme;
 

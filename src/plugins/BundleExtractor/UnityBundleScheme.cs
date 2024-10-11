@@ -24,9 +24,9 @@ namespace ZoDream.BundleExtractor
             return new UnityBundleReader(this, platform, options);
         }
 
-        internal static IPlatformScheme? GetPlatform(IEnumerable<string> fileItems)
+        internal static IBundlePlatform? GetPlatform(IEnumerable<string> fileItems)
         {
-            IPlatformScheme[] platforms = [
+            IBundlePlatform[] platforms = [
                 new WindowsPlatformScheme(),
                 new AndroidPlatformScheme(),
                 new IosPlatformScheme(),
@@ -41,9 +41,9 @@ namespace ZoDream.BundleExtractor
             return null;
         }
 
-        internal static IProducerScheme GetProducer(IEnumerable<string> fileItems)
+        internal static IBundleProducer GetProducer(IEnumerable<string> fileItems)
         {
-            IProducerScheme[] producers = [
+            IBundleProducer[] producers = [
                 new MiHoYoProducer(),
                 new PaperProducer()
             ];
@@ -54,7 +54,7 @@ namespace ZoDream.BundleExtractor
                     return item;
                 }
             }
-            return new DefaultProducer();
+            return new UnityProducer();
         }
 
         #endregion
