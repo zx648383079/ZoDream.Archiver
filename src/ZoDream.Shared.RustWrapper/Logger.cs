@@ -2,15 +2,18 @@
 
 namespace ZoDream.Shared.RustWrapper
 {
-    [StructLayout(LayoutKind.Sequential, Size = 16)]
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct LoggerRef
     {
-        public void* env_ptr;
-
         [MarshalAs(UnmanagedType.FunctionPtr)]
-        public LoggerProgressFn call;
+        public LoggerFn log;
+        [MarshalAs(UnmanagedType.FunctionPtr)]
+        public LoggerProgressFn progress;
     }
 
-    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-    public unsafe delegate void LoggerProgressFn(void* _0, int _1, byte /*const*/ * _2);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public unsafe delegate void LoggerProgressFn(uint _1, uint _2, byte /*const*/ * _3);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public unsafe delegate void LoggerFn(byte /*const*/ * _3);
 }

@@ -1,4 +1,5 @@
 
+
 // #[no_mangle]
 // pub extern "C" fn call_from_c() {
 //     println!("Just called a Rust function from C!");
@@ -12,14 +13,21 @@ use ::safer_ffi::prelude::*;
 #[repr(opaque)]
 pub struct InputStream {
     // read: extern "C" fn(c_slice::Ref<'_, u8>) -> u32,
-    read: extern "C" fn(&'_ * mut u8, u32) -> usize,
+    read: extern "C" fn(* mut u8, u32) -> usize,
 }
 
 #[derive_ReprC]
 #[repr(opaque)]
 pub struct OutputStream {
     // write: extern "C" fn(c_slice::Ref<'_, u8>, u32),
-    write: extern "C" fn(&'_ * const u8, u32),
+    write: extern "C" fn(* const u8, u32),
+}
+
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct Logger {
+    log: extern "C" fn(char_p::Raw),
+    progress: extern "C" fn(u32, u32, char_p::Raw),
 }
 
 
@@ -105,7 +113,8 @@ fn encrypt_encryptor (
     ctor: &'_ Encryptor, 
     input: &'_ InputStream, 
     output: &'_ OutputStream, 
-    mut logger: ::safer_ffi::closure::RefDynFnMut2<'_, (), usize, char_p::Raw>,) -> u32
+    logger: &'_ Logger,
+) -> u32
 {
     const BLOCK_SIZE: usize = 1024;
     let mut len = 0;
@@ -116,18 +125,18 @@ fn encrypt_encryptor (
         EncryptionID::Unkown => {
             let mut l = BLOCK_SIZE;
             while l == BLOCK_SIZE {
-                let c = (input.read)(&mut buffer.as_mut_ptr(), BLOCK_SIZE as u32);
-                logger.call(c.try_into().unwrap(), char_p::new("111711").as_ref().into());
+                (logger.log)(char_p::new("entry").as_ref().into());
+                let c = (input.read)(buffer.as_mut_ptr(), BLOCK_SIZE as u32);
+                (logger.progress)(c.try_into().unwrap(), 100, char_p::new("finish").as_ref().into());
                 l = c as usize;
-                
-                // for i in 0..l {
-                //     if buffer[i] > 128 {
-                //         buffer[i] -= 9
-                //     } else {
-                //         buffer[i] += 9
-                //     }
-                // }
-                (output.write)(&buffer.as_ptr(), l as u32);
+                for i in 0..l {
+                    if buffer[i] > 128 {
+                        buffer[i] -= 9
+                    } else {
+                        buffer[i] += 9
+                    }
+                }
+                (output.write)(buffer.as_ptr(), l as u32);
                 len += l;
             }
         },

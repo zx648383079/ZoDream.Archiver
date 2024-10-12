@@ -21,32 +21,32 @@ namespace ZoDream.Shared.RustWrapper
         }
 
         private readonly EncryptorRef* _instance;
+        private LoggerRef _logger = new()
+        {
+            log = (byte* msgPtr) => {
+                var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
+                Debug.WriteLine($"logger call: {msg} ");
+            },
+            progress = (uint progress, uint total, byte * msgPtr) =>
+            {
+                var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
+                Debug.WriteLine($"logger call: {progress}/{total}; {msg} ");
+            }
+        };
 
         public byte[] Encrypt(byte[] buffer)
         {
             return Convert(buffer, (inputRef, outputRef) => {
-                return NativeMethods.encrypt_encryptor(_instance, ref inputRef, ref outputRef, new LoggerRef()
-                {
-                    env_ptr = (void*)0xbad00,
-                    call = (void* _, int p, byte* msgPtr) => {
-                        var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
-                        Debug.WriteLine($"logger call: {p}; {msg} ");
-                    },
-                });
+                return NativeMethods.encrypt_encryptor(_instance, ref inputRef, 
+                    ref outputRef, ref _logger);
             });
         }
 
         public void Encrypt(Stream input, Stream output)
         {
             Convert(input, output, (inputRef, outputRef) => {
-                return NativeMethods.encrypt_encryptor(_instance, ref inputRef, ref outputRef, new LoggerRef()
-                {
-                    env_ptr = (void*)0xbad00,
-                    call = (void* _, int p, byte* msgPtr) => {
-                        var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
-                        Debug.WriteLine($"logger call: {p}; {msg} ");
-                    },
-                });
+                return NativeMethods.encrypt_encryptor(_instance,
+                    ref inputRef, ref outputRef, ref _logger);
             });
         }
 
@@ -78,9 +78,7 @@ namespace ZoDream.Shared.RustWrapper
                     var len = Math.Min(buffer.Length - i, (int)count);
                     if (len > 0)
                     {
-                        Debug.WriteLine(count);
                         Marshal.Copy(buffer, i, (nint)ptr, len);
-                        Debug.WriteLine(3);
                         i += len;
                     }
                     return (uint)len;
@@ -90,7 +88,6 @@ namespace ZoDream.Shared.RustWrapper
             var outputRef = new OutputStreamRef()
             {
                 write = (byte* ptr, uint count) => {
-                    Debug.WriteLine(4);
                     if (count == 0)
                     {
                         return;

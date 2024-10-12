@@ -12,8 +12,8 @@ namespace ZoDream.Shared.RustWrapper
         [DllImport(RustDllName, EntryPoint = "find_encryptor_with_key", ExactSpelling = true)]
         public static unsafe extern EncryptorRef* find_encryptor(EncryptionID encryption, byte /*const*/ * key);
 
-        [DllImport(RustDllName, ExactSpelling = true)]
-        public static unsafe extern int encrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output, LoggerRef logger);
+        [DllImport(RustDllName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static unsafe extern int encrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output, ref LoggerRef logger);
 
         [DllImport(RustDllName, ExactSpelling = true)]
         public static unsafe extern int decrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output);
