@@ -1,5 +1,5 @@
 [package]
-name = "libzodream"
+name = "zodream"
 version = "0.1.0"
 edition = "2021"
 

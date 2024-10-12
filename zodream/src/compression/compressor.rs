@@ -1,4 +1,9 @@
 pub trait Compressor {
-    fn compress() -> u64;
-    fn decompress() -> u64;
+    fn new(input: Read) -> Compressor;
+    fn compress(&mut self, output: Write) -> u64;
+}
+
+pub trait Decompressor {
+    fn new(input: Read) -> Compressor;
+    fn decompress(&mut self, output: Write) -> u64;
 }

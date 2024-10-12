@@ -1,13 +1,20 @@
-
-
 // #[no_mangle]
 // pub extern "C" fn call_from_c() {
 //     println!("Just called a Rust function from C!");
 // }
 
+use std::io::{self, Read, Write};
+
+use lz4::EncoderBuilder;
 // use cipher::{KeyInit};
 use ::safer_ffi::prelude::*;
 // use ::blowfish::Blowfish;
+
+mod encryption;
+
+use encryption::blowfish::Blowfish;
+use encryption::encryptor::Encryptor;
+
 
 #[derive_ReprC]
 #[repr(opaque)]
@@ -16,11 +23,36 @@ pub struct InputStream {
     read: extern "C" fn(* mut u8, u32) -> usize,
 }
 
+
+impl Read for InputStream {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+        let size = (self.read)(buf.as_mut_ptr(), buf.len() as u32);
+        return Ok(size);
+    }
+}
+
 #[derive_ReprC]
 #[repr(opaque)]
 pub struct OutputStream {
     // write: extern "C" fn(c_slice::Ref<'_, u8>, u32),
     write: extern "C" fn(* const u8, u32),
+}
+
+impl Write for OutputStream {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+        let size = buf.len();
+        (self.write)(buf.as_ptr(), size as u32);
+        Ok(size)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
 }
 
 #[derive_ReprC]
@@ -48,69 +80,92 @@ pub enum EncryptionID {
 
 #[derive_ReprC]
 #[repr(opaque)]
-pub struct Compressor {
+pub struct CompressorBox {
     id: CompressionID,
+    instance: Option<Box<dyn Read>>,
 }
 
 #[ffi_export]
-fn find_compressor (id: CompressionID) -> repr_c::Box<Compressor>
+fn find_compressor (id: CompressionID) -> repr_c::Box<CompressorBox>
 {
-    Box::new(Compressor {id: id.into()})
+    Box::new(CompressorBox {id: id.into(), instance: None})
         .into()
 }
 
 #[ffi_export]
-fn compress_compressor (ctor: &'_ Compressor, _input: &'_ InputStream, _output: &'_ OutputStream) -> u32
+fn compress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u32
 {
     match ctor.id {
-        CompressionID::Lz4 => 1,
+        CompressionID::Lz4 => {
+            let mut encoder = EncoderBuilder::new()
+                    .level(4)
+                    .build(output).unwrap();
+            let res = io::copy(input, &mut encoder);
+            _ = encoder.finish();
+            match res {
+                Ok(i) => i as u32,
+                Err(_) => 0
+            }
+        },
         CompressionID::Unkown => 0
     }
     // ctor.id.into_i8() as i32
 }
 
 #[ffi_export]
-fn decompress_compressor (ctor: &'_ Compressor, _input: &'_ InputStream, _output: &'_ OutputStream) -> u32
+fn decompress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u32
 {
     match ctor.id {
-        CompressionID::Lz4 => 1,
+        CompressionID::Lz4 => {
+            let mut decoder = lz4::Decoder::new(input).unwrap();
+            let res = io::copy(&mut decoder, output);
+            match res {
+                Ok(i) => i as u32,
+                Err(_) => 0
+            }
+        },
         CompressionID::Unkown => 0
     }
 }
 
 #[ffi_export]
-fn free_compressor (ctor: Option<repr_c::Box<Compressor>>)
+fn free_compressor (ctor: Option<repr_c::Box<CompressorBox>>)
 {
     drop(ctor)
 }
 
 #[derive_ReprC]
 #[repr(opaque)]
-pub struct Encryptor {
+pub struct EncryptorBox {
     id: EncryptionID,
-    // instance: Blowfish,
+    instance: Option<Box<dyn Encryptor>>,
 }
 
 
 #[ffi_export]
-fn find_encryptor (id: EncryptionID) -> repr_c::Box<Encryptor>
+fn find_encryptor (id: EncryptionID) -> repr_c::Box<EncryptorBox>
 {
-    // let instance = Blowfish::new_from_slice("jjjjj".as_bytes()).unwrap();
-    Box::new(Encryptor {id: id.into()})
+    Box::new(EncryptorBox {id: id.into(), instance: None})
         .into()
 }
 
 #[ffi_export]
-fn find_encryptor_with_key (id: EncryptionID, _key: char_p::Ref<'_>) -> repr_c::Box<Encryptor>
+fn find_encryptor_with_key (id: EncryptionID, key: char_p::Ref<'_>) -> repr_c::Box<EncryptorBox>
 {
-    // let instance: Blowfish = Blowfish::new_from_slice(key.to_bytes()).unwrap();
-    Box::new(Encryptor {id: id.into()})
+    // let instance: Blowfish = 
+    let instance: Option<Box<dyn Encryptor>> = match id {
+        EncryptionID::Blowfish => {
+            Box::new(Blowfish::new(key.to_bytes()))
+        },
+        _ => None
+    };
+    Box::new(EncryptorBox {id: id.into(), instance: instance})
         .into()
 }
 
 #[ffi_export]
 fn encrypt_encryptor (
-    ctor: &'_ Encryptor, 
+    ctor: &'_ EncryptorBox, 
     input: &'_ InputStream, 
     output: &'_ OutputStream, 
     logger: &'_ Logger,
@@ -119,9 +174,19 @@ fn encrypt_encryptor (
     const BLOCK_SIZE: usize = 1024;
     let mut len = 0;
     let mut buffer: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
-    // let buffer_ref = c_slice::Mut::from(buffer.as_mut_slice());
     match ctor.id {
-        EncryptionID::Blowfish => {},
+        EncryptionID::Blowfish => {
+            let cipher = Blowfish::new(key.into());
+            let mut block = GenericArray::from(buffer);
+            let mut l = BLOCK_SIZE;
+            while l == BLOCK_SIZE {
+                let c = (input.read)(buffer.as_mut_ptr(), BLOCK_SIZE as u32);
+                l = c as usize;
+                // cipher.encrypt_block(&mut block);
+                (output.write)(buffer.as_ptr(), l as u32);
+                len += l;
+            }
+        },
         EncryptionID::Unkown => {
             let mut l = BLOCK_SIZE;
             while l == BLOCK_SIZE {
@@ -146,7 +211,7 @@ fn encrypt_encryptor (
 }
 
 #[ffi_export]
-fn decrypt_encryptor (ctor: &'_ Encryptor, _input: &'_ InputStream, _output: &'_ OutputStream) -> u32
+fn decrypt_encryptor (ctor: &'_ EncryptorBox, _input: &'_ InputStream, _output: &'_ OutputStream) -> u32
 {
     match ctor.id {
         EncryptionID::Blowfish => {
@@ -161,7 +226,7 @@ fn decrypt_encryptor (ctor: &'_ Encryptor, _input: &'_ InputStream, _output: &'_
 }
 
 #[ffi_export]
-fn free_encryptor (ctor: Option<repr_c::Box<Encryptor>>)
+fn free_encryptor (ctor: Option<repr_c::Box<EncryptorBox>>)
 {
     drop(ctor)
 }
