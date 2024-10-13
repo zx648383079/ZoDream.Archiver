@@ -1,5 +1,6 @@
 pub mod blowfish;
 pub mod own;
+pub mod threeway;
 
 use std::io::{Read, Write};
 

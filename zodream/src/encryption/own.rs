@@ -59,7 +59,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_divide() {
+    fn test_own() {
         let key = b"helle";
         let input = b"aaafkdnkjank";
         let mut encrypted = vec![0u8; input.len()];

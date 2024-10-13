@@ -1,5 +1,6 @@
 use std::io::{self, Read, Write};
 
+use encryption::threeway::ThreeWay;
 use lz4::EncoderBuilder;
 // use cipher::{KeyInit};
 use ::safer_ffi::prelude::*;
@@ -70,6 +71,7 @@ pub enum CompressionID {
 pub enum EncryptionID {
     Unkown,
     Blowfish,
+    ThreeWay,
 }
 
 
@@ -176,6 +178,10 @@ fn encrypt_encryptor (
                     let mut instance = Blowfish::new(key.as_slice());
                     encryption::encrypt_stream(&mut instance, input, output) as u32
                 },
+                EncryptionID::ThreeWay => {
+                    let mut instance = ThreeWay::new(key.as_slice());
+                    encryption::encrypt_stream(&mut instance, input, output) as u32
+                },
                 EncryptionID::Unkown => {
                     let mut instance = own::OwnEncryptor::new(key.as_slice());
                     let res = encryption::encrypt_stream(&mut instance, input, output) as u32;
@@ -223,6 +229,10 @@ fn decrypt_encryptor (
             match ctor.id {
                 EncryptionID::Blowfish => {
                     let mut instance = Blowfish::new(key.as_slice());
+                    encryption::decrypt_stream(&mut instance, input, output) as u32
+                },
+                EncryptionID::ThreeWay => {
+                    let mut instance = ThreeWay::new(key.as_slice());
                     encryption::decrypt_stream(&mut instance, input, output) as u32
                 },
                 EncryptionID::Unkown => {
