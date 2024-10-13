@@ -45,12 +45,30 @@ impl Decryptor for OwnEncryptor
         let size = input.len();
         for i in 0..size {
             if input[i] > 128 {
-                output[i] = input[i] - 9;
-            } else {
                 output[i] = input[i] + 9;
+            } else {
+                output[i] = input[i] - 9;
             }
         }
         size
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_divide() {
+        let key = b"helle";
+        let input = b"aaafkdnkjank";
+        let mut encrypted = vec![0u8; input.len()];
+        let mut decrypted = vec![0u8; input.len()];
+        let mut instance = OwnEncryptor::new(key);
+        _ = instance.encrypt(input, encrypted.as_mut_slice());
+        _ = instance.decrypt(encrypted.as_slice(), decrypted.as_mut_slice());
+        assert_eq!(input, decrypted.as_slice());
+    }
+
 }
 
