@@ -1,6 +1,6 @@
 use cipher::{generic_array::GenericArray, BlockEncrypt, BlockDecrypt, KeyInit};
 
-use super::encryptor::{Encryptor, Decryptor};
+use super::{Encryptor, Decryptor};
 
 
 pub struct Blowfish 
@@ -18,30 +18,30 @@ impl Blowfish {
 
 impl Encryptor for Blowfish 
 {
-    fn block_size(&self) -> u32 
+    fn block_size(&self) -> usize
     {
         16
     }
-    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> u64
+    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
     {
         let data = GenericArray::from_slice(input);
         let mut out = GenericArray::from_mut_slice(output);
         self.instance.encrypt_block_b2b(data, &mut out);
-        0
+        input.len()
     }
 }
 
 impl Decryptor for Blowfish 
 {
-    fn block_size(&self) -> u32 
+    fn block_size(&self) -> usize
     {
         16
     }
-    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> u64
+    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
     {
         let data = GenericArray::from_slice(input);
         let mut out = GenericArray::from_mut_slice(output);
         self.instance.decrypt_block_b2b(data, &mut out);
-        0
+        input.len()
     }
 }

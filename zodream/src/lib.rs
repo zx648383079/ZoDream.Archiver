@@ -1,8 +1,3 @@
-// #[no_mangle]
-// pub extern "C" fn call_from_c() {
-//     println!("Just called a Rust function from C!");
-// }
-
 use std::io::{self, Read, Write};
 
 use lz4::EncoderBuilder;
@@ -13,7 +8,7 @@ use ::safer_ffi::prelude::*;
 mod encryption;
 
 use encryption::blowfish::Blowfish;
-use encryption::encryptor::Encryptor;
+use encryption::own;
 
 
 #[derive_ReprC]
@@ -58,7 +53,7 @@ impl Write for OutputStream {
 #[derive_ReprC]
 #[repr(opaque)]
 pub struct Logger {
-    log: extern "C" fn(char_p::Raw),
+    _log: extern "C" fn(char_p::Raw),
     progress: extern "C" fn(u32, u32, char_p::Raw),
 }
 
@@ -82,13 +77,13 @@ pub enum EncryptionID {
 #[repr(opaque)]
 pub struct CompressorBox {
     id: CompressionID,
-    instance: Option<Box<dyn Read>>,
+    // instance: Option<Box<dyn Read>>,
 }
 
 #[ffi_export]
 fn find_compressor (id: CompressionID) -> repr_c::Box<CompressorBox>
 {
-    Box::new(CompressorBox {id: id.into(), instance: None})
+    Box::new(CompressorBox {id: id.into()})
         .into()
 }
 
@@ -138,90 +133,110 @@ fn free_compressor (ctor: Option<repr_c::Box<CompressorBox>>)
 #[repr(opaque)]
 pub struct EncryptorBox {
     id: EncryptionID,
-    instance: Option<Box<dyn Encryptor>>,
+    key: Option<Vec<u8>>,
+    // instance: Option<Box<dyn Encryptor>>,
 }
 
 
 #[ffi_export]
 fn find_encryptor (id: EncryptionID) -> repr_c::Box<EncryptorBox>
 {
-    Box::new(EncryptorBox {id: id.into(), instance: None})
+    Box::new(EncryptorBox {id: id.into(), key: None})
         .into()
 }
 
 #[ffi_export]
 fn find_encryptor_with_key (id: EncryptionID, key: char_p::Ref<'_>) -> repr_c::Box<EncryptorBox>
 {
-    // let instance: Blowfish = 
-    let instance: Option<Box<dyn Encryptor>> = match id {
-        EncryptionID::Blowfish => {
-            Box::new(Blowfish::new(key.to_bytes()))
-        },
-        _ => None
-    };
-    Box::new(EncryptorBox {id: id.into(), instance: instance})
+    // let instance: Option<Box<dyn Encryptor>> = match id {
+    //     EncryptionID::Blowfish => {
+    //         Some(Box::new(Blowfish::new(key.to_bytes())))
+    //     },
+    //     EncryptionID::Unkown => {
+    //         Some(Box::new(own::OwnEncryptor::new(key.to_bytes())))
+    //     },
+    //     _ => None
+    // };
+    Box::new(EncryptorBox {id: id.into(), key: Some(key.to_bytes().to_owned())})
         .into()
 }
 
 #[ffi_export]
 fn encrypt_encryptor (
     ctor: &'_ EncryptorBox, 
-    input: &'_ InputStream, 
-    output: &'_ OutputStream, 
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, 
     logger: &'_ Logger,
 ) -> u32
 {
-    const BLOCK_SIZE: usize = 1024;
-    let mut len = 0;
-    let mut buffer: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
-    match ctor.id {
-        EncryptionID::Blowfish => {
-            let cipher = Blowfish::new(key.into());
-            let mut block = GenericArray::from(buffer);
-            let mut l = BLOCK_SIZE;
-            while l == BLOCK_SIZE {
-                let c = (input.read)(buffer.as_mut_ptr(), BLOCK_SIZE as u32);
-                l = c as usize;
-                // cipher.encrypt_block(&mut block);
-                (output.write)(buffer.as_ptr(), l as u32);
-                len += l;
+    match &ctor.key {
+        Some(key) => {
+            match ctor.id {
+                EncryptionID::Blowfish => {
+                    let mut instance = Blowfish::new(key.as_slice());
+                    encryption::encrypt_stream(&mut instance, input, output) as u32
+                },
+                EncryptionID::Unkown => {
+                    let mut instance = own::OwnEncryptor::new(key.as_slice());
+                    let res = encryption::encrypt_stream(&mut instance, input, output) as u32;
+                    (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());
+                    res
+                },
+                // _ => 0
             }
         },
-        EncryptionID::Unkown => {
-            let mut l = BLOCK_SIZE;
-            while l == BLOCK_SIZE {
-                (logger.log)(char_p::new("entry").as_ref().into());
-                let c = (input.read)(buffer.as_mut_ptr(), BLOCK_SIZE as u32);
-                (logger.progress)(c.try_into().unwrap(), 100, char_p::new("finish").as_ref().into());
-                l = c as usize;
-                for i in 0..l {
-                    if buffer[i] > 128 {
-                        buffer[i] -= 9
-                    } else {
-                        buffer[i] += 9
-                    }
-                }
-                (output.write)(buffer.as_ptr(), l as u32);
-                len += l;
-            }
-        },
+        None => {
+            0
+        }
     }
-    len as u32
-    // ctor.id.into_i8() as i32
+    
+    // const BLOCK_SIZE: usize = 1024;
+    // let mut len = 0;
+    // let mut buffer: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
+    // let mut l = BLOCK_SIZE;
+    // while l == BLOCK_SIZE {
+    //     (logger.log)(char_p::new("entry").as_ref().into());
+    //     let c = (input.read)(buffer.as_mut_ptr(), BLOCK_SIZE as u32);
+    //     (logger.progress)(c.try_into().unwrap(), 100, char_p::new("finish").as_ref().into());
+    //     l = c as usize;
+    //     for i in 0..l {
+    //         if buffer[i] > 128 {
+    //             buffer[i] -= 9
+    //         } else {
+    //             buffer[i] += 9
+    //         }
+    //     }
+    //     (output.write)(buffer.as_ptr(), l as u32);
+    //     len += l;
+    // }
+    // len as u32
 }
 
 #[ffi_export]
-fn decrypt_encryptor (ctor: &'_ EncryptorBox, _input: &'_ InputStream, _output: &'_ OutputStream) -> u32
+fn decrypt_encryptor (
+    ctor: &'_ EncryptorBox,     
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, ) -> u32
 {
-    match ctor.id {
-        EncryptionID::Blowfish => {
-            // _ = ctor.instance.clone();
+    match &ctor.key {
+        Some(key) => {
+            match ctor.id {
+                EncryptionID::Blowfish => {
+                    let mut instance = Blowfish::new(key.as_slice());
+                    encryption::decrypt_stream(&mut instance, input, output) as u32
+                },
+                EncryptionID::Unkown => {
+                    let mut instance = own::OwnEncryptor::new(key.as_slice());
+                    let res = encryption::decrypt_stream(&mut instance, input, output) as u32;
+                    // (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());
+                    res
+                },
+                // _ => 0
+            }
+        },
+        None => {
             0
-        },
-        EncryptionID::Unkown => {
-
-            1
-        },
+        }
     }
 }
 
