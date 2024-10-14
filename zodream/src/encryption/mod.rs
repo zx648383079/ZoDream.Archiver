@@ -1,19 +1,25 @@
 pub mod blowfish;
 pub mod own;
 pub mod threeway;
+pub mod arc4;
 
 use std::io::{Read, Write};
+
+const DEFAULT_BLOCK_SIZE: usize = 1024;
 
 pub trait Encryptor {
     fn block_size(&self) -> usize;
     fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize;
 }
 
-pub fn encrypt_stream<T, R, W>(target: & mut T, input: &mut  R, output: &mut  W) -> u64 
+pub fn encrypt_stream<T, R, W>(target: & mut T, input: &mut R, output: &mut  W) -> u64 
     where R : Read, W : Write, T : Encryptor + ?Sized
 {
     let mut len: u64 = 0;
-    let size = target.block_size();
+    let mut size = target.block_size();
+    if size == 0 {
+        size = DEFAULT_BLOCK_SIZE;
+    }
     let mut in_buf = vec![0u8; size];
     let mut out_buf = vec![0u8; size];
     let mut l = size;
@@ -41,7 +47,10 @@ pub fn decrypt_stream<T, R, W>(target: & mut T, input: &mut R, output: &mut W) -
     where R : Read, W : Write, T : Decryptor
 {
     let mut len: u64 = 0;
-    let size = target.block_size();
+    let mut size = target.block_size();
+    if size == 0 {
+        size = DEFAULT_BLOCK_SIZE;
+    }
     let mut in_buf = vec![0u8; size];
     let mut out_buf = vec![0u8; size];
     let mut l = size;

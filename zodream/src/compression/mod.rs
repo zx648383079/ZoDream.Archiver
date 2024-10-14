@@ -1,9 +1,11 @@
+use std::io::{Read, Write};
+
+pub mod lzxd;
+
 pub trait Compressor {
-    fn new(input: Read) -> Compressor;
-    fn compress(&mut self, output: Write) -> u64;
+    fn compress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> u64;
 }
 
 pub trait Decompressor {
-    fn new(input: Read) -> Compressor;
-    fn decompress(&mut self, output: Write) -> u64;
+    fn decompress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> u64;
 }

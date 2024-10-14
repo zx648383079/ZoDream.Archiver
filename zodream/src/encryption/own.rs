@@ -18,7 +18,7 @@ impl Encryptor for OwnEncryptor
 {
     fn block_size(&self) -> usize
     {
-        1024
+        0
     }
     fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
     {
@@ -38,7 +38,7 @@ impl Decryptor for OwnEncryptor
 {
     fn block_size(&self) -> usize
     {
-        1024
+        0
     }
     fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
     {

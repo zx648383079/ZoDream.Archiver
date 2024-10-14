@@ -1,5 +1,8 @@
 use std::io::{self, Read, Write};
 
+use compression::lzxd::LzxdCompressor;
+use compression::Decompressor;
+use encryption::arc4::Arc4;
 use encryption::threeway::ThreeWay;
 use lz4::EncoderBuilder;
 // use cipher::{KeyInit};
@@ -7,6 +10,7 @@ use ::safer_ffi::prelude::*;
 // use ::blowfish::Blowfish;
 
 mod encryption;
+mod compression;
 
 use encryption::blowfish::Blowfish;
 use encryption::own;
@@ -64,6 +68,7 @@ pub struct Logger {
 pub enum CompressionID {
     Unkown,
     Lz4,
+    Lzxd,
 }
 
 #[derive_ReprC]
@@ -72,6 +77,7 @@ pub enum EncryptionID {
     Unkown,
     Blowfish,
     ThreeWay,
+    Arc4,
 }
 
 
@@ -104,6 +110,9 @@ fn compress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, out
                 Err(_) => 0
             }
         },
+        CompressionID::Lzxd => {
+            0
+        },
         CompressionID::Unkown => 0
     }
     // ctor.id.into_i8() as i32
@@ -120,6 +129,10 @@ fn decompress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, o
                 Ok(i) => i as u32,
                 Err(_) => 0
             }
+        },
+        CompressionID::Lzxd => {
+            let mut instance = LzxdCompressor::new();
+            instance.decompress(input, output) as u32
         },
         CompressionID::Unkown => 0
     }
@@ -182,6 +195,10 @@ fn encrypt_encryptor (
                     let mut instance = ThreeWay::new(key.as_slice());
                     encryption::encrypt_stream(&mut instance, input, output) as u32
                 },
+                EncryptionID::Arc4 => {
+                    let mut instance = Arc4::new(key.as_slice());
+                    encryption::encrypt_stream(&mut instance, input, output) as u32
+                },
                 EncryptionID::Unkown => {
                     let mut instance = own::OwnEncryptor::new(key.as_slice());
                     let res = encryption::encrypt_stream(&mut instance, input, output) as u32;
@@ -233,6 +250,10 @@ fn decrypt_encryptor (
                 },
                 EncryptionID::ThreeWay => {
                     let mut instance = ThreeWay::new(key.as_slice());
+                    encryption::decrypt_stream(&mut instance, input, output) as u32
+                },
+                EncryptionID::Arc4 => {
+                    let mut instance = Arc4::new(key.as_slice());
                     encryption::decrypt_stream(&mut instance, input, output) as u32
                 },
                 EncryptionID::Unkown => {
