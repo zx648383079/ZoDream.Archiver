@@ -1,12 +1,16 @@
 ﻿using System.IO;
 using ZoDream.ChmExtractor.Lzx;
+using ZoDream.Shared.RustWrapper;
 
 namespace ZoDream.ChmExtractor
 {
     public static class LzxCodec
     {
-        public static void Decode(Stream input, Stream output)
+        public static void Decode(Stream input, Stream output, int windowSize)
         {
+            //using var compressor = new Compressor(CompressionID.Lzxd);
+            //compressor.Decompress(input, output);
+            //return;
             var decoder = new LzxDecoder(16);
             long seekPos = input.Position;
             while (input.Position - 14 < input.Length)

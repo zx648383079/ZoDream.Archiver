@@ -1,13 +1,11 @@
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 
+use compression::lz4::Lz4Compressor;
 use compression::lzxd::LzxdCompressor;
-use compression::Decompressor;
+use compression::{Compressor, Decompressor};
 use encryption::arc4::Arc4;
 use encryption::threeway::ThreeWay;
-use lz4::EncoderBuilder;
-// use cipher::{KeyInit};
 use ::safer_ffi::prelude::*;
-// use ::blowfish::Blowfish;
 
 mod encryption;
 mod compression;
@@ -66,7 +64,7 @@ pub struct Logger {
 #[derive_ReprC]
 #[repr(i8)]
 pub enum CompressionID {
-    Unkown,
+    Unknown,
     Lz4,
     Lzxd,
 }
@@ -74,8 +72,9 @@ pub enum CompressionID {
 #[derive_ReprC]
 #[repr(i8)]
 pub enum EncryptionID {
-    Unkown,
+    Unknown,
     Blowfish,
+    BlowfishCBC,
     ThreeWay,
     Arc4,
 }
@@ -96,45 +95,34 @@ fn find_compressor (id: CompressionID) -> repr_c::Box<CompressorBox>
 }
 
 #[ffi_export]
-fn compress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u32
+fn compress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u64
 {
     match ctor.id {
         CompressionID::Lz4 => {
-            let mut encoder = EncoderBuilder::new()
-                    .level(4)
-                    .build(output).unwrap();
-            let res = io::copy(input, &mut encoder);
-            _ = encoder.finish();
-            match res {
-                Ok(i) => i as u32,
-                Err(_) => 0
-            }
+            let mut instance = Lz4Compressor::new();
+            instance.compress(input, output)
         },
         CompressionID::Lzxd => {
             0
         },
-        CompressionID::Unkown => 0
+        CompressionID::Unknown => 0
     }
     // ctor.id.into_i8() as i32
 }
 
 #[ffi_export]
-fn decompress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u32
+fn decompress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u64
 {
     match ctor.id {
         CompressionID::Lz4 => {
-            let mut decoder = lz4::Decoder::new(input).unwrap();
-            let res = io::copy(&mut decoder, output);
-            match res {
-                Ok(i) => i as u32,
-                Err(_) => 0
-            }
+            let mut instance = Lz4Compressor::new();
+            instance.decompress(input, output)
         },
         CompressionID::Lzxd => {
             let mut instance = LzxdCompressor::new();
-            instance.decompress(input, output) as u32
+            instance.decompress(input, output)
         },
-        CompressionID::Unkown => 0
+        CompressionID::Unknown => 0
     }
 }
 
@@ -191,6 +179,10 @@ fn encrypt_encryptor (
                     let mut instance = Blowfish::new(key.as_slice());
                     encryption::encrypt_stream(&mut instance, input, output) as u32
                 },
+                EncryptionID::BlowfishCBC => {
+                    let mut instance = Blowfish::new_cbc_enc(key.as_slice());
+                    encryption::encrypt_stream(&mut instance, input, output) as u32
+                },
                 EncryptionID::ThreeWay => {
                     let mut instance = ThreeWay::new(key.as_slice());
                     encryption::encrypt_stream(&mut instance, input, output) as u32
@@ -199,7 +191,7 @@ fn encrypt_encryptor (
                     let mut instance = Arc4::new(key.as_slice());
                     encryption::encrypt_stream(&mut instance, input, output) as u32
                 },
-                EncryptionID::Unkown => {
+                EncryptionID::Unknown => {
                     let mut instance = own::OwnEncryptor::new(key.as_slice());
                     let res = encryption::encrypt_stream(&mut instance, input, output) as u32;
                     (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());
@@ -248,6 +240,10 @@ fn decrypt_encryptor (
                     let mut instance = Blowfish::new(key.as_slice());
                     encryption::decrypt_stream(&mut instance, input, output) as u32
                 },
+                EncryptionID::BlowfishCBC => {
+                    let mut instance = Blowfish::new_cbc_dec(key.as_slice());
+                    encryption::decrypt_stream(&mut instance, input, output) as u32
+                },
                 EncryptionID::ThreeWay => {
                     let mut instance = ThreeWay::new(key.as_slice());
                     encryption::decrypt_stream(&mut instance, input, output) as u32
@@ -256,7 +252,7 @@ fn decrypt_encryptor (
                     let mut instance = Arc4::new(key.as_slice());
                     encryption::decrypt_stream(&mut instance, input, output) as u32
                 },
-                EncryptionID::Unkown => {
+                EncryptionID::Unknown => {
                     let mut instance = own::OwnEncryptor::new(key.as_slice());
                     let res = encryption::decrypt_stream(&mut instance, input, output) as u32;
                     // (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());

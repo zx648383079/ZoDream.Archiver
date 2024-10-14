@@ -14,6 +14,8 @@ namespace ZoDream.BundleExtractor.Platforms
 
         public IBundleProducer Producer => throw new NotImplementedException();
 
+        public IBundleEngine Engine => throw new NotImplementedException();
+
         public bool TryLoad(IEnumerable<string> fileItems)
         {
             throw new NotImplementedException();

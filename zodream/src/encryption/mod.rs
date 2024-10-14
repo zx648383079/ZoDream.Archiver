@@ -12,6 +12,7 @@ pub trait Encryptor {
     fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize;
 }
 
+/// 加密流
 pub fn encrypt_stream<T, R, W>(target: & mut T, input: &mut R, output: &mut  W) -> u64 
     where R : Read, W : Write, T : Encryptor + ?Sized
 {
@@ -43,6 +44,7 @@ pub trait Decryptor {
     fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize;
 }
 
+/// 解密流
 pub fn decrypt_stream<T, R, W>(target: & mut T, input: &mut R, output: &mut W) -> u64 
     where R : Read, W : Write, T : Decryptor
 {

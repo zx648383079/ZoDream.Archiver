@@ -140,7 +140,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             var app = App.ViewModel;
 
-            var picker = new ExtractDialog();
+            var picker = new BundleDialog();
             var model = picker.ViewModel;
             var res = await app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
@@ -148,12 +148,12 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            var options = new ArchiveOptions(model.Password, model.DictFileName);
+            var options = new ArchiveOptions(model.Password);
             var token = app.ShowProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();
                 watch.Start();
-                using var reader = new UnityBundleScheme().Load(fileItems, options);
+                using var reader = new BundleScheme().Load(fileItems, options);
                 try
                 {
                     reader?.ExtractTo(model.FileName, model.ExtractMode, token);

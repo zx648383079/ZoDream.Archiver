@@ -7,6 +7,8 @@ namespace ZoDream.Shared.Interfaces
         public string Root { get; }
 
         public IBundleProducer Producer { get; }
+
+        public IBundleEngine Engine { get; }
         public bool TryLoad(IEnumerable<string> fileItems);
     }
 }

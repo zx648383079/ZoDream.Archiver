@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using ZoDream.BundleExtractor.BundleFiles;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Producers

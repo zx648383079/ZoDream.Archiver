@@ -17,14 +17,15 @@ namespace ZoDream.ChmExtractor
     {
         
         private readonly long _basePosition = reader.BaseStream.Position;
+        private int _windowSize;
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
-            if (entry is not ArchiveEntry item)
+            if (entry is not FileArchiveEntry item)
             {
                 return;
             }
-            LzxCodec.Decode(new PartialStream(reader.BaseStream, item.Offset, item.Length), output);
+            LzxCodec.Decode(new PartialStream(reader.BaseStream, item.Offset, item.Length), output, item.WindowSize);
         }
 
         private void ExtractTo(IReadOnlyEntry entry, string fileName, ArchiveExtractMode mode)
@@ -58,12 +59,20 @@ namespace ZoDream.ChmExtractor
             reader.BaseStream.Seek(_basePosition, SeekOrigin.Begin);
             ReadHeader();
             ReadHeaderSectionTableEntry();
-            return ReadHeaderSectionTableEntry().Where(i => i.Length > 0);
+            var entries = ReadHeaderSectionTableEntry()
+                .Where(i => i.Length > 0).ToArray();
 
-            //var pos = reader.ReadUInt64();
-            //reader.BaseStream.Seek((long)pos, SeekOrigin.Begin);
-            //ReadNameListFile();
-            //ReadSectionData();
+            
+
+            var pos = reader.ReadUInt64();
+            reader.BaseStream.Seek((long)pos, SeekOrigin.Begin);
+            ReadNameListFile();
+            ReadSectionData();
+            foreach (var item in entries)
+            {
+                item.WindowSize = _windowSize;
+            }
+            return entries;
         }
 
 
@@ -79,7 +88,7 @@ namespace ZoDream.ChmExtractor
             var guids = reader.ReadBytes(16 * 2);
         }
 
-        private ArchiveEntry[] ReadHeaderSectionTableEntry()
+        private FileArchiveEntry[] ReadHeaderSectionTableEntry()
         {
             var offset = reader.ReadUInt64();
             var size = reader.ReadUInt64();
@@ -90,7 +99,7 @@ namespace ZoDream.ChmExtractor
             return res;
         }
 
-        private ArchiveEntry[] ReadHeaderSection()
+        private FileArchiveEntry[] ReadHeaderSection()
         {
             var magic = reader.ReadBytes(4);
             if (magic.SequenceEqual((byte[])[0xFE, 0x01, 0x00, 0x00]))
@@ -120,7 +129,7 @@ namespace ZoDream.ChmExtractor
                 reader.ReadUInt32();
                 reader.ReadUInt32();
                 reader.ReadUInt32();
-                var res = new List<ArchiveEntry>();
+                var res = new List<FileArchiveEntry>();
                 for (var i = 0; i < directoryChunkCount; i++)
                 {
                     // Debug.WriteLine($"{i}: 0x{reader.BaseStream.Position:X}");
@@ -133,7 +142,7 @@ namespace ZoDream.ChmExtractor
             }
         }
 
-        private ArchiveEntry ReadDirectoryListingEntry()
+        private FileArchiveEntry ReadDirectoryListingEntry()
         {
             var nameLength = reader.Read7BitEncodedInt();
             var name = Encoding.ASCII.GetString(reader.ReadBytes(nameLength));
@@ -141,7 +150,7 @@ namespace ZoDream.ChmExtractor
             var offset = reader.Read7BitEncodedInt();
             var length = reader.Read7BitEncodedInt();
 
-            return new ArchiveEntry(name, offset, length);
+            return new FileArchiveEntry(name, offset, length);
         }
 
         private void ReadDirectoryIndexEntry()
@@ -151,7 +160,7 @@ namespace ZoDream.ChmExtractor
             var directoryListingChunk = reader.Read7BitEncodedInt();
         }
 
-        private ArchiveEntry[] ReadListingChunk(uint directoryChunkSize)
+        private FileArchiveEntry[] ReadListingChunk(uint directoryChunkSize)
         {
             var entryPos = reader.BaseStream.Position;
             var magic = Encoding.ASCII.GetString(reader.ReadBytes(4));
@@ -171,7 +180,7 @@ namespace ZoDream.ChmExtractor
                     var offsets = reader.ReadUInt16();
                 }
                 reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                var res = new ArchiveEntry[directoryListingEntryCount];
+                var res = new FileArchiveEntry[directoryListingEntryCount];
                 for (var i = 0; i < directoryListingEntryCount; i++)
                 {
                     res[i] = ReadDirectoryListingEntry();
@@ -193,7 +202,7 @@ namespace ZoDream.ChmExtractor
                 }
 
                 reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                var res = new ArchiveEntry[directoryIndexEntryCount];
+                var res = new FileArchiveEntry[directoryIndexEntryCount];
                 for (var i = 0; i < directoryIndexEntryCount; i++)
                 {
                     res[i] = ReadDirectoryListingEntry();
@@ -209,8 +218,9 @@ namespace ZoDream.ChmExtractor
         private void ReadNameListEntry()
         {
             var nameLength = reader.ReadUInt16();
-            var name = Encoding.Unicode.GetString(reader.ReadBytes(nameLength));
+            var name = Encoding.Unicode.GetString(reader.ReadBytes(nameLength * 2));
 
+            reader.BaseStream.Seek(2, SeekOrigin.Current);
         }
 
         private void ReadNameListFile()
@@ -221,6 +231,7 @@ namespace ZoDream.ChmExtractor
             {
                 ReadNameListEntry();
             }
+            reader.BaseStream.Seek(0x2E, SeekOrigin.Current);
         }
 
         private void ReadSectionData()
@@ -230,10 +241,19 @@ namespace ZoDream.ChmExtractor
             Debug.Assert(magic == "LZXC");
 
             var version = reader.ReadUInt32();
-            var lzxResetInterval = reader.ReadUInt32();
+            var resetInterval = reader.ReadUInt32();
             var windowSize = reader.ReadUInt32();
-            var cacheSize = reader.ReadUInt32();
+            if (version == 2)
+            {
+                resetInterval *= 0x8000;
+                windowSize *= 0x8000;
+            }
+            var windowsPerReset = reader.ReadUInt32();
             reader.ReadUInt32();
+
+
+            var resetBlkCount = resetInterval / (windowSize / 2) * windowsPerReset;
+            _windowSize = (int)windowSize;
         }
 
         public void Dispose()

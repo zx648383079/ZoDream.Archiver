@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ZoDream.Shared.RustWrapper
@@ -69,7 +68,7 @@ namespace ZoDream.Shared.RustWrapper
         }
 
 
-        public static byte[] Convert(byte[] buffer, Func<InputStreamRef, OutputStreamRef, int> cb)
+        public static byte[] Convert(byte[] buffer, Func<InputStreamRef, OutputStreamRef, long> cb)
         {
             var i = 0;
             var inputRef = new InputStreamRef()
@@ -102,7 +101,7 @@ namespace ZoDream.Shared.RustWrapper
             return memory.ToArray();
         }
 
-        public static void Convert(Stream input, Stream output, Func<InputStreamRef, OutputStreamRef, int> cb)
+        public static void Convert(Stream input, Stream output, Func<InputStreamRef, OutputStreamRef, long> cb)
         {
             var inputRef = new InputStreamRef()
             {

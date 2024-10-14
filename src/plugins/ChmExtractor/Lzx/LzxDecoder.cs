@@ -44,8 +44,6 @@
 #endregion
 using System;
 using System.IO;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 
 namespace ZoDream.ChmExtractor.Lzx
 {

@@ -2,7 +2,10 @@
 {
     public enum EncryptionID: byte
     {
-        Unkown,
+        Unknown,
         Blowfish,
+        BlowfishCBC,
+        ThreeWay,
+        Arc4,
     }
 }

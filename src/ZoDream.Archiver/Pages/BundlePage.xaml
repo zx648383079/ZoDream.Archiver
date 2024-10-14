@@ -57,7 +57,8 @@
         <ListView
             Grid.Row="1"
             AllowDrop="True"
-            ItemsSource="{Binding FileItems}">
+            ItemsSource="{Binding FileItems}"
+            SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
             <ivy:Interaction.Behaviors>
                 <bhv:DragFileBehavior Command="{Binding DragCommand}" />
             </ivy:Interaction.Behaviors>

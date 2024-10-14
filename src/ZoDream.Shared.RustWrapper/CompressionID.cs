@@ -2,7 +2,8 @@
 {
     public enum CompressionID
     {
-        Unkown,
+        Unknown,
         Lz4,
+        Lzxd,
     }
 }
