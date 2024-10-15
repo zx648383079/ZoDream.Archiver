@@ -37,8 +37,10 @@ namespace ZoDream.Archiver.ViewModels
 
         private async Task CreateProgress(string title)
         {
-            _progress = new ProgressDialog();
-            _progress.Title = title;
+            _progress = new ProgressDialog
+            {
+                Title = title
+            };
             await OpenDialogAsync(_progress);
             _progressToken?.Cancel();
         }

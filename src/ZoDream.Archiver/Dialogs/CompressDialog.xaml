@@ -14,6 +14,9 @@
     <ContentDialog.DataContext>
         <vm:CompressDialogViewModel />
     </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
 
     <StackPanel>
         <TextBlock Text="FileName" />
@@ -27,16 +30,18 @@
                 <FontIcon Glyph="&#xE8E5;" />
             </Button>
         </Grid>
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Type" />
-        <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Subvolume(MB)" />
+        <ComboBox
+            Header="Type"
+            ItemsSource="{Binding TypeItems}"
+            SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+
         <ComboBox
             HorizontalAlignment="Stretch"
+            Header="Subvolume(MB)"
             IsEditable="True"
             ItemsSource="{Binding SubvolumeItems}"
             Text="{Binding SubvolumeText, Mode=TwoWay}" />
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Password" />
-        <TextBox Text="{Binding Password, Mode=TwoWay}" />
+        <TextBox Header="Password" Text="{Binding Password, Mode=TwoWay}" />
         <TextBlock
             Style="{StaticResource InputHeaderTb}"
             Text="Dictionary"

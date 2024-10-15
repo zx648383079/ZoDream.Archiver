@@ -220,6 +220,9 @@ namespace ZoDream.Shared.Compression.Own
             catch (Exception)
             {
                 return false;
+            } finally
+            {
+                stream.Seek(0, SeekOrigin.Begin);
             }
         }
 

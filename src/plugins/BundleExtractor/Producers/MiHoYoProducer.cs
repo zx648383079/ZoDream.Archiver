@@ -9,7 +9,7 @@ namespace ZoDream.BundleExtractor.Producers
 {
     public class MiHoYoProducer : IBundleProducer
     {
-        public IEnumerable<IEnumerable<string>> EnumerateChunk()
+        public IEnumerable<IBundleChunk> EnumerateChunk()
         {
             throw new NotImplementedException();
         }

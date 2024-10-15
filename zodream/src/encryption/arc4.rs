@@ -3,7 +3,7 @@ use rc4::{Key, Rc4};
 use rc4::{consts::*, KeyInit};
 use cipher::StreamCipher;
 
-use super::{Encryptor, Decryptor};
+use super::{Encryptor, Decryptor, Result};
 
 
 pub struct Arc4 
@@ -26,11 +26,11 @@ impl Encryptor for Arc4
     {
         0
     }
-    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
 
-        _ = self.instance.try_apply_keystream_inout(InOutBuf::new(input, output).unwrap());
-        output.len()
+        self.instance.try_apply_keystream_inout(InOutBuf::new(input, output)?)?;
+        Ok(output.len())
     }
 }
 
@@ -40,10 +40,10 @@ impl Decryptor for Arc4
     {
         0
     }
-    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
-        _ = self.instance.try_apply_keystream_inout(InOutBuf::new(input, output).unwrap());
-        output.len()
+        self.instance.try_apply_keystream_inout(InOutBuf::new(input, output)?)?;
+        Ok(output.len())
     }
 }
 

@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\plugins\BundleExtractor\BundleExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />
   </ItemGroup>
 

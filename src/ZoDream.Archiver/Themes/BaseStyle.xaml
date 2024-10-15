@@ -4,7 +4,6 @@
     <Thickness x:Key="InputInnerSpace">0,12,0,0</Thickness>
     <Thickness x:Key="InputSpace">0,16,0,0</Thickness>
     <Thickness x:Key="InputHeaderSpace">0,12,0,0</Thickness>
-
     <Style x:Key="InputHeaderTb" TargetType="TextBlock">
         <Setter Property="Margin" Value="{StaticResource InputHeaderSpace}" />
     </Style>

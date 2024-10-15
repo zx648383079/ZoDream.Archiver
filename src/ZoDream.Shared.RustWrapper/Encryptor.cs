@@ -52,13 +52,13 @@ namespace ZoDream.Shared.RustWrapper
         public byte[] Decrypt(byte[] buffer)
         {
             return Convert(buffer, (inputRef, outputRef) => {
-                return NativeMethods.decrypt_encryptor(_instance, ref inputRef, ref outputRef);
+                return NativeMethods.decrypt_encryptor(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }
         public void Decrypt(Stream input, Stream output)
         {
             Convert(input, output, (inputRef, outputRef) => {
-                return NativeMethods.decrypt_encryptor(_instance, ref inputRef, ref outputRef);
+                return NativeMethods.decrypt_encryptor(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }
 

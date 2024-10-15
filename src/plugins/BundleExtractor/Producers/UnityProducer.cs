@@ -9,7 +9,7 @@ namespace ZoDream.BundleExtractor.Producers
     {
         public IList<DependencyDictionary> DependencyItems { get; private set; } = [];
 
-        public IEnumerable<IEnumerable<string>> EnumerateChunk()
+        public IEnumerable<IBundleChunk> EnumerateChunk()
         {
             throw new NotImplementedException();
         }

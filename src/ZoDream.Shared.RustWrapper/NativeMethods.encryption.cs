@@ -16,7 +16,7 @@ namespace ZoDream.Shared.RustWrapper
         public static unsafe extern int encrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output, ref LoggerRef logger);
 
         [DllImport(RustDllName, ExactSpelling = true)]
-        public static unsafe extern int decrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output);
+        public static unsafe extern int decrypt_encryptor(EncryptorRef* encryptor, ref InputStreamRef input, ref OutputStreamRef output, ref LoggerRef logger);
 
         [DllImport(RustDllName, ExactSpelling = true)]
         public static unsafe extern void free_encryptor(EncryptorRef* encryptor);

@@ -18,7 +18,7 @@ namespace ZoDream.BundleExtractor.Platforms
 
         public bool TryLoad(IEnumerable<string> fileItems)
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

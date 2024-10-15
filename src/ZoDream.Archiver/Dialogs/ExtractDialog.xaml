@@ -37,11 +37,12 @@
                 OffContent="All"
                 OnContent="Only Selection" />
         </StackPanel>
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Same File" />
-        <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+        <ComboBox
+            Header="Same File"
+            ItemsSource="{Binding TypeItems}"
+            SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
         <StackPanel Visibility="{Binding IsEncrypted}">
-            <TextBlock Style="{StaticResource InputHeaderTb}" Text="Password" />
-            <TextBox Text="{Binding Password, Mode=TwoWay}" />
+            <TextBox Header="Password" Text="{Binding Password, Mode=TwoWay}" />
             <TextBlock Style="{StaticResource InputHeaderTb}" Text="Dictionary" />
             <Grid>
                 <Grid.ColumnDefinitions>

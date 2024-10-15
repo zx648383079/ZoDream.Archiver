@@ -5,6 +5,11 @@
     xmlns:cvt="using:ZoDream.Archiver.Converters">
     <cvt:SizeConverter x:Key="SizeCvt" />
     <cvt:ToggleConverter x:Key="ToggleCvt" />
+
+    <Thickness x:Key="TextBoxTopHeaderMargin">0,12,0,2</Thickness>
+    <Thickness x:Key="ComboBoxTopHeaderMargin">0,12,0,2</Thickness>
+    <Thickness x:Key="PasswordBoxTopHeaderMargin">0,12,0,2</Thickness>
+
     <Style x:Name="HeaderIcon" TargetType="FontIcon">
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />

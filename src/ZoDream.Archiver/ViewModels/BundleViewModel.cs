@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
@@ -133,27 +135,49 @@ namespace ZoDream.Archiver.ViewModels
 
         private async void TapSaveAs(object? _)
         {
+            var app = App.ViewModel;
             var fileItems = FileItems.Select(i => i.FullPath).ToArray();
             if (!fileItems.Any())
             {
+                await app.ConfirmAsync("请选择文件");
                 return;
             }
-            var app = App.ViewModel;
-
             var picker = new BundleDialog();
             var model = picker.ViewModel;
             var res = await app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
                 || !model.Verify())
             {
+                app.Warning("已取消操作！");
                 return;
             }
             var options = new ArchiveOptions(model.Password);
             var token = app.ShowProgress("解压中...");
+            _ = Task.Factory.StartNew(() => {
+                var progress = 0D;
+                while (!token.IsCancellationRequested)
+                {
+                    Thread.Sleep(500);
+                    if (progress < .95)
+                    {
+                        progress += .001;
+                    }
+                    app.UpdateProgress(progress);
+                }
+            }, token);
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();
                 watch.Start();
-                using var reader = new BundleScheme().Load(fileItems, options);
+                IBundleReader? reader;
+                var scheme = new BundleScheme();
+                if (!string.IsNullOrWhiteSpace(model.ApplicationId))
+                {
+                    reader = scheme.Load(scheme.TryGet(model.ApplicationId), 
+                        fileItems, options);
+                } else
+                {
+                    reader = scheme.Load(fileItems, options);
+                }
                 try
                 {
                     reader?.ExtractTo(model.FileName, model.ExtractMode, token);
@@ -162,10 +186,12 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     Debug.WriteLine(ex.Message);
                 }
+                reader?.Dispose();
                 watch.Stop();
                 Debug.WriteLine($"Use Time: {watch.Elapsed.TotalSeconds}");
                 app.CloseProgress();
             }, token);
+            
         }
 
         private void TapDelete(object? _)

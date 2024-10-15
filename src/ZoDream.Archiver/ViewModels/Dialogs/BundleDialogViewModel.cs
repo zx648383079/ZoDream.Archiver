@@ -25,12 +25,10 @@ namespace ZoDream.Archiver.ViewModels
 
         public int TypeIndex {
             get => _typeIndex;
-            set {
-                Set(ref _typeIndex, value);
-            }
+            set => Set(ref _typeIndex, value);
         }
 
-        private string[] _engineItems = ["Unity", "Unreal", "Godot", "Cocos"];
+        private string[] _engineItems = ["Auto", "Unity", "Unreal", "Godot", "Cocos"];
 
         public string[] EngineItems {
             get => _engineItems;
@@ -41,9 +39,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public int EngineIndex {
             get => _engineIndex;
-            set {
-                Set(ref _engineIndex, value);
-            }
+            set => Set(ref _engineIndex, value);
+        }
+
+        private string[] _platformItems = ["Auto", "Android", "IOS", "Windows"];
+
+        public string[] PlatformItems {
+            get => _platformItems;
+            set => Set(ref _platformItems, value);
+        }
+
+        private int _platformIndex;
+
+        public int PlatformIndex {
+            get => _platformIndex;
+            set => Set(ref _platformIndex, value);
         }
 
         private string _applicationId = string.Empty;

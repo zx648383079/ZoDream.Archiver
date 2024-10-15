@@ -30,15 +30,32 @@
             </Button>
         </Grid>
 
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Same File" />
-        <ComboBox ItemsSource="{Binding TypeItems}" SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+        <ComboBox
+            Header="Same File"
+            ItemsSource="{Binding TypeItems}"
+            SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
 
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Game Engine" />
-        <ComboBox ItemsSource="{Binding EngineItems}" SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <ComboBox
+                Header="Game Engine"
+                ItemsSource="{Binding EngineItems}"
+                SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
 
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Package Name" />
-        <TextBox PlaceholderText="cn.zodream.xx" Text="{Binding ApplicationId, Mode=TwoWay}" />
-        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Key" />
-        <TextBox Text="{Binding Password, Mode=TwoWay}" />
+            <ComboBox
+                Grid.Column="1"
+                Header="Platform"
+                ItemsSource="{Binding PlatformItems}"
+                SelectedIndex="{Binding PlatformIndex, Mode=TwoWay}" />
+        </Grid>
+
+        <TextBox
+            Header="Package Name"
+            PlaceholderText="cn.zodream.xx"
+            Text="{Binding ApplicationId, Mode=TwoWay}" />
+        <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />
     </StackPanel>
 </ContentDialog>

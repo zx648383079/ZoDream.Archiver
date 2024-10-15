@@ -1,4 +1,4 @@
-use super::{Encryptor, Decryptor};
+use super::{Encryptor, Decryptor, Result};
 
 const STRT_E: u32 =  0x0b0b;
 const STRT_D: u32 =  0xb1b1;
@@ -96,7 +96,7 @@ impl Encryptor for ThreeWay
     {
         12
     }
-    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
         let mut rcon = [0u32; 12];
         Self::rndcon_gen(STRT_E, & mut rcon);
@@ -119,7 +119,7 @@ impl Encryptor for ThreeWay
             let j = i * 4;
             output[j..(j+4)].copy_from_slice(&data[i].to_le_bytes());
         }
-        data.len()
+        Ok(data.len())
     }
 }
 
@@ -129,7 +129,7 @@ impl Decryptor for ThreeWay
     {
         12
     }
-    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
         let mut ki = self.key.clone();
         Self::theta(&mut ki);
@@ -159,7 +159,7 @@ impl Decryptor for ThreeWay
             let j = i * 4;
             output[j..(j+4)].copy_from_slice(&data[i].to_le_bytes());
         }
-        data.len()
+        Ok(data.len())
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{Encryptor, Decryptor};
+use super::{Encryptor, Decryptor, Result};
 
 
 pub struct OwnEncryptor 
@@ -20,7 +20,7 @@ impl Encryptor for OwnEncryptor
     {
         0
     }
-    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn encrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
         let size = input.len();
         for i in 0..size {
@@ -30,7 +30,7 @@ impl Encryptor for OwnEncryptor
                 output[i] = input[i] + 9;
             }
         }
-        size
+        Ok(size)
     }
 }
 
@@ -40,7 +40,7 @@ impl Decryptor for OwnEncryptor
     {
         0
     }
-    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> usize
+    fn decrypt(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize>
     {
         let size = input.len();
         for i in 0..size {
@@ -50,7 +50,7 @@ impl Decryptor for OwnEncryptor
                 output[i] = input[i] - 9;
             }
         }
-        size
+        Ok(size)
     }
 }
 
@@ -71,4 +71,3 @@ mod tests {
     }
 
 }
-

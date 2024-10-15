@@ -16,20 +16,18 @@ namespace ZoDream.BundleExtractor
             _options = options;
         }
 
-        public BundleReader(BundleScheme scheme, IBundlePlatform platform,
-            IArchiveOptions? options): this(platform, options)
-        {
-            _scheme = scheme;
-        }
 
         private readonly IBundlePlatform _platform;
         private readonly IArchiveOptions? _options;
-        private readonly BundleScheme? _scheme;
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
-            foreach (var items in _platform.Producer.EnumerateChunk())
+            foreach (var items in _platform.Engine.EnumerateChunk())
             {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
                 using var chunk = _platform.Engine.OpenRead(items);
                 chunk.ExtractTo(folder, mode, token);
             }

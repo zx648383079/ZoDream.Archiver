@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 
 use lzxd::{Lzxd, WindowSize};
 
-use super::Decompressor;
+use super::{Decompressor, Result};
 
 
 pub struct LzxdCompressor
@@ -20,14 +20,14 @@ impl LzxdCompressor {
 
 impl Decompressor for LzxdCompressor
 {
-    fn decompress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> u64
+    fn decompress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> Result<usize>
     {
         let mut buf = [0u8; 8];
 
         // Read file header.
-        input.read_exact(&mut buf[..4]).unwrap();
+        input.read_exact(&mut buf[..4])?;
         let ws = u32::from_le_bytes(buf[..4].try_into().unwrap());
-        input.read_exact(&mut buf[..4]).unwrap(); // Discard.
+        input.read_exact(&mut buf[..4])?; // Discard.
 
         let ws = match ws {
             0x0000_8000 => WindowSize::KB32,
@@ -58,17 +58,17 @@ impl Decompressor for LzxdCompressor
             }
 
             let chunk_len = usize::from_le_bytes(buf.try_into().unwrap());
-            input.read_exact(&mut buf[..8]).unwrap();
+            input.read_exact(&mut buf[..8])?;
             let output_len = usize::from_le_bytes(buf.try_into().unwrap());
 
             chunk.resize(chunk_len, 0);
 
-            input.read_exact(&mut chunk).unwrap();
+            input.read_exact(&mut chunk)?;
             
-            let res = lzxd.decompress_next(&mut chunk, output_len).unwrap();
-            output.write(res).unwrap();
+            let res = lzxd.decompress_next(&mut chunk, output_len)?;
+            output.write(res)?;
             length += res.len() as u64;
         }
-        length
+        Ok(length as usize)
     }
 }

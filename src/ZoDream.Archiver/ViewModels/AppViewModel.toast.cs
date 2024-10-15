@@ -1,4 +1,4 @@
-﻿using System.Xml;
+﻿using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
 namespace ZoDream.Archiver.ViewModels

@@ -1,4 +1,5 @@
 use std::io::{Read, Write};
+use super::error::Result;
 
 pub mod lzxd;
 pub mod lz4;
@@ -7,16 +8,16 @@ const DEFAULT_BLOCK_SIZE: usize = 1024;
 
 /// 压缩
 pub trait Compressor {
-    fn compress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> u64;
+    fn compress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> Result<usize>;
 }
 
 /// 解压缩
 pub trait Decompressor {
-    fn decompress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> u64;
+    fn decompress<R: Read, W: Write>(&mut self, input: &mut R, output: &mut W) -> Result<usize>;
 }
 
 /// 复制数据
-pub fn copy_to<R, W>(input: &mut R, output: &mut  W) -> u64 
+pub fn copy_to<R, W>(input: &mut R, output: &mut  W) -> Result<usize>
     where R : Read, W : Write
 {
     let mut len: u64 = 0;
@@ -34,5 +35,5 @@ pub fn copy_to<R, W>(input: &mut R, output: &mut  W) -> u64
         _ = output.write(&in_buf[..l]);
         len += l as u64;
     }
-    len
+    Ok(len as usize)
 }

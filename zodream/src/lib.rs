@@ -9,7 +9,9 @@ use ::safer_ffi::prelude::*;
 
 mod encryption;
 mod compression;
+mod error;
 
+use error::{Error, Result};
 use encryption::blowfish::Blowfish;
 use encryption::own;
 
@@ -56,8 +58,8 @@ impl Write for OutputStream {
 #[derive_ReprC]
 #[repr(opaque)]
 pub struct Logger {
-    _log: extern "C" fn(char_p::Raw),
-    progress: extern "C" fn(u32, u32, char_p::Raw),
+    log: extern "C" fn(char_p::Raw),
+    _progress: extern "C" fn(u32, u32, char_p::Raw),
 }
 
 
@@ -87,6 +89,38 @@ pub struct CompressorBox {
     // instance: Option<Box<dyn Read>>,
 }
 
+impl CompressorBox {
+    fn compress<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match self.id {
+            CompressionID::Lz4 => {
+                let mut instance = Lz4Compressor::new();
+                instance.compress(input, output)
+            },
+            CompressionID::Lzxd => {
+                Ok(0)
+            },
+            CompressionID::Unknown => Ok(0)
+        }
+    }
+    fn decompress<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match self.id {
+            CompressionID::Lz4 => {
+                let mut instance = Lz4Compressor::new();
+                instance.decompress(input, output)
+            },
+            CompressionID::Lzxd => {
+                let mut instance = LzxdCompressor::new();
+                instance.decompress(input, output)
+            },
+            CompressionID::Unknown => Ok(0)
+        }
+    }
+}
+
 #[ffi_export]
 fn find_compressor (id: CompressionID) -> repr_c::Box<CompressorBox>
 {
@@ -95,34 +129,36 @@ fn find_compressor (id: CompressionID) -> repr_c::Box<CompressorBox>
 }
 
 #[ffi_export]
-fn compress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u64
+fn compress_compressor (
+    ctor: &'_ CompressorBox, 
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, 
+    logger: &'_ Logger) -> u64
 {
-    match ctor.id {
-        CompressionID::Lz4 => {
-            let mut instance = Lz4Compressor::new();
-            instance.compress(input, output)
-        },
-        CompressionID::Lzxd => {
+    let res = ctor.compress(input, output);
+    match res {
+        Ok(i) => i as u64,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
             0
-        },
-        CompressionID::Unknown => 0
+        }
     }
-    // ctor.id.into_i8() as i32
 }
 
 #[ffi_export]
-fn decompress_compressor (ctor: &'_ CompressorBox, input: &'_ mut InputStream, output: &'_ mut OutputStream) -> u64
+fn decompress_compressor(
+    ctor: &'_ CompressorBox, 
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, 
+    logger: &'_ Logger) -> u64
 {
-    match ctor.id {
-        CompressionID::Lz4 => {
-            let mut instance = Lz4Compressor::new();
-            instance.decompress(input, output)
-        },
-        CompressionID::Lzxd => {
-            let mut instance = LzxdCompressor::new();
-            instance.decompress(input, output)
-        },
-        CompressionID::Unknown => 0
+    let res = ctor.decompress(input, output);
+    match res {
+        Ok(i) => i as u64,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
+            0
+        }
     }
 }
 
@@ -138,6 +174,74 @@ pub struct EncryptorBox {
     id: EncryptionID,
     key: Option<Vec<u8>>,
     // instance: Option<Box<dyn Encryptor>>,
+}
+
+impl EncryptorBox {
+    fn encrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match &self.key {
+            Some(key) => {
+                match self.id {
+                    EncryptionID::Blowfish => {
+                        let mut instance = Blowfish::new(key.as_slice())?;
+                        encryption::encrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::BlowfishCBC => {
+                        let mut instance = Blowfish::new_cbc_enc(key.as_slice())?;
+                        encryption::encrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::ThreeWay => {
+                        let mut instance = ThreeWay::new(key.as_slice());
+                        encryption::encrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::Arc4 => {
+                        let mut instance = Arc4::new(key.as_slice());
+                        encryption::encrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::Unknown => {
+                        let mut instance = own::OwnEncryptor::new(key.as_slice());
+                        encryption::encrypt_stream(&mut instance, input, output)
+                    },
+                    // _ => 0
+                }
+            },
+            None => Err(Error::form_str("key error"))
+        }
+    }
+
+    fn decrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match &self.key {
+            Some(key) => {
+                match self.id {
+                    EncryptionID::Blowfish => {
+                        let mut instance = Blowfish::new(key.as_slice())?;
+                        encryption::decrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::BlowfishCBC => {
+                        let mut instance = Blowfish::new_cbc_dec(key.as_slice())?;
+                        encryption::decrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::ThreeWay => {
+                        let mut instance = ThreeWay::new(key.as_slice());
+                        encryption::decrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::Arc4 => {
+                        let mut instance = Arc4::new(key.as_slice());
+                        encryption::decrypt_stream(&mut instance, input, output)
+                    },
+                    EncryptionID::Unknown => {
+                        let mut instance = own::OwnEncryptor::new(key.as_slice());
+                        encryption::decrypt_stream(&mut instance, input, output)
+                    },
+                    // _ => 0
+                }
+            },
+            None => Err(Error::form_str("key error"))
+        }
+    }
 }
 
 
@@ -172,39 +276,14 @@ fn encrypt_encryptor (
     logger: &'_ Logger,
 ) -> u32
 {
-    match &ctor.key {
-        Some(key) => {
-            match ctor.id {
-                EncryptionID::Blowfish => {
-                    let mut instance = Blowfish::new(key.as_slice());
-                    encryption::encrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::BlowfishCBC => {
-                    let mut instance = Blowfish::new_cbc_enc(key.as_slice());
-                    encryption::encrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::ThreeWay => {
-                    let mut instance = ThreeWay::new(key.as_slice());
-                    encryption::encrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::Arc4 => {
-                    let mut instance = Arc4::new(key.as_slice());
-                    encryption::encrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::Unknown => {
-                    let mut instance = own::OwnEncryptor::new(key.as_slice());
-                    let res = encryption::encrypt_stream(&mut instance, input, output) as u32;
-                    (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());
-                    res
-                },
-                // _ => 0
-            }
-        },
-        None => {
+    let res = ctor.encrypt(input, output);
+    match res {
+        Ok(i) => i as u32,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
             0
         }
     }
-    
     // const BLOCK_SIZE: usize = 1024;
     // let mut len = 0;
     // let mut buffer: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
@@ -231,37 +310,14 @@ fn encrypt_encryptor (
 fn decrypt_encryptor (
     ctor: &'_ EncryptorBox,     
     input: &'_ mut InputStream, 
-    output: &'_ mut OutputStream, ) -> u32
+    output: &'_ mut OutputStream, 
+    logger: &'_ Logger) -> u32
 {
-    match &ctor.key {
-        Some(key) => {
-            match ctor.id {
-                EncryptionID::Blowfish => {
-                    let mut instance = Blowfish::new(key.as_slice());
-                    encryption::decrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::BlowfishCBC => {
-                    let mut instance = Blowfish::new_cbc_dec(key.as_slice());
-                    encryption::decrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::ThreeWay => {
-                    let mut instance = ThreeWay::new(key.as_slice());
-                    encryption::decrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::Arc4 => {
-                    let mut instance = Arc4::new(key.as_slice());
-                    encryption::decrypt_stream(&mut instance, input, output) as u32
-                },
-                EncryptionID::Unknown => {
-                    let mut instance = own::OwnEncryptor::new(key.as_slice());
-                    let res = encryption::decrypt_stream(&mut instance, input, output) as u32;
-                    // (logger.progress)(res, key.len() as u32, char_p::new("finish").as_ref().into());
-                    res
-                },
-                // _ => 0
-            }
-        },
-        None => {
+    let res = ctor.decrypt(input, output);
+    match res {
+        Ok(i) => i as u32,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
             0
         }
     }
@@ -274,41 +330,21 @@ fn free_encryptor (ctor: Option<repr_c::Box<EncryptorBox>>)
 }
 
 
-#[ffi_export]
-fn lz4_decompress(
-    input: c_slice::Ref<'_, u8>, 
-    output: c_slice::Mut<'_, u8>,
-    mut cb: ::safer_ffi::closure::RefDynFnMut2<'_, (), usize, char_p::Raw>,
-    ) -> u32
-{
-    // match input.first() {
-    //     None => {},
-    //     Some(val) => cb.call(*val as usize, char_p::new("11111").as_ref().into())
-    // }
-    // let mut cursor: Cursor<&mut [u8]> = Cursor::new(output.as_slice());
-    let mut decoder = lz4::Decoder::new(input.as_slice()).unwrap();
-    let len = std::io::Read::read_to_end(&mut decoder, &mut output.as_slice().to_vec());
-    // const BUFFER_SIZE: usize = 32 * 1024;
-    // loop {
-    //     let mut buffer = [0; BUFFER_SIZE];
-    //     match decoder.read(&mut buffer) {
-    //         Ok(size) => {
-    //             cb.call(size);
-    //             if size == 0 {
-    //                 break;
-    //             }
-    //             cursor.write(&buffer[0..size]).unwrap();
-    //         }
-    //         Err(_) => {}
-    //     }
-    // }
-    // let _ = std::io::copy(&mut decoder, &mut cursor);
-    cb.call(input.len(), char_p::new("111711").as_ref().into());
-    match len {
-        Ok(size) => size as u32,
-        Err(err) => {
-            cb.call(input.len(), char_p::new(err.to_string()).as_ref().into());
-            0
-        }
+mod tests {
+    use std::fs::File;
+    use super::*;
+
+    
+    #[test]
+    fn test_decrypt() {
+        //File::options().read(true).write(true).open();
+        let mut input = File::open("texture_00.ktx").unwrap();
+        let length = input.metadata().unwrap().len();
+        //input.set_len(input.metadata().unwrap().len() - 8).unwrap();
+        let mut output = File::create("texture.png").unwrap();
+        let key = char_p::new("");
+        let instance = find_encryptor_with_key(EncryptionID::BlowfishCBC, key.as_ref());
+        let res = instance.decrypt(&mut input, &mut output).unwrap();
+        assert_eq!(res, length as usize);
     }
 }
