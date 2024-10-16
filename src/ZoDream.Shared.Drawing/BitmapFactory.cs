@@ -73,7 +73,6 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.LA1616 => new LA1616(),
                 _ => throw new NotImplementedException(),
             };
-
             return SKBitmapDecoder.Decode(decoder.Decode(data, width, height), width, height, SKColorType.Rgba8888);
         }
     }

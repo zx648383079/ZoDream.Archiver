@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
     <ProjectReference Include="..\..\ZoDream.Shared\ZoDream.Shared.csproj" />
   </ItemGroup>
 

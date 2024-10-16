@@ -12,6 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MimeMapping" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\..\ZoDream.Shared\ZoDream.Shared.csproj" />
   </ItemGroup>
 
