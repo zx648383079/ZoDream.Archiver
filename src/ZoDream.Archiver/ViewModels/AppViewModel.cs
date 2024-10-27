@@ -9,6 +9,7 @@ using Microsoft.UI.Dispatching;
 using ZoDream.Shared.ViewModel;
 using ZoDream.Shared.Interfaces;
 using System.Threading.Tasks;
+using ZoDream.Shared.Logging;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -39,6 +40,8 @@ namespace ZoDream.Archiver.ViewModels
                 return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
             }
         }
+
+        public ILogger Logger { get; private set; } = new EventLogger();
         public PluginViewModel Plugin { get; private set; } = new();
 
         public ISettingContainer Setting { get; private set; } = new SettingContainer();

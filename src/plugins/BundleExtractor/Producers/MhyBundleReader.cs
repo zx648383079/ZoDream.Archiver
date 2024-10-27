@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Producers
     public class MhyBundleReader : IArchiveReader
     {
         public MhyBundleReader(Stream stream, IArchiveOptions? option)
-            : this(new EndianReader(stream, Shared.Models.EndianType.LittleEndian), option)
+            : this(new EndianReader(stream, EndianType.LittleEndian), option)
         {
 
         }

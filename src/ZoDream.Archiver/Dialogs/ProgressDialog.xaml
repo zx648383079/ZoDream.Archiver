@@ -28,6 +28,7 @@
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -43,8 +44,14 @@
             HorizontalAlignment="Right"
             Text="{Binding TimeLeft, Converter={StaticResource TimeCvt}}" />
 
-        <ProgressBar
+        <TextBlock
             Grid.Row="2"
+            Grid.ColumnSpan="2"
+            Style="{ThemeResource CaptionTextBlockStyle}"
+            Text="{Binding Message}" />
+
+        <ProgressBar
+            Grid.Row="3"
             Grid.ColumnSpan="2"
             IsIndeterminate="{Binding ProgressUnknow}"
             ShowError="False"

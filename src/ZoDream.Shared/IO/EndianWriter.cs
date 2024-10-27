@@ -21,15 +21,15 @@ namespace ZoDream.Shared.IO
 
         public bool IsAlignArray { get; }
 
-        public EndianWriter(Stream stream, EndianType endianess)
-            : this(stream, endianess, alignArray: false)
+        public EndianWriter(Stream stream, EndianType endian)
+            : this(stream, endian, alignArray: false)
         {
         }
 
-        protected EndianWriter(Stream stream, EndianType endianess, bool alignArray)
+        protected EndianWriter(Stream stream, EndianType endian, bool alignArray)
             : base(stream, Encoding.UTF8, leaveOpen: true)
         {
-            EndianType = endianess;
+            EndianType = endian;
             IsAlignArray = alignArray;
         }
 

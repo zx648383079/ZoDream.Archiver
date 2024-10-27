@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Archiver.Dialogs;
@@ -11,6 +7,7 @@ namespace ZoDream.Archiver.ViewModels
 {
     internal partial class AppViewModel
     {
+
         private ProgressDialog? _progress;
         private CancellationTokenSource? _progressToken;
 
@@ -29,6 +26,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             DispatcherQueue.TryEnqueue(() => {
                 _progress.Hide();
+                _progress.ViewModel.Dispose();
                 _progress = null;
                 _progressToken?.Dispose();
                 _progressToken = null;
@@ -44,15 +42,22 @@ namespace ZoDream.Archiver.ViewModels
             await OpenDialogAsync(_progress);
             _progressToken?.Cancel();
         }
-
-        public void UpdateProgress(double progress) 
+        public void UpdateProgress(double progress)
+        {
+            UpdateProgress(progress, string.Empty);
+        }
+        public void UpdateProgress(double progress, string message) 
         {
             if (_progress is null)
             {
                 return;
             }
             DispatcherQueue.TryEnqueue(() => {
-                _progress.ViewModel.Progress = progress * 100;
+                if (progress >= 0)
+                {
+                    _progress.ViewModel.Progress = progress * 100;
+                }
+                _progress.ViewModel.Message = message;
             });
         }
     }

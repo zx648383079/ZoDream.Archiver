@@ -33,7 +33,7 @@ namespace ZoDream.Shared.Logging
         }
 
 
-        public void Waining(string message)
+        public void Warning(string message)
         {
             Log(LogLevel.Warn, message);
         }

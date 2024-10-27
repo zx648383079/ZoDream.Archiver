@@ -32,15 +32,15 @@ namespace ZoDream.Shared.IO
 
         protected long RemainingStreamBytes => checked(BaseStream.Length - BaseStream.Position);
 
-        public EndianReader(Stream stream, EndianType endianess)
-            : this(stream, endianess, alignArray: false)
+        public EndianReader(Stream stream, EndianType endian)
+            : this(stream, endian, alignArray: false)
         {
         }
 
-        protected EndianReader(Stream stream, EndianType endianess, bool alignArray)
+        protected EndianReader(Stream stream, EndianType endian, bool alignArray)
             : base(stream, Encoding.UTF8, leaveOpen: true)
         {
-            EndianType = endianess;
+            EndianType = endian;
             IsAlignArray = alignArray;
         }
 

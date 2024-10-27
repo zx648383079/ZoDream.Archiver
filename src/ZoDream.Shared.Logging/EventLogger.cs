@@ -49,7 +49,7 @@ namespace ZoDream.Shared.Logging
             Progress(current, total, string.Empty);
         }
 
-        public void Waining(string message)
+        public void Warning(string message)
         {
             Log(LogLevel.Warn, message);
         }

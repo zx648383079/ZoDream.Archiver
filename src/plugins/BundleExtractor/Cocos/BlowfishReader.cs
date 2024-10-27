@@ -11,7 +11,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Cocos
 {
-    public class BlowfishReader(IEnumerable<string> fileItems, string key) : IBundleReader
+    public class BlowfishReader(IEnumerable<string> fileItems) : IBundleReader
     {
         private static readonly int[] CONST_IMG = [ 'd', 'r', -1, -1, -1, 'p', 'n', 'g' ];
         private static readonly int[] CONST_LUA = [ 'd', 'r', -1, -1, -1, 'l', 'u', 'a' ];
@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Cocos
                 var fileName = fileItems is IBundleChunk c ? c.Create(item, folder) 
                     : Path.Combine(folder, Path.GetFileName(item));
                 using var fs = File.OpenRead(item);
-                if (!IsSupprot(fs, out var extension))
+                if (!IsSupport(fs, out var extension))
                 {
                     continue;
                 }
@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor.Cocos
             }
         }
 
-        private static bool IsSupprot(Stream input, out string extension)
+        private static bool IsSupport(Stream input, out string extension)
         {
             if (input.Length <= 8)
             {
@@ -51,7 +51,7 @@ namespace ZoDream.BundleExtractor.Cocos
             input.Seek(-8, SeekOrigin.End);
             input.Read(buffer, 0, 8);
             //input.Seek(0, SeekOrigin.Begin);
-            var res = SignureEq(CONST_IMG, buffer) || SignureEq(CONST_LUA, buffer);
+            var res = SignatureEq(CONST_IMG, buffer) || SignatureEq(CONST_LUA, buffer);
             extension = res ? Encoding.ASCII.GetString(buffer, 5, 3).ToLower() : string.Empty;
             return res;
         }
@@ -67,11 +67,11 @@ namespace ZoDream.BundleExtractor.Cocos
             input.Seek(-8, SeekOrigin.End);
             input.Read(buffer, 0, 8);
             var format = FileFormat.None;
-            if (SignureEq(CONST_IMG, buffer))
+            if (SignatureEq(CONST_IMG, buffer))
             {
                 format = FileFormat.IMAGE;
             }
-            else if (SignureEq(CONST_LUA, buffer))
+            else if (SignatureEq(CONST_LUA, buffer))
             {
                 format = FileFormat.LUA; 
             }
@@ -79,6 +79,12 @@ namespace ZoDream.BundleExtractor.Cocos
             if (format == FileFormat.None)
             {
                 input.CopyTo(output);
+                return;
+            }
+            var key = TryGetKey(buffer);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                // 不能加密
                 return;
             }
             var length = input.Length - 8;
@@ -91,15 +97,28 @@ namespace ZoDream.BundleExtractor.Cocos
             }
         }
 
-        private static bool SignureEq(int[] signure, byte[] data)
+        private string TryGetKey(byte[] buffer)
         {
-            if (signure.Length > data.Length)
+            if (buffer[2] == 'o' && buffer[3] == 'i')
+            {
+                return "fd1c1b2f34a0d1d246be3ba9bc5af022e83375f315a0216085d3013a";
+            }
+            if (buffer[2] == 'r' && buffer[3] == 'c')
+            {
+
+            }
+            return string.Empty;
+        }
+
+        private static bool SignatureEq(int[] signature, byte[] data)
+        {
+            if (signature.Length > data.Length)
             {
                 return false;
             }
-            for (var i = 0; i < signure.Length; i++)
+            for (var i = 0; i < signature.Length; i++)
             {
-                if (signure[i] >= 0 && signure[i] != data[i])
+                if (signature[i] >= 0 && signature[i] != data[i])
                 {
                     return false;
                 }

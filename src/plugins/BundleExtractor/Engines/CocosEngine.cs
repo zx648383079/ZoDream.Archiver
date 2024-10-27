@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor.Engines
         {
             if (_platform?.Producer is PaperProducer)
             {
-                return new BlowfishReader(fileItems, "fd1c1b2f34a0d1d246be3ba9bc5af022e83375f315a0216085d3013a");
+                return new BlowfishReader(fileItems);
             }
             throw new NotImplementedException();
         }

@@ -1,11 +1,38 @@
 ﻿using System;
+using ZoDream.Shared.Logging;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ProgressDialogViewModel: BindableBase
+    public class ProgressDialogViewModel: BindableBase, IDisposable
     {
-        private DateTime _beginTime = DateTime.Now;
+        public ProgressDialogViewModel()
+        {
+            if (_app.Logger is EventLogger logger)
+            {
+                logger.OnLog += Logger_OnLog;
+                logger.OnProgress += Logger_OnProgress;
+            }
+        }
+
+        private void Logger_OnProgress(long current, long total, string message)
+        {
+            _app.DispatcherQueue.TryEnqueue(() => {
+                Message = message;
+                Progress = total > 0 ? (current * 100 / total) : 0;
+            });
+        }
+
+        private void Logger_OnLog(string message, Shared.Models.LogLevel level)
+        {
+            _app.DispatcherQueue.TryEnqueue(() => {
+                Message = message;
+            });
+        }
+
+        private readonly AppViewModel _app = App.ViewModel;
+
+        private readonly DateTime _beginTime = DateTime.Now;
 
         private int _elapsedTime;
 
@@ -30,7 +57,9 @@ namespace ZoDream.Archiver.ViewModels
 
 
         private double _progress;
-
+        /// <summary>
+        /// %
+        /// </summary>
         public double Progress {
             get => _progress;
             set {
@@ -38,6 +67,19 @@ namespace ZoDream.Archiver.ViewModels
                 if (value > 0)
                 {
                     ProgressUnknow = false;
+                    Computed();
+                }
+            }
+        }
+
+        private string _message = string.Empty;
+
+        public string Message {
+            get => _message;
+            set {
+                Set(ref _message, value);
+                if (Progress > 0)
+                {
                     Computed();
                 }
             }
@@ -52,6 +94,15 @@ namespace ZoDream.Archiver.ViewModels
             var diff = DateTime.Now - _beginTime;
             ElapsedTime = (int)diff.TotalSeconds;
             TimeLeft = (int)(diff.TotalSeconds * 100 / Progress - diff.TotalSeconds);
+        }
+
+        public void Dispose()
+        {
+            if (_app.Logger is EventLogger logger)
+            {
+                logger.OnLog -= Logger_OnLog;
+                logger.OnProgress -= Logger_OnProgress;
+            }
         }
     }
 }

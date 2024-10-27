@@ -11,27 +11,27 @@ namespace ZoDream.Shared.IO
         { 
         }
 
-        public PartialStream(Stream stream, long beginPostion, long byteLength)
+        public PartialStream(Stream stream, long beginPosition, long byteLength)
         {
             _byteLength = byteLength;
             if (stream is not PartialStream ps)
             {
                 BaseStream = stream;
-                _current = _beginPostion = beginPostion;
+                _current = _beginPosition = beginPosition;
                 return;
             }
             BaseStream = ps.BaseStream;
-            _current = _beginPostion = beginPostion + ps._beginPostion;
+            _current = _beginPosition = beginPosition + ps._beginPosition;
         }
 
         private readonly Stream BaseStream;
         private readonly bool _leaveStreamOpen = true;
-        private readonly long _beginPostion;
+        private readonly long _beginPosition;
         private readonly long _byteLength;
 
         private long _current;
 
-        private long EndPostion => _beginPostion + _byteLength;
+        private long EndPosition => _beginPosition + _byteLength;
 
         public override bool CanRead => BaseStream.CanRead;
 
@@ -42,15 +42,15 @@ namespace ZoDream.Shared.IO
         public override long Length => _byteLength;
 
         public override long Position {
-            get => _current - _beginPostion;
+            get => _current - _beginPosition;
             set {
-                Seek(value + _beginPostion, SeekOrigin.Begin);
+                Seek(value + _beginPosition, SeekOrigin.Begin);
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            var len = (int)Math.Min(count, EndPostion - _current);
+            var len = (int)Math.Min(count, EndPosition - _current);
             if (len <= 0)
             {
                 return 0;
@@ -67,13 +67,13 @@ namespace ZoDream.Shared.IO
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            var min = _beginPostion;
-            var max = _beginPostion + _byteLength;
+            var min = _beginPosition;
+            var max = _beginPosition + _byteLength;
             var pos = origin switch
             {
                 SeekOrigin.Current => BaseStream.Position + offset,
-                SeekOrigin.End => _beginPostion + _byteLength + offset,
-                _ => _beginPostion + offset,
+                SeekOrigin.End => _beginPosition + _byteLength + offset,
+                _ => _beginPosition + offset,
             };
             _current = Math.Min(Math.Max(pos, min), max);
             return _current - min;

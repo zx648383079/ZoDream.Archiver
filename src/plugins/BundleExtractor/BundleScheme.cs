@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class BundleScheme : IBundleScheme
+    public partial class BundleScheme(ILogger logger) : IBundleScheme
     {
         public IBundleReader? Load(IEnumerable<string> fileItems, IArchiveOptions? options = null)
         {
@@ -12,6 +12,7 @@ namespace ZoDream.BundleExtractor
             {
                 return null;
             }
+            logger.Info(platform.GetType().Name);
             return new BundleReader(platform, options);
         }
 

@@ -169,7 +169,7 @@ namespace ZoDream.Archiver.ViewModels
                 var watch = new Stopwatch();
                 watch.Start();
                 IBundleReader? reader;
-                var scheme = new BundleScheme();
+                var scheme = new BundleScheme(app.Logger);
                 if (!string.IsNullOrWhiteSpace(model.ApplicationId))
                 {
                     reader = scheme.Load(scheme.TryGet(model.ApplicationId), 

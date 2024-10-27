@@ -25,8 +25,7 @@ namespace ZoDream.BundleExtractor.Platforms
         private const string AssetName = "assets";
         private const string MetaName = "META-INF";
         private const string BinName = "bin";
-        private const string Il2CppGameAssemblyName = "libil2cpp.so";
-        private const string AndroidUnityAssemblyName = "libunity.so";
+
 
         public string Root { get; private set; } = string.Empty;
         public IBundleProducer Producer { get; private set; }
