@@ -8,12 +8,12 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.Shared.Compression.Own
+namespace ZoDream.Shared.Compression.Own.V2
 {
     public class OwnArchiveReader(Stream stream, IOwnKey key) : IArchiveReader
     {
         public OwnArchiveReader(Stream stream, IArchiveOptions options)
-            : this (stream, OwnArchiveScheme.CreateKey(options))
+            : this(stream, OwnArchiveScheme.CreateKey(options))
         {
             _options = options;
         }
@@ -63,7 +63,7 @@ namespace ZoDream.Shared.Compression.Own
             }
             var length = ReadLength();
             var buffer = new byte[length];
-            var deflator = new OwnDeflateStream(stream, key, _nextPadding);
+            var deflator = new OwnDeflateStream(stream, key, new byte[16], _nextPadding);
             deflator.Read(buffer, 0, buffer.Length);
             _nextPadding = !_nextPadding;
             return Encoding.UTF8.GetString(buffer);
@@ -75,7 +75,7 @@ namespace ZoDream.Shared.Compression.Own
             {
                 return;
             }
-            var deflator = new OwnDeflateStream(stream, key, _nextPadding);
+            var deflator = new OwnDeflateStream(stream, key, new byte[64], _nextPadding);
             deflator.CopyTo(output, length);
             _nextPadding = !_nextPadding;
         }
@@ -175,7 +175,7 @@ namespace ZoDream.Shared.Compression.Own
             try
             {
                 _header.Read(stream);
-                return true;
+                return _header.Version == OwnVersion.V2;
             }
             catch (Exception)
             {
@@ -183,7 +183,7 @@ namespace ZoDream.Shared.Compression.Own
             }
         }
 
-        
+
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {

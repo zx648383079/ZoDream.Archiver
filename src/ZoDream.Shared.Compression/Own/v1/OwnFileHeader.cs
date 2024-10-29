@@ -20,7 +20,16 @@ namespace ZoDream.Shared.Compression.Own
         /// <summary>
         /// 这个版本是指包含一些运算公式
         /// </summary>
-        public byte Version { get; set; }
+        public OwnVersion Version { get; set; } = OwnVersion.Unknown;
+
+        public byte VersionByte 
+        {
+            get {
+                var b = (byte)Version;
+                return b >= 0x0A ? (byte)(b + 1) : b;
+            }
+            set => Version = (OwnVersion)(value > 0x0A ? (byte)(value - 1) : value);
+        }
 
         public void Read(Stream input)
         {
@@ -36,7 +45,7 @@ namespace ZoDream.Shared.Compression.Own
             {
                 return;
             }
-            Version = buffer[3] > 0x0A ? (byte)(buffer[3] - 1) : buffer[3];
+            VersionByte = buffer[3];
             if (input.ReadByte() != 0x0A)
             {
                 throw new NotSupportedException("Own Archive Header error");
@@ -57,7 +66,7 @@ namespace ZoDream.Shared.Compression.Own
             }
             if (Version > 0)
             {
-                output.WriteByte(Version >= 0x0A ? (byte)(Version + 1) : Version);
+                output.WriteByte(VersionByte);
             }
             output.WriteByte(0x0A);
         }

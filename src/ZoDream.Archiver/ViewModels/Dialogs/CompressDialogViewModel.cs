@@ -1,6 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
@@ -23,12 +22,7 @@ namespace ZoDream.Archiver.ViewModels
             DictCommand = new RelayCommand(TapDict);
         }
 
-        private string[] _typeItems = ["zip", "tar", "bz", "特殊", "字典"];
-
-        public string[] TypeItems {
-            get => _typeItems;
-            set => Set(ref _typeItems, value);
-        }
+        public string[] TypeItems => ["zip", "tar", "bz", "特殊", "字典"];
 
         private int _typeIndex;
 
@@ -40,19 +34,28 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private string[] _subvolumeItems = ["100MB", "500MB", "1GB", "4GB", "8GB"];
+        public string[] VersionItems => ["默认", "v1", "v2"];
 
-        public string[] SubvolumeItems {
-            get => _subvolumeItems;
-            set => Set(ref _subvolumeItems, value);
+        private int _versionIndex;
+
+        public int VersionIndex {
+            get => _versionIndex;
+            set => Set(ref _versionIndex, value);
+        }
+
+        private string[] _subVolumeItems = ["100MB", "500MB", "1GB", "4GB", "8GB"];
+
+        public string[] SubVolumeItems {
+            get => _subVolumeItems;
+            set => Set(ref _subVolumeItems, value);
         }
 
 
-        private string _subvolumeText = string.Empty;
+        private string _subVolumeText = string.Empty;
 
-        public string SubvolumeText {
-            get => _subvolumeText;
-            set => Set(ref _subvolumeText, value);
+        public string SubVolumeText {
+            get => _subVolumeText;
+            set => Set(ref _subVolumeText, value);
         }
 
 
@@ -86,7 +89,7 @@ namespace ZoDream.Archiver.ViewModels
         }
 
 
-        public long SubvolumeLength => SizeConverter.Parse(SubvolumeText, "M");
+        public long SubVolumeLength => SizeConverter.Parse(SubVolumeText, "M");
 
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }
@@ -128,13 +131,14 @@ namespace ZoDream.Archiver.ViewModels
             {
                 LeaveStreamOpen = false,
             };
-            var subvolume = SubvolumeLength;
-            Stream fs = subvolume > 0 ? new MultipartOutputStream(FileName, subvolume) :
+            var subVolume = SubVolumeLength;
+            Stream fs = subVolume > 0 ? new MultipartOutputStream(FileName, subVolume) :
                 File.Create(FileName);
             return TypeIndex switch
             {
                 4 => new OwnDictionaryWriter(fs, option),
-                3 => new OwnArchiveWriter(fs, option),
+                3 => VersionIndex == 2 ? new ZoDream.Shared.Compression.Own.V2.OwnArchiveWriter(fs, option) 
+                        : new OwnArchiveWriter(fs, option),
                 2 or 1 => new TarArchiveWriter(fs, option),
                 _ => new ZipArchiveWriter(fs, option),
             };

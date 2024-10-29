@@ -13,14 +13,19 @@ namespace ZoDream.Shared.Compression.Own
 
         public bool IsReadable(Stream stream)
         {
-            return OwnArchiveReader.IsSupport(stream);
+            return IsSupport(stream) is not null;
         }
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            if (!IsReadable(stream))
+            var header = IsSupport(stream);
+            if (header is null)
             {
                 return null;
+            }
+            if (header.Version == OwnVersion.V2)
+            {
+                return new V2.OwnArchiveReader(stream, options);
             }
             return new OwnArchiveReader(stream, options);
         }
@@ -37,6 +42,25 @@ namespace ZoDream.Shared.Compression.Own
                 return bin;
             }
             return new OwnMultipleKey(bin, new OwnPassword(options.Password));
+        }
+
+        public static OwnFileHeader? IsSupport(Stream stream)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            try
+            {
+                var header = new OwnFileHeader();
+                header.Read(stream);
+                return header;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            finally
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+            }
         }
     }
 }

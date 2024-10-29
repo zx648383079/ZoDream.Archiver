@@ -6,7 +6,7 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.Shared.Compression.Own
+namespace ZoDream.Shared.Compression.Own.V2
 {
     public class OwnArchiveWriter : IArchiveWriter
     {
@@ -16,6 +16,7 @@ namespace ZoDream.Shared.Compression.Own
             BaseStream = stream;
             _key = key;
             _header = header;
+            _header.Version = OwnVersion.V2;
             _header.Write(stream);
         }
 
@@ -36,7 +37,7 @@ namespace ZoDream.Shared.Compression.Own
             var buffer = Encoding.UTF8.GetBytes(fileName);
             WriteLength(buffer.Length);
             using var ms = new MemoryStream(buffer);
-            var inflator = new OwnInflateStream(ms, _key, _nextPadding);
+            var inflator = new OwnInflateStream(ms, _key, new byte[16], _nextPadding);
             inflator.CopyTo(BaseStream);
             _nextPadding = !_nextPadding;
         }
@@ -94,7 +95,7 @@ namespace ZoDream.Shared.Compression.Own
         {
             var length = input.Length - input.Position;
             WriteLength(length);
-            var inflator = new OwnInflateStream(input, _key, _nextPadding);
+            var inflator = new OwnInflateStream(input, _key, new byte[64], _nextPadding);
             inflator.CopyTo(BaseStream, length);
             _nextPadding = !_nextPadding;
         }
