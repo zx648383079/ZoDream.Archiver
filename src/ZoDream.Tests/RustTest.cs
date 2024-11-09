@@ -13,7 +13,7 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestEncrypt()
         {
-            using var encryptor = new Encryptor(EncryptionID.Unkown, "kkkk");
+            using var encryptor = new Encryptor(EncryptionID.Unknown, "kkkk");
             var buffer = new byte[10];
             buffer[1] = 200;
             var res = encryptor.Encrypt(buffer);

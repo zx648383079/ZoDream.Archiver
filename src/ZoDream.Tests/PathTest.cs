@@ -5,10 +5,10 @@ namespace ZoDream.Tests
     [TestClass]
     public class PathTest
     {
-        [TestMethod]
+        //[TestMethod]
         public void TestFinder()
         {
-            var file = "D:\\zodream\\apk\\nn4\\Assets";
+            var file = "apk\\Assets";
             var items = Directory.GetDirectories(file, "Assets", SearchOption.AllDirectories);
             Assert.IsNotNull(items);
         }
