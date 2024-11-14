@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ZoDream.Shared.Interfaces
+namespace ZoDream.Shared.Bundle
 {
     public interface IBundleChunk: IEnumerable<string>
     {

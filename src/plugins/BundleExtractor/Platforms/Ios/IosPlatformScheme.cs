@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.BundleExtractor.Producers;
-using ZoDream.Shared.Interfaces;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
     public class IosPlatformScheme : IBundlePlatform
     {
-        public string Root => throw new NotImplementedException();
+        public const string PlatformName = "IOS";
 
-        public IBundleProducer Producer => throw new NotImplementedException();
-
-        public IBundleEngine Engine => throw new NotImplementedException();
-
-        public bool TryLoad(IEnumerable<string> fileItems)
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
             return false;
         }

@@ -1,5 +1,6 @@
 ﻿using ZoDream.Shared.Interfaces;
 using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
@@ -7,23 +8,43 @@ namespace ZoDream.BundleExtractor
     {
         public IBundleReader? Load(IEnumerable<string> fileItems, IArchiveOptions? options = null)
         {
-            var platform = GetPlatform(fileItems);
-            if (platform == null)
+            var source = fileItems is BundleSource s ? s : new BundleSource(fileItems);
+            var option = options is IBundleOptions o ? o : new BundleOptions(options);
+            Load(source, option);
+            if (string.IsNullOrWhiteSpace(option.Platform) 
+                || string.IsNullOrWhiteSpace(option.Engine))
             {
                 return null;
             }
-            logger.Info(platform.GetType().Name);
-            return new BundleReader(platform, options);
+            logger.Info(option.Platform);
+            return new BundleReader(source, option, logger);
         }
 
-        public IBundleReader? Load(IBundlePlatform? platform, IEnumerable<string> fileItems, IArchiveOptions? options = null)
+        public IBundleOptions? TryLoad(IEnumerable<string> fileItems)
         {
-            if (platform is null)
+            var option = new BundleOptions();
+            Load(fileItems is BundleSource s ? s : new BundleSource(fileItems), option);
+            return option;
+        }
+
+        public void Load(IBundleSource fileItems, IBundleOptions option)
+        {
+            if (string.IsNullOrWhiteSpace(option.Package))
             {
-                return Load(fileItems, options);
+                LoadWithPackage(option);
             }
-            platform.TryLoad(fileItems);
-            return new BundleReader(platform, options);
+            if (string.IsNullOrWhiteSpace(option.Platform))
+            {
+                TryGetPlatform(fileItems, option);
+            }
+            if (string.IsNullOrWhiteSpace(option.Producer))
+            {
+                TryGetProducer(fileItems, option);
+            }
+            if (string.IsNullOrWhiteSpace(option.Engine))
+            {
+                TryGetEngine(fileItems, option);
+            }
         }
     }
 }

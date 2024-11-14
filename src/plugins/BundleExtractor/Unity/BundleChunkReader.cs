@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
-using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -14,26 +14,24 @@ namespace ZoDream.BundleExtractor
     public partial class UnityBundleChunkReader : IBundleReader, IBundleContainer
     {
 
-
-        
         public UnityBundleChunkReader(
-            IEnumerable<string> fileItems,
-            IBundlePlatform platform)
-            : this(fileItems, null, platform)
+            IBundleChunk fileItems,
+            IBundleOptions options)
+            : this(fileItems, null, options)
         {
         }
 
-        public UnityBundleChunkReader(IEnumerable<string> fileItems,
+        public UnityBundleChunkReader(IBundleChunk fileItems,
             UnityBundleScheme? scheme,
-            IBundlePlatform platform)
+            IBundleOptions options)
         {
             _scheme = scheme ?? new();
             _fileItems = fileItems;
-            _platform = platform;
+            _options = options;
         }
 
-        private readonly IEnumerable<string> _fileItems;
-        private readonly IBundlePlatform _platform;
+        private readonly IBundleChunk _fileItems;
+        private readonly IBundleOptions _options;
         private readonly UnityBundleScheme _scheme;
 
         private readonly List<ISerializedFile> _assetItems = [];

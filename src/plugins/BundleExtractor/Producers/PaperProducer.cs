@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using ZoDream.Shared.Interfaces;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {
     public class PaperProducer : IBundleProducer
     {
-        
-        public bool TryLoad(IEnumerable<string> fileItems)
+        public const string ProducerName = "Paper";
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
             return false;
         }

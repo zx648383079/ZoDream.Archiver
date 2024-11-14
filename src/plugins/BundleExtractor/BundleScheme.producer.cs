@@ -1,14 +1,21 @@
-﻿using ZoDream.Shared.Interfaces;
-using ZoDream.BundleExtractor.Platforms;
-using System.Collections.Generic;
-using ZoDream.BundleExtractor.Producers;
-using ZoDream.BundleExtractor.Engines;
+﻿using ZoDream.BundleExtractor.Producers;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
     public partial class BundleScheme
     {
-        internal static IBundleProducer GetProducer(IEnumerable<string> fileItems)
+        internal static IBundleProducer CreateProducer(IBundleOptions options)
+        {
+            return options.Producer switch
+            {
+                MiHoYoProducer.ProducerName => new MiHoYoProducer(),
+                PaperProducer.ProducerName => new PaperProducer(),
+                _ => new UnknownProducer(),
+            };
+        }
+
+        internal static bool TryGetProducer(IBundleSource fileItems, IBundleOptions options)
         {
             IBundleProducer[] producers = [
                 new MiHoYoProducer(),
@@ -16,12 +23,12 @@ namespace ZoDream.BundleExtractor
             ];
             foreach (var item in producers)
             {
-                if (item.TryLoad(fileItems))
+                if (item.TryLoad(fileItems, options))
                 {
-                    return item;
+                    return true;
                 }
             }
-            return new UnityProducer();
+            return false;
         }
 
 

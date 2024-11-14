@@ -30,4 +30,12 @@
         <Setter Property="FontWeight" Value="Black" />
         <Setter Property="Foreground" Value="{ThemeResource BodyTextBrush}" />
     </Style>
+    <Style x:Name="InlineHeaderTb" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{ThemeResource SecondaryTextBrush}" />
+    </Style>
+    <Style x:Name="InlineTextTb" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{ThemeResource BodyTextBrush}" />
+    </Style>
 </ResourceDictionary>

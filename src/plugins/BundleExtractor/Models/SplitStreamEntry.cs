@@ -77,6 +77,7 @@ namespace ZoDream.BundleExtractor.Models
             var ms = CreateEntryStream(input, inputBasePos + entry.CompressedPosition, entry);
             return new PartialStream(ms, entry.Offset, entry.EffectiveLength);
         }
+
         private Stream CreateEntryStream(Stream input, long inputBasePos, SplitStreamEntry entry)
         {
             if (_cacheEntry == entry && _cacheSource is not null)

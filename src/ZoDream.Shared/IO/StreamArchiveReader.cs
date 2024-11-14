@@ -10,8 +10,6 @@ namespace ZoDream.Shared.IO
 {
     public class StreamArchiveReader(string fileName, Stream stream, IArchiveOptions? options) : IArchiveReader
     {
-        
-
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
             stream.CopyTo(output);

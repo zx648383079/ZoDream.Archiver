@@ -1,68 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using ZoDream.BundleExtractor.Cocos;
 using ZoDream.BundleExtractor.Producers;
-using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class CocosEngine : IBundleEngine, IOfPlatform
+    public class CocosEngine : IBundleEngine
     {
-        public CocosEngine()
+
+        public const string EngineName = "Cocos";
+
+        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
+            return fileItems.Select(i => new BundleChunk(i));
         }
 
-        public CocosEngine(IBundlePlatform platform)
+        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
-            _platform = platform;
-        }
-
-        private IBundlePlatform? _platform;
-        private IEnumerable<string>? _fileItems;
-
-        public IBundlePlatform Platform 
-        {
-            set { _platform = value; }
-        }
-
-        public IEnumerable<IBundleChunk> EnumerateChunk()
-        {
-            if (_fileItems is null)
-            {
-                return [];
-            }
-            return _fileItems.Select(i => new BundleChunk(i));
-        }
-
-        public IBundleReader OpenRead(IBundleChunk fileItems)
-        {
-            if (_platform?.Producer is PaperProducer)
+            if (options.Producer == PaperProducer.ProducerName)
             {
                 return new BlowfishReader(fileItems);
             }
             throw new NotImplementedException();
         }
 
-        public bool TryLoad(IEnumerable<string> fileItems)
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
-            _fileItems = fileItems;
-            foreach (var item in fileItems)
+            if (fileItems.Glob("cocos").Any())
             {
-                if (File.Exists(item))
-                {
-                    continue;
-                }
-                if (Path.GetFileName(item).StartsWith("cocos"))
-                {
-                    return true;
-                }
-                if (Directory.GetDirectories(item, "cocos", 
-                    SearchOption.AllDirectories).Length > 0)
-                {
-                    return true;
-                }
+                options.Engine = EngineName;
+                return true;
             }
             return false;
         }

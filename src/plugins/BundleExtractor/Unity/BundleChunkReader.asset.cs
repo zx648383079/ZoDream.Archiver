@@ -120,7 +120,7 @@ namespace ZoDream.BundleExtractor
             {
                 foreach (var obj in asset.ObjectMetaItems)
                 {
-                    var reader = new UIReader(asset.Create(obj), obj, asset, _platform.Producer);
+                    var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                     try
                     {
                         UIObject res = reader.Type switch

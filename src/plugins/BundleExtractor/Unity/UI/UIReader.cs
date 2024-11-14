@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Producers;
-using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
-using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
@@ -17,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     public record UIReader(EndianReader Reader,
         ObjectInfo Data,
         ISerializedFile Source,
-        IBundleProducer Producer)
+        IBundleOptions Options)
     {
 
         public ElementIDType Type
@@ -194,10 +189,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
 
         #region GameType
-        internal bool IsGISubGroup()
-        {
-            throw new NotImplementedException();
-        }
+        
 
         internal bool IsSR()
         {
@@ -239,31 +231,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
             throw new NotImplementedException();
         }
 
-        internal bool IsGIGroup()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         internal bool IsGICB1()
         {
             throw new NotImplementedException();
         }
-
         internal bool IsGIPack()
         {
             throw new NotImplementedException();
         }
-
         internal bool IsGI()
         {
             throw new NotImplementedException();
         }
-
         internal bool IsBH3Group()
         {
             throw new NotImplementedException();
         }
-
         internal bool IsGICB2()
         {
             throw new NotImplementedException();
@@ -279,9 +263,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
             throw new NotImplementedException();
         }
 
-        internal bool IsSRGroup()
+        internal bool IsSRCB2()
         {
             throw new NotImplementedException();
+        }
+
+        internal bool IsGISubGroup()
+        {
+            return IsGI() || IsGICB2() || IsGICB3() || IsGICB3Pre();
+        }
+
+        internal bool IsGIGroup()
+        {
+            return IsGI() || IsGIPack() || IsGICB1() || IsGICB2() || IsGICB3()
+                || IsGICB3Pre();
+        }
+
+        internal bool IsSRGroup()
+        {
+            return IsSRCB2() || IsSR();
         }
         #endregion
 

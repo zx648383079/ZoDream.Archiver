@@ -2,7 +2,7 @@
 using System.Threading;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.Shared.Interfaces
+namespace ZoDream.Shared.Bundle
 {
     public interface IBundleReader : IDisposable
     {

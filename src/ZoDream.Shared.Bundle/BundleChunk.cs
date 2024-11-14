@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using ZoDream.Shared.Interfaces;
 
-namespace ZoDream.BundleExtractor
+namespace ZoDream.Shared.Bundle
 {
     public class BundleChunk : IBundleChunk
     {

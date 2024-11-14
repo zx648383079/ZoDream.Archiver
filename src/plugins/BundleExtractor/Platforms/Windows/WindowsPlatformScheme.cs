@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Producers;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
     public class WindowsPlatformScheme : IBundlePlatform
     {
-        public string Root => throw new NotImplementedException();
+        public const string PlatformName = "Windows";
 
-        public IBundleProducer Producer => throw new NotImplementedException();
-
-        public IBundleEngine Engine => throw new NotImplementedException();
-
-        public bool TryLoad(IEnumerable<string> fileItems)
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
+            foreach (var item in fileItems.GetFiles("*.exe"))
+            {
+                options.Platform = PlatformName;
+                options.Entrance = Path.GetDirectoryName(item);
+                return true;
+            }
             return false;
         }
     }

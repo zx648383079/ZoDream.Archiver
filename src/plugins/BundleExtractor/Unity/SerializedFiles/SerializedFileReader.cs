@@ -41,7 +41,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         private readonly EndianReader _reader;
         private readonly SerializedFileHeader _header = new();
         private readonly SerializedFileMetadata _metadata = new();
-        private readonly Dictionary<long, UIObject> _childremDict = [];
+        private readonly Dictionary<long, UIObject> _childrenDict = [];
         private readonly List<FileIdentifier> _dependencyItems = [];
 
         public IBundleContainer? Container { get; set; }
@@ -56,7 +56,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public IEnumerable<string> Dependencies => _dependencyItems.Select(i => i.PathName);
         public IEnumerable<ObjectInfo> ObjectMetaItems => _metadata.Object;
 
-        public UIObject? this[long pathID] => _childremDict[pathID];
+        public UIObject? this[long pathID] => _childrenDict[pathID];
 
         public string GetDependency(int index)
         {
@@ -79,11 +79,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public EndianReader Create(ObjectInfo info)
         {
-            bool swapEndianess = SerializedFileHeader.HasEndianess(_header.Version) ?
+            bool swapEndian = SerializedFileHeader.HasEndianess(_header.Version) ?
                 _header.Endianess : _metadata.SwapEndianess;
             return new EndianReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
-                swapEndianess ? EndianType.BigEndian : EndianType.LittleEndian);
+                swapEndian ? EndianType.BigEndian : EndianType.LittleEndian);
         }
 
         private static void CombineFormats(FormatVersion generation, SerializedFileMetadata origin)
@@ -118,7 +118,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public void AddChild(UIObject obj)
         {
             Children.Add(obj);
-            _childremDict.Add(obj.FileID, obj);
+            _childrenDict.Add(obj.FileID, obj);
         }
 
         public void Dispose()

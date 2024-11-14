@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 	  <LangVersion>12</LangVersion>
-	  <Nullable>enable</Nullable>
+	  <Nullable>Enable</Nullable>
 	  <Version>1.0.0</Version>
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>

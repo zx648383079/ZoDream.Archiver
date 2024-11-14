@@ -1,47 +1,32 @@
-﻿using ZoDream.Shared.Interfaces;
-using System.Collections.Generic;
-using ZoDream.BundleExtractor.Producers;
+﻿using ZoDream.BundleExtractor.Engines;
 using ZoDream.BundleExtractor.Platforms;
-using ZoDream.BundleExtractor.Engines;
+using ZoDream.BundleExtractor.Producers;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
     public partial class BundleScheme
     {
-        public IBundlePlatform? TryGet(string packeageName)
+        public static void LoadWithPackage(IBundleOptions options)
         {
-            if (packeageName.EndsWith(".qjnn"))
+            if (string.IsNullOrWhiteSpace(options.Package))
             {
-                return new AndroidPlatformScheme(new PaperProducer(), 
-                    new CocosEngine());
+                return;
             }
-            if (packeageName.StartsWith("com.papegames."))
+            if (options.Package.EndsWith(".qjnn"))
             {
-                return new AndroidPlatformScheme(new PaperProducer(), new UnityEngine());
+                options.Platform ??= AndroidPlatformScheme.PlatformName;
+                options.Engine = CocosEngine.EngineName;
+                options.Producer = PaperProducer.ProducerName;
+                return;
             }
-            return null;
-        }
-
-        internal static bool TryGet(
-            string packeageName, 
-            out IBundleProducer producer,
-            out IBundleEngine engine)
-        {
-            if (packeageName.EndsWith(".qjnn"))
+            if (options.Package.StartsWith("com.papegames."))
             {
-                producer = new PaperProducer();
-                engine = new CocosEngine();
-                return true;
+                options.Platform ??= AndroidPlatformScheme.PlatformName;
+                options.Engine = UnityEngine.EngineName; ;
+                options.Producer = PaperProducer.ProducerName;
+                return;
             }
-            if (packeageName.StartsWith("com.papegames."))
-            {
-                producer = new PaperProducer();
-                engine = new UnityEngine();
-                return true;
-            }
-            producer = null;
-            engine = null;
-            return false;
         }
     }
 }

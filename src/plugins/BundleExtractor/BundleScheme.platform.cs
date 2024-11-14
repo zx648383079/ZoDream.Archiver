@@ -1,12 +1,25 @@
-﻿using ZoDream.Shared.Interfaces;
+﻿using System;
 using ZoDream.BundleExtractor.Platforms;
-using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
     public partial class BundleScheme
     {
-        internal static IBundlePlatform? GetPlatform(IEnumerable<string> fileItems)
+
+        internal static IBundlePlatform CreatePlatform(IBundleOptions options)
+        {
+            return options.Platform switch
+            {
+                WindowsPlatformScheme.PlatformName => new WindowsPlatformScheme(),
+                AndroidPlatformScheme.PlatformName => new AndroidPlatformScheme(),
+                IosPlatformScheme.PlatformName => new IosPlatformScheme(),
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        internal static bool TryGetPlatform(
+            IBundleSource fileItems, IBundleOptions options)
         {
             IBundlePlatform[] platforms = [
                 new WindowsPlatformScheme(),
@@ -15,12 +28,12 @@ namespace ZoDream.BundleExtractor
             ];
             foreach (var item in platforms)
             {
-                if (item.TryLoad(fileItems))
+                if (item.TryLoad(fileItems, options))
                 {
-                    return item;
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
     }

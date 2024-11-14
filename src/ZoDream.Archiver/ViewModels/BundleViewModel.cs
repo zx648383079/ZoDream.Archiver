@@ -10,8 +10,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
-using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -28,6 +27,9 @@ namespace ZoDream.Archiver.ViewModels
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
         }
+
+        private readonly AppViewModel _app = App.ViewModel;
+        private IBundleOptions? _options;
 
         private ObservableCollection<EntryViewModel> _fileItems = [];
 
@@ -56,22 +58,35 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapSetting(object? _)
         {
             var picker = new SettingDialog();
-            var res = await App.ViewModel.OpenDialogAsync(picker);
+            var res = await _app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
             {
                 return;
             }
             await picker.ViewModel.SaveAsync();
         }
-        private void TapView(object? _)
+        private async void TapView(object? _)
         {
-
+            if (FileItems.Count == 0)
+            {
+                await _app.ConfirmAsync("请选择文件");
+                return;
+            }
+            if (_options is null)
+            {
+                var scheme = new BundleScheme(_app.Logger);
+                _options = scheme.TryLoad(FileItems.Select(i => i.FullPath));
+            }
+            var dialog = new PropertyDialog();
+            dialog.ViewModel.Load(_options);
+            await _app.OpenDialogAsync(dialog);
         }
+
         private async void TapAdd(object? _)
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");
-            App.ViewModel.InitializePicker(picker);
+            _app.InitializePicker(picker);
             var items = await picker.PickMultipleFilesAsync();
             if (items is null)
             {
@@ -123,7 +138,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapAddFolder(object? _)
         {
             var picker = new FolderPicker();
-            App.ViewModel.InitializePicker(picker);
+            _app.InitializePicker(picker);
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             var folder = await picker.PickSingleFolderAsync();
             if (folder is null)
@@ -135,24 +150,36 @@ namespace ZoDream.Archiver.ViewModels
 
         private async void TapSaveAs(object? _)
         {
-            var app = App.ViewModel;
             var fileItems = FileItems.Select(i => i.FullPath).ToArray();
             if (!fileItems.Any())
             {
-                await app.ConfirmAsync("请选择文件");
+                await _app.ConfirmAsync("请选择文件");
                 return;
             }
             var picker = new BundleDialog();
             var model = picker.ViewModel;
-            var res = await app.OpenDialogAsync(picker);
+            if (_options is not null)
+            {
+                model.Password = _options.Password ?? string.Empty;
+                model.ApplicationId = _options.Package ?? string.Empty;
+            }
+            var res = await _app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
                 || !model.Verify())
             {
-                app.Warning("已取消操作！");
+                _app.Warning("已取消操作！");
                 return;
             }
-            var options = new ArchiveOptions(model.Password);
-            var token = app.ShowProgress("解压中...");
+            _options ??= new BundleOptions();
+            if (_options is BundleOptions o)
+            {
+                o.Password = model.Password;
+            }
+            if (!string.IsNullOrWhiteSpace(model.ApplicationId))
+            {
+                _options.Package = model.ApplicationId;
+            }
+            var token = _app.ShowProgress("解压中...");
             _ = Task.Factory.StartNew(() => {
                 var progress = 0D;
                 while (!token.IsCancellationRequested)
@@ -162,22 +189,15 @@ namespace ZoDream.Archiver.ViewModels
                     {
                         progress += .001;
                     }
-                    app.UpdateProgress(progress);
+                    _app.UpdateProgress(progress);
                 }
             }, token);
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();
                 watch.Start();
                 IBundleReader? reader;
-                var scheme = new BundleScheme(app.Logger);
-                if (!string.IsNullOrWhiteSpace(model.ApplicationId))
-                {
-                    reader = scheme.Load(scheme.TryGet(model.ApplicationId), 
-                        fileItems, options);
-                } else
-                {
-                    reader = scheme.Load(fileItems, options);
-                }
+                var scheme = new BundleScheme(_app.Logger);
+                reader = scheme.Load(fileItems, _options);
                 try
                 {
                     reader?.ExtractTo(model.FileName, model.ExtractMode, token);
@@ -189,7 +209,7 @@ namespace ZoDream.Archiver.ViewModels
                 reader?.Dispose();
                 watch.Stop();
                 Debug.WriteLine($"Use Time: {watch.Elapsed.TotalSeconds}");
-                app.CloseProgress();
+                _app.CloseProgress();
             }, token);
             
         }
