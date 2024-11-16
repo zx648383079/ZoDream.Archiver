@@ -11,6 +11,12 @@ namespace ZoDream.BundleExtractor
             {
                 CocosEngine.EngineName => new CocosEngine(),
                 UnityEngine.EngineName => new UnityEngine(),
+                UnrealEngine.EngineName => new UnrealEngine(),
+                GodotEngine.EngineName => new GodotEngine(),
+                KrKrEngine.EngineName => new KrKrEngine(),
+                RenPyEngine.EngineName => new RenPyEngine(),
+                RPGMakerEngine.EngineName => new RPGMakerEngine(),
+                TyranoEngine.EngineName => new TyranoEngine(),
                 _ => new UnknownEngine(),
             };
         }
@@ -20,7 +26,13 @@ namespace ZoDream.BundleExtractor
         {
             IBundleEngine[] items = [
                 new UnityEngine(),
-                new CocosEngine()
+                new CocosEngine(),
+                new UnrealEngine(),
+                new GodotEngine(),
+                new KrKrEngine(),
+                new RenPyEngine(),
+                new RPGMakerEngine(),
+                new TyranoEngine()
             ];
             foreach (var item in items)
             {

@@ -107,7 +107,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_CustomRenderQueue = reader.Reader.ReadInt32();
             }
 
-            if (reader.IsLoveAndDeepspace() || reader.IsShiningNikki() && version.Major >= 2019)
+            if (reader.IsLoveAndDeepSpace() || reader.IsShiningNikki() && version.Major >= 2019)
             {
                 var m_MaterialType = reader.Reader.ReadUInt32();
             }

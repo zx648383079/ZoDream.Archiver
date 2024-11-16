@@ -69,7 +69,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_StateMachineMotionSetIndex = reader.Reader.ReadUInt32();
             m_BodyMask = new HumanPoseMask(reader);
             m_SkeletonMask = new SkeletonMask(reader);
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 var m_GenericMask = new SkeletonMask(reader);
             }

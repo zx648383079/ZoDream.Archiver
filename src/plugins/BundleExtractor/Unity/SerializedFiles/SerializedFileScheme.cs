@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return new SerializedFileReader(r, filePath, options);
         }
 
-        private bool IsReadable(EndianReader reader)
+        private static bool IsReadable(EndianReader reader)
         {
             var initialPosition = reader.BaseStream.Position;
             if (reader.BaseStream.Position + SerializedFileHeader.HeaderMinSize > reader.BaseStream.Length)

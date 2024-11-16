@@ -20,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             reader.Reader.AlignStream();
             m_AudioClip = new PPtr<AudioClip>(reader);
 
-            MovieData = reader.ReadAsStrem();
+            MovieData = reader.ReadAsStream();
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

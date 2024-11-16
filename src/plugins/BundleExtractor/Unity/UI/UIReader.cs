@@ -3,6 +3,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Producers;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
@@ -112,7 +113,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
 
 
-        public Stream ReadAsStrem(long length = -1)
+        public Stream ReadAsStream(long length = -1)
         {
             if (length < 0)
             {
@@ -196,19 +197,33 @@ namespace ZoDream.BundleExtractor.Unity.UI
             throw new NotImplementedException();
         }
 
-        internal bool IsLoveAndDeepspace()
+        internal bool IsLoveAndDeepSpace()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Producer == PaperProducer.ProducerName && Options.Package.Contains("deepspace");
+        }
+
+        
+
+        internal bool IsShiningNikki()
+        {
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Producer == PaperProducer.ProducerName && Options.Package.Contains(".nn4");
         }
 
         internal bool IsArknightsEndfield()
         {
-            throw new NotImplementedException();
-        }
-
-        internal bool IsShiningNikki()
-        {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Package.Contains("endfield");
         }
 
         internal bool IsNaraka()

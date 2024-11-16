@@ -44,13 +44,22 @@ namespace ZoDream.BundleExtractor.Platforms
         {
             var content = File.ReadAllText(entry);
             var match = Regex.Match(content, @"package=""([a-zA-Z\d\.-_]+)""");
-            if (match.Success)
+            if (!match.Success)
             {
-                options.Package = match.Groups[1].Value;
-                BundleScheme.LoadWithPackage(options);
+                return false;
+            }
+            options.Package = match.Groups[1].Value;
+            BundleScheme.LoadWithPackage(options);
+            if (!string.IsNullOrWhiteSpace(options.DisplayName))
+            {
                 return true;
             }
-            return false;
+            match = Regex.Match(content, @"\<application[^\<\>]+?android:label=""(.+?)""");
+            if (match.Success)
+            {
+                options.DisplayName = match.Groups[1].Value;
+            }
+            return true;
         }
 
     }

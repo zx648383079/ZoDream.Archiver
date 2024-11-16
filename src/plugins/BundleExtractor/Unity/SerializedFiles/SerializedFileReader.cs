@@ -31,7 +31,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 ref ObjectInfo objectInfo = ref _metadata.Object[i];
                 reader.BaseStream.Position = _header.DataOffset + objectInfo.ByteStart;
-                byte[] objectData = new byte[objectInfo.ByteSize];
+                var objectData = new byte[objectInfo.ByteSize];
                 reader.BaseStream.ReadExactly(objectData);
                 objectInfo.ObjectData = objectData;
             }

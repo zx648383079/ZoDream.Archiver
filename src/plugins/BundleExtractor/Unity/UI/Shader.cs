@@ -291,7 +291,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             gpuProgramID = reader.Reader.ReadInt32();
             m_Tags = new SerializedTagMap(reader);
             m_LOD = reader.Reader.ReadInt32();
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 int numOverrideKeywordAndStage = reader.Reader.ReadInt32();
                 var m_OverrideKeywordAndStage = new List<KeyValuePair<string, uint>>();
@@ -630,7 +630,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 var m_CodeHash = new Hash128(reader);
             }
@@ -1122,7 +1122,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
                 }
 
-                if (reader.IsLoveAndDeepspace())
+                if (reader.IsLoveAndDeepSpace())
                 {
                     var codeOffsets = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
                     var codeCompressedLengths = reader.Reader.ReadArrayArray(r => r.ReadUInt32());

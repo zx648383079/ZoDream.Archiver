@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public TextAsset(UIReader reader) : base(reader)
         {
-            Script = reader.ReadAsStrem();
+            Script = reader.ReadAsStream();
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

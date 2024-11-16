@@ -323,7 +323,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             hasNormals = reader.Reader.ReadBoolean();
             hasTangents = reader.Reader.ReadBoolean();
-            if (!reader.IsLoveAndDeepspace() && version.GreaterThanOrEquals(4, 3)) //4.3 and up
+            if (!reader.IsLoveAndDeepSpace() && version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 reader.Reader.AlignStream();
             }
@@ -374,7 +374,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     shapes.Add(new MeshBlendShape(reader));
                 }
 
-                if (reader.IsLoveAndDeepspace())
+                if (reader.IsLoveAndDeepSpace())
                 {
                     reader.Reader.AlignStream();
                 }
@@ -387,7 +387,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
 
                 fullWeights = reader.ReadArray(r => r.ReadSingle());
-                if (reader.IsLoveAndDeepspace())
+                if (reader.IsLoveAndDeepSpace())
                 {
                     var varintVerticesSize = reader.Reader.ReadInt32();
                     if (varintVerticesSize > 0)

@@ -46,7 +46,7 @@ namespace ZoDream.BundleExtractor
             return reader;
         }
 
-        public IArchiveReader? OpenBundle(Stream stream, IArchiveOptions? options = null)
+        public static IArchiveReader? OpenBundle(Stream stream, IArchiveOptions? options = null)
         {
             var pos = stream.Position;
             var reader = new EndianReader(stream, Shared.Models.EndianType.BigEndian);
@@ -68,15 +68,6 @@ namespace ZoDream.BundleExtractor
 
         #endregion
 
-        /*
-         * 预处理流程
-         * 1. 解压 bundle
-         * 2. 合并 split 文件
-         * 3. 判断 SerializedFile 建立文件依赖表
-         * 4. 根据依赖表拆分文件组进行处理
-         */
-
-
         public static Stream OpenRead(string fileName)
         {
             var name = Path.GetFileName(fileName);
@@ -84,6 +75,12 @@ namespace ZoDream.BundleExtractor
             {
                 return File.OpenRead(fileName);
             }
+            return OpenSplitStream(fileName);
+        }
+
+        private static Stream OpenSplitStream(string fileName)
+        {
+            var name = Path.GetFileName(fileName);
             var folder = Path.GetDirectoryName(fileName);
             var i = name.LastIndexOf('t');
             var items =

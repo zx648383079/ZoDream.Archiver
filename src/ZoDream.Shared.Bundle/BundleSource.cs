@@ -76,6 +76,10 @@ namespace ZoDream.Shared.Bundle
 
         private static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
         {
+            if (patternItems.Length == 0)
+            {
+                return true;
+            }
             foreach (var item in patternItems)
             {
                 if (FileSystemName.MatchesSimpleExpression(item, name, true))

@@ -1373,7 +1373,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_ACLClip = new MHYACLClip();
                 m_ACLClip.Read(reader);
             }
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 m_ACLClip = new LnDACLClip();
                 m_ACLClip.Read(reader);
@@ -1507,7 +1507,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public ClipMuscleConstant(UIReader reader)
         {
             var version = reader.Version;
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 m_StartX = reader.ReadXForm();
                 if (version.GreaterThanOrEquals(5, 5))//5.5 and up
@@ -1893,7 +1893,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 m_Legacy = true;
             }
-            if (reader.IsLoveAndDeepspace())
+            if (reader.IsLoveAndDeepSpace())
             {
                 reader.Reader.AlignStream();
                 var m_aclTransformCache = reader.ReadArray(r => r.ReadByte());

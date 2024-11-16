@@ -18,6 +18,10 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         public string? Package { get; set; }
         /// <summary>
+        /// 应用显示名称
+        /// </summary>
+        public string? DisplayName { get; set; }
+        /// <summary>
         /// 制作人
         /// </summary>
         public string? Producer { get; set; }
@@ -52,6 +56,7 @@ namespace ZoDream.Shared.Bundle
             Producer = o.Producer;
             Version = o.Version;
             Entrance = o.Entrance;
+            DisplayName = o.DisplayName;
         }
     }
 }

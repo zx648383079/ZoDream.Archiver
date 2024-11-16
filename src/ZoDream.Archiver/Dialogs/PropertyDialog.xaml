@@ -30,6 +30,7 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock Style="{StaticResource InlineHeaderTb}" Text="平台：" />
@@ -67,18 +68,27 @@
         <TextBlock
             Grid.Row="4"
             Style="{StaticResource InlineHeaderTb}"
-            Text="版本：" />
+            Text="名称：" />
         <TextBlock
             Grid.Row="4"
             Grid.Column="1"
             Style="{StaticResource InlineTextTb}"
-            Text="{Binding Version}" />
+            Text="{Binding DisplayName}" />
         <TextBlock
             Grid.Row="5"
             Style="{StaticResource InlineHeaderTb}"
-            Text="入口：" />
+            Text="版本：" />
         <TextBlock
             Grid.Row="5"
+            Grid.Column="1"
+            Style="{StaticResource InlineTextTb}"
+            Text="{Binding Version}" />
+        <TextBlock
+            Grid.Row="6"
+            Style="{StaticResource InlineHeaderTb}"
+            Text="入口：" />
+        <TextBlock
+            Grid.Row="6"
             Grid.Column="1"
             Style="{StaticResource InlineTextTb}"
             Text="{Binding Entrance}" />

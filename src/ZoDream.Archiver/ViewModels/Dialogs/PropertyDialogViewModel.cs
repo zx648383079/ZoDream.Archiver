@@ -42,6 +42,14 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _package, value);
         }
 
+        private string? _displayName;
+
+        public string? DisplayName {
+            get => _displayName;
+            set => Set(ref _displayName, value);
+        }
+
+
         private string? _producer;
 
         public string? Producer {
@@ -77,6 +85,7 @@ namespace ZoDream.Archiver.ViewModels
             Platform = options.Platform;
             Entrance = options.Entrance;
             Dictionary = options.Dictionary;
+            DisplayName = options.DisplayName;
         }
 
     }

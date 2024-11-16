@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ZoDream.Shared.Bundle;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {

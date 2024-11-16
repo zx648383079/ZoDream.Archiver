@@ -1,5 +1,5 @@
-﻿using BundleExtractor.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
