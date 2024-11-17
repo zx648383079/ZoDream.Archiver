@@ -26,9 +26,11 @@ namespace ZoDream.Archiver.ViewModels
             ViewCommand = new RelayCommand(TapView);
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
+            _scheme = new(_app.Logger);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
+        private readonly BundleScheme _scheme;
         private IBundleOptions? _options;
 
         private ObservableCollection<EntryViewModel> _fileItems = [];
@@ -72,11 +74,7 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
-            if (_options is null)
-            {
-                var scheme = new BundleScheme(_app.Logger);
-                _options = scheme.TryLoad(FileItems.Select(i => i.FullPath));
-            }
+            _options ??= _scheme.TryLoad(FileItems.Select(i => i.FullPath));
             var dialog = new PropertyDialog();
             dialog.ViewModel.Load(_options);
             await _app.OpenDialogAsync(dialog);
@@ -158,11 +156,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             var picker = new BundleDialog();
             var model = picker.ViewModel;
-            if (_options is not null)
-            {
-                model.Password = _options.Password ?? string.Empty;
-                model.ApplicationId = _options.Package ?? string.Empty;
-            }
+            model.Load(_scheme, _options);
             var res = await _app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
                 || !model.Verify())
@@ -171,14 +165,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             _options ??= new BundleOptions();
-            if (_options is BundleOptions o)
-            {
-                o.Password = model.Password;
-            }
-            if (!string.IsNullOrWhiteSpace(model.ApplicationId))
-            {
-                _options.Package = model.ApplicationId;
-            }
+            model.Unload(_options);
             var token = _app.ShowProgress("解压中...");
             _ = Task.Factory.StartNew(() => {
                 var progress = 0D;
@@ -196,8 +183,7 @@ namespace ZoDream.Archiver.ViewModels
                 var watch = new Stopwatch();
                 watch.Start();
                 IBundleReader? reader;
-                var scheme = new BundleScheme(_app.Logger);
-                reader = scheme.Load(fileItems, _options);
+                reader = _scheme.Load(fileItems, _options);
                 try
                 {
                     reader?.ExtractTo(model.FileName, model.ExtractMode, token);

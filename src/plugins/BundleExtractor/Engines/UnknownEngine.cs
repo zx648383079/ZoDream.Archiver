@@ -5,6 +5,7 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class UnknownEngine : IBundleEngine
     {
+        public string AliasName => string.Empty;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

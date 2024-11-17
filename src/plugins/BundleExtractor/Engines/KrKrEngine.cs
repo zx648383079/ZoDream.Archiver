@@ -6,7 +6,9 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class KrKrEngine : IBundleEngine
     {
-        public const string EngineName = "krkr";
+        internal const string EngineName = "krkr";
+
+        public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

@@ -4,7 +4,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class BundleScheme(ILogger logger) : IBundleScheme
+    public partial class BundleScheme : IBundleScheme
     {
         public IBundleReader? Load(IEnumerable<string> fileItems, IArchiveOptions? options = null)
         {
@@ -16,8 +16,8 @@ namespace ZoDream.BundleExtractor
             {
                 return null;
             }
-            logger.Info(option.Platform);
-            return new BundleReader(source, option, logger);
+            Get<ILogger>().Info(option.Platform);
+            return new BundleReader(source, option, this);
         }
 
         public IBundleOptions? TryLoad(IEnumerable<string> fileItems)
@@ -29,21 +29,21 @@ namespace ZoDream.BundleExtractor
 
         public void Load(IBundleSource fileItems, IBundleOptions option)
         {
-            if (string.IsNullOrWhiteSpace(option.Package))
+            if (!string.IsNullOrWhiteSpace(option.Package))
             {
                 LoadWithPackage(option);
             }
             if (string.IsNullOrWhiteSpace(option.Platform))
             {
-                TryGetPlatform(fileItems, option);
+                TryGet<IBundlePlatform>(fileItems, option);
             }
             if (string.IsNullOrWhiteSpace(option.Producer))
             {
-                TryGetProducer(fileItems, option);
+                TryGet<IBundleProducer>(fileItems, option);
             }
             if (string.IsNullOrWhiteSpace(option.Engine))
             {
-                TryGetEngine(fileItems, option);
+                TryGet<IBundleEngine>(fileItems, option);
             }
         }
     }

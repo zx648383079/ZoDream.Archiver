@@ -6,7 +6,8 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class TyranoEngine : IBundleEngine
     {
-        public const string EngineName = "Tyrano";
+        internal const string EngineName = "Tyrano";
+        public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

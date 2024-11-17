@@ -6,7 +6,9 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class GodotEngine : IBundleEngine
     {
-        public const string EngineName = "Godot";
+        internal const string EngineName = "Godot";
+
+        public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

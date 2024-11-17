@@ -2,10 +2,9 @@
 
 namespace ZoDream.BundleExtractor.Platforms
 {
-    public class IosPlatformScheme : IBundlePlatform
+    public class MacPlatformScheme : IBundlePlatform
     {
-        internal const string PlatformName = "IOS";
-
+        internal const string PlatformName = "Mac"; 
         public string AliasName => PlatformName;
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

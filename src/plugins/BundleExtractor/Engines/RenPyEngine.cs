@@ -6,7 +6,9 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class RenPyEngine : IBundleEngine
     {
-        public const string EngineName = "RenPy";
+        internal const string EngineName = "RenPy";
+
+        public string AliasName => EngineName;
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {

@@ -2,12 +2,9 @@
 
 namespace ZoDream.BundleExtractor.Platforms
 {
-    public class IosPlatformScheme : IBundlePlatform
+    public class UnknownPlatform : IBundlePlatform
     {
-        internal const string PlatformName = "IOS";
-
-        public string AliasName => PlatformName;
-
+        public string AliasName => string.Empty;
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
             return false;

@@ -10,7 +10,9 @@ namespace ZoDream.BundleExtractor.Engines
     public class CocosEngine : IBundleEngine
     {
 
-        public const string EngineName = "Cocos";
+        internal const string EngineName = "Cocos";
+
+        public string AliasName => EngineName;
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {

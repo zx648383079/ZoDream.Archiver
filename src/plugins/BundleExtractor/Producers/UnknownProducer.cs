@@ -6,6 +6,8 @@ namespace ZoDream.BundleExtractor.Producers
 {
     public class UnknownProducer : IBundleProducer
     {
+
+        public string AliasName => string.Empty;
         public IList<DependencyDictionary> DependencyItems { get; private set; } = [];
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

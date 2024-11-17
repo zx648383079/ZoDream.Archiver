@@ -6,7 +6,9 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class RPGMakerEngine : IBundleEngine
     {
-        public const string EngineName = "RPG Maker";
+        internal const string EngineName = "RPG Maker";
+
+        public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

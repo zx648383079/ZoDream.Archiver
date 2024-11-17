@@ -3,6 +3,6 @@
     public interface IBundleService
     {
         public void Add<T>(T instance);
-        public T? Get<T>();
+        public T Get<T>();
     }
 }

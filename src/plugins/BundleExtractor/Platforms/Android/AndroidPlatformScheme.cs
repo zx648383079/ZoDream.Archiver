@@ -7,7 +7,9 @@ namespace ZoDream.BundleExtractor.Platforms
 {
     public class AndroidPlatformScheme: IBundlePlatform
     {
-        public const string PlatformName = "Android";
+        internal const string PlatformName = "Android";
+
+        public string AliasName => PlatformName;
 
         private const string ManifestName = "AndroidManifest.xml";
         private const string AssetName = "assets";

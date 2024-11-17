@@ -5,7 +5,9 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class UnrealEngine : IBundleEngine
     {
-        public const string EngineName = "Unreal";
+        internal const string EngineName = "Unreal";
+
+        public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
         {
             foreach (var item in fileItems)

@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace ZoDream.Shared.Bundle
+﻿namespace ZoDream.Shared.Bundle
 {
-    public interface IBundleProducer
+    public interface IBundleProducer: IBundleLoader
     {
-        public bool TryLoad(IBundleSource fileItems, IBundleOptions options);
     }
 }

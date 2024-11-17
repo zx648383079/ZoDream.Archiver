@@ -11,7 +11,8 @@ namespace ZoDream.BundleExtractor.Engines
 {
     public class UnityEngine : IBundleEngine
     {
-        public const string EngineName = "Unity";
+        internal const string EngineName = "Unity";
+        public string AliasName => EngineName;
 
         private const string Il2CppGameAssemblyName = "libil2cpp.so";
         private const string AndroidAssemblyName = "libunity.so";
@@ -32,7 +33,7 @@ namespace ZoDream.BundleExtractor.Engines
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
-            if (fileItems.GetFiles(AndroidAssemblyName).Any())
+            if (fileItems.GetFiles(AndroidAssemblyName, Il2CppGameAssemblyName).Any())
             {
                 options.Platform = AndroidPlatformScheme.PlatformName;
                 options.Engine = EngineName;

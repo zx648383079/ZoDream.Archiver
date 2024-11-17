@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.BundleExtractor.Producers;
+﻿using System.IO;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Platforms
 {
     public class WindowsPlatformScheme : IBundlePlatform
     {
-        public const string PlatformName = "Windows";
+        internal const string PlatformName = "Windows";
+
+        public string AliasName => PlatformName;
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {

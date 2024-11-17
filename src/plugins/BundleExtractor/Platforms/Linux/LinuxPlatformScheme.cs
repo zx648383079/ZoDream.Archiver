@@ -2,10 +2,9 @@
 
 namespace ZoDream.BundleExtractor.Platforms
 {
-    public class IosPlatformScheme : IBundlePlatform
+    public class LinuxPlatformScheme : IBundlePlatform
     {
-        internal const string PlatformName = "IOS";
-
+        internal const string PlatformName = "Linux";
         public string AliasName => PlatformName;
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

@@ -1,16 +1,16 @@
 ﻿using System.Threading;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    public class BundleReader(BundleSource fileItems, IBundleOptions options, ILogger logger) : IBundleReader
+    public class BundleReader(BundleSource fileItems, 
+        IBundleOptions options, BundleScheme scheme) : IBundleReader
     {
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
-            var engine = BundleScheme.CreateEngine(options);
+            var engine = scheme.Get<IBundleEngine>(options);
             if (engine is null)
             {
                 return;

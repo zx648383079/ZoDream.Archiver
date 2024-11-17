@@ -1,7 +1,6 @@
 ﻿namespace ZoDream.Shared.Bundle
 {
-    public interface IBundlePlatform
+    public interface IBundlePlatform: IBundleLoader
     {
-        public bool TryLoad(IBundleSource fileItems, IBundleOptions options);
     }
 }
