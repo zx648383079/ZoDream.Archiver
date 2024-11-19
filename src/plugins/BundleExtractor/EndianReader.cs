@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor
@@ -76,9 +78,23 @@ namespace ZoDream.BundleExtractor
             return array;
         }
 
+        public static string ReadAlignedString(this EndianReader reader)
+        {
+            var result = string.Empty;
+            var length = reader.ReadInt32();
+            if (length > 0 && length <= reader.RemainingLength)
+            {
+                var stringData = reader.ReadBytes(length);
+                result = Encoding.UTF8.GetString(stringData);
+            }
+            reader.AlignStream();
+            return result;
+        }
+
         public static void AlignStream(this EndianReader reader)
         {
-            reader.BaseStream.Position = checked(reader.BaseStream.Position + 3) & -4;
+            // reader.BaseStream.Position = checked(reader.BaseStream.Position + 3) & -4;
+            reader.AlignStream(4);
         }
 
         public static void AlignStream(this EndianReader reader, int alignment)
@@ -89,6 +105,15 @@ namespace ZoDream.BundleExtractor
             {
                 reader.BaseStream.Seek(alignment - mod, System.IO.SeekOrigin.Current);
             }
+        }
+
+        public static Stream ReadAsStream(this EndianReader reader, long length = -1)
+        {
+            if (length < 0)
+            {
+                length = reader.ReadInt32();
+            }
+            return new PartialStream(reader.BaseStream, length);
         }
     }
 }

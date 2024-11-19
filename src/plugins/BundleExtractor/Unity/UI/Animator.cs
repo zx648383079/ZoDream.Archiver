@@ -19,63 +19,63 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 var m_FBIKAvatar = new PPtr<UIObject>(reader); //FBIKAvatar placeholder
             }
-            var m_CullingMode = reader.Reader.ReadInt32();
+            var m_CullingMode = reader.ReadInt32();
 
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
             {
-                var m_UpdateMode = reader.Reader.ReadInt32();
+                var m_UpdateMode = reader.ReadInt32();
             }
 
             if (reader.IsSR())
             {
-                var m_MotionSkeletonMode = reader.Reader.ReadInt32();
+                var m_MotionSkeletonMode = reader.ReadInt32();
             }
 
-            var m_ApplyRootMotion = reader.Reader.ReadBoolean();
+            var m_ApplyRootMotion = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 5) && version.LessThan(5)) //4.5 and up - 5.0 down
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
 
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                var m_LinearVelocityBlending = reader.Reader.ReadBoolean();
+                var m_LinearVelocityBlending = reader.ReadBoolean();
                 if (version.GreaterThanOrEquals(2021, 2)) //2021.2 and up
                 {
-                    var m_StabilizeFeet = reader.Reader.ReadBoolean();
+                    var m_StabilizeFeet = reader.ReadBoolean();
                 }
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
 
             if (version.LessThan(4, 5)) //4.5 down
             {
-                var m_AnimatePhysics = reader.Reader.ReadBoolean();
+                var m_AnimatePhysics = reader.ReadBoolean();
             }
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                m_HasTransformHierarchy = reader.Reader.ReadBoolean();
+                m_HasTransformHierarchy = reader.ReadBoolean();
             }
 
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
             {
-                var m_AllowConstantClipSamplingOptimization = reader.Reader.ReadBoolean();
+                var m_AllowConstantClipSamplingOptimization = reader.ReadBoolean();
             }
             if (version.GreaterThanOrEquals(5) && version.LessThan(2018)) //5.0 and up - 2018 down
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
 
             if (version.GreaterThanOrEquals(2018)) //2018 and up
             {
-                var m_KeepAnimatorControllerStateOnDisable = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_KeepAnimatorControllerStateOnDisable = reader.ReadBoolean();
+                reader.AlignStream();
             }
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            throw new System.NotImplementedException();
+            // TODO
         }
     }
 }

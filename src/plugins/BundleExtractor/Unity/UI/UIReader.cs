@@ -10,17 +10,21 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public record UIReader(EndianReader Reader,
-        ObjectInfo Data,
-        ISerializedFile Source,
-        IBundleOptions Options)
+    public class UIReader(EndianReader reader,
+        ObjectInfo data,
+        ISerializedFile source,
+        IBundleOptions options): EndianReader(reader.BaseStream, reader.EndianType, reader.IsAlignArray)
     {
+
+        public ObjectInfo Data { get; private set; } = data;
+        public ISerializedFile Source { get; private set; } = source;
+        public IBundleOptions Options { get; private set; } = options;
 
         public ElementIDType Type
         {
             get
             {
-                if (Enum.IsDefined(typeof(ElementIDType), Data.ClassID))
+                if (Enum.IsDefined(typeof(ElementIDType), (int)Data.ClassID))
                 {
                     return (ElementIDType)Data.ClassID;
                 }
@@ -37,33 +41,45 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public UnityVersion Version => Source.UnityVersion;
         public BuildTarget Platform => Source.Platform;
 
-        public long Position
+
+        public Stream OpenResource(string fileName)
         {
-            get => Reader.BaseStream.Position;
-            set => Reader.BaseStream.Position = value;
+            return Source.Container!.OpenResource(fileName, Source);
         }
-        public long Length => Reader.BaseStream.Length;
-        public long Remaining => Length - Reader.BaseStream.Position;
+
+        public Stream? OpenResource(StreamingInfo info)
+        {
+            if (string.IsNullOrWhiteSpace(info.path))
+            {
+                return null;
+            }
+            var stream = OpenResource(info.path);
+            if (stream is null)
+            {
+                return null;
+            }
+            return new PartialStream(stream, info.offset, info.size);
+        }
 
         public Vector4 ReadVector4()
         {
-            return new Vector4(Reader.ReadSingle(), Reader.ReadSingle(),
-                Reader.ReadSingle(), Reader.ReadSingle());
+            return new Vector4(ReadSingle(), ReadSingle(),
+                ReadSingle(), ReadSingle());
         }
 
         public Vector2 ReadVector2()
         {
-            return new Vector2(Reader.ReadSingle(), Reader.ReadSingle());
+            return new Vector2(ReadSingle(), ReadSingle());
         }
         public Vector3 ReadVector3()
         {
-            if (Version.Major > 5 || Version.Major == 5 && Version.Minor >= 4)
+            if (Version.GreaterThanOrEquals(5, 4))
             {
-                return new Vector3(Reader.ReadSingle(), Reader.ReadSingle(), Reader.ReadSingle());
+                return new Vector3(ReadSingle(), ReadSingle(), ReadSingle());
             }
             else
             {
-                var res = new Vector4(Reader.ReadSingle(), Reader.ReadSingle(), Reader.ReadSingle(), Reader.ReadSingle());
+                var res = new Vector4(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle());
                 return new(res.X, res.Y, res.Z);
                 //return new Vector4(Reader.ReadSingle(), Reader.ReadSingle(), Reader.ReadSingle(), Reader.ReadSingle());
             }
@@ -91,7 +107,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             if (length == 0)
             {
-                length = Reader.ReadInt32();
+                length = ReadInt32();
             }
             var items = new Vector3[length];
             for (int i = 0; i < length; i++)
@@ -103,7 +119,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public XForm<Vector3>[] ReadXFormArray()
         {
-            var length = Reader.ReadInt32();
+            var length = ReadInt32();
             var items = new XForm<Vector3>[length];
             for (int i = 0; i < length; i++)
             {
@@ -112,41 +128,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return items;
         }
 
-
-        public Stream ReadAsStream(long length = -1)
-        {
-            if (length < 0)
-            {
-                length = Reader.ReadInt32();
-            }
-            return new PartialStream(Reader.BaseStream, length);
-        }
-
-        public T[] ReadArray<T>(Func<EndianReader, T> cb)
-        {
-            return Reader.ReadArray(cb);
-        }
-        public T[] ReadArray<T>(int length, Func<EndianReader, T> cb)
-        {
-            var items = new T[length];
-            for (int i = 0; i < length; i++)
-            {
-                items[i] = cb.Invoke(Reader);
-            }
-            return items;
-        }
-        public string ReadAlignedString()
-        {
-            var result = "";
-            var length = Reader.ReadInt32();
-            if (length > 0 && length <= Remaining)
-            {
-                var stringData = Reader.ReadBytes(length);
-                result = Encoding.UTF8.GetString(stringData);
-            }
-            Reader.AlignStream();
-            return result;
-        }
+        
         public Matrix4x4 ReadMatrix()
         {
             var data = new Matrix4x4();
@@ -154,7 +136,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 for (int c = 0; c < 4; c++)
                 {
-                    data[r, c] = Reader.ReadSingle();
+                    data[r, c] = ReadSingle();
                 }
             }
             return data;
@@ -162,7 +144,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Matrix4x4[] ReadMatrixArray()
         {
-            return Reader.ReadArray(_ => ReadMatrix());
+            return reader.ReadArray(_ => ReadMatrix());
         }
 
         public static Vector3 Parse(Vector4 data)
@@ -194,7 +176,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         internal bool IsSR()
         {
-            throw new NotImplementedException();
+            return false;
+        }
+
+        internal bool IsSRCB2()
+        {
+            return false;
         }
 
         internal bool IsLoveAndDeepSpace()
@@ -228,60 +215,82 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         internal bool IsNaraka()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Package.Contains("naraka");
         }
 
         internal bool IsBH3()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Producer == MiHoYoProducer.ProducerName
+                && Options.Package.Contains("bh3");
+        }
+
+        internal bool IsBH3Group()
+        {
+            return false;
         }
 
         internal bool IsExAstris()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Package.Contains("yinjiao");
         }
 
         internal bool IsZZZCB1()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Producer == MiHoYoProducer.ProducerName
+                && Options.Package.Contains("zenless");
         }
 
         
         internal bool IsGICB1()
         {
-            throw new NotImplementedException();
+            return false;
         }
         internal bool IsGIPack()
         {
-            throw new NotImplementedException();
+            return false;
         }
         internal bool IsGI()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(Options.Package))
+            {
+                return false;
+            }
+            return Options.Producer == MiHoYoProducer.ProducerName 
+                && Options.Package.Contains("genshin");
         }
-        internal bool IsBH3Group()
-        {
-            throw new NotImplementedException();
-        }
+     
         internal bool IsGICB2()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         internal bool IsGICB3()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         internal bool IsGICB3Pre()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
-        internal bool IsSRCB2()
-        {
-            throw new NotImplementedException();
-        }
+     
 
         internal bool IsGISubGroup()
         {

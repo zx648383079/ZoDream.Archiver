@@ -72,7 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
                 else
                 {
-                    m_UVInfo = reader.Reader.ReadUInt32();
+                    m_UVInfo = reader.ReadUInt32();
                 }
             }
         }
@@ -93,19 +93,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            channelMask = reader.Reader.ReadUInt32();
-            offset = reader.Reader.ReadUInt32();
+            channelMask = reader.ReadUInt32();
+            offset = reader.ReadUInt32();
 
             if (version.LessThan(4)) //4.0 down
             {
-                stride = reader.Reader.ReadUInt32();
-                align = reader.Reader.ReadUInt32();
+                stride = reader.ReadUInt32();
+                align = reader.ReadUInt32();
             }
             else
             {
-                stride = reader.Reader.ReadByte();
-                dividerOp = reader.Reader.ReadByte();
-                frequency = reader.Reader.ReadUInt16();
+                stride = reader.ReadByte();
+                dividerOp = reader.ReadByte();
+                frequency = reader.ReadUInt16();
             }
         }
     }
@@ -121,10 +121,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ChannelInfo(UIReader reader)
         {
-            stream = reader.Reader.ReadByte();
-            offset = reader.Reader.ReadByte();
-            format = reader.Reader.ReadByte();
-            dimension = (byte)(reader.Reader.ReadByte() & 0xF);
+            stream = reader.ReadByte();
+            offset = reader.ReadByte();
+            format = reader.ReadByte();
+            dimension = (byte)(reader.ReadByte() & 0xF);
         }
     }
 
@@ -142,14 +142,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThan(2018))//2018 down
             {
-                m_CurrentChannels = reader.Reader.ReadUInt32();
+                m_CurrentChannels = reader.ReadUInt32();
             }
 
-            m_VertexCount = reader.Reader.ReadUInt32();
+            m_VertexCount = reader.ReadUInt32();
 
             if (version.GreaterThanOrEquals(4)) //4.0 and up
             {
-                var m_ChannelsSize = reader.Reader.ReadInt32();
+                var m_ChannelsSize = reader.ReadInt32();
                 m_Channels = new List<ChannelInfo>();
                 for (int i = 0; i < m_ChannelsSize; i++)
                 {
@@ -159,7 +159,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThan(5)) //5.0 down
             {
-                var numStreams = version.LessThan(4) ? 4 : reader.Reader.ReadInt32();
+                var numStreams = version.LessThan(4) ? 4 : reader.ReadInt32();
                 m_Streams = new List<StreamInfo>();
                 for (int i = 0; i < numStreams; i++)
                 {
@@ -176,8 +176,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 GetStreams(version);
             }
 
-            m_DataSize = reader.Reader.ReadArray(r => r.ReadByte());
-            reader.Reader.AlignStream();
+            m_DataSize = reader.ReadArray(r => r.ReadByte());
+            reader.AlignStream();
         }
 
         private void GetStreams(UnityVersion version)
@@ -294,7 +294,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             vertex = reader.ReadVector3();
             normal = reader.ReadVector3();
             tangent = reader.ReadVector3();
-            index = reader.Reader.ReadUInt32();
+            index = reader.ReadUInt32();
         }
     }
 
@@ -314,18 +314,18 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 name = reader.ReadAlignedString();
             }
-            firstVertex = reader.Reader.ReadUInt32();
-            vertexCount = reader.Reader.ReadUInt32();
+            firstVertex = reader.ReadUInt32();
+            vertexCount = reader.ReadUInt32();
             if (version.LessThan(4, 3)) //4.3 down
             {
                 var aabbMinDelta = reader.ReadVector3();
                 var aabbMaxDelta = reader.ReadVector3();
             }
-            hasNormals = reader.Reader.ReadBoolean();
-            hasTangents = reader.Reader.ReadBoolean();
+            hasNormals = reader.ReadBoolean();
+            hasTangents = reader.ReadBoolean();
             if (!reader.IsLoveAndDeepSpace() && version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
         }
     }
@@ -340,9 +340,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public MeshBlendShapeChannel(UIReader reader)
         {
             name = reader.ReadAlignedString();
-            nameHash = reader.Reader.ReadUInt32();
-            frameIndex = reader.Reader.ReadInt32();
-            frameCount = reader.Reader.ReadInt32();
+            nameHash = reader.ReadUInt32();
+            frameIndex = reader.ReadInt32();
+            frameCount = reader.ReadInt32();
         }
     }
 
@@ -360,14 +360,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                int numVerts = reader.Reader.ReadInt32();
+                int numVerts = reader.ReadInt32();
                 vertices = new List<BlendShapeVertex>();
                 for (int i = 0; i < numVerts; i++)
                 {
                     vertices.Add(new BlendShapeVertex(reader));
                 }
 
-                int numShapes = reader.Reader.ReadInt32();
+                int numShapes = reader.ReadInt32();
                 shapes = new List<MeshBlendShape>();
                 for (int i = 0; i < numShapes; i++)
                 {
@@ -376,10 +376,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
                 if (reader.IsLoveAndDeepSpace())
                 {
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
 
-                int numChannels = reader.Reader.ReadInt32();
+                int numChannels = reader.ReadInt32();
                 channels = new List<MeshBlendShapeChannel>();
                 for (int i = 0; i < numChannels; i++)
                 {
@@ -389,13 +389,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 fullWeights = reader.ReadArray(r => r.ReadSingle());
                 if (reader.IsLoveAndDeepSpace())
                 {
-                    var varintVerticesSize = reader.Reader.ReadInt32();
+                    var varintVerticesSize = reader.ReadInt32();
                     if (varintVerticesSize > 0)
                     {
                         var pos = reader.Position;
                         while (reader.Position < pos + varintVerticesSize)
                         {
-                            var value = reader.Reader.ReadUInt32();
+                            var value = reader.ReadUInt32();
                             var index = value & 0x0FFFFFFF;
                             var flags = value >> 0x1D;
                             var blendShapeVertex = new BlendShapeVertex
@@ -407,7 +407,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                             };
                             vertices.Add(blendShapeVertex);
                         }
-                        reader.Reader.AlignStream();
+                        reader.AlignStream();
 
                         var stride = (uint)(varintVerticesSize / vertices.Count);
                         foreach (var shape in shapes)
@@ -424,14 +424,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             else
             {
-                var m_ShapesSize = reader.Reader.ReadInt32();
+                var m_ShapesSize = reader.ReadInt32();
                 var m_Shapes = new List<MeshBlendShape>();
                 for (int i = 0; i < m_ShapesSize; i++)
                 {
                     m_Shapes.Add(new MeshBlendShape(reader));
                 }
-                reader.Reader.AlignStream();
-                var m_ShapeVerticesSize = reader.Reader.ReadInt32();
+                reader.AlignStream();
+                var m_ShapeVerticesSize = reader.ReadInt32();
                 var m_ShapeVertices = new List<BlendShapeVertex>(); //MeshBlendShapeVertex
                 for (int i = 0; i < m_ShapeVerticesSize; i++)
                 {
@@ -466,24 +466,24 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            firstByte = reader.Reader.ReadUInt32();
-            indexCount = reader.Reader.ReadUInt32();
-            topology = (GfxPrimitiveType)reader.Reader.ReadInt32();
+            firstByte = reader.ReadUInt32();
+            indexCount = reader.ReadUInt32();
+            topology = (GfxPrimitiveType)reader.ReadInt32();
 
             if (version.LessThan(4)) //4.0 down
             {
-                triangleCount = reader.Reader.ReadUInt32();
+                triangleCount = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
-                baseVertex = reader.Reader.ReadUInt32();
+                baseVertex = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(3)) //3.0 and up
             {
-                firstVertex = reader.Reader.ReadUInt32();
-                vertexCount = reader.Reader.ReadUInt32();
+                firstVertex = reader.ReadUInt32();
+                vertexCount = reader.ReadUInt32();
                 localAABB = new AABB(reader);
             }
         }
@@ -525,21 +525,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var version = reader.Version;
             if (version.LessThan(3, 5)) //3.5 down
             {
-                m_Use16BitIndices = reader.Reader.ReadInt32() > 0;
+                m_Use16BitIndices = reader.ReadInt32() > 0;
             }
 
             if (version.LessThanOrEquals(2, 5)) //2.5 and down
             {
-                int m_IndexBuffer_size = reader.Reader.ReadInt32();
+                int m_IndexBuffer_size = reader.ReadInt32();
 
                 if (m_Use16BitIndices)
                 {
                     m_IndexBuffer = new uint[m_IndexBuffer_size / 2];
                     for (int i = 0; i < m_IndexBuffer_size / 2; i++)
                     {
-                        m_IndexBuffer[i] = reader.Reader.ReadUInt16();
+                        m_IndexBuffer[i] = reader.ReadUInt16();
                     }
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
                 else
                 {
@@ -547,7 +547,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            int m_SubMeshesSize = reader.Reader.ReadInt32();
+            int m_SubMeshesSize = reader.ReadInt32();
             m_SubMeshes = new List<SubMesh>();
             for (int i = 0; i < m_SubMeshesSize; i++)
             {
@@ -563,14 +563,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 m_BindPose = reader.ReadMatrixArray();
                 m_BoneNameHashes = reader.ReadArray(r => r.ReadUInt32());
-                var m_RootBoneNameHash = reader.Reader.ReadUInt32();
+                var m_RootBoneNameHash = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
             {
                 if (version.GreaterThanOrEquals(2019)) //2019 and up
                 {
-                    var m_BonesAABBSize = reader.Reader.ReadInt32();
+                    var m_BonesAABBSize = reader.ReadInt32();
                     var m_BonesAABB = new List<MinMaxAABB>();
                     for (int i = 0; i < m_BonesAABBSize; i++)
                     {
@@ -580,56 +580,56 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     var m_VariableBoneCountWeights = reader.ReadArray(r => r.ReadUInt32());
                 }
 
-                var m_MeshCompression = reader.Reader.ReadByte();
+                var m_MeshCompression = reader.ReadByte();
                 if (version.GreaterThanOrEquals(4))
                 {
                     if (version.LessThan(5))
                     {
-                        var m_StreamCompression = reader.Reader.ReadByte();
+                        var m_StreamCompression = reader.ReadByte();
                     }
-                    var m_IsReadable = reader.Reader.ReadBoolean();
+                    var m_IsReadable = reader.ReadBoolean();
                     if (reader.IsBH3())
                     {
-                        var m_IsHighPrecisionPosition = reader.Reader.ReadBoolean();
-                        var m_IsHighPrecisionTangent = reader.Reader.ReadBoolean();
-                        var m_IsHighPrecisionUv = reader.Reader.ReadBoolean();
+                        var m_IsHighPrecisionPosition = reader.ReadBoolean();
+                        var m_IsHighPrecisionTangent = reader.ReadBoolean();
+                        var m_IsHighPrecisionUv = reader.ReadBoolean();
                     }
-                    var m_KeepVertices = reader.Reader.ReadBoolean();
-                    var m_KeepIndices = reader.Reader.ReadBoolean();
+                    var m_KeepVertices = reader.ReadBoolean();
+                    var m_KeepIndices = reader.ReadBoolean();
                     if (reader.IsBH3() && HasVertexColorSkinning(reader.SerializedType))
                     {
-                        var m_VertexColorSkinning = reader.Reader.ReadBoolean();
+                        var m_VertexColorSkinning = reader.ReadBoolean();
                     }
                     if (reader.IsArknightsEndfield())
                     {
-                        var m_CollisionMeshOnly = reader.Reader.ReadBoolean();
-                        m_CollisionMeshBaked = reader.Reader.ReadBoolean();
-                        var m_CollisionMeshConvex = reader.Reader.ReadBoolean();
+                        var m_CollisionMeshOnly = reader.ReadBoolean();
+                        m_CollisionMeshBaked = reader.ReadBoolean();
+                        var m_CollisionMeshConvex = reader.ReadBoolean();
                     }
                 }
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 if (reader.IsGISubGroup() || reader.IsBH3() && HasVertexColorSkinning(reader.SerializedType))
                 {
-                    var m_PackSkinDataToUV2UV3 = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
+                    var m_PackSkinDataToUV2UV3 = reader.ReadBoolean();
+                    reader.AlignStream();
                 }
 
                 //Unity fixed it in 2017.3.1p1 and later versions
                 if (version.GreaterThanOrEquals(2017, 3, 1, UnityVersionType.Patch, 1) && m_MeshCompression == 0)//2017.3.xfx with no compression
                 {
-                    var m_IndexFormat = reader.Reader.ReadInt32();
+                    var m_IndexFormat = reader.ReadInt32();
                     m_Use16BitIndices = m_IndexFormat == 0;
                 }
 
-                int m_IndexBuffer_size = reader.Reader.ReadInt32();
+                int m_IndexBuffer_size = reader.ReadInt32();
                 if (m_Use16BitIndices)
                 {
                     m_IndexBuffer = new uint[m_IndexBuffer_size / 2];
                     for (int i = 0; i < m_IndexBuffer_size / 2; i++)
                     {
-                        m_IndexBuffer[i] = reader.Reader.ReadUInt16();
+                        m_IndexBuffer[i] = reader.ReadUInt16();
                     }
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
                 else
                 {
@@ -639,10 +639,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThan(3, 5)) //3.4.2 and earlier
             {
-                m_VertexCount = reader.Reader.ReadInt32();
+                m_VertexCount = reader.ReadInt32();
                 m_Vertices = reader.ReadArray(m_VertexCount * 3, r => r.ReadSingle()); //Vector3
 
-                var skinNum = reader.Reader.ReadInt32();
+                var skinNum = reader.ReadInt32();
                 m_Skin = new List<BoneWeights4>();
                 for (int s = 0; s < skinNum; s++)
                 {
@@ -651,38 +651,38 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
                 m_BindPose = reader.ReadMatrixArray();
 
-                m_UV0 = reader.ReadArray(reader.Reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
+                m_UV0 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
-                m_UV1 = reader.ReadArray(reader.Reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
+                m_UV1 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
                 if (version.LessThanOrEquals(2, 5)) //2.5 and down
                 {
-                    int m_TangentSpace_size = reader.Reader.ReadInt32();
+                    int m_TangentSpace_size = reader.ReadInt32();
                     m_Normals = new float[m_TangentSpace_size * 3];
                     m_Tangents = new float[m_TangentSpace_size * 4];
                     for (int v = 0; v < m_TangentSpace_size; v++)
                     {
-                        m_Normals[v * 3] = reader.Reader.ReadSingle();
-                        m_Normals[v * 3 + 1] = reader.Reader.ReadSingle();
-                        m_Normals[v * 3 + 2] = reader.Reader.ReadSingle();
-                        m_Tangents[v * 3] = reader.Reader.ReadSingle();
-                        m_Tangents[v * 3 + 1] = reader.Reader.ReadSingle();
-                        m_Tangents[v * 3 + 2] = reader.Reader.ReadSingle();
-                        m_Tangents[v * 3 + 3] = reader.Reader.ReadSingle(); //handedness
+                        m_Normals[v * 3] = reader.ReadSingle();
+                        m_Normals[v * 3 + 1] = reader.ReadSingle();
+                        m_Normals[v * 3 + 2] = reader.ReadSingle();
+                        m_Tangents[v * 3] = reader.ReadSingle();
+                        m_Tangents[v * 3 + 1] = reader.ReadSingle();
+                        m_Tangents[v * 3 + 2] = reader.ReadSingle();
+                        m_Tangents[v * 3 + 3] = reader.ReadSingle(); //handedness
                     }
                 }
                 else //2.6.0 and later
                 {
-                    m_Tangents = reader.ReadArray(reader.Reader.ReadInt32() * 4, r => r.ReadSingle()); //Vector4
+                    m_Tangents = reader.ReadArray(reader.ReadInt32() * 4, r => r.ReadSingle()); //Vector4
 
-                    m_Normals = reader.ReadArray(reader.Reader.ReadInt32() * 3, r => r.ReadSingle()); //Vector3
+                    m_Normals = reader.ReadArray(reader.ReadInt32() * 3, r => r.ReadSingle()); //Vector3
                 }
             }
             else
             {
                 if (version.LessThan(2018, 2)) //2018.2 down
                 {
-                    var skinNum = reader.Reader.ReadInt32();
+                    var skinNum = reader.ReadInt32();
                     m_Skin = new List<BoneWeights4>();
                     for (int s = 0; s < skinNum; s++)
                     {
@@ -707,79 +707,79 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThanOrEquals(3, 4, 2)) //3.4.2 and earlier
             {
-                int m_Colors_size = reader.Reader.ReadInt32();
+                int m_Colors_size = reader.ReadInt32();
                 m_Colors = new float[m_Colors_size * 4];
                 for (int v = 0; v < m_Colors_size * 4; v++)
                 {
-                    m_Colors[v] = (float)reader.Reader.ReadByte() / 0xFF;
+                    m_Colors[v] = (float)reader.ReadByte() / 0xFF;
                 }
 
-                int m_CollisionTriangles_size = reader.Reader.ReadInt32();
+                int m_CollisionTriangles_size = reader.ReadInt32();
                 reader.Position += m_CollisionTriangles_size * 4; //UInt32 indices
-                int m_CollisionVertexCount = reader.Reader.ReadInt32();
+                int m_CollisionVertexCount = reader.ReadInt32();
             }
 
             if (reader.IsExAstris())
             {
-                var m_ColliderType = reader.Reader.ReadInt32();
+                var m_ColliderType = reader.ReadInt32();
             }
 
-            int m_MeshUsageFlags = reader.Reader.ReadInt32();
+            int m_MeshUsageFlags = reader.ReadInt32();
 
             if (version.GreaterThanOrEquals(2022, 1)) //2022.1 and up
             {
-                int m_CookingOptions = reader.Reader.ReadInt32();
+                int m_CookingOptions = reader.ReadInt32();
             }
 
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
                 var m_BakedConvexCollisionMesh = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 var m_BakedTriangleCollisionMesh = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 if (reader.IsBH3())
                 {
-                    var m_MeshOptimized = reader.Reader.ReadBoolean();
+                    var m_MeshOptimized = reader.ReadBoolean();
                 }
             }
 
             if (reader.IsZZZCB1())
             {
-                var m_CloseMeshDynamicCompression = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_CloseMeshDynamicCompression = reader.ReadBoolean();
+                reader.AlignStream();
 
-                var m_CompressLevelVertexData = reader.Reader.ReadInt32();
-                var m_CompressLevelNormalAndTangent = reader.Reader.ReadInt32();
-                var m_CompressLevelTexCoordinates = reader.Reader.ReadInt32();
+                var m_CompressLevelVertexData = reader.ReadInt32();
+                var m_CompressLevelNormalAndTangent = reader.ReadInt32();
+                var m_CompressLevelTexCoordinates = reader.ReadInt32();
             }
 
             if (reader.IsGIGroup() || version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
             {
                 var m_MeshMetrics = new float[2];
-                m_MeshMetrics[0] = reader.Reader.ReadSingle();
-                m_MeshMetrics[1] = reader.Reader.ReadSingle();
+                m_MeshMetrics[0] = reader.ReadSingle();
+                m_MeshMetrics[1] = reader.ReadSingle();
                 if (reader.IsArknightsEndfield())
                 {
-                    var m_MeshMetrics2 = reader.Reader.ReadSingle();
+                    var m_MeshMetrics2 = reader.ReadSingle();
                 }
             }
 
             if (reader.IsGIGroup())
             {
-                var m_MetricsDirty = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
-                var m_CloseMeshDynamicCompression = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_MetricsDirty = reader.ReadBoolean();
+                reader.AlignStream();
+                var m_CloseMeshDynamicCompression = reader.ReadBoolean();
+                reader.AlignStream();
                 if (!reader.IsGICB1() && !reader.IsGIPack())
                 {
-                    var m_IsStreamingMesh = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
+                    var m_IsStreamingMesh = reader.ReadBoolean();
+                    reader.AlignStream();
                 }
             }
 
             if (version.GreaterThanOrEquals(2018, 3)) //2018.3 and up
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 m_StreamData = new StreamingInfo(reader);
             }
 
@@ -793,7 +793,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (m_VertexData.m_VertexCount > 0)
                 {
-                    m_VertexData.m_DataSize = new PartialStream(_reader.Reader.BaseStream, m_StreamData.offset, m_StreamData.size).ToArray();
+                    m_VertexData.m_DataSize = new PartialStream(_reader.BaseStream, m_StreamData.offset, m_StreamData.size).ToArray();
                 }
             }
             if (version.GreaterThanOrEquals(3, 5)) //3.5 and up
@@ -845,7 +845,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                             }
                         }
 
-                        if (_reader.Reader.EndianType == EndianType.BigEndian && componentByteSize > 1) //swap bytes
+                        if (_reader.EndianType == EndianType.BigEndian && componentByteSize > 1) //swap bytes
                         {
                             for (var i = 0; i < componentBytes.Length / componentByteSize; i++)
                             {

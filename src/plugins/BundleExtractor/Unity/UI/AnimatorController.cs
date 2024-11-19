@@ -13,11 +13,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            word0 = reader.Reader.ReadUInt32();
-            word1 = reader.Reader.ReadUInt32();
+            word0 = reader.ReadUInt32();
+            word1 = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(5, 2)) //5.2 and up
             {
-                word2 = reader.Reader.ReadUInt32();
+                word2 = reader.ReadUInt32();
             }
         }
     }
@@ -29,8 +29,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SkeletonMaskElement(UIReader reader)
         {
-            m_PathHash = reader.Reader.ReadUInt32();
-            m_Weight = reader.Reader.ReadSingle();
+            m_PathHash = reader.ReadUInt32();
+            m_Weight = reader.ReadSingle();
         }
     }
 
@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SkeletonMask(UIReader reader)
         {
-            int numElements = reader.Reader.ReadInt32();
+            int numElements = reader.ReadInt32();
             m_Data = new List<SkeletonMaskElement>();
             for (int i = 0; i < numElements; i++)
             {
@@ -65,26 +65,26 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            m_StateMachineIndex = reader.Reader.ReadUInt32();
-            m_StateMachineMotionSetIndex = reader.Reader.ReadUInt32();
+            m_StateMachineIndex = reader.ReadUInt32();
+            m_StateMachineMotionSetIndex = reader.ReadUInt32();
             m_BodyMask = new HumanPoseMask(reader);
             m_SkeletonMask = new SkeletonMask(reader);
             if (reader.IsLoveAndDeepSpace())
             {
                 var m_GenericMask = new SkeletonMask(reader);
             }
-            m_Binding = reader.Reader.ReadUInt32();
-            m_LayerBlendingMode = reader.Reader.ReadInt32();
+            m_Binding = reader.ReadUInt32();
+            m_LayerBlendingMode = reader.ReadInt32();
             if (version.GreaterThanOrEquals(4, 2)) //4.2 and up
             {
-                m_DefaultWeight = reader.Reader.ReadSingle();
+                m_DefaultWeight = reader.ReadSingle();
             }
-            m_IKPass = reader.Reader.ReadBoolean();
+            m_IKPass = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 2)) //4.2 and up
             {
-                m_SyncedLayerAffectsTiming = reader.Reader.ReadBoolean();
+                m_SyncedLayerAffectsTiming = reader.ReadBoolean();
             }
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
 
     }
@@ -98,10 +98,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ConditionConstant(UIReader reader)
         {
-            m_ConditionMode = reader.Reader.ReadUInt32();
-            m_EventID = reader.Reader.ReadUInt32();
-            m_EventThreshold = reader.Reader.ReadSingle();
-            m_ExitTime = reader.Reader.ReadSingle();
+            m_ConditionMode = reader.ReadUInt32();
+            m_EventID = reader.ReadUInt32();
+            m_EventThreshold = reader.ReadSingle();
+            m_ExitTime = reader.ReadSingle();
         }
     }
 
@@ -126,43 +126,43 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numConditions = reader.Reader.ReadInt32();
+            int numConditions = reader.ReadInt32();
             m_ConditionConstantArray = new List<ConditionConstant>();
             for (int i = 0; i < numConditions; i++)
             {
                 m_ConditionConstantArray.Add(new ConditionConstant(reader));
             }
 
-            m_DestinationState = reader.Reader.ReadUInt32();
+            m_DestinationState = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                m_FullPathID = reader.Reader.ReadUInt32();
+                m_FullPathID = reader.ReadUInt32();
             }
 
-            m_ID = reader.Reader.ReadUInt32();
-            m_UserID = reader.Reader.ReadUInt32();
-            m_TransitionDuration = reader.Reader.ReadSingle();
-            m_TransitionOffset = reader.Reader.ReadSingle();
+            m_ID = reader.ReadUInt32();
+            m_UserID = reader.ReadUInt32();
+            m_TransitionDuration = reader.ReadSingle();
+            m_TransitionOffset = reader.ReadSingle();
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                m_ExitTime = reader.Reader.ReadSingle();
-                m_HasExitTime = reader.Reader.ReadBoolean();
-                m_HasFixedDuration = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
-                m_InterruptionSource = reader.Reader.ReadInt32();
-                m_OrderedInterruption = reader.Reader.ReadBoolean();
+                m_ExitTime = reader.ReadSingle();
+                m_HasExitTime = reader.ReadBoolean();
+                m_HasFixedDuration = reader.ReadBoolean();
+                reader.AlignStream();
+                m_InterruptionSource = reader.ReadInt32();
+                m_OrderedInterruption = reader.ReadBoolean();
             }
             else
             {
-                m_Atomic = reader.Reader.ReadBoolean();
+                m_Atomic = reader.ReadBoolean();
             }
 
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
             {
-                m_CanTransitionToSelf = reader.Reader.ReadBoolean();
+                m_CanTransitionToSelf = reader.ReadBoolean();
             }
 
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
     }
 
@@ -173,8 +173,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public LeafInfoConstant(UIReader reader)
         {
-            m_IDArray = reader.Reader.ReadArray(r => r.ReadUInt32());
-            m_IndexOffset = reader.Reader.ReadUInt32();
+            m_IDArray = reader.ReadArray(r => r.ReadUInt32());
+            m_IndexOffset = reader.ReadUInt32();
         }
     }
 
@@ -184,7 +184,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public MotionNeighborList(UIReader reader)
         {
-            m_NeighborArray = reader.Reader.ReadArray(r => r.ReadUInt32());
+            m_NeighborArray = reader.ReadArray(r => r.ReadUInt32());
         }
     }
 
@@ -198,12 +198,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Blend2dDataConstant(UIReader reader)
         {
-            m_ChildPositionArray = reader.Reader.ReadArray(_ => reader.ReadVector2());
-            m_ChildMagnitudeArray = reader.Reader.ReadArray(r => r.ReadSingle());
-            m_ChildPairVectorArray = reader.Reader.ReadArray(_ => reader.ReadVector2());
-            m_ChildPairAvgMagInvArray = reader.Reader.ReadArray(r => r.ReadSingle());
+            m_ChildPositionArray = reader.ReadArray(_ => reader.ReadVector2());
+            m_ChildMagnitudeArray = reader.ReadArray(r => r.ReadSingle());
+            m_ChildPairVectorArray = reader.ReadArray(_ => reader.ReadVector2());
+            m_ChildPairAvgMagInvArray = reader.ReadArray(r => r.ReadSingle());
 
-            int numNeighbours = reader.Reader.ReadInt32();
+            int numNeighbours = reader.ReadInt32();
             m_ChildNeighborListArray = new List<MotionNeighborList>();
             for (int i = 0; i < numNeighbours; i++)
             {
@@ -218,7 +218,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Blend1dDataConstant(UIReader reader)
         {
-            m_ChildThresholdArray = reader.Reader.ReadArray(r => r.ReadSingle());
+            m_ChildThresholdArray = reader.ReadArray(r => r.ReadSingle());
         }
     }
 
@@ -229,9 +229,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public BlendDirectDataConstant(UIReader reader)
         {
-            m_ChildBlendEventIDArray = reader.Reader.ReadArray(r => r.ReadUInt32());
-            m_NormalizedBlendValues = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            m_ChildBlendEventIDArray = reader.ReadArray(r => r.ReadUInt32());
+            m_NormalizedBlendValues = reader.ReadBoolean();
+            reader.AlignStream();
         }
     }
 
@@ -257,17 +257,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
-                m_BlendType = reader.Reader.ReadUInt32();
+                m_BlendType = reader.ReadUInt32();
             }
-            m_BlendEventID = reader.Reader.ReadUInt32();
+            m_BlendEventID = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
-                m_BlendEventYID = reader.Reader.ReadUInt32();
+                m_BlendEventYID = reader.ReadUInt32();
             }
-            m_ChildIndices = reader.Reader.ReadArray(r => r.ReadUInt32());
+            m_ChildIndices = reader.ReadArray(r => r.ReadUInt32());
             if (version.LessThan(4, 1)) //4.1 down
             {
-                m_ChildThresholdArray = reader.Reader.ReadArray(r => r.ReadSingle());
+                m_ChildThresholdArray = reader.ReadArray(r => r.ReadSingle());
             }
 
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
@@ -281,23 +281,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_BlendDirectData = new BlendDirectDataConstant(reader);
             }
 
-            m_ClipID = reader.Reader.ReadUInt32();
+            m_ClipID = reader.ReadUInt32();
             if (version.Major == 4 && version.Minor >= 5) //4.5 - 5.0
             {
-                m_ClipIndex = reader.Reader.ReadUInt32();
+                m_ClipIndex = reader.ReadUInt32();
             }
 
-            m_Duration = reader.Reader.ReadSingle();
+            m_Duration = reader.ReadSingle();
 
             if (version.GreaterThanOrEquals(4, 1, 3)) //4.1.3 and up
             {
-                m_CycleOffset = reader.Reader.ReadSingle();
+                m_CycleOffset = reader.ReadSingle();
                 if (reader.IsArknightsEndfield())
                 {
-                    var m_StateNameHash = reader.Reader.ReadUInt32();
+                    var m_StateNameHash = reader.ReadUInt32();
                 }
-                m_Mirror = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                m_Mirror = reader.ReadBoolean();
+                reader.AlignStream();
             }
         }
     }
@@ -311,7 +311,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numNodes = reader.Reader.ReadInt32();
+            int numNodes = reader.ReadInt32();
             m_NodeArray = new List<BlendTreeNodeConstant>();
             for (int i = 0; i < numNodes; i++)
             {
@@ -350,18 +350,18 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numTransistions = reader.Reader.ReadInt32();
+            int numTransistions = reader.ReadInt32();
             m_TransitionConstantArray = new List<TransitionConstant>();
             for (int i = 0; i < numTransistions; i++)
             {
                 m_TransitionConstantArray.Add(new TransitionConstant(reader));
             }
 
-            m_BlendTreeConstantIndexArray = reader.Reader.ReadArray(r => r.ReadInt32());
+            m_BlendTreeConstantIndexArray = reader.ReadArray(r => r.ReadInt32());
 
             if (version.LessThan(5, 2)) //5.2 down
             {
-                int numInfos = reader.Reader.ReadInt32();
+                int numInfos = reader.ReadInt32();
                 m_LeafInfoArray = new List<LeafInfoConstant>();
                 for (int i = 0; i < numInfos; i++)
                 {
@@ -369,60 +369,60 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            int numBlends = reader.Reader.ReadInt32();
+            int numBlends = reader.ReadInt32();
             m_BlendTreeConstantArray = new List<BlendTreeConstant>();
             for (int i = 0; i < numBlends; i++)
             {
                 m_BlendTreeConstantArray.Add(new BlendTreeConstant(reader));
             }
 
-            m_NameID = reader.Reader.ReadUInt32();
+            m_NameID = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                m_PathID = reader.Reader.ReadUInt32();
+                m_PathID = reader.ReadUInt32();
             }
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                m_FullPathID = reader.Reader.ReadUInt32();
+                m_FullPathID = reader.ReadUInt32();
             }
 
-            m_TagID = reader.Reader.ReadUInt32();
+            m_TagID = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(5, 1)) //5.1 and up
             {
-                m_SpeedParamID = reader.Reader.ReadUInt32();
-                m_MirrorParamID = reader.Reader.ReadUInt32();
-                m_CycleOffsetParamID = reader.Reader.ReadUInt32();
+                m_SpeedParamID = reader.ReadUInt32();
+                m_MirrorParamID = reader.ReadUInt32();
+                m_CycleOffsetParamID = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(2017, 2)) //2017.2 and up
             {
-                var m_TimeParamID = reader.Reader.ReadUInt32();
+                var m_TimeParamID = reader.ReadUInt32();
             }
 
-            m_Speed = reader.Reader.ReadSingle();
+            m_Speed = reader.ReadSingle();
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
-                m_CycleOffset = reader.Reader.ReadSingle();
+                m_CycleOffset = reader.ReadSingle();
             }
-            m_IKOnFeet = reader.Reader.ReadBoolean();
+            m_IKOnFeet = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                m_WriteDefaultValues = reader.Reader.ReadBoolean();
+                m_WriteDefaultValues = reader.ReadBoolean();
             }
 
-            m_Loop = reader.Reader.ReadBoolean();
+            m_Loop = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
-                m_Mirror = reader.Reader.ReadBoolean();
+                m_Mirror = reader.ReadBoolean();
             }
 
             if (reader.IsArknightsEndfield())
             {
-                var m_SyncGroupID = reader.Reader.ReadUInt32();
-                var m_SyncGroupRole = reader.Reader.ReadUInt32();
+                var m_SyncGroupID = reader.ReadUInt32();
+                var m_SyncGroupRole = reader.ReadUInt32();
             }
 
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
     }
 
@@ -433,9 +433,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SelectorTransitionConstant(UIReader reader)
         {
-            m_Destination = reader.Reader.ReadUInt32();
+            m_Destination = reader.ReadUInt32();
 
-            int numConditions = reader.Reader.ReadInt32();
+            int numConditions = reader.ReadInt32();
             m_ConditionConstantArray = new List<ConditionConstant>();
             for (int i = 0; i < numConditions; i++)
             {
@@ -452,16 +452,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SelectorStateConstant(UIReader reader)
         {
-            int numTransitions = reader.Reader.ReadInt32();
+            int numTransitions = reader.ReadInt32();
             m_TransitionConstantArray = new List<SelectorTransitionConstant>();
             for (int i = 0; i < numTransitions; i++)
             {
                 m_TransitionConstantArray.Add(new SelectorTransitionConstant(reader));
             }
 
-            m_FullPathID = reader.Reader.ReadUInt32();
-            m_isEntry = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            m_FullPathID = reader.ReadUInt32();
+            m_isEntry = reader.ReadBoolean();
+            reader.AlignStream();
         }
     }
 
@@ -477,14 +477,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numStates = reader.Reader.ReadInt32();
+            int numStates = reader.ReadInt32();
             m_StateConstantArray = new List<StateConstant>();
             for (int i = 0; i < numStates; i++)
             {
                 m_StateConstantArray.Add(new StateConstant(reader));
             }
 
-            int numAnyStates = reader.Reader.ReadInt32();
+            int numAnyStates = reader.ReadInt32();
             m_AnyStateTransitionConstantArray = new List<TransitionConstant>();
             for (int i = 0; i < numAnyStates; i++)
             {
@@ -493,7 +493,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                int numSelectors = reader.Reader.ReadInt32();
+                int numSelectors = reader.ReadInt32();
                 m_SelectorStateConstantArray = new List<SelectorStateConstant>();
                 for (int i = 0; i < numSelectors; i++)
                 {
@@ -501,8 +501,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            m_DefaultState = reader.Reader.ReadUInt32();
-            m_MotionSetCount = reader.Reader.ReadUInt32();
+            m_DefaultState = reader.ReadUInt32();
+            m_MotionSetCount = reader.ReadUInt32();
         }
     }
 
@@ -522,30 +522,30 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThan(5, 5)) //5.5 down
             {
-                m_BoolValues = reader.Reader.ReadArray(r => r.ReadBoolean());
-                reader.Reader.AlignStream();
-                m_IntValues = reader.Reader.ReadInt32Array();
-                m_FloatValues = reader.Reader.ReadArray(r => r.ReadSingle());
+                m_BoolValues = reader.ReadArray(r => r.ReadBoolean());
+                reader.AlignStream();
+                m_IntValues = reader.ReadInt32Array();
+                m_FloatValues = reader.ReadArray(r => r.ReadSingle());
             }
 
             if (version.GreaterThan(4, 3)) //4.3 down
             {
-                m_VectorValues = reader.Reader.ReadArray(_ => reader.ReadVector4());
+                m_VectorValues = reader.ReadArray(_ => reader.ReadVector4());
             }
             else
             {
                 m_PositionValues = reader.ReadVector3Array();
 
-                m_QuaternionValues = reader.Reader.ReadArray(_ => reader.ReadVector4());
+                m_QuaternionValues = reader.ReadArray(_ => reader.ReadVector4());
 
                 m_ScaleValues = reader.ReadVector3Array();
 
                 if (version.GreaterThanOrEquals(5, 5)) //5.5 and up
                 {
-                    m_FloatValues = reader.Reader.ReadArray(r => r.ReadSingle());
-                    m_IntValues = reader.Reader.ReadInt32Array();
-                    m_BoolValues = reader.Reader.ReadArray(r => r.ReadBoolean());
-                    reader.Reader.AlignStream();
+                    m_FloatValues = reader.ReadArray(r => r.ReadSingle());
+                    m_IntValues = reader.ReadInt32Array();
+                    m_BoolValues = reader.ReadArray(r => r.ReadBoolean());
+                    reader.AlignStream();
                 }
             }
         }
@@ -560,14 +560,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ControllerConstant(UIReader reader)
         {
-            int numLayers = reader.Reader.ReadInt32();
+            int numLayers = reader.ReadInt32();
             m_LayerArray = new List<LayerConstant>();
             for (int i = 0; i < numLayers; i++)
             {
                 m_LayerArray.Add(new LayerConstant(reader));
             }
 
-            int numStates = reader.Reader.ReadInt32();
+            int numStates = reader.ReadInt32();
             m_StateMachineArray = new List<StateMachineConstant>();
             for (int i = 0; i < numStates; i++)
             {
@@ -586,17 +586,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public AnimatorController(UIReader reader) : base(reader)
         {
-            var m_ControllerSize = reader.Reader.ReadUInt32();
+            var m_ControllerSize = reader.ReadUInt32();
             var m_Controller = new ControllerConstant(reader);
 
-            int tosSize = reader.Reader.ReadInt32();
+            int tosSize = reader.ReadInt32();
             m_TOS = new Dictionary<uint, string>();
             for (int i = 0; i < tosSize; i++)
             {
-                m_TOS.Add(reader.Reader.ReadUInt32(), reader.ReadAlignedString());
+                m_TOS.Add(reader.ReadUInt32(), reader.ReadAlignedString());
             }
 
-            int numClips = reader.Reader.ReadInt32();
+            int numClips = reader.ReadInt32();
             m_AnimationClips = new List<PPtr<AnimationClip>>();
             for (int i = 0; i < numClips; i++)
             {

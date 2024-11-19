@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SecondarySpriteTexture(UIReader reader)
         {
             texture = new PPtr<Texture2D>(reader);
-            name = reader.Reader.ReadStringZeroTerm();
+            name = reader.ReadStringZeroTerm();
         }
     }
 
@@ -116,7 +116,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2019)) //2019 and up
             {
-                var secondaryTexturesSize = reader.Reader.ReadInt32();
+                var secondaryTexturesSize = reader.ReadInt32();
                 secondaryTextures = new List<SecondarySpriteTexture>();
                 for (int i = 0; i < secondaryTexturesSize; i++)
                 {
@@ -126,29 +126,29 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
-                var m_SubMeshesSize = reader.Reader.ReadInt32();
+                var m_SubMeshesSize = reader.ReadInt32();
                 m_SubMeshes = new List<SubMesh>();
                 for (int i = 0; i < m_SubMeshesSize; i++)
                 {
                     m_SubMeshes.Add(new SubMesh(reader));
                 }
 
-                m_IndexBuffer = reader.Reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                m_IndexBuffer = reader.ReadArray(r => r.ReadByte());
+                reader.AlignStream();
 
                 m_VertexData = new VertexData(reader);
             }
             else
             {
-                var verticesSize = reader.Reader.ReadInt32();
+                var verticesSize = reader.ReadInt32();
                 vertices = new List<SpriteVertex>();
                 for (int i = 0; i < verticesSize; i++)
                 {
                     vertices.Add(new SpriteVertex(reader));
                 }
 
-                indices = reader.Reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                indices = reader.ReadArray(r => r.ReadUInt16());
+                reader.AlignStream();
             }
 
             if (version.GreaterThanOrEquals(2018)) //2018 and up
@@ -157,7 +157,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
                 if (version.Major == 2018 && version.Minor < 2) //2018.2 down
                 {
-                    var m_SourceSkinSize = reader.Reader.ReadInt32();
+                    var m_SourceSkinSize = reader.ReadInt32();
                     for (int i = 0; i < m_SourceSkinSize; i++)
                     {
                         m_SourceSkin[i] = new BoneWeights4(reader);
@@ -165,14 +165,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            textureRect = new Rectf(reader.Reader);
+            textureRect = new Rectf(reader);
             textureRectOffset = reader.ReadVector2();
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
                 atlasRectOffset = reader.ReadVector2();
             }
 
-            settingsRaw = new SpriteSettings(reader.Reader);
+            settingsRaw = new SpriteSettings(reader);
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
             {
                 uvTransform = reader.ReadVector4();
@@ -180,7 +180,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2017)) //2017 and up
             {
-                downscaleMultiplier = reader.Reader.ReadSingle();
+                downscaleMultiplier = reader.ReadSingle();
             }
         }
     }
@@ -219,33 +219,33 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Sprite(UIReader reader) : base(reader)
         {
             var version = reader.Version;
-            m_Rect = new Rectf(reader.Reader);
+            m_Rect = new Rectf(reader);
             m_Offset = reader.ReadVector2();
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
             {
                 m_Border = reader.ReadVector4();
             }
 
-            m_PixelsToUnits = reader.Reader.ReadSingle();
+            m_PixelsToUnits = reader.ReadSingle();
             if (version.GreaterThanOrEquals(5, 4, 1, UnityVersionType.Patch, 3)) //5.4.1p3 and up
             {
                 m_Pivot = reader.ReadVector2();
             }
 
-            m_Extrude = reader.Reader.ReadUInt32();
+            m_Extrude = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(5, 3)) //5.3 and up
             {
-                m_IsPolygon = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                m_IsPolygon = reader.ReadBoolean();
+                reader.AlignStream();
             }
 
             if (version.GreaterThanOrEquals(2017)) //2017 and up
             {
-                var first = new Guid(reader.Reader.ReadBytes(16));
-                var second = reader.Reader.ReadInt64();
+                var first = new Guid(reader.ReadBytes(16));
+                var second = reader.ReadInt64();
                 m_RenderDataKey = new KeyValuePair<Guid, long>(first, second);
 
-                m_AtlasTags = reader.Reader.ReadArray(r => r.ReadString());
+                m_AtlasTags = reader.ReadArray(r => r.ReadString());
 
                 m_SpriteAtlas = new PPtr<SpriteAtlas>(reader);
             }
@@ -254,11 +254,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2017)) //2017 and up
             {
-                var m_PhysicsShapeSize = reader.Reader.ReadInt32();
+                var m_PhysicsShapeSize = reader.ReadInt32();
                 m_PhysicsShape = new List<Vector2[]>();
                 for (int i = 0; i < m_PhysicsShapeSize; i++)
                 {
-                    m_PhysicsShape.Add(reader.Reader.ReadArray(_ => reader.ReadVector2()));
+                    m_PhysicsShape.Add(reader.ReadArray(_ => reader.ReadVector2()));
                 }
             }
 

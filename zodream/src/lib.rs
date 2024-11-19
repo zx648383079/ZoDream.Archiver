@@ -3,12 +3,15 @@ use std::io::{Read, Write};
 use compression::lz4::Lz4Compressor;
 use compression::lzxd::LzxdCompressor;
 use compression::{Compressor, Decompressor};
+use drawing::{decode_stream, PixelDecoder};
 use encryption::arc4::Arc4;
 use encryption::threeway::ThreeWay;
+use drawing::atc::AtcDecoder;
 use ::safer_ffi::prelude::*;
 
 mod encryption;
 mod compression;
+mod drawing;
 mod error;
 
 use error::{Error, Result};
@@ -80,6 +83,14 @@ pub enum EncryptionID {
     ThreeWay,
     Arc4,
 }
+
+#[derive_ReprC]
+#[repr(i8)]
+pub enum PixelID {
+    Unknown,
+    Atc,
+}
+
 
 
 #[derive_ReprC]
@@ -325,6 +336,83 @@ fn decrypt_encryptor (
 
 #[ffi_export]
 fn free_encryptor (ctor: Option<repr_c::Box<EncryptorBox>>)
+{
+    drop(ctor)
+}
+
+#[derive_ReprC]
+#[repr(opaque)]
+pub struct PainterBox {
+    id: PixelID,
+    width: u32,
+    height: u32,
+}
+
+impl PainterBox {
+    fn encode<R, W>(&self, _input: & mut R, _output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match self.id {
+            _ => Ok(0)
+        }
+    }
+
+    fn decode<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+        where R : Read, W : Write
+    {
+        match self.id {
+            PixelID::Atc => {
+                let mut instance = AtcDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            _ => Ok(0)
+        }
+    }
+}
+
+#[ffi_export]
+fn find_painter (id: PixelID, width: u32, height: u32) -> repr_c::Box<PainterBox>
+{
+    Box::new(PainterBox {id: id.into(), width, height})
+        .into()
+}
+
+#[ffi_export]
+fn encode_painter (  
+    ctor: &'_ PainterBox,    
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, 
+    logger: &'_ Logger) -> u32
+{
+    let res = ctor.encode(input, output);
+    match res {
+        Ok(i) => i as u32,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
+            0
+        }
+    }
+}
+
+#[ffi_export]
+fn decode_painter (  
+    ctor: &'_ PainterBox,    
+    input: &'_ mut InputStream, 
+    output: &'_ mut OutputStream, 
+    logger: &'_ Logger) -> u32
+{
+    let res = ctor.decode(input, output);
+    match res {
+        Ok(i) => i as u32,
+        Err(err) => {
+            (logger.log)(char_p::new(err.to_string()).as_ref().into());
+            0
+        }
+    }
+}
+
+#[ffi_export]
+fn free_painter (ctor: Option<repr_c::Box<PainterBox>>)
 {
     drop(ctor)
 }

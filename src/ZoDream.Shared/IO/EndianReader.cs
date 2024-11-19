@@ -30,7 +30,17 @@ namespace ZoDream.Shared.IO
 
         public bool IsAlignArray { get; }
 
-        protected long RemainingStreamBytes => checked(BaseStream.Length - BaseStream.Position);
+        public long Position 
+        {
+            get => BaseStream.Position;
+            set => BaseStream.Position = value;
+        }
+
+        public long Length => BaseStream.Length;
+        /// <summary>
+        /// 剩余字节长度
+        /// </summary>
+        public long RemainingLength => checked(BaseStream.Length - BaseStream.Position);
 
         public EndianReader(Stream stream, EndianType endian)
             : this(stream, endian, alignArray: false)
@@ -179,9 +189,9 @@ namespace ZoDream.Shared.IO
                 return "";
             }
 
-            if (length > RemainingStreamBytes)
+            if (length > RemainingLength)
             {
-                throw new EndOfStreamException($"Can't read {length}-byte string because there are only {RemainingStreamBytes} bytes left in the stream");
+                throw new EndOfStreamException($"Can't read {length}-byte string because there are only {RemainingLength} bytes left in the stream");
             }
 
             byte[]? array;
@@ -261,16 +271,14 @@ namespace ZoDream.Shared.IO
             Span<byte> span = stackalloc byte[maxLength];
             for (int i = 0; i < maxLength; i = checked(i + 1))
             {
-                byte b = ReadByte();
-                if (b == 0)
+                var b = BaseStream.ReadByte();
+                if (b <= 0)
                 {
-                    result = Encoding.UTF8.GetString(span.Slice(0, i));
+                    result = Encoding.UTF8.GetString(span[..i]);
                     return true;
                 }
-
-                span[i] = b;
+                span[i] = (byte)b;
             }
-
             result = null;
             return false;
         }

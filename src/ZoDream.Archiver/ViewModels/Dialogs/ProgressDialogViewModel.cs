@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.ViewModel;
 
@@ -17,6 +19,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private void Logger_OnProgress(long current, long total, string message)
         {
+            _messageRefreshToken.Cancel();
             _app.DispatcherQueue.TryEnqueue(() => {
                 Message = message;
                 Progress = total > 0 ? (current * 100 / total) : 0;
@@ -25,14 +28,37 @@ namespace ZoDream.Archiver.ViewModels
 
         private void Logger_OnLog(string message, Shared.Models.LogLevel level)
         {
+            _messageRefreshToken.Cancel();
+            if (level == Shared.Models.LogLevel.Info)
+            {
+                _lastInfoMessage = message;
+            }
             _app.DispatcherQueue.TryEnqueue(() => {
                 Message = message;
             });
+            // 错误信息只允许显示一次
+            if (level == Shared.Models.LogLevel.Info)
+            {
+                return;
+            }
+            _messageRefreshToken = new();
+            var token = _messageRefreshToken.Token;
+            Task.Factory.StartNew(() => {
+                Thread.Sleep(10000);
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                _app.DispatcherQueue.TryEnqueue(() => {
+                    Message = _lastInfoMessage;
+                });
+            }, token);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
-
         private readonly DateTime _beginTime = DateTime.Now;
+        private CancellationTokenSource _messageRefreshToken = new();
+        private string _lastInfoMessage = string.Empty;
 
         private int _elapsedTime;
 

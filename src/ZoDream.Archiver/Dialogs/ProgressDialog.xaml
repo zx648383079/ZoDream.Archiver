@@ -48,7 +48,8 @@
             Grid.Row="2"
             Grid.ColumnSpan="2"
             Style="{ThemeResource CaptionTextBlockStyle}"
-            Text="{Binding Message}" />
+            Text="{Binding Message}"
+            TextWrapping="Wrap" />
 
         <ProgressBar
             Grid.Row="3"

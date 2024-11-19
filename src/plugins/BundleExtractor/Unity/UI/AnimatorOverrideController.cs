@@ -23,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             m_Controller = new PPtr<RuntimeAnimatorController>(reader);
 
-            int numOverrides = reader.Reader.ReadInt32();
+            int numOverrides = reader.ReadInt32();
             m_Clips = new List<AnimationClipOverride>();
             for (int i = 0; i < numOverrides; i++)
             {

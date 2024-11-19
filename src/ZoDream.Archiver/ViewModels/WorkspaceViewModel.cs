@@ -90,9 +90,8 @@ namespace ZoDream.Archiver.ViewModels
             }
             model.IsEncrypted = IsEncrypted ? Visibility.Visible : Visibility.Collapsed;
             model.IsSelected = SelectedItem is not null ? Visibility.Visible : Visibility.Collapsed;
-            var res = await app.OpenDialogAsync(picker);
-            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
-                || !model.Verify())
+            var res = await app.OpenFormAsync(picker);
+            if (!res)
             {
                 return;
             }

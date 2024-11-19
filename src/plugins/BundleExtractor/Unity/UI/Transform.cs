@@ -20,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_LocalPosition = reader.ReadVector3();
             m_LocalScale = reader.ReadVector3();
 
-            int m_ChildrenCount = reader.Reader.ReadInt32();
+            int m_ChildrenCount = reader.ReadInt32();
             m_Children = new List<PPtr<Transform>>();
             for (int i = 0; i < m_ChildrenCount; i++)
             {

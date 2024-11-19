@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ZoDream.Shared.Models;
 
@@ -21,18 +22,18 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public GameObject(UIReader reader) : base(reader)
         {
             var version = reader.Version;
-            int m_Component_size = reader.Reader.ReadInt32();
-            m_Components = new List<PPtr<UIComponent>>();
+            int m_Component_size = reader.ReadInt32();
+            m_Components = [];
             for (int i = 0; i < m_Component_size; i++)
             {
                 if (version.LessThan(5, 5)) //5.5 down
                 {
-                    int first = reader.Reader.ReadInt32();
+                    int first = reader.ReadInt32();
                 }
                 m_Components.Add(new PPtr<UIComponent>(reader));
             }
 
-            var m_Layer = reader.Reader.ReadInt32();
+            var m_Layer = reader.ReadInt32();
             m_Name = reader.ReadAlignedString();
         }
 
@@ -65,7 +66,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             catch (Exception e)
             {
-                // Logger.Warning($"Unable to verify if {m_Transform?.Name} has meshes, skipping...");
+                Debug.WriteLine($"Unable to verify if {m_Transform?.Name} has meshes, skipping...");
                 return false;
             }
         }
@@ -81,8 +82,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             else
             {
-                meshR.m_GameObject.TryGet(out var m_GameObject);
-                if (m_GameObject.m_MeshFilter != null)
+                if (meshR.m_GameObject.TryGet(out var m_GameObject) && 
+                    m_GameObject.m_MeshFilter != null)
                 {
                     if (m_GameObject.m_MeshFilter.m_Mesh.TryGet(out var m_Mesh))
                     {
@@ -96,6 +97,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            // TODO
         }
     }
 }

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
@@ -96,11 +94,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         private int GetChildCount(int index)
         {
-            int count = 0;
-            int depth = Nodes[index].Level + 1;
-            for (int i = index + 1; i < Nodes.Count; i++)
+            var count = 0;
+            var depth = Nodes[index].Level + 1;
+            for (var i = index + 1; i < Nodes.Count; i++)
             {
-                int nodeDepth = Nodes[i].Level;
+                var nodeDepth = Nodes[i].Level;
                 if (nodeDepth < depth)
                 {
                     break;
@@ -117,7 +115,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 ToString(sb);
                 return sb.ToString();
             }
@@ -126,10 +124,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         private void SetNamesFromBuffer()
         {
             Debug.Assert(IsFormat5);
-            Dictionary<uint, string> customTypes = new Dictionary<uint, string>();
-            using (MemoryStream stream = new MemoryStream(StringBuffer))
+            var customTypes = new Dictionary<uint, string>();
+            using (var stream = new MemoryStream(StringBuffer))
             {
-                using EndianReader reader = new EndianReader(stream, EndianType.LittleEndian);
+                using var reader = new EndianReader(stream, EndianType.LittleEndian);
                 while (stream.Position < stream.Length)
                 {
                     uint position = (uint)stream.Position;
@@ -138,7 +136,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 }
             }
 
-            foreach (TypeTreeNode node in Nodes)
+            foreach (var node in Nodes)
             {
                 node.Type = GetTypeName(customTypes, node.TypeStrOffset);
                 node.Name = GetTypeName(customTypes, node.NameStrOffset);
@@ -147,7 +145,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         private static string GetTypeName(Dictionary<uint, string> customTypes, uint value)
         {
-            bool isCustomType = (value & 0x80000000) == 0;
+            var isCustomType = (value & 0x80000000) == 0;
             if (isCustomType)
             {
                 return customTypes[value];

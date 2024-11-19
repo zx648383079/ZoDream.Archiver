@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZoDream.BundleExtractor.Unity.UI
+﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
     public sealed class MonoScript : NamedObject
     {
@@ -18,15 +13,15 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var version = reader.Version;
             if (version.GreaterThanOrEquals(3, 4)) //3.4 and up
             {
-                var m_ExecutionOrder = reader.Reader.ReadInt32();
+                var m_ExecutionOrder = reader.ReadInt32();
             }
             if (version.LessThan(5)) //5.0 down
             {
-                var m_PropertiesHash = reader.Reader.ReadUInt32();
+                var m_PropertiesHash = reader.ReadUInt32();
             }
             else
             {
-                var m_PropertiesHash = reader.Reader.ReadBytes(16);
+                var m_PropertiesHash = reader.ReadBytes(16);
             }
             if (version.LessThan(3)) //3.0 down
             {
@@ -40,7 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_AssemblyName = reader.ReadAlignedString();
             if (version.LessThan(2018, 2)) //2018.2 down
             {
-                var m_IsEditorScript = reader.Reader.ReadBoolean();
+                var m_IsEditorScript = reader.ReadBoolean();
             }
         }
     }

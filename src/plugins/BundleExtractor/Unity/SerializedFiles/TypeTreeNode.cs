@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -119,11 +115,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// Name of the data type. This can be the name of any substructure or a static predefined type.
         /// </summary>
-        public string Type { get; set; } = "";
+        public string Type { get; set; } = string.Empty;
         /// <summary>
         /// Name of the field.
         /// </summary>
-        public string Name { get; set; } = "";
+        public string Name { get; set; } = string.Empty;
         /// <summary>
         /// Size of the data value in bytes, e.g. 4 for int. -1 means that there is an array somewhere inside its hierarchy<br/>
         /// Note: The padding for the alignment is not included in the size.

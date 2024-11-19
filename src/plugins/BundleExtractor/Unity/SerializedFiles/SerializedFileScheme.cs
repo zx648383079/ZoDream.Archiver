@@ -37,27 +37,28 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 return false;
             }
-            int metadataSize = reader.ReadInt32();
-            ulong headerDefinedFileSize = reader.ReadUInt32();
-            var generation = reader.ReadInt32();
-            if (!Enum.IsDefined(typeof(FormatVersion), generation))
+            var metadataSize = reader.ReadUInt32();
+            long headerDefinedFileSize = reader.ReadUInt32();
+            var version = reader.ReadUInt32();
+            long dataOffset = reader.ReadUInt32();
+            if (!Enum.IsDefined(typeof(FormatVersion), (int)version))
             {
                 reader.BaseStream.Position = initialPosition;
                 return false;
             }
-            if (generation >= 22)
+            if (version >= 22)
             {
                 reader.BaseStream.Position = initialPosition + 0x14;
-                metadataSize = reader.ReadInt32();
-                headerDefinedFileSize = reader.ReadUInt64();
+                metadataSize = reader.ReadUInt32();
+                headerDefinedFileSize = reader.ReadInt64();
+                dataOffset = reader.ReadInt64();
             }
 
             reader.BaseStream.Position = initialPosition;
-
             return metadataSize >= SerializedFileHeader.MetadataMinSize
                 && headerDefinedFileSize >= SerializedFileHeader.HeaderMinSize + SerializedFileHeader.MetadataMinSize
                 && reader.BaseStream.Length >= 0
-                && headerDefinedFileSize == (ulong)reader.BaseStream.Length;
+                && headerDefinedFileSize == reader.BaseStream.Length;
         }
     }
 }

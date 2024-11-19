@@ -1,12 +1,15 @@
 ﻿using SharpCompress;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -16,33 +19,30 @@ namespace ZoDream.BundleExtractor
 
         public UnityBundleChunkReader(
             IBundleChunk fileItems,
-            IBundleOptions options)
-            : this(fileItems, null, options)
-        {
-        }
-
-        public UnityBundleChunkReader(IBundleChunk fileItems,
-            UnityBundleScheme? scheme,
+            IBundleService service,
             IBundleOptions options)
         {
-            _scheme = scheme ?? new();
             _fileItems = fileItems;
             _options = options;
+            _service = service;
+            _scheme = service.Get<UnityBundleScheme>() ?? new();
         }
 
         private readonly IBundleChunk _fileItems;
         private readonly IBundleOptions _options;
+        private readonly IBundleService _service;
         private readonly UnityBundleScheme _scheme;
 
         private readonly List<ISerializedFile> _assetItems = [];
-        private readonly Dictionary<string, int> _assetIndexItems = [];
-        private readonly List<Stream> _resourceItems = [];
+        private readonly ConcurrentDictionary<string, int> _assetIndexItems = [];
+        private readonly ConcurrentDictionary<string, Stream> _resourceItems = [];
         private readonly List<string> _importItems = [];
         private readonly HashSet<string> _resourceFileHash = [];
         private readonly HashSet<string> _importFileHash = [];
         private readonly HashSet<string> _assetFileHash = [];
 
         public ISerializedFile? this[int index] => _assetItems[index];
+        public ILogger Logger => _service.Get<ILogger>();
 
         public int IndexOf(string fileName)
         {
@@ -51,7 +51,7 @@ namespace ZoDream.BundleExtractor
                 return index;
             }
             var i = _assetItems.FindIndex(x => x.FullPath.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            _assetIndexItems.Add(fileName, i);
+            _assetIndexItems.TryAdd(fileName, i);
             return i;
         }
 
@@ -84,40 +84,104 @@ namespace ZoDream.BundleExtractor
                 _importItems.Add(item);
                 _importFileHash.Add(Path.GetFileName(item));
             }
+            Logger.Info("Load file...");
             for (int i = 0; i < _importItems.Count; i++)
             {
-                LoadFile(_importItems[i]);
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                LoadFile(_importItems[i], token);
             }
-
-            ReadAssets();
-            ProcessAssets();
-
+            Logger.Info("Read assets...");
+            ReadAssets(token);
+            Logger.Info("Process assets...");
+            ProcessAssets(token);
+            Logger.Info("Export assets...");
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.Children)
                 {
-                    var exportPath = Path.Combine(folder, asset.FullPath + "_export");
-                    ExportConvertFile(obj, exportPath, mode);
+                    if (token.IsCancellationRequested)
+                    {
+                        Logger.Info("Exporting assets has been cancelled !!");
+                        return;
+                    }
+                    try
+                    {
+                        var exportPath = _fileItems.Create(obj.Name ?? asset.FullPath, folder);
+                        ExportConvertFile(obj, exportPath, mode);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(e.Message);
+                    }
                 }
             }
         }
 
-        
-        private void LoadFile(string fullName)
+        private bool IsExcludeFile(string fileName)
         {
-            using var fs = File.OpenRead(fullName);
-            LoadFile(fs, fullName);
+            if (!string.IsNullOrWhiteSpace(_options.Entrance) && 
+                fileName.StartsWith(_options.Entrance))
+            {
+                if (_options.Platform == AndroidPlatformScheme.PlatformName)
+                {
+                    return !fileName.StartsWith(Path.Combine(_options.Entrance, 
+                        "assets"));
+                }
+            }
+            var i = fileName.LastIndexOf('.');
+            if (i < 0)
+            {
+                return false;
+            }
+            return fileName[(i + 1)..].ToLower() switch
+            {
+                "xml" or "dex" or "so" or "kotlin_metadata" or "dylib" => true,
+                _ => false
+            };
+        }
+        
+        private void LoadFile(string fullName, CancellationToken token)
+        {
+            if (IsExcludeFile(fullName))
+            {
+                return;
+            }
+            var fs = File.OpenRead(fullName);
+            if (fs.Length == 0)
+            {
+                fs.Dispose();
+                return;
+            }
+            try
+            {
+                LoadFile(fs, fullName, token);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message);
+            }
         }
 
-        private void LoadFile(Stream stream, string fullName)
+
+
+        private void LoadFile(Stream stream, string fullName, CancellationToken token)
         {
             using var reader = _scheme.Open(stream, fullName, Path.GetFileName(fullName), new ArchiveOptions()
             {
-                LeaveStreamOpen = false
+                LeaveStreamOpen = true
             });
+            if (token.IsCancellationRequested)
+            {
+                stream.Dispose();
+                return;
+            }
             if (reader is null)
             {
-                _resourceItems.Add(stream);
+                _resourceItems.TryAdd(Path.GetFileName(fullName), stream);
+                // stream.Dispose();
                 return;
             }
             if (reader is SerializedFileReader s)
@@ -130,12 +194,48 @@ namespace ZoDream.BundleExtractor
             var entries = reader.ReadEntry().ToArray();
             foreach (var item in entries)
             {
-                using var ms = new MemoryStream();
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                var ms = new MemoryStream();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-                LoadFile(stream, item.Name);
+                LoadFile(ms, item.Name, token);
             }
+            stream.Dispose();
         }
+
+        public Stream OpenResource(string fileName, ISerializedFile source)
+        {
+            fileName = Path.GetFileName(fileName);
+            if (_resourceItems.TryGetValue(fileName, out var stream))
+            {
+                return stream;
+            }
+            var assetsFileDirectory = Path.GetDirectoryName(source.FullPath);
+            var resourceFilePath = Path.Combine(assetsFileDirectory, fileName);
+            if (!File.Exists(resourceFilePath))
+            {
+                var findFiles = Directory.GetFiles(assetsFileDirectory, fileName, SearchOption.AllDirectories);
+                if (findFiles.Length > 0)
+                {
+                    resourceFilePath = findFiles[0];
+                }
+            }
+            if (File.Exists(resourceFilePath))
+            {
+                if (_resourceItems.TryGetValue(fileName, out stream))
+                {
+                    return stream;
+                }
+                stream = File.OpenRead(resourceFilePath);
+                _resourceItems.TryAdd(fileName, stream);
+                return stream;
+            }
+            return null;
+        }
+
 
         public void Dispose()
         {
@@ -145,7 +245,7 @@ namespace ZoDream.BundleExtractor
             }
             foreach (var item in _resourceItems)
             {
-                item.Dispose();
+                item.Value.Dispose();
             }
             _assetItems.Clear();
             _resourceItems.Clear();

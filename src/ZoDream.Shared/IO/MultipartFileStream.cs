@@ -33,7 +33,11 @@ namespace ZoDream.Shared.IO
                 {
                     pos += _items[i].Length;
                 }
-                return pos + _items[_index].Position;
+                if (_index < _items.Length)
+                {
+                    pos += _items[_index].Position;
+                }
+                return pos;
             }
             set {
                 Seek(value, SeekOrigin.Begin);
@@ -78,7 +82,7 @@ namespace ZoDream.Shared.IO
         public override int Read(byte[] buffer, int offset, int count)
         {
             var len = 0;
-            while (true)
+            while (_index < _items.Length)
             {
                 var res = _items[_index].Read(buffer, offset + len, count - len);
                 len += res;

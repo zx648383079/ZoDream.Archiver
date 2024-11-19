@@ -57,12 +57,34 @@ namespace ZoDream.BundleExtractor.Platforms
                 return true;
             }
             match = Regex.Match(content, @"\<application[^\<\>]+?android:label=""(.+?)""");
-            if (match.Success)
+            if (!match.Success)
             {
-                options.DisplayName = match.Groups[1].Value;
+                return true;
             }
+            options.DisplayName = GetString(entry, match.Groups[1].Value);
             return true;
         }
 
+        private string GetString(string entry, string key)
+        {
+            if (!key.StartsWith('@'))
+            {
+                return key;
+            }
+            var args = key[1..].Split('/');
+            var fileName = Path.Combine(Path.GetDirectoryName(entry), "res", 
+                "values", "strings.xml");
+            if (!File.Exists(fileName))
+            {
+                return string.Empty;
+            }
+            var content = File.ReadAllText(fileName);
+            var match = Regex.Match(content, @"\<string\s+name="""+ args[1] + @""">(.+?)\</string");
+            if (!match.Success)
+            {
+                return string.Empty;
+            }
+            return match.Groups[1].Value;
+        }
     }
 }

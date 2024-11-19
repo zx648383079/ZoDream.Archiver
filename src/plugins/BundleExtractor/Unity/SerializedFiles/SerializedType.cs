@@ -1,11 +1,5 @@
 ﻿using ZoDream.BundleExtractor.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.IO;
-using ZoDream.BundleExtractor.Unity;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {

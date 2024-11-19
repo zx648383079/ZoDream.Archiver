@@ -23,8 +23,15 @@ namespace ZoDream.BundleExtractor
             if (options.Package.StartsWith("com.papegames."))
             {
                 options.Platform ??= AndroidPlatformScheme.PlatformName;
-                options.Engine = UnityEngine.EngineName; ;
+                options.Engine = UnityEngine.EngineName;
                 options.Producer = PaperProducer.ProducerName;
+                return;
+            }
+            if (options.Package.StartsWith("com.mihoyo."))
+            {
+                options.Platform ??= AndroidPlatformScheme.PlatformName;
+                options.Engine = UnityEngine.EngineName;
+                options.Producer = MiHoYoProducer.ProducerName;
                 return;
             }
         }

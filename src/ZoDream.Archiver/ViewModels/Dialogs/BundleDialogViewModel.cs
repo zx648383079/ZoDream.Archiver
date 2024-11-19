@@ -9,11 +9,12 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class BundleDialogViewModel: BindableBase
+    public class BundleDialogViewModel: BindableBase, IFormValidator
     {
         public BundleDialogViewModel()
         {
             OpenCommand = new RelayCommand(TapOpen);
+            FolderCommand = new RelayCommand(TapFolder);
         }
 
         private string[] _typeItems = ["覆盖", "跳过", "重命名"];
@@ -67,6 +68,13 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _applicationId, value);
         }
 
+        private string _entrance = string.Empty;
+
+        public string Entrance {
+            get => _entrance;
+            set => Set(ref _entrance, value);
+        }
+
         public ArchiveExtractMode ExtractMode => (ArchiveExtractMode)(TypeIndex + 1);
 
         private string _fileName = string.Empty;
@@ -91,7 +99,22 @@ namespace ZoDream.Archiver.ViewModels
         }
 
 
+        public bool IsValid => !string.IsNullOrWhiteSpace(FileName);
+
         public ICommand OpenCommand { get; private set; }
+        public ICommand FolderCommand { get; private set; }
+
+        private async void TapFolder(object? _)
+        {
+            var picker = new FolderPicker();
+            App.ViewModel.InitializePicker(picker);
+            var folder = await picker.PickSingleFolderAsync();
+            if (folder is null)
+            {
+                return;
+            }
+            Entrance = folder.Path;
+        }
 
         private async void TapOpen(object? _)
         {
@@ -106,15 +129,6 @@ namespace ZoDream.Archiver.ViewModels
             FileName = folder.Path;
         }
 
-
-        public bool Verify()
-        {
-            if (string.IsNullOrWhiteSpace(FileName))
-            {
-                return false;
-            }
-            return true;
-        }
 
         private static int IndexOf(string[] items, string? item)
         {
@@ -150,6 +164,7 @@ namespace ZoDream.Archiver.ViewModels
                 ApplicationId = options.Package ?? string.Empty;
                 PlatformIndex = IndexOf(PlatformItems, options.Platform);
                 EngineIndex = IndexOf(EngineItems, options.Engine);
+                Entrance = options.Entrance ?? string.Empty;
             }
         }
 
@@ -174,6 +189,10 @@ namespace ZoDream.Archiver.ViewModels
             if (EngineIndex > 0)
             {
                 options.Engine = EngineItems[EngineIndex];
+            }
+            if (!string.IsNullOrWhiteSpace(Entrance))
+            {
+                options.Entrance = Entrance;
             }
         }
     }

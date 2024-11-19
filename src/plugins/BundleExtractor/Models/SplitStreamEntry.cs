@@ -54,13 +54,14 @@ namespace ZoDream.BundleExtractor.Models
             foreach (var item in this)
             {
                 var next = pos + item.Length;
-                if (pos > offset && next <= end)
+                var maxBegin = Math.Max(pos, offset);
+                if (maxBegin < Math.Min(next, end))
                 {
                     yield return new(item)
                     {
                         CompressedPosition = p,
                         Offset = Math.Max(0, offset - pos),
-                        EffectiveLength = Math.Min(item.Length, end - Math.Max(pos, offset))
+                        EffectiveLength = Math.Min(item.Length, end - maxBegin)
                     };
                 }
                 if (next > end)
@@ -74,7 +75,7 @@ namespace ZoDream.BundleExtractor.Models
 
         private Stream CreateEntryStream(Stream input, long inputBasePos, MergeSplitStreamEntry entry)
         {
-            var ms = CreateEntryStream(input, inputBasePos + entry.CompressedPosition, entry);
+            var ms = CreateEntryStream(input, inputBasePos + entry.CompressedPosition, entry.Source);
             return new PartialStream(ms, entry.Offset, entry.EffectiveLength);
         }
 

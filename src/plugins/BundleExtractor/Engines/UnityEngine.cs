@@ -9,7 +9,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class UnityEngine : IBundleEngine
+    public class UnityEngine(IBundleService service) : IBundleEngine
     {
         internal const string EngineName = "Unity";
         public string AliasName => EngineName;
@@ -18,17 +18,15 @@ namespace ZoDream.BundleExtractor.Engines
         private const string AndroidAssemblyName = "libunity.so";
         private const string WindowsAssemblyName = "UnityPlayer.dll";
 
-
-        private readonly UnityBundleScheme _scheme = new();
-
-        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems)
+        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
         {
             return fileItems.Select(i => new BundleChunk(i));
         }
 
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
-            return new UnityBundleChunkReader(fileItems, _scheme, options);
+            service.AddIf<UnityBundleScheme>();
+            return new UnityBundleChunkReader(fileItems, service, options);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

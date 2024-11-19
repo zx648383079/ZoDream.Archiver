@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -15,14 +17,21 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
-            foreach (var items in engine.EnumerateChunk(fileItems))
+            foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                using var chunk = engine.OpenRead(items, options);
-                chunk?.ExtractTo(folder, mode, token);
+                try
+                {
+                    using var chunk = engine.OpenRead(items, options);
+                    chunk?.ExtractTo(folder, mode, token);
+                }
+                catch (Exception ex)
+                {
+                    scheme.Get<ILogger>().Error(ex.Message);
+                }
             }
         }
 

@@ -16,8 +16,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public MovieTexture(UIReader reader) : base(reader)
         {
-            var m_Loop = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            var m_Loop = reader.ReadBoolean();
+            reader.AlignStream();
             m_AudioClip = new PPtr<AudioClip>(reader);
 
             MovieData = reader.ReadAsStream();

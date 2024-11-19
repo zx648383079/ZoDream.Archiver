@@ -15,7 +15,18 @@ namespace ZoDream.Shared.Bundle
     {
 
         public string Entrance { get; }
-
+        /// <summary>
+        /// 添加依赖
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="dependencies"></param>
         public void Add(string key, params string[] dependencies);
+        /// <summary>
+        /// 根据文件路径获取文件所需依赖路径
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        public bool TryGet(string fileName, out string[] items);
     }
 }

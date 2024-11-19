@@ -1,16 +1,10 @@
-﻿using System.Linq;
-using ZoDream.BundleExtractor.Producers;
-using ZoDream.Shared.Bundle;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
     public partial class BundleScheme
     {
-        private readonly IBundleProducer[] _producerItems = [
-            new MiHoYoProducer(),
-            new PaperProducer(),
-            new UnknownProducer(),
-        ];
+        private IBundleProducer[] _producerItems = [];
 
         public string[] ProducerNames => GetNames(_producerItems);
     }

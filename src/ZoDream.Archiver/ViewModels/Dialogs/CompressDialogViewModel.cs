@@ -14,7 +14,7 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class CompressDialogViewModel: BindableBase
+    public class CompressDialogViewModel: BindableBase, IFormValidator
     {
         public CompressDialogViewModel()
         {
@@ -90,6 +90,8 @@ namespace ZoDream.Archiver.ViewModels
 
 
         public long SubVolumeLength => SizeConverter.Parse(SubVolumeText, "M");
+
+        public bool IsValid => !string.IsNullOrWhiteSpace(FileName);
 
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }

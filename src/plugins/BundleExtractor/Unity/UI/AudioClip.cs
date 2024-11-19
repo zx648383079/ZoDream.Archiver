@@ -36,60 +36,58 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (reader.Version.LessThan(5))
             {
                 var version = reader.Version;
-                m_Format = reader.Reader.ReadInt32();
-                m_Type = (FMODSoundType)reader.Reader.ReadInt32();
-                m_3D = reader.Reader.ReadBoolean();
-                m_UseHardware = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                m_Format = reader.ReadInt32();
+                m_Type = (FMODSoundType)reader.ReadInt32();
+                m_3D = reader.ReadBoolean();
+                m_UseHardware = reader.ReadBoolean();
+                reader.AlignStream();
 
                 if (version.GreaterThanOrEquals(3, 2)) //3.2.0 to 5
                 {
-                    int m_Stream = reader.Reader.ReadInt32();
-                    m_Size = reader.Reader.ReadInt32();
+                    int m_Stream = reader.ReadInt32();
+                    m_Size = reader.ReadInt32();
                     var tsize = m_Size % 4 != 0 ? m_Size + 4 - m_Size % 4 : m_Size;
                     if (reader.Data.ByteSize + reader.Data.ByteStart - reader.Position != tsize)
                     {
-                        m_Offset = reader.Reader.ReadUInt32();
+                        m_Offset = reader.ReadUInt32();
                         m_Source = reader.FullPath + ".resS";
                     }
                 }
                 else
                 {
-                    m_Size = reader.Reader.ReadInt32();
+                    m_Size = reader.ReadInt32();
                 }
             }
             else
             {
-                m_LoadType = reader.Reader.ReadInt32();
-                m_Channels = reader.Reader.ReadInt32();
-                m_Frequency = reader.Reader.ReadInt32();
-                m_BitsPerSample = reader.Reader.ReadInt32();
-                m_Length = reader.Reader.ReadSingle();
-                m_IsTrackerFormat = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
-                m_SubsoundIndex = reader.Reader.ReadInt32();
-                m_PreloadAudioData = reader.Reader.ReadBoolean();
-                m_LoadInBackground = reader.Reader.ReadBoolean();
-                m_Legacy3D = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                m_LoadType = reader.ReadInt32();
+                m_Channels = reader.ReadInt32();
+                m_Frequency = reader.ReadInt32();
+                m_BitsPerSample = reader.ReadInt32();
+                m_Length = reader.ReadSingle();
+                m_IsTrackerFormat = reader.ReadBoolean();
+                reader.AlignStream();
+                m_SubsoundIndex = reader.ReadInt32();
+                m_PreloadAudioData = reader.ReadBoolean();
+                m_LoadInBackground = reader.ReadBoolean();
+                m_Legacy3D = reader.ReadBoolean();
+                reader.AlignStream();
 
                 //StreamedResource m_Resource
                 m_Source = reader.ReadAlignedString();
-                m_Offset = reader.Reader.ReadInt64();
-                m_Size = reader.Reader.ReadInt64();
-                m_CompressionFormat = (AudioCompressionFormat)reader.Reader.ReadInt32();
+                m_Offset = reader.ReadInt64();
+                m_Size = reader.ReadInt64();
+                m_CompressionFormat = (AudioCompressionFormat)reader.ReadInt32();
             }
 
-            //ResourceReader resourceReader;
-            //if (!string.IsNullOrEmpty(m_Source))
-            //{
-            //    resourceReader = new ResourceReader(m_Source, assetsFile, m_Offset, m_Size);
-            //}
-            //else
-            //{
-            //    resourceReader = new ResourceReader(reader, reader.BaseStream.Position, m_Size);
-            //}
-            m_AudioData = new PartialStream(reader.Reader.BaseStream, m_Size);
+            if (!string.IsNullOrEmpty(m_Source))
+            {
+                m_AudioData = new PartialStream(reader.OpenResource(m_Source), m_Offset, m_Size);
+            } else
+            {
+                m_AudioData = new PartialStream(reader.BaseStream, m_Size);
+            }
+            
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

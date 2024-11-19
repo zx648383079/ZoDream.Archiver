@@ -9,7 +9,7 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class PasswordDialogViewModel: BindableBase
+    public class PasswordDialogViewModel: BindableBase, IFormValidator
     {
         public PasswordDialogViewModel()
         {
@@ -29,6 +29,8 @@ namespace ZoDream.Archiver.ViewModels
             get => _dictFileName;
             set => Set(ref _dictFileName, value);
         }
+
+        public bool IsValid => !string.IsNullOrWhiteSpace(Password) || !string.IsNullOrWhiteSpace(DictFileName);
 
         public ICommand OpenCommand { get; private set; }
 

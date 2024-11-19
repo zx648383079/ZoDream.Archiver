@@ -8,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ResourceManager(UIReader reader) : base(reader)
         {
-            var m_ContainerSize = reader.Reader.ReadInt32();
+            var m_ContainerSize = reader.ReadInt32();
             m_Container = new List<KeyValuePair<string, PPtr<UIObject>>>();
             for (int i = 0; i < m_ContainerSize; i++)
             {

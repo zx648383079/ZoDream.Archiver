@@ -1,21 +1,24 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text;
+using System.Threading;
 using ZoDream.BundleExtractor.Unity.UI;
 
 namespace ZoDream.BundleExtractor
 {
     public partial class UnityBundleChunkReader
     {
-        private void ProcessAssets()
+        private void ProcessAssets(CancellationToken token)
         {
             foreach (var assetsFile in _assetItems)
             {
                 foreach (var obj in assetsFile.Children)
                 {
-                    //if (tokenSource.IsCancellationRequested)
-                    //{
-                    //    Logger.Info("Processing assets has been cancelled !!");
-                    //    return;
-                    //}
+                    if (token.IsCancellationRequested)
+                    {
+                        Logger.Info("Processing assets has been cancelled !!");
+                        return;
+                    }
                     if (obj is GameObject m_GameObject)
                     {
                         //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
@@ -96,8 +99,7 @@ namespace ZoDream.BundleExtractor
                                     }
                                     else
                                     {
-                                        m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld);
-                                        if (m_SpriteAtlaOld.m_IsVariant)
+                                        if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld) && m_SpriteAtlaOld.m_IsVariant)
                                         {
                                             //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
                                             //{
@@ -114,19 +116,24 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        private void ReadAssets()
+        private void ReadAssets(CancellationToken token)
         {
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.ObjectMetaItems)
                 {
-                    var reader = new UIReader(asset.Create(obj), obj, asset, _options);
+                    if (token.IsCancellationRequested)
+                    {
+                        Logger.Info("Reading assets has been cancelled !!");
+                        return;
+                    }
                     try
                     {
+                        var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                         UIObject res = reader.Type switch
                         {
                             ElementIDType.Animation => new Animation(reader),
-                            ElementIDType.AnimationClip => new AnimationClip(reader),
+                            ElementIDType.AnimationClip => new AnimationClip(reader, reader.SerializedType.OldType is null),
                             ElementIDType.Animator => new Animator(reader),
                             ElementIDType.AnimatorController => new AnimatorController(reader),
                             ElementIDType.AnimatorOverrideController => new AnimatorOverrideController(reader),
@@ -151,7 +158,8 @@ namespace ZoDream.BundleExtractor
                             ElementIDType.Sprite => new Sprite(reader),
                             ElementIDType.SpriteAtlas => new SpriteAtlas(reader),
                             ElementIDType.TextAsset => new TextAsset(reader),
-                            ElementIDType.Texture2D => new Texture2D(reader),
+                            ElementIDType.Texture2D => new Texture2D(reader, reader.SerializedType.OldType is null),
+                            ElementIDType.Texture2DArray => new Texture2D(reader, reader.SerializedType.OldType is null),
                             ElementIDType.Transform => new Transform(reader),
                             ElementIDType.VideoClip => new VideoClip(reader),
                             ElementIDType.ResourceManager => new ResourceManager(reader),
@@ -161,14 +169,17 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-                        //var sb = new StringBuilder();
-                        //sb.AppendLine("Unable to load object")
-                        //    .AppendLine($"Assets {assetsFile.fileName}")
-                        //    .AppendLine($"Path {assetsFile.originalPath}")
-                        //    .AppendLine($"Type {objectReader.type}")
-                        //    .AppendLine($"PathID {objectInfo.m_PathID}")
-                        //    .Append(e);
+                        var sb = new StringBuilder();
+                        sb.AppendLine("Unable to load object")
+                            .AppendLine($"Assets {asset.FullPath}")
+                            .AppendLine($"Path {asset.FullPath}")
+                            .AppendLine($"Type {obj.TypeID}")
+                            .AppendLine($"PathID {obj.FileID}")
+                            .Append(e);
+                        Debug.WriteLine(sb.ToString());
                         //Logger.Error(sb.ToString());
+                        //Logger.Error("Unable to load object");
+                        Logger.Error(e.Message);
                     }
                 }
             }

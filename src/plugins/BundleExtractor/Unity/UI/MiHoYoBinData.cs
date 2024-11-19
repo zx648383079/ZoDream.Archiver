@@ -23,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public MiHoYoBinData(UIReader reader) : base(reader)
         {
-            RawData = reader.Reader.ReadArray(r => r.ReadByte());
+            RawData = reader.ReadArray(r => r.ReadByte());
         }
 
         //public string AsString => Type switch
@@ -41,7 +41,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-
+            // TODO
         }
 
         private string DataStr => Encoding.UTF8.GetString(Data);

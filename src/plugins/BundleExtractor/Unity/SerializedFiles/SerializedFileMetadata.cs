@@ -1,13 +1,7 @@
 ﻿using ZoDream.BundleExtractor.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
-using ZoDream.BundleExtractor.Unity;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -22,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// Serialized files with this field enabled supposedly don't exist
         /// </summary>
         public uint LongFileID { get; set; }
-        public bool SwapEndianess { get; set; }
+        public bool SwapEndian { get; set; }
         public ObjectInfo[] Object { get; set; } = [];
         public LocalSerializedObjectIdentifier[] ScriptTypes { get; set; } = [];
         public FileIdentifier[] Externals { get; set; } = [];
@@ -70,24 +64,24 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public void Read(Stream stream, SerializedFileHeader header)
         {
-            bool swapEndianess = ReadSwapEndianess(stream, header);
-            EndianType endianess = swapEndianess ? EndianType.BigEndian : EndianType.LittleEndian;
-            using var reader = new EndianReader(stream, endianess);
+            bool swapEndian = ReadSwapEndian(stream, header);
+            EndianType endian = swapEndian ? EndianType.BigEndian : EndianType.LittleEndian;
+            using var reader = new EndianReader(stream, endian);
             Read(reader, header.Version);
         }
 
-        private bool ReadSwapEndianess(Stream stream, SerializedFileHeader header)
+        private bool ReadSwapEndian(Stream stream, SerializedFileHeader header)
         {
             if (HasEndian(header.Version))
             {
                 int num = stream.ReadByte();
                 //This is not and should not be aligned.
-                //Aligment only happens for the endian boolean on version 9 and greater.
-                //This coincides with endianess being stored in the header on version 9 and greater.
+                //Alignment only happens for the endian boolean on version 9 and greater.
+                //This coincides with endian being stored in the header on version 9 and greater.
                 return num switch
                 {
                     < 0 => throw new EndOfStreamException(),
-                    _ => SwapEndianess = num != 0,
+                    _ => SwapEndian = num != 0,
                 };
             }
             else

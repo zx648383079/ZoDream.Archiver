@@ -15,8 +15,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public StreamedResource(UIReader reader)
         {
             m_Source = reader.ReadAlignedString();
-            m_Offset = reader.Reader.ReadInt64();
-            m_Size = reader.Reader.ReadInt64();
+            m_Offset = reader.ReadInt64();
+            m_Size = reader.ReadInt64();
         }
     }
 
@@ -30,25 +30,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
             m_OriginalPath = reader.ReadAlignedString();
-            var m_ProxyWidth = reader.Reader.ReadUInt32();
-            var m_ProxyHeight = reader.Reader.ReadUInt32();
-            var Width = reader.Reader.ReadUInt32();
-            var Height = reader.Reader.ReadUInt32();
+            var m_ProxyWidth = reader.ReadUInt32();
+            var m_ProxyHeight = reader.ReadUInt32();
+            var Width = reader.ReadUInt32();
+            var Height = reader.ReadUInt32();
             if (version.GreaterThanOrEquals(2017, 2)) //2017.2 and up
             {
-                var m_PixelAspecRatioNum = reader.Reader.ReadUInt32();
-                var m_PixelAspecRatioDen = reader.Reader.ReadUInt32();
+                var m_PixelAspecRatioNum = reader.ReadUInt32();
+                var m_PixelAspecRatioDen = reader.ReadUInt32();
             }
-            var m_FrameRate = reader.Reader.ReadDouble();
-            var m_FrameCount = reader.Reader.ReadUInt64();
-            var m_Format = reader.Reader.ReadInt32();
-            var m_AudioChannelCount = reader.Reader.ReadArray(r => r.ReadUInt16());
-            reader.Reader.AlignStream();
-            var m_AudioSampleRate = reader.Reader.ReadArray(r => r.ReadUInt32());
-            var m_AudioLanguage = reader.Reader.ReadArray(r => r.ReadString());
+            var m_FrameRate = reader.ReadDouble();
+            var m_FrameCount = reader.ReadUInt64();
+            var m_Format = reader.ReadInt32();
+            var m_AudioChannelCount = reader.ReadArray(r => r.ReadUInt16());
+            reader.AlignStream();
+            var m_AudioSampleRate = reader.ReadArray(r => r.ReadUInt32());
+            var m_AudioLanguage = reader.ReadArray(r => r.ReadString());
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
-                var m_VideoShadersSize = reader.Reader.ReadInt32();
+                var m_VideoShadersSize = reader.ReadInt32();
                 var m_VideoShaders = new List<PPtr<Shader>>();
                 for (int i = 0; i < m_VideoShadersSize; i++)
                 {
@@ -56,10 +56,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
             m_ExternalResources = new StreamedResource(reader);
-            var m_HasSplitAlpha = reader.Reader.ReadBoolean();
+            var m_HasSplitAlpha = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
-                var m_sRGB = reader.Reader.ReadBoolean();
+                var m_sRGB = reader.ReadBoolean();
             }
 
             //ResourceReader resourceReader;
@@ -71,7 +71,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             //{
             //    resourceReader = new ResourceReader(reader, reader.BaseStream.Position, m_ExternalResources.m_Size);
             //}
-            m_VideoData = new PartialStream(reader.Reader.BaseStream, m_ExternalResources.m_Size);
+            m_VideoData = new PartialStream(reader.BaseStream, m_ExternalResources.m_Size);
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

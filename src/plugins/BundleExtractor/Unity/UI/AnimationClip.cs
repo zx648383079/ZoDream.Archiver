@@ -33,13 +33,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Keyframe(UIReader reader, Func<T> readerFunc)
         {
-            time = reader.Reader.ReadSingle();
+            time = reader.ReadSingle();
             value = readerFunc();
             inSlope = readerFunc();
             outSlope = readerFunc();
             if (reader.Version.Major >= 2018) //2018 and up
             {
-                weightedMode = reader.Reader.ReadInt32();
+                weightedMode = reader.ReadInt32();
                 inWeight = readerFunc();
                 outWeight = readerFunc();
             }
@@ -88,24 +88,24 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_PreInfinity = 2;
             m_PostInfinity = 2;
             m_RotationOrder = 4;
-            m_Curve = new List<Keyframe<T>>();
+            m_Curve = [];
         }
 
         public AnimationCurve(UIReader reader, Func<T> readerFunc)
         {
             var version = reader.Version;
-            int numCurves = reader.Reader.ReadInt32();
+            int numCurves = reader.ReadInt32();
             m_Curve = new List<Keyframe<T>>();
             for (int i = 0; i < numCurves; i++)
             {
                 m_Curve.Add(new Keyframe<T>(reader, readerFunc));
             }
 
-            m_PreInfinity = reader.Reader.ReadInt32();
-            m_PostInfinity = reader.Reader.ReadInt32();
+            m_PreInfinity = reader.ReadInt32();
+            m_PostInfinity = reader.ReadInt32();
             if (version.Major > 5 || version.Major == 5 && version.Minor >= 3)//5.3 and up
             {
-                m_RotationOrder = reader.Reader.ReadInt32();
+                m_RotationOrder = reader.ReadInt32();
             }
         }
 
@@ -187,16 +187,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public PackedFloatVector(UIReader reader)
         {
-            m_NumItems = reader.Reader.ReadUInt32();
-            m_Range = reader.Reader.ReadSingle();
-            m_Start = reader.Reader.ReadSingle();
+            m_NumItems = reader.ReadUInt32();
+            m_Range = reader.ReadSingle();
+            m_Start = reader.ReadSingle();
 
-            int numData = reader.Reader.ReadInt32();
-            m_Data = reader.Reader.ReadBytes(numData);
-            reader.Reader.AlignStream();
+            int numData = reader.ReadInt32();
+            m_Data = reader.ReadBytes(numData);
+            reader.AlignStream();
 
-            m_BitSize = reader.Reader.ReadByte();
-            reader.Reader.AlignStream();
+            m_BitSize = reader.ReadByte();
+            reader.AlignStream();
         }
 
         //public YAMLNode ExportYAML(UnityVersion version)
@@ -257,14 +257,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public PackedIntVector(UIReader reader)
         {
-            m_NumItems = reader.Reader.ReadUInt32();
+            m_NumItems = reader.ReadUInt32();
 
-            int numData = reader.Reader.ReadInt32();
-            m_Data = reader.Reader.ReadBytes(numData);
-            reader.Reader.AlignStream();
+            int numData = reader.ReadInt32();
+            m_Data = reader.ReadBytes(numData);
+            reader.AlignStream();
 
-            m_BitSize = reader.Reader.ReadByte();
-            reader.Reader.AlignStream();
+            m_BitSize = reader.ReadByte();
+            reader.AlignStream();
         }
         //public YAMLNode ExportYAML(UnityVersion version)
         //{
@@ -309,12 +309,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public PackedQuatVector(UIReader reader)
         {
-            m_NumItems = reader.Reader.ReadUInt32();
+            m_NumItems = reader.ReadUInt32();
 
-            int numData = reader.Reader.ReadInt32();
-            m_Data = reader.Reader.ReadBytes(numData);
+            int numData = reader.ReadInt32();
+            m_Data = reader.ReadBytes(numData);
 
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
 
         //public YAMLNode ExportYAML(UnityVersion version)
@@ -405,8 +405,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Times = new PackedIntVector(reader);
             m_Values = new PackedQuatVector(reader);
             m_Slopes = new PackedFloatVector(reader);
-            m_PreInfinity = reader.Reader.ReadInt32();
-            m_PostInfinity = reader.Reader.ReadInt32();
+            m_PreInfinity = reader.ReadInt32();
+            m_PostInfinity = reader.ReadInt32();
         }
 
         //public YAMLNode ExportYAML(UnityVersion version)
@@ -490,14 +490,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            curve = new AnimationCurve<float>(reader, reader.Reader.ReadSingle);
+            curve = new AnimationCurve<float>(reader, reader.ReadSingle);
             attribute = reader.ReadAlignedString();
             path = reader.ReadAlignedString();
-            classID = (ElementIDType)reader.Reader.ReadInt32();
+            classID = (ElementIDType)reader.ReadInt32();
             script = new PPtr<MonoScript>(reader);
             if (version.Major == 2022 && version.Minor >= 2) //2022.2 and up
             {
-                flags = reader.Reader.ReadInt32();
+                flags = reader.ReadInt32();
             }
         }
 
@@ -549,7 +549,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public PPtrKeyframe(UIReader reader)
         {
-            time = reader.Reader.ReadSingle();
+            time = reader.ReadSingle();
             value = new PPtr<UIObject>(reader);
         }
         //public YAMLNode ExportYAML(int[] version)
@@ -584,7 +584,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numCurves = reader.Reader.ReadInt32();
+            int numCurves = reader.ReadInt32();
             curve = new List<PPtrKeyframe>();
             for (int i = 0; i < numCurves; i++)
             {
@@ -593,11 +593,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             attribute = reader.ReadAlignedString();
             path = reader.ReadAlignedString();
-            classID = reader.Reader.ReadInt32();
+            classID = reader.ReadInt32();
             script = new PPtr<MonoScript>(reader);
             if (version.Major == 2022 && version.Minor >= 2) //2022.2 and up
             {
-                flags = reader.Reader.ReadInt32();
+                flags = reader.ReadInt32();
             }
         }
 
@@ -671,10 +671,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             m_GrabX = reader.ReadXForm();
             m_DoFArray = reader.ReadArray(r => r.ReadSingle());
-            m_Override = reader.Reader.ReadSingle();
-            m_CloseOpen = reader.Reader.ReadSingle();
-            m_InOut = reader.Reader.ReadSingle();
-            m_Grab = reader.Reader.ReadSingle();
+            m_Override = reader.ReadSingle();
+            m_CloseOpen = reader.ReadSingle();
+            m_InOut = reader.ReadSingle();
+            m_Grab = reader.ReadSingle();
         }
 
         public static HandPose ParseGI(UIReader reader)
@@ -682,10 +682,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var handPose = new HandPose();
             handPose.m_GrabX = UIReader.Parse(reader.ReadXForm4());
             handPose.m_DoFArray = reader.ReadArray(20, r => r.ReadSingle());
-            handPose.m_Override = reader.Reader.ReadSingle();
-            handPose.m_CloseOpen = reader.Reader.ReadSingle();
-            handPose.m_InOut = reader.Reader.ReadSingle();
-            handPose.m_Grab = reader.Reader.ReadSingle();
+            handPose.m_Override = reader.ReadSingle();
+            handPose.m_CloseOpen = reader.ReadSingle();
+            handPose.m_InOut = reader.ReadSingle();
+            handPose.m_Grab = reader.ReadSingle();
 
             return handPose;
         }
@@ -704,13 +704,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
             m_X = reader.ReadXForm();
-            m_WeightT = reader.Reader.ReadSingle();
-            m_WeightR = reader.Reader.ReadSingle();
+            m_WeightT = reader.ReadSingle();
+            m_WeightR = reader.ReadSingle();
             if (version.Major >= 5)//5.0 and up
             {
                 m_HintT = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() :
                     UIReader.Parse(reader.ReadVector4());//5.4 and up
-                m_HintWeightT = reader.Reader.ReadSingle();
+                m_HintWeightT = reader.ReadSingle();
             }
         }
 
@@ -719,14 +719,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var humanGoal = new HumanGoal();
 
             humanGoal.m_X = UIReader.Parse(reader.ReadXForm4());
-            humanGoal.m_WeightT = reader.Reader.ReadSingle();
-            humanGoal.m_WeightR = reader.Reader.ReadSingle();
+            humanGoal.m_WeightT = reader.ReadSingle();
+            humanGoal.m_WeightR = reader.ReadSingle();
 
             humanGoal.m_HintT = UIReader.Parse(reader.ReadVector4());
-            humanGoal.m_HintWeightT = reader.Reader.ReadSingle();
+            humanGoal.m_HintWeightT = reader.ReadSingle();
 
             var m_HintR = UIReader.Parse(reader.ReadVector4());
-            var m_HintWeightR = reader.Reader.ReadSingle();
+            var m_HintWeightR = reader.ReadSingle();
 
             return humanGoal;
         }
@@ -752,7 +752,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 UIReader.Parse(reader.ReadVector4());//5.4 and up
             m_LookAtWeight = reader.ReadVector4();
 
-            int numGoals = reader.Reader.ReadInt32();
+            int numGoals = reader.ReadInt32();
             m_GoalArray = new List<HumanGoal>();
             for (int i = 0; i < numGoals; i++)
             {
@@ -824,25 +824,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             m_CurveCount = 0;
             m_ConstCurveCount = 0;
-            m_ClipData = Array.Empty<byte>();
+            m_ClipData = [];
         }
         public override void Read(UIReader reader)
         {
-            var byteCount = reader.Reader.ReadInt32();
+            var byteCount = reader.ReadInt32();
 
             if (reader.IsSRGroup())
             {
                 byteCount *= 4;
             }
 
-            m_ClipData = reader.Reader.ReadBytes(byteCount);
-            reader.Reader.AlignStream();
+            m_ClipData = reader.ReadBytes(byteCount);
+            reader.AlignStream();
 
-            m_CurveCount = reader.Reader.ReadUInt32();
+            m_CurveCount = reader.ReadUInt32();
 
             if (reader.IsSRGroup())
             {
-                m_ConstCurveCount = reader.Reader.ReadUInt32();
+                m_ConstCurveCount = reader.ReadUInt32();
             }
         }
     }
@@ -854,9 +854,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint scaleIDToBindingCurveID;
         public AclTransformTrackIDToBindingCurveID(UIReader reader)
         {
-            rotationIDToBindingCurveID = reader.Reader.ReadUInt32();
-            positionIDToBindingCurveID = reader.Reader.ReadUInt32();
-            scaleIDToBindingCurveID = reader.Reader.ReadUInt32();
+            rotationIDToBindingCurveID = reader.ReadUInt32();
+            positionIDToBindingCurveID = reader.ReadUInt32();
+            scaleIDToBindingCurveID = reader.ReadUInt32();
         }
     }
 
@@ -869,18 +869,18 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public override uint CurveCount => m_CurveCount;
         public override void Read(UIReader reader)
         {
-            m_CurveCount = reader.Reader.ReadUInt32();
-            var compressedTransformTracksSize = reader.Reader.ReadUInt32();
-            var compressedScalarTracksSize = reader.Reader.ReadUInt32();
-            var aclTransformCount = reader.Reader.ReadUInt32();
-            var aclScalarCount = reader.Reader.ReadUInt32();
+            m_CurveCount = reader.ReadUInt32();
+            var compressedTransformTracksSize = reader.ReadUInt32();
+            var compressedScalarTracksSize = reader.ReadUInt32();
+            var aclTransformCount = reader.ReadUInt32();
+            var aclScalarCount = reader.ReadUInt32();
 
-            var compressedTransformTracksCount = reader.Reader.ReadInt32() * 0x10;
-            var compressedTransformTracks = reader.Reader.ReadBytes(compressedTransformTracksCount);
-            var compressedScalarTracksCount = reader.Reader.ReadInt32() * 0x10;
-            var compressedScalarTracks = reader.Reader.ReadBytes(compressedScalarTracksCount);
+            var compressedTransformTracksCount = reader.ReadInt32() * 0x10;
+            var compressedTransformTracks = reader.ReadBytes(compressedTransformTracksCount);
+            var compressedScalarTracksCount = reader.ReadInt32() * 0x10;
+            var compressedScalarTracks = reader.ReadBytes(compressedScalarTracksCount);
 
-            int numaclTransformTrackIDToBindingCurveID = reader.Reader.ReadInt32();
+            int numaclTransformTrackIDToBindingCurveID = reader.ReadInt32();
             var aclTransformTrackIDToBindingCurveID = new List<AclTransformTrackIDToBindingCurveID>();
             for (int i = 0; i < numaclTransformTrackIDToBindingCurveID; i++)
             {
@@ -911,9 +911,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override void Read(UIReader reader)
         {
-            var aclTracksCount = (int)reader.Reader.ReadUInt64();
-            var aclTracksOffset = reader.Position + reader.Reader.ReadInt64();
-            var aclTracksCurveCount = reader.Reader.ReadUInt32();
+            var aclTracksCount = (int)reader.ReadUInt64();
+            var aclTracksOffset = reader.Position + reader.ReadInt64();
+            var aclTracksCurveCount = reader.ReadUInt32();
             if (aclTracksOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -922,8 +922,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var pos = reader.Position;
             reader.Position = aclTracksOffset;
 
-            var tracksBytes = reader.Reader.ReadBytes(aclTracksCount);
-            reader.Reader.AlignStream();
+            var tracksBytes = reader.ReadBytes(aclTracksCount);
+            reader.AlignStream();
 
             using var tracksMS = new MemoryStream();
             tracksMS.Write(tracksBytes);
@@ -933,9 +933,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             reader.Position = pos;
 
-            var aclDatabaseCount = reader.Reader.ReadInt32();
-            var aclDatabaseOffset = reader.Position + reader.Reader.ReadInt64();
-            var aclDatabaseCurveCount = (uint)reader.Reader.ReadUInt64();
+            var aclDatabaseCount = reader.ReadInt32();
+            var aclDatabaseOffset = reader.Position + reader.ReadInt64();
+            var aclDatabaseCurveCount = (uint)reader.ReadUInt64();
             if (aclDatabaseOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -944,8 +944,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             pos = reader.Position;
             reader.Position = aclDatabaseOffset;
 
-            var databaseBytes = reader.Reader.ReadBytes(aclDatabaseCount);
-            reader.Reader.AlignStream();
+            var databaseBytes = reader.ReadBytes(aclDatabaseCount);
+            reader.AlignStream();
 
             using var databaseMS = new MemoryStream();
             databaseMS.Write(databaseBytes);
@@ -967,13 +967,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public StreamedClip(UIReader reader)
         {
             data = reader.ReadArray(r => r.ReadUInt32());
-            curveCount = reader.Reader.ReadUInt32();
+            curveCount = reader.ReadUInt32();
         }
         public static StreamedClip ParseGI(UIReader reader)
         {
-            var streamedClipCount = (int)reader.Reader.ReadUInt64();
-            var streamedClipOffset = reader.Position + reader.Reader.ReadInt64();
-            var streamedClipCurveCount = (uint)reader.Reader.ReadUInt64();
+            var streamedClipCount = (int)reader.ReadUInt64();
+            var streamedClipOffset = reader.Position + reader.ReadInt64();
+            var streamedClipCurveCount = (uint)reader.ReadUInt64();
             if (streamedClipOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -1091,23 +1091,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public DenseClip(UIReader reader)
         {
-            m_FrameCount = reader.Reader.ReadInt32();
-            m_CurveCount = reader.Reader.ReadUInt32();
-            m_SampleRate = reader.Reader.ReadSingle();
-            m_BeginTime = reader.Reader.ReadSingle();
-            m_SampleArray = reader.Reader.ReadArray(r => r.ReadSingle());
+            m_FrameCount = reader.ReadInt32();
+            m_CurveCount = reader.ReadUInt32();
+            m_SampleRate = reader.ReadSingle();
+            m_BeginTime = reader.ReadSingle();
+            m_SampleArray = reader.ReadArray(r => r.ReadSingle());
         }
         public static DenseClip ParseGI(UIReader reader)
         {
             var denseClip = new DenseClip();
 
-            denseClip.m_FrameCount = reader.Reader.ReadInt32();
-            denseClip.m_CurveCount = reader.Reader.ReadUInt32();
-            denseClip.m_SampleRate = reader.Reader.ReadSingle();
-            denseClip.m_BeginTime = reader.Reader.ReadSingle();
+            denseClip.m_FrameCount = reader.ReadInt32();
+            denseClip.m_CurveCount = reader.ReadUInt32();
+            denseClip.m_SampleRate = reader.ReadSingle();
+            denseClip.m_BeginTime = reader.ReadSingle();
 
-            var denseClipCount = (int)reader.Reader.ReadUInt64();
-            var denseClipOffset = reader.Position + reader.Reader.ReadInt64();
+            var denseClipCount = (int)reader.ReadUInt64();
+            var denseClipOffset = reader.Position + reader.ReadInt64();
             if (denseClipOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -1139,33 +1139,33 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ACLDenseClip(UIReader reader) : base(reader)
         {
-            m_ACLType = reader.Reader.ReadInt32();
+            m_ACLType = reader.ReadInt32();
             if (reader.IsArknightsEndfield())
             {
                 m_ACLArray = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
-                m_PositionFactor = reader.Reader.ReadSingle();
-                m_EulerFactor = reader.Reader.ReadSingle();
-                m_ScaleFactor = reader.Reader.ReadSingle();
-                m_FloatFactor = reader.Reader.ReadSingle();
-                m_nPositionCurves = reader.Reader.ReadUInt32();
-                m_nRotationCurves = reader.Reader.ReadUInt32();
-                m_nEulerCurves = reader.Reader.ReadUInt32();
-                m_nScaleCurves = reader.Reader.ReadUInt32();
+                reader.AlignStream();
+                m_PositionFactor = reader.ReadSingle();
+                m_EulerFactor = reader.ReadSingle();
+                m_ScaleFactor = reader.ReadSingle();
+                m_FloatFactor = reader.ReadSingle();
+                m_nPositionCurves = reader.ReadUInt32();
+                m_nRotationCurves = reader.ReadUInt32();
+                m_nEulerCurves = reader.ReadUInt32();
+                m_nScaleCurves = reader.ReadUInt32();
             }
             else if (reader.IsExAstris())
             {
-                m_nPositionCurves = reader.Reader.ReadUInt32();
-                m_nRotationCurves = reader.Reader.ReadUInt32();
-                m_nEulerCurves = reader.Reader.ReadUInt32();
-                m_nScaleCurves = reader.Reader.ReadUInt32();
-                m_nGenericCurves = reader.Reader.ReadUInt32();
-                m_PositionFactor = reader.Reader.ReadSingle();
-                m_EulerFactor = reader.Reader.ReadSingle();
-                m_ScaleFactor = reader.Reader.ReadSingle();
-                m_FloatFactor = reader.Reader.ReadSingle();
-                m_ACLArray = reader.Reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                m_nPositionCurves = reader.ReadUInt32();
+                m_nRotationCurves = reader.ReadUInt32();
+                m_nEulerCurves = reader.ReadUInt32();
+                m_nScaleCurves = reader.ReadUInt32();
+                m_nGenericCurves = reader.ReadUInt32();
+                m_PositionFactor = reader.ReadSingle();
+                m_EulerFactor = reader.ReadSingle();
+                m_ScaleFactor = reader.ReadSingle();
+                m_FloatFactor = reader.ReadSingle();
+                m_ACLArray = reader.ReadArray(r => r.ReadByte());
+                reader.AlignStream();
             }
             Process();
         }
@@ -1284,8 +1284,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
         public static ConstantClip ParseGI(UIReader reader)
         {
-            var constantClipCount = (int)reader.Reader.ReadUInt64();
-            var constantClipOffset = reader.Position + reader.Reader.ReadInt64();
+            var constantClipCount = (int)reader.ReadUInt64();
+            var constantClipOffset = reader.Position + reader.ReadInt64();
             if (constantClipOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -1313,13 +1313,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public ValueConstant(UIReader reader)
         {
             var version = reader.Version;
-            m_ID = reader.Reader.ReadUInt32();
+            m_ID = reader.ReadUInt32();
             if (version.LessThan(5, 5))//5.5 down
             {
-                m_TypeID = reader.Reader.ReadUInt32();
+                m_TypeID = reader.ReadUInt32();
             }
-            m_Type = reader.Reader.ReadUInt32();
-            m_Index = reader.Reader.ReadUInt32();
+            m_Type = reader.ReadUInt32();
+            m_Index = reader.ReadUInt32();
         }
     }
 
@@ -1329,7 +1329,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ValueArrayConstant(UIReader reader)
         {
-            int numVals = reader.Reader.ReadInt32();
+            int numVals = reader.ReadInt32();
             m_ValueArray = new List<ValueConstant>();
             for (int i = 0; i < numVals; i++)
             {
@@ -1385,7 +1385,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
         public static Clip ParseGI(UIReader reader)
         {
-            var clipOffset = reader.Position + reader.Reader.ReadInt64();
+            var clipOffset = reader.Position + reader.ReadInt64();
             if (clipOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
@@ -1458,8 +1458,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ValueDelta(UIReader reader)
         {
-            m_Start = reader.Reader.ReadSingle();
-            m_Stop = reader.Reader.ReadSingle();
+            m_Start = reader.ReadSingle();
+            m_Stop = reader.ReadSingle();
         }
     }
 
@@ -1533,12 +1533,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() : UIReader.Parse(reader.ReadVector4());//5.4 and up
             m_Clip = new Clip(reader);
-            m_StartTime = reader.Reader.ReadSingle();
-            m_StopTime = reader.Reader.ReadSingle();
-            m_OrientationOffsetY = reader.Reader.ReadSingle();
-            m_Level = reader.Reader.ReadSingle();
-            m_CycleOffset = reader.Reader.ReadSingle();
-            m_AverageAngularSpeed = reader.Reader.ReadSingle();
+            m_StartTime = reader.ReadSingle();
+            m_StopTime = reader.ReadSingle();
+            m_OrientationOffsetY = reader.ReadSingle();
+            m_Level = reader.ReadSingle();
+            m_CycleOffset = reader.ReadSingle();
+            m_AverageAngularSpeed = reader.ReadSingle();
 
             if (reader.IsSR() && HasShortIndexArray(reader.SerializedType))
             {
@@ -1552,7 +1552,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 var m_AdditionalCurveIndexArray = reader.ReadArray(r => r.ReadInt32());
             }
-            int numDeltas = reader.Reader.ReadInt32();
+            int numDeltas = reader.ReadInt32();
             m_ValueArrayDelta = new List<ValueDelta>();
             for (int i = 0; i < numDeltas; i++)
             {
@@ -1563,24 +1563,24 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_ValueArrayReferencePose = reader.ReadArray(r => r.ReadSingle());
             }
 
-            m_Mirror = reader.Reader.ReadBoolean();
+            m_Mirror = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                m_LoopTime = reader.Reader.ReadBoolean();
+                m_LoopTime = reader.ReadBoolean();
             }
-            m_LoopBlend = reader.Reader.ReadBoolean();
-            m_LoopBlendOrientation = reader.Reader.ReadBoolean();
-            m_LoopBlendPositionY = reader.Reader.ReadBoolean();
-            m_LoopBlendPositionXZ = reader.Reader.ReadBoolean();
+            m_LoopBlend = reader.ReadBoolean();
+            m_LoopBlendOrientation = reader.ReadBoolean();
+            m_LoopBlendPositionY = reader.ReadBoolean();
+            m_LoopBlendPositionXZ = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(5, 5))//5.5 and up
             {
-                m_StartAtOrigin = reader.Reader.ReadBoolean();
+                m_StartAtOrigin = reader.ReadBoolean();
             }
-            m_KeepOriginalOrientation = reader.Reader.ReadBoolean();
-            m_KeepOriginalPositionY = reader.Reader.ReadBoolean();
-            m_KeepOriginalPositionXZ = reader.Reader.ReadBoolean();
-            m_HeightFromFeet = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            m_KeepOriginalOrientation = reader.ReadBoolean();
+            m_KeepOriginalPositionY = reader.ReadBoolean();
+            m_KeepOriginalPositionXZ = reader.ReadBoolean();
+            m_HeightFromFeet = reader.ReadBoolean();
+            reader.AlignStream();
         }
         public static ClipMuscleConstant ParseGI(UIReader reader)
         {
@@ -1597,43 +1597,43 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             clipMuscleConstant.m_Clip = Clip.ParseGI(reader);
 
-            clipMuscleConstant.m_StartTime = reader.Reader.ReadSingle();
-            clipMuscleConstant.m_StopTime = reader.Reader.ReadSingle();
-            clipMuscleConstant.m_OrientationOffsetY = reader.Reader.ReadSingle();
-            clipMuscleConstant.m_Level = reader.Reader.ReadSingle();
-            clipMuscleConstant.m_CycleOffset = reader.Reader.ReadSingle();
-            clipMuscleConstant.m_AverageAngularSpeed = reader.Reader.ReadSingle();
+            clipMuscleConstant.m_StartTime = reader.ReadSingle();
+            clipMuscleConstant.m_StopTime = reader.ReadSingle();
+            clipMuscleConstant.m_OrientationOffsetY = reader.ReadSingle();
+            clipMuscleConstant.m_Level = reader.ReadSingle();
+            clipMuscleConstant.m_CycleOffset = reader.ReadSingle();
+            clipMuscleConstant.m_AverageAngularSpeed = reader.ReadSingle();
 
             clipMuscleConstant.m_IndexArray = reader.ReadArray(0xC8, r => (int)r.ReadInt16());
 
-            var valueArrayDeltaCount = (int)reader.Reader.ReadUInt64();
-            var valueArrayDeltaOffset = reader.Position + reader.Reader.ReadInt64();
+            var valueArrayDeltaCount = (int)reader.ReadUInt64();
+            var valueArrayDeltaOffset = reader.Position + reader.ReadInt64();
 
             if (valueArrayDeltaOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
             }
 
-            var valueArrayReferencePoseCount = (int)reader.Reader.ReadUInt64();
-            var valueArrayReferencePoseOffset = reader.Position + reader.Reader.ReadInt64();
+            var valueArrayReferencePoseCount = (int)reader.ReadUInt64();
+            var valueArrayReferencePoseOffset = reader.Position + reader.ReadInt64();
 
             if (valueArrayReferencePoseOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
             }
 
-            clipMuscleConstant.m_Mirror = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_LoopTime = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlend = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendOrientation = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendPositionY = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendPositionXZ = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_StartAtOrigin = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalOrientation = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalPositionY = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalPositionXZ = reader.Reader.ReadBoolean();
-            clipMuscleConstant.m_HeightFromFeet = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            clipMuscleConstant.m_Mirror = reader.ReadBoolean();
+            clipMuscleConstant.m_LoopTime = reader.ReadBoolean();
+            clipMuscleConstant.m_LoopBlend = reader.ReadBoolean();
+            clipMuscleConstant.m_LoopBlendOrientation = reader.ReadBoolean();
+            clipMuscleConstant.m_LoopBlendPositionY = reader.ReadBoolean();
+            clipMuscleConstant.m_LoopBlendPositionXZ = reader.ReadBoolean();
+            clipMuscleConstant.m_StartAtOrigin = reader.ReadBoolean();
+            clipMuscleConstant.m_KeepOriginalOrientation = reader.ReadBoolean();
+            clipMuscleConstant.m_KeepOriginalPositionY = reader.ReadBoolean();
+            clipMuscleConstant.m_KeepOriginalPositionXZ = reader.ReadBoolean();
+            clipMuscleConstant.m_HeightFromFeet = reader.ReadBoolean();
+            reader.AlignStream();
 
             if (valueArrayDeltaCount > 0)
             {
@@ -1704,24 +1704,24 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public GenericBinding(UIReader reader)
         {
             version = reader.Version;
-            path = reader.Reader.ReadUInt32();
-            attribute = reader.Reader.ReadUInt32();
+            path = reader.ReadUInt32();
+            attribute = reader.ReadUInt32();
             script = new PPtr<UIObject>(reader);
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
-                typeID = (ElementIDType)reader.Reader.ReadInt32();
+                typeID = (ElementIDType)reader.ReadInt32();
             }
             else
             {
-                typeID = (ElementIDType)reader.Reader.ReadUInt16();
+                typeID = (ElementIDType)reader.ReadUInt16();
             }
-            customType = reader.Reader.ReadByte();
-            isPPtrCurve = reader.Reader.ReadByte();
+            customType = reader.ReadByte();
+            isPPtrCurve = reader.ReadByte();
             if (version.GreaterThanOrEquals(2022, 1)) //2022.1 and up
             {
-                isIntCurve = reader.Reader.ReadByte();
+                isIntCurve = reader.ReadByte();
             }
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
 
         //public YAMLNode ExportYAML(int[] version)
@@ -1746,14 +1746,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public AnimationClipBindingConstant(UIReader reader)
         {
-            int numBindings = reader.Reader.ReadInt32();
+            int numBindings = reader.ReadInt32();
             genericBindings = new List<GenericBinding>();
             for (int i = 0; i < numBindings; i++)
             {
                 genericBindings.Add(new GenericBinding(reader));
             }
 
-            int numMappings = reader.Reader.ReadInt32();
+            int numMappings = reader.ReadInt32();
             pptrCurveMapping = new List<PPtr<UIObject>>();
             for (int i = 0; i < numMappings; i++)
             {
@@ -1819,16 +1819,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            time = reader.Reader.ReadSingle();
+            time = reader.ReadSingle();
             functionName = reader.ReadAlignedString();
             data = reader.ReadAlignedString();
             objectReferenceParameter = new PPtr<UIObject>(reader);
-            floatParameter = reader.Reader.ReadSingle();
+            floatParameter = reader.ReadSingle();
             if (version.Major >= 3) //3 and up
             {
-                intParameter = reader.Reader.ReadInt32();
+                intParameter = reader.ReadInt32();
             }
-            messageOptions = reader.Reader.ReadInt32();
+            messageOptions = reader.ReadInt32();
         }
 
         //public YAMLNode ExportYAML(int[] version)
@@ -1876,16 +1876,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         private bool hasStreamingInfo = false;
 
-        public AnimationClip(UIReader reader) : base(reader)
+        public AnimationClip(UIReader reader, bool isReadable)
+            : base(reader, isReadable)
         {
+            if (!isReadable)
+            {
+                return;
+            }
             var version = reader.Version;
             if (version.Major >= 5)//5.0 and up
             {
-                m_Legacy = reader.Reader.ReadBoolean();
+                m_Legacy = reader.ReadBoolean();
             }
             else if (version.Major >= 4)//4.0 and up
             {
-                m_AnimationType = (AnimationType)reader.Reader.ReadInt32();
+                m_AnimationType = (AnimationType)reader.ReadInt32();
                 if (m_AnimationType == AnimationType.Legacy)
                     m_Legacy = true;
             }
@@ -1895,10 +1900,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             if (reader.IsLoveAndDeepSpace())
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 var m_aclTransformCache = reader.ReadArray(r => r.ReadByte());
                 var m_aclScalarCache = reader.ReadArray(r => r.ReadByte());
-                int numaclTransformTrackId2CurveId = reader.Reader.ReadInt32();
+                int numaclTransformTrackId2CurveId = reader.ReadInt32();
                 var m_aclTransformTrackId2CurveId = new List<AclTransformTrackIDToBindingCurveID>();
                 for (int i = 0; i < numaclTransformTrackId2CurveId; i++)
                 {
@@ -1906,21 +1911,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
                 var m_aclScalarTrackId2CurveId = reader.ReadArray(r => r.ReadUInt32());
             }
-            m_Compressed = reader.Reader.ReadBoolean();
+            m_Compressed = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 3))//4.3 and up
             {
-                m_UseHighQualityCurve = reader.Reader.ReadBoolean();
+                m_UseHighQualityCurve = reader.ReadBoolean();
             }
-            reader.Reader.AlignStream();
-            int numRCurves = reader.Reader.ReadInt32();
-            m_RotationCurves = new List<QuaternionCurve>();
+            reader.AlignStream();
+            int numRCurves = reader.ReadInt32();
+            m_RotationCurves = [];
             for (int i = 0; i < numRCurves; i++)
             {
                 m_RotationCurves.Add(new QuaternionCurve(reader));
             }
 
-            int numCRCurves = reader.Reader.ReadInt32();
-            m_CompressedRotationCurves = new List<CompressedAnimationCurve>();
+            int numCRCurves = reader.ReadInt32();
+            m_CompressedRotationCurves = [];
             for (int i = 0; i < numCRCurves; i++)
             {
                 m_CompressedRotationCurves.Add(new CompressedAnimationCurve(reader));
@@ -1928,35 +1933,35 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (reader.IsExAstris())
             {
-                var m_aclType = reader.Reader.ReadInt32();
+                var m_aclType = reader.ReadInt32();
             }
 
             if (version.GreaterThanOrEquals(5, 3))//5.3 and up
             {
-                int numEulerCurves = reader.Reader.ReadInt32();
-                m_EulerCurves = new List<Vector3Curve>();
+                int numEulerCurves = reader.ReadInt32();
+                m_EulerCurves = [];
                 for (int i = 0; i < numEulerCurves; i++)
                 {
                     m_EulerCurves.Add(new Vector3Curve(reader));
                 }
             }
 
-            int numPCurves = reader.Reader.ReadInt32();
-            m_PositionCurves = new List<Vector3Curve>();
+            int numPCurves = reader.ReadInt32();
+            m_PositionCurves = [];
             for (int i = 0; i < numPCurves; i++)
             {
                 m_PositionCurves.Add(new Vector3Curve(reader));
             }
 
-            int numSCurves = reader.Reader.ReadInt32();
-            m_ScaleCurves = new List<Vector3Curve>();
+            int numSCurves = reader.ReadInt32();
+            m_ScaleCurves = [];
             for (int i = 0; i < numSCurves; i++)
             {
                 m_ScaleCurves.Add(new Vector3Curve(reader));
             }
 
-            int numFCurves = reader.Reader.ReadInt32();
-            m_FloatCurves = new List<FloatCurve>();
+            int numFCurves = reader.ReadInt32();
+            m_FloatCurves = [];
             for (int i = 0; i < numFCurves; i++)
             {
                 m_FloatCurves.Add(new FloatCurve(reader));
@@ -1964,19 +1969,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                int numPtrCurves = reader.Reader.ReadInt32();
-                m_PPtrCurves = new List<PPtrCurve>();
+                int numPtrCurves = reader.ReadInt32();
+                m_PPtrCurves = [];
                 for (int i = 0; i < numPtrCurves; i++)
                 {
                     m_PPtrCurves.Add(new PPtrCurve(reader));
                 }
             }
 
-            m_SampleRate = reader.Reader.ReadSingle();
-            m_WrapMode = reader.Reader.ReadInt32();
+            m_SampleRate = reader.ReadSingle();
+            m_WrapMode = reader.ReadInt32();
             if (reader.IsArknightsEndfield())
             {
-                var m_aclType = reader.Reader.ReadInt32();
+                var m_aclType = reader.ReadInt32();
             }
             if (version.GreaterThanOrEquals(3, 4)) //3.4 and up
             {
@@ -1986,11 +1991,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (reader.IsGI())
                 {
-                    var muscleClipSize = reader.Reader.ReadInt32();
+                    var muscleClipSize = reader.ReadInt32();
                     if (muscleClipSize < 0)
                     {
                         hasStreamingInfo = true;
-                        m_MuscleClipSize = reader.Reader.ReadUInt32();
+                        m_MuscleClipSize = reader.ReadUInt32();
                         var pos = reader.Position;
                         m_MuscleClip = ClipMuscleConstant.ParseGI(reader);
                         reader.Position = pos + m_MuscleClipSize;
@@ -2003,21 +2008,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
                 else
                 {
-                    m_MuscleClipSize = reader.Reader.ReadUInt32();
+                    m_MuscleClipSize = reader.ReadUInt32();
                     m_MuscleClip = new ClipMuscleConstant(reader);
                 }
             }
             if (reader.IsSRGroup())
             {
                 var m_AclClipData = reader.ReadArray(r => r.ReadByte());
-                var aclBindingsCount = reader.Reader.ReadInt32();
+                var aclBindingsCount = reader.ReadInt32();
                 var m_AclBindings = new List<GenericBinding>();
                 for (int i = 0; i < aclBindingsCount; i++)
                 {
                     m_AclBindings.Add(new GenericBinding(reader));
                 }
                 var m_AclRange = new KeyValuePair<float, float>(
-                    reader.Reader.ReadSingle(), reader.Reader.ReadSingle());
+                    reader.ReadSingle(), reader.ReadSingle());
             }
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
@@ -2025,19 +2030,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             if (version.GreaterThanOrEquals(2018, 3)) //2018.3 and up
             {
-                var m_HasGenericRootTransform = reader.Reader.ReadBoolean();
-                var m_HasMotionFloatCurves = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_HasGenericRootTransform = reader.ReadBoolean();
+                var m_HasMotionFloatCurves = reader.ReadBoolean();
+                reader.AlignStream();
             }
-            int numEvents = reader.Reader.ReadInt32();
-            m_Events = new List<AnimationEvent>();
+            int numEvents = reader.ReadInt32();
+            m_Events = [];
             for (int i = 0; i < numEvents; i++)
             {
                 m_Events.Add(new AnimationEvent(reader));
             }
             if (version.Major >= 2017) //2017 and up
             {
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
             if (hasStreamingInfo)
             {
@@ -2046,9 +2051,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 {
                     var aclClip = m_MuscleClip.m_Clip.m_ACLClip as GIACLClip;
 
-                    //var resourceReader = new ResourceReader(m_StreamData.path, 
-                    //    assetsFile, m_StreamData.offset, m_StreamData.size);
-                    var res = new PartialStream(reader.Reader.BaseStream, m_StreamData.offset, m_StreamData.size);
+                    var res = reader.OpenResource(m_StreamData);
                     using var ms = new MemoryStream();
                     ms.Write(aclClip.m_DatabaseData);
 
@@ -2061,9 +2064,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
         }
 
+        public AnimationClip(UIReader reader) : this(reader, true)
+        {
+            
+        }
+
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            throw new NotImplementedException();
+            // TODO
         }
     }
 }

@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Index(UIReader reader)
         {
             Object = new PPtr<UIObject>(reader);
-            Size = reader.Reader.ReadUInt64();
+            Size = reader.ReadUInt64();
         }
     }
 
@@ -23,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public IndexObject(UIReader reader) : base(reader)
         {
-            Count = reader.Reader.ReadInt32();
+            Count = reader.ReadInt32();
             AssetMap = new List<KeyValuePair<string, Index>>();
             for (int i = 0; i < Count; i++)
             {

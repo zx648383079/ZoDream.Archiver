@@ -86,6 +86,7 @@ namespace ZoDream.BundleExtractor
             //settings.Converters.Add(new StringEnumConverter());
             //var str = JsonConvert.SerializeObject(item, Formatting.Indented, settings);
             //File.WriteAllText(exportFullPath, str);
+            // TODO
             return true;
         }
 

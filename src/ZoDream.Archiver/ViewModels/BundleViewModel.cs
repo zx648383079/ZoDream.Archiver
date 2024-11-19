@@ -157,9 +157,8 @@ namespace ZoDream.Archiver.ViewModels
             var picker = new BundleDialog();
             var model = picker.ViewModel;
             model.Load(_scheme, _options);
-            var res = await _app.OpenDialogAsync(picker);
-            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary
-                || !model.Verify())
+            var res = await _app.OpenFormAsync(picker);
+            if (!res)
             {
                 _app.Warning("已取消操作！");
                 return;
@@ -196,6 +195,7 @@ namespace ZoDream.Archiver.ViewModels
                 watch.Stop();
                 Debug.WriteLine($"Use Time: {watch.Elapsed.TotalSeconds}");
                 _app.CloseProgress();
+                _app.Success("已完成操作！");
             }, token);
             
         }
@@ -222,6 +222,11 @@ namespace ZoDream.Archiver.ViewModels
             {
                 TapDrag(items);
             }
+        }
+
+        public void UnloadAsync()
+        {
+            _scheme?.Dispose();
         }
     }
 }

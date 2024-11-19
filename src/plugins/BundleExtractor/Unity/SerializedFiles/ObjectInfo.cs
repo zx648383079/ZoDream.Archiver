@@ -163,6 +163,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// The data referenced by <see cref="ByteStart"/> and <see cref="ByteSize"/>.
         /// </summary>
-        public byte[]? ObjectData { get; set; }
+        //public byte[]? ObjectData { get; set; }
     }
 }

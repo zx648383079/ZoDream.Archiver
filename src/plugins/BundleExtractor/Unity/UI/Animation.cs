@@ -10,8 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             : base(reader)
         {
             var m_Animation = new PPtr<AnimationClip>(reader);
-            int numAnimations = reader.Reader.ReadInt32();
-            m_Animations = new List<PPtr<AnimationClip>>();
+            int numAnimations = reader.ReadInt32();
+            m_Animations = [];
             for (int i = 0; i < numAnimations; i++)
             {
                 m_Animations.Add(new PPtr<AnimationClip>(reader));

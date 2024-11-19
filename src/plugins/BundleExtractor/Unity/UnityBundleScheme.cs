@@ -34,7 +34,7 @@ namespace ZoDream.BundleExtractor
                 new BrotliFileScheme(),
                 new GZipFileScheme(),
                 new SerializedFileScheme(),
-                ];
+            ];
             foreach (var scheme in schemes) 
             {
                 reader = scheme.Open(stream, filePath, fileName, options);
@@ -62,7 +62,7 @@ namespace ZoDream.BundleExtractor
                 FileStreamBundleHeader.UnityFSMagic => new FileStreamBundleReader(reader, options),
                 RawBundleHeader.UnityRawMagic => new RawWebBundleReader<RawBundleHeader>(reader, options),
                 WebBundleHeader.UnityWebMagic => new RawWebBundleReader<WebBundleHeader>(reader, options),
-                _ => throw new NotSupportedException(signature)
+                _ => null,//throw new NotSupportedException(signature)
             };
         }
 

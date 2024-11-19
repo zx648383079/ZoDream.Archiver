@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
+using System.Linq;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -61,6 +62,23 @@ namespace ZoDream.Shared.Bundle
                 {
                     yield return it;
                 }
+            }
+        }
+
+        public IEnumerable<IBundleChunk> EnumerateChunk()
+        {
+            return fileItems.Select(i => new BundleChunk(i));
+        }
+
+        public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
+        {
+            foreach (var item in GetFiles())
+            {
+                if (dependencies.TryGet(item, out var items))
+                {
+                    yield return new BundleChunk(dependencies.Entrance, [.. items, item]);
+                }
+                yield return new BundleChunk(item);
             }
         }
 

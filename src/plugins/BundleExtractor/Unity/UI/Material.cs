@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Offset = reader.ReadVector2();
             if (reader.IsArknightsEndfield())
             {
-                var m_UVSetIndex = reader.Reader.ReadInt32();
+                var m_UVSetIndex = reader.ReadInt32();
             }
         }
     }
@@ -33,7 +33,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int m_TexEnvsSize = reader.Reader.ReadInt32();
+            int m_TexEnvsSize = reader.ReadInt32();
             m_TexEnvs = new List<KeyValuePair<string, UnityTexEnv>>();
             for (int i = 0; i < m_TexEnvsSize; i++)
             {
@@ -42,22 +42,22 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2021, 1)) //2021.1 and up
             {
-                int m_IntsSize = reader.Reader.ReadInt32();
+                int m_IntsSize = reader.ReadInt32();
                 m_Ints = new List<KeyValuePair<string, int>>();
                 for (int i = 0; i < m_IntsSize; i++)
                 {
-                    m_Ints.Add(new(reader.ReadAlignedString(), reader.Reader.ReadInt32()));
+                    m_Ints.Add(new(reader.ReadAlignedString(), reader.ReadInt32()));
                 }
             }
 
-            int m_FloatsSize = reader.Reader.ReadInt32();
+            int m_FloatsSize = reader.ReadInt32();
             m_Floats = new List<KeyValuePair<string, float>>();
             for (int i = 0; i < m_FloatsSize; i++)
             {
-                m_Floats.Add(new(reader.ReadAlignedString(), reader.Reader.ReadSingle()));
+                m_Floats.Add(new(reader.ReadAlignedString(), reader.ReadSingle()));
             }
 
-            int m_ColorsSize = reader.Reader.ReadInt32();
+            int m_ColorsSize = reader.ReadInt32();
             m_Colors = new List<KeyValuePair<string, Vector4>>();
             for (int i = 0; i < m_ColorsSize; i++)
             {
@@ -78,13 +78,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.Major == 4 && version.Minor >= 1) //4.x
             {
-                var m_ShaderKeywords = reader.Reader.ReadArray(r => r.ReadString());
+                var m_ShaderKeywords = reader.ReadArray(r => r.ReadString());
             }
 
             if (version.GreaterThanOrEquals(2021, 3)) //2021.3 and up
             {
-                var m_ValidKeywords = reader.Reader.ReadArray(r => r.ReadString());
-                var m_InvalidKeywords = reader.Reader.ReadArray(r => r.ReadString());
+                var m_ValidKeywords = reader.ReadArray(r => r.ReadString());
+                var m_InvalidKeywords = reader.ReadArray(r => r.ReadString());
             }
             else if (version.GreaterThanOrEquals(5)) //5.0 ~ 2021.2
             {
@@ -93,28 +93,28 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
-                var m_LightmapFlags = reader.Reader.ReadUInt32();
+                var m_LightmapFlags = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
-                var m_EnableInstancingVariants = reader.Reader.ReadBoolean();
+                var m_EnableInstancingVariants = reader.ReadBoolean();
                 //var m_DoubleSidedGI = a_Stream.ReadBoolean(); //2017 and up
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                var m_CustomRenderQueue = reader.Reader.ReadInt32();
+                var m_CustomRenderQueue = reader.ReadInt32();
             }
 
             if (reader.IsLoveAndDeepSpace() || reader.IsShiningNikki() && version.Major >= 2019)
             {
-                var m_MaterialType = reader.Reader.ReadUInt32();
+                var m_MaterialType = reader.ReadUInt32();
             }
 
             if (version.GreaterThanOrEquals(5, 1)) //5.1 and up
             {
-                var stringTagMapSize = reader.Reader.ReadInt32();
+                var stringTagMapSize = reader.ReadInt32();
                 for (int i = 0; i < stringTagMapSize; i++)
                 {
                     var first = reader.ReadAlignedString();
@@ -124,12 +124,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (reader.IsNaraka())
             {
-                var value = reader.Reader.ReadInt32();
+                var value = reader.ReadInt32();
             }
 
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
-                var disabledShaderPasses = reader.Reader.ReadArray(r => r.ReadString());
+                var disabledShaderPasses = reader.ReadArray(r => r.ReadString());
             }
 
             m_SavedProperties = new UnityPropertySheet(reader);

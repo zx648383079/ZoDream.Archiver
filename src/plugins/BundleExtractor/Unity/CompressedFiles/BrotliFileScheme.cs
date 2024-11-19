@@ -17,16 +17,16 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 
         public bool IsReadable(Stream stream)
         {
-            long remaining = stream.Length - stream.Position;
+            var remaining = stream.Length - stream.Position;
             if (remaining < 4)
             {
                 return false;
             }
 
-            long position = stream.Position;
+            var position = stream.Position;
 
             stream.Position += 1;
-            byte bt = (byte)stream.ReadByte(); // read 3 bits
+            var bt = (byte)stream.ReadByte(); // read 3 bits
             int sizeBytes = bt & 0x3;
 
             if (stream.Position + sizeBytes > stream.Length)

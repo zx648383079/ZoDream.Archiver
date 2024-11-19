@@ -44,9 +44,9 @@ namespace ZoDream.Archiver.ViewModels
         }
         public void UpdateProgress(double progress)
         {
-            UpdateProgress(progress, string.Empty);
+            UpdateProgress(progress, null);
         }
-        public void UpdateProgress(double progress, string message) 
+        public void UpdateProgress(double progress, string? message) 
         {
             if (_progress is null)
             {
@@ -57,7 +57,10 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     _progress.ViewModel.Progress = progress * 100;
                 }
-                _progress.ViewModel.Message = message;
+                if (message is not null)
+                {
+                    _progress.ViewModel.Message = message;
+                }
             });
         }
     }

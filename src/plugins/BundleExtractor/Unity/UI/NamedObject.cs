@@ -11,9 +11,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override string Name => m_Name;
 
-        protected NamedObject(UIReader reader) : base(reader)
+        protected NamedObject(UIReader reader) : 
+            this(reader, true)
         {
-            m_Name = reader.ReadAlignedString();
+            
+        }
+
+        protected NamedObject(UIReader reader, bool isReadable)
+            : base(reader, isReadable)
+        {
+            if (isReadable)
+            {
+                m_Name = reader.ReadAlignedString();
+            }
         }
     }
 }

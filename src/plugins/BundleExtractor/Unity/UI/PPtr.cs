@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 
 namespace ZoDream.BundleExtractor.Unity.UI
@@ -24,9 +24,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public PPtr(UIReader reader)
         {
-            m_FileID = reader.Reader.ReadInt32();
+            m_FileID = reader.ReadInt32();
             m_PathID = reader.Source.Version < FormatVersion.Unknown_14 ?
-                reader.Reader.ReadInt32() : reader.Reader.ReadInt64();
+                reader.ReadInt32() : reader.ReadInt64();
             assetsFile = reader.Source;
         }
 
@@ -38,7 +38,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         //    return node;
         //}
 
-        private bool TryGetAssetsFile(out ISerializedFile? result)
+        private bool TryGetAssetsFile([NotNullWhen(true)] out ISerializedFile? result)
         {
             result = null;
             if (m_FileID == 0)
@@ -70,7 +70,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return false;
         }
 
-        public bool TryGet(out T? result)
+        public bool TryGet([NotNullWhen(true)] out T? result)
         {
             if (TryGetAssetsFile(out var sourceFile))
             {
@@ -89,7 +89,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return false;
         }
 
-        public bool TryGet<T2>(out T2 result) where T2 : UIObject
+        public bool TryGet<T2>([NotNullWhen(true)] out T2 result) where T2 : UIObject
         {
             if (TryGetAssetsFile(out var sourceFile))
             {

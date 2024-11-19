@@ -12,5 +12,18 @@ namespace ZoDream.Shared.Bundle
         /// <param name="searchPatternItems"></param>
         /// <returns></returns>
         public IEnumerable<string> Glob(params string[] searchPatternItems);
+
+        /// <summary>
+        /// 拆分组
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<IBundleChunk> EnumerateChunk();
+
+        /// <summary>
+        /// 根据依赖拆分组
+        /// </summary>
+        /// <param name="dependencies"></param>
+        /// <returns></returns>
+        public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies);
     }
 }

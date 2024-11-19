@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor
 {
@@ -11,6 +12,8 @@ namespace ZoDream.BundleExtractor
         public BundleScheme(ILogger logger)
         {
             Add(logger);
+            Add<ITemporaryStorage>(new TemporaryStorage());
+            Initialize();
         }
 
         private readonly ConcurrentDictionary<Type, object> _instanceItems = [];
@@ -18,6 +21,16 @@ namespace ZoDream.BundleExtractor
         public void Add<T>(T instance)
         {
             Add(typeof(T), instance);
+        }
+
+        public void AddIf<T>()
+        {
+            var key = typeof(T);
+            if (_instanceItems.ContainsKey(key))
+            {
+                return;
+            }
+            Add(key);
         }
 
         public T Get<T>()
@@ -46,17 +59,28 @@ namespace ZoDream.BundleExtractor
 
         private bool Has(Type type)
         {
+            if (type == typeof(IBundleService)
+                || type == typeof(IBundleScheme)
+                || type == typeof(BundleScheme))
+            {
+                return true;
+            }
             return _instanceItems.ContainsKey(type);
         }
 
         private object Get(Type type)
         {
+            if (type == typeof(IBundleService) 
+                || type == typeof(IBundleScheme)
+                || type == typeof(BundleScheme))
+            {
+                return this;
+            }
             var key = type;
             if (_instanceItems.TryGetValue(key, out var val))
             {
                 return val;
             }
-            object obj;
             foreach (var ctor in key.GetConstructors())
             {
                 if (!ctor.IsPublic)
@@ -66,17 +90,13 @@ namespace ZoDream.BundleExtractor
                 var parameters = ctor.GetParameters();
                 if (ctor.GetParameters().Length == 0)
                 {
-                    obj = ctor.Invoke(null);
-                    Add(type, obj);
-                    return obj;
+                    return ctor.Invoke(null);
                 }
                 if (parameters.Where(i => !Has(i.ParameterType)).Any())
                 {
                     continue;
                 }
-                obj = ctor.Invoke(parameters.Select(i => Get(i.ParameterType)).ToArray());
-                Add(type, obj);
-                return obj;
+                return ctor.Invoke(parameters.Select(i => Get(i.ParameterType)).ToArray()); ;
             }
             throw new NotImplementedException();
         }

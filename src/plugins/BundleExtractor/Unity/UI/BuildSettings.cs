@@ -6,12 +6,12 @@
 
         public BuildSettings(UIReader reader) : base(reader)
         {
-            var levels = reader.Reader.ReadArray(r => r.ReadString());
+            var levels = reader.ReadArray(r => r.ReadString());
 
-            var hasRenderTexture = reader.Reader.ReadBoolean();
-            var hasPROVersion = reader.Reader.ReadBoolean();
-            var hasPublishingRights = reader.Reader.ReadBoolean();
-            var hasShadows = reader.Reader.ReadBoolean();
+            var hasRenderTexture = reader.ReadBoolean();
+            var hasPROVersion = reader.ReadBoolean();
+            var hasPublishingRights = reader.ReadBoolean();
+            var hasShadows = reader.ReadBoolean();
 
             m_Version = reader.ReadAlignedString();
         }

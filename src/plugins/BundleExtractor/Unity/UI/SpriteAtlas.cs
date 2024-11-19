@@ -21,24 +21,24 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var version = reader.Version;
             texture = new PPtr<Texture2D>(reader);
             alphaTexture = new PPtr<Texture2D>(reader);
-            textureRect = new Rectf(reader.Reader);
+            textureRect = new Rectf(reader);
             textureRectOffset = reader.ReadVector2();
             if (version.GreaterThanOrEquals(2017, 2)) //2017.2 and up
             {
                 atlasRectOffset = reader.ReadVector2();
             }
             uvTransform = reader.ReadVector4();
-            downscaleMultiplier = reader.Reader.ReadSingle();
-            settingsRaw = new SpriteSettings(reader.Reader);
+            downscaleMultiplier = reader.ReadSingle();
+            settingsRaw = new SpriteSettings(reader);
             if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
             {
-                var secondaryTexturesSize = reader.Reader.ReadInt32();
-                secondaryTextures = new List<SecondarySpriteTexture>();
+                var secondaryTexturesSize = reader.ReadInt32();
+                secondaryTextures = [];
                 for (int i = 0; i < secondaryTexturesSize; i++)
                 {
                     secondaryTextures.Add(new SecondarySpriteTexture(reader));
                 }
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
         }
     }
@@ -51,27 +51,27 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SpriteAtlas(UIReader reader) : base(reader)
         {
-            var m_PackedSpritesSize = reader.Reader.ReadInt32();
+            var m_PackedSpritesSize = reader.ReadInt32();
             m_PackedSprites = new List<PPtr<Sprite>>();
             for (int i = 0; i < m_PackedSpritesSize; i++)
             {
                 m_PackedSprites.Add(new PPtr<Sprite>(reader));
             }
 
-            var m_PackedSpriteNamesToIndex = reader.Reader.ReadArray(r => r.ReadString());
+            var m_PackedSpriteNamesToIndex = reader.ReadArray(r => r.ReadString());
 
-            var m_RenderDataMapSize = reader.Reader.ReadInt32();
+            var m_RenderDataMapSize = reader.ReadInt32();
             m_RenderDataMap = new Dictionary<KeyValuePair<Guid, long>, SpriteAtlasData>();
             for (int i = 0; i < m_RenderDataMapSize; i++)
             {
-                var first = new Guid(reader.Reader.ReadBytes(16));
-                var second = reader.Reader.ReadInt64();
+                var first = new Guid(reader.ReadBytes(16));
+                var second = reader.ReadInt64();
                 var value = new SpriteAtlasData(reader);
                 m_RenderDataMap.Add(new KeyValuePair<Guid, long>(first, second), value);
             }
             var m_Tag = reader.ReadAlignedString();
-            m_IsVariant = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            m_IsVariant = reader.ReadBoolean();
+            reader.AlignStream();
         }
     }
 }

@@ -10,8 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public AssetInfo(UIReader reader)
         {
-            preloadIndex = reader.Reader.ReadInt32();
-            preloadSize = reader.Reader.ReadInt32();
+            preloadIndex = reader.ReadInt32();
+            preloadSize = reader.ReadInt32();
             asset = new PPtr<UIObject>(reader);
         }
     }
@@ -23,14 +23,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public AssetBundle(UIReader reader) : base(reader)
         {
-            var m_PreloadTableSize = reader.Reader.ReadInt32();
+            var m_PreloadTableSize = reader.ReadInt32();
             m_PreloadTable = new List<PPtr<UIObject>>();
             for (int i = 0; i < m_PreloadTableSize; i++)
             {
                 m_PreloadTable.Add(new PPtr<UIObject>(reader));
             }
 
-            var m_ContainerSize = reader.Reader.ReadInt32();
+            var m_ContainerSize = reader.ReadInt32();
             m_Container = new List<KeyValuePair<string, AssetInfo>>();
             for (int i = 0; i < m_ContainerSize; i++)
             {

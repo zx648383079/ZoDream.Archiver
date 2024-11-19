@@ -11,8 +11,12 @@ namespace ZoDream.Shared.IO
     {
         public static byte[] ToArray(this Stream input)
         {
+            if (input is null)
+            {
+                return [];
+            }
             var buffer = new byte[input.Length];
-            input.Read(buffer, 0, buffer.Length);
+            input.ReadExactly(buffer);
             return buffer;
         }
 

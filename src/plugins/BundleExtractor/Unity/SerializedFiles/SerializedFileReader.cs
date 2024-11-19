@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -22,19 +21,19 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             _header.Read(reader);
             if (SerializedFileMetadata.IsMetadataAtTheEnd(_header.Version))
             {
-                reader.BaseStream.Position = _header.FileSize - _header.MetadataSize;
+                reader.BaseStream.Position = Math.Max(reader.BaseStream.Position, _header.FileSize - _header.MetadataSize);
             }
             _metadata.Read(reader.BaseStream, _header);
             CombineFormats(_header.Version, _metadata);
             _dependencyItems.AddRange(_metadata.Externals);
-            for (int i = 0; i < _metadata.Object.Length; i++)
-            {
-                ref ObjectInfo objectInfo = ref _metadata.Object[i];
-                reader.BaseStream.Position = _header.DataOffset + objectInfo.ByteStart;
-                var objectData = new byte[objectInfo.ByteSize];
-                reader.BaseStream.ReadExactly(objectData);
-                objectInfo.ObjectData = objectData;
-            }
+            //for (var i = 0; i < _metadata.Object.Length; i++)
+            //{
+            //    var objectInfo = _metadata.Object[i];
+            //    reader.BaseStream.Position = _header.DataOffset + objectInfo.ByteStart;
+            //    var objectData = new byte[objectInfo.ByteSize];
+            //    reader.BaseStream.ReadExactly(objectData);
+            //    objectInfo.ObjectData = objectData;
+            //}
         }
 
         private readonly IArchiveOptions? _options;
@@ -56,7 +55,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public IEnumerable<string> Dependencies => _dependencyItems.Select(i => i.PathName);
         public IEnumerable<ObjectInfo> ObjectMetaItems => _metadata.Object;
 
-        public UIObject? this[long pathID] => _childrenDict[pathID];
+        public UIObject? this[long pathID] => _childrenDict.TryGetValue(pathID, out var res) ? res : null;
 
         public string GetDependency(int index)
         {
@@ -80,7 +79,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public EndianReader Create(ObjectInfo info)
         {
             bool swapEndian = SerializedFileHeader.HasEndianess(_header.Version) ?
-                _header.Endianess : _metadata.SwapEndianess;
+                _header.Endianess : _metadata.SwapEndian;
             return new EndianReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
                 swapEndian ? EndianType.BigEndian : EndianType.LittleEndian);
@@ -94,7 +93,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
             if (generation >= FormatVersion.RefactorTypeData)
             {
-                for (int i = 0; i < origin.Object.Length; i++)
+                for (var i = 0; i < origin.Object.Length; i++)
                 {
                     origin.Object[i].Initialize(origin.Types);
                 }

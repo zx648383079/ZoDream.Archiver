@@ -13,8 +13,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public StaticBatchInfo(UIReader reader)
         {
-            firstSubMesh = reader.Reader.ReadUInt16();
-            subMeshCount = reader.Reader.ReadUInt16();
+            firstSubMesh = reader.ReadUInt16();
+            subMeshCount = reader.ReadUInt16();
         }
     }
 
@@ -37,10 +37,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var version = reader.Version;
             if (version.Major < 5) //5.0 down
             {
-                var m_Enabled = reader.Reader.ReadBoolean();
-                var m_CastShadows = reader.Reader.ReadBoolean();
-                var m_ReceiveShadows = reader.Reader.ReadBoolean();
-                var m_LightmapIndex = reader.Reader.ReadByte();
+                var m_Enabled = reader.ReadBoolean();
+                var m_CastShadows = reader.ReadBoolean();
+                var m_ReceiveShadows = reader.ReadBoolean();
+                var m_LightmapIndex = reader.ReadByte();
             }
             else //5.0 and up
             {
@@ -54,103 +54,103 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     {
                         CheckHeader(reader, 0x12);
                     }
-                    var m_Enabled = reader.Reader.ReadBoolean();
-                    var m_CastShadows = reader.Reader.ReadByte();
-                    var m_ReceiveShadows = reader.Reader.ReadByte();
+                    var m_Enabled = reader.ReadBoolean();
+                    var m_CastShadows = reader.ReadByte();
+                    var m_ReceiveShadows = reader.ReadByte();
                     if (version.GreaterThanOrEquals(2017, 2)) //2017.2 and up
                     {
-                        var m_DynamicOccludee = reader.Reader.ReadByte();
+                        var m_DynamicOccludee = reader.ReadByte();
                     }
                     if (reader.IsBH3Group())
                     {
-                        var m_AllowHalfResolution = reader.Reader.ReadByte();
-                        int m_EnableGpuQuery = isNewHeader ? reader.Reader.ReadByte() : 0;
+                        var m_AllowHalfResolution = reader.ReadByte();
+                        int m_EnableGpuQuery = isNewHeader ? reader.ReadByte() : 0;
                     }
                     if (reader.IsGIGroup())
                     {
-                        var m_ReceiveDecals = reader.Reader.ReadByte();
-                        var m_EnableShadowCulling = reader.Reader.ReadByte();
-                        var m_EnableGpuQuery = reader.Reader.ReadByte();
-                        var m_AllowHalfResolution = reader.Reader.ReadByte();
+                        var m_ReceiveDecals = reader.ReadByte();
+                        var m_EnableShadowCulling = reader.ReadByte();
+                        var m_EnableGpuQuery = reader.ReadByte();
+                        var m_AllowHalfResolution = reader.ReadByte();
                         if (!reader.IsGICB1())
                         {
                             if (reader.IsGI())
                             {
                                 var m_AllowPerMaterialProp = isNewHeader ?
-                                    reader.Reader.ReadByte() : 0;
+                                    reader.ReadByte() : 0;
                             }
-                            var m_IsRainOccluder = reader.Reader.ReadByte();
+                            var m_IsRainOccluder = reader.ReadByte();
                             if (!reader.IsGICB2())
                             {
-                                var m_IsDynamicAOOccluder = reader.Reader.ReadByte();
+                                var m_IsDynamicAOOccluder = reader.ReadByte();
                                 if (reader.IsGI())
                                 {
-                                    var m_IsHQDynamicAOOccluder = reader.Reader.ReadByte();
-                                    var m_IsCloudObject = reader.Reader.ReadByte();
-                                    var m_IsInteriorVolume = reader.Reader.ReadByte();
+                                    var m_IsHQDynamicAOOccluder = reader.ReadByte();
+                                    var m_IsCloudObject = reader.ReadByte();
+                                    var m_IsInteriorVolume = reader.ReadByte();
                                 }
                             }
                             if (!reader.IsGIPack())
                             {
-                                var m_IsDynamic = reader.Reader.ReadByte();
+                                var m_IsDynamic = reader.ReadByte();
                             }
                             if (reader.IsGI())
                             {
-                                var m_UseTessellation = reader.Reader.ReadByte();
-                                var m_IsTerrainTessInfo = isNewHeader ? reader.Reader.ReadByte() : 0;
-                                var m_UseVertexLightInForward = isNewHeader ? reader.Reader.ReadByte() : 0;
-                                var m_CombineSubMeshInGeoPass = isNewHeader ? reader.Reader.ReadByte() : 0;
+                                var m_UseTessellation = reader.ReadByte();
+                                var m_IsTerrainTessInfo = isNewHeader ? reader.ReadByte() : 0;
+                                var m_UseVertexLightInForward = isNewHeader ? reader.ReadByte() : 0;
+                                var m_CombineSubMeshInGeoPass = isNewHeader ? reader.ReadByte() : 0;
                             }
                         }
                     }
                     if (version.Major >= 2021) //2021.1 and up
                     {
-                        var m_StaticShadowCaster = reader.Reader.ReadByte();
+                        var m_StaticShadowCaster = reader.ReadByte();
                         if (reader.IsArknightsEndfield())
                         {
-                            var m_RealtimeShadowCaster = reader.Reader.ReadByte();
-                            var m_SubMeshRenderMode = reader.Reader.ReadByte();
-                            var m_CharacterIndex = reader.Reader.ReadByte();
+                            var m_RealtimeShadowCaster = reader.ReadByte();
+                            var m_SubMeshRenderMode = reader.ReadByte();
+                            var m_CharacterIndex = reader.ReadByte();
                         }
                     }
-                    var m_MotionVectors = reader.Reader.ReadByte();
-                    var m_LightProbeUsage = reader.Reader.ReadByte();
-                    var m_ReflectionProbeUsage = reader.Reader.ReadByte();
+                    var m_MotionVectors = reader.ReadByte();
+                    var m_LightProbeUsage = reader.ReadByte();
+                    var m_ReflectionProbeUsage = reader.ReadByte();
                     if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up
                     {
-                        var m_RayTracingMode = reader.Reader.ReadByte();
+                        var m_RayTracingMode = reader.ReadByte();
                     }
                     if (version.Major >= 2020) //2020.1 and up
                     {
-                        var m_RayTraceProcedural = reader.Reader.ReadByte();
+                        var m_RayTraceProcedural = reader.ReadByte();
                     }
                     if (reader.IsGI() || reader.IsGICB3() || reader.IsGICB3Pre())
                     {
-                        var m_MeshShowQuality = reader.Reader.ReadByte();
+                        var m_MeshShowQuality = reader.ReadByte();
                     }
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
                 else
                 {
-                    var m_Enabled = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
-                    var m_CastShadows = reader.Reader.ReadByte();
-                    var m_ReceiveShadows = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
+                    var m_Enabled = reader.ReadBoolean();
+                    reader.AlignStream();
+                    var m_CastShadows = reader.ReadByte();
+                    var m_ReceiveShadows = reader.ReadBoolean();
+                    reader.AlignStream();
                 }
 
                 if (version.Major >= 2018 || reader.IsBH3() && isNewHeader) //2018 and up
                 {
-                    var m_RenderingLayerMask = reader.Reader.ReadUInt32();
+                    var m_RenderingLayerMask = reader.ReadUInt32();
                 }
 
                 if (version.GreaterThanOrEquals(2018, 3)) //2018.3 and up
                 {
-                    var m_RendererPriority = reader.Reader.ReadInt32();
+                    var m_RendererPriority = reader.ReadInt32();
                 }
 
-                var m_LightmapIndex = reader.Reader.ReadUInt16();
-                var m_LightmapIndexDynamic = reader.Reader.ReadUInt16();
+                var m_LightmapIndex = reader.ReadUInt16();
+                var m_LightmapIndexDynamic = reader.ReadUInt16();
                 if (reader.IsGIGroup() && (m_LightmapIndex != 0xFFFF || m_LightmapIndexDynamic != 0xFFFF))
                 {
                     throw new Exception("Not Supported !! skipping....");
@@ -169,10 +169,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (reader.IsGIGroup())
             {
-                var m_ViewDistanceRatio = reader.Reader.ReadSingle();
-                var m_ShaderLODDistanceRatio = reader.Reader.ReadSingle();
+                var m_ViewDistanceRatio = reader.ReadSingle();
+                var m_ShaderLODDistanceRatio = reader.ReadSingle();
             }
-            var m_MaterialsSize = reader.Reader.ReadInt32();
+            var m_MaterialsSize = reader.ReadInt32();
             m_Materials = new List<PPtr<Material>>();
             for (int i = 0; i < m_MaterialsSize; i++)
             {
@@ -199,7 +199,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (reader.IsGIGroup())
             {
-                var m_MatLayers = reader.Reader.ReadInt32();
+                var m_MatLayers = reader.ReadInt32();
             }
 
             if (!reader.IsSR() || !HasPrope(reader.SerializedType))
@@ -211,12 +211,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
                 else if (version.GreaterThanOrEquals(3, 5)) //3.5 - 5.3
                 {
-                    var m_UseLightProbes = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
+                    var m_UseLightProbes = reader.ReadBoolean();
+                    reader.AlignStream();
 
                     if (version.Major >= 5)//5.0 and up
                     {
-                        var m_ReflectionProbeUsage = reader.Reader.ReadInt32();
+                        var m_ReflectionProbeUsage = reader.ReadInt32();
                     }
 
                     var m_LightProbeAnchor = new PPtr<Transform>(reader); //5.0 and up m_ProbeAnchor
@@ -227,25 +227,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (version.Major == 4 && version.Minor == 3) //4.3
                 {
-                    var m_SortingLayer = reader.Reader.ReadInt16();
+                    var m_SortingLayer = reader.ReadInt16();
                 }
                 else
                 {
-                    var m_SortingLayerID = reader.Reader.ReadUInt32();
+                    var m_SortingLayerID = reader.ReadUInt32();
                 }
 
                 //SInt16 m_SortingLayer 5.6 and up
-                var m_SortingOrder = reader.Reader.ReadInt16();
-                reader.Reader.AlignStream();
+                var m_SortingOrder = reader.ReadInt16();
+                reader.AlignStream();
                 if (reader.IsGIGroup() || reader.IsBH3())
                 {
-                    var m_UseHighestMip = reader.Reader.ReadBoolean();
-                    reader.Reader.AlignStream();
+                    var m_UseHighestMip = reader.ReadBoolean();
+                    reader.AlignStream();
                 }
                 if (reader.IsSR())
                 {
-                    var RenderFlag = reader.Reader.ReadUInt32();
-                    reader.Reader.AlignStream();
+                    var RenderFlag = reader.ReadUInt32();
+                    reader.AlignStream();
                 }
             }
         }
@@ -256,7 +256,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var pos = reader.Position;
             while (value != -1 && reader.Position <= pos + offset)
             {
-                value = reader.Reader.ReadInt16();
+                value = reader.ReadInt16();
             }
             isNewHeader = reader.Position - pos == offset;
             reader.Position = pos;

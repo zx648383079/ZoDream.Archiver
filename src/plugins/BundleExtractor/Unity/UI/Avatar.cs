@@ -10,8 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Node(UIReader reader)
         {
-            m_ParentId = reader.Reader.ReadInt32();
-            m_AxesId = reader.Reader.ReadInt32();
+            m_ParentId = reader.ReadInt32();
+            m_AxesId = reader.ReadInt32();
         }
     }
 
@@ -59,8 +59,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_Sgn = reader.ReadVector4();
             }
             m_Limit = new Limit(reader);
-            m_Length = reader.Reader.ReadSingle();
-            m_Type = reader.Reader.ReadUInt32();
+            m_Length = reader.ReadSingle();
+            m_Type = reader.ReadUInt32();
         }
     }
 
@@ -72,16 +72,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Skeleton(UIReader reader)
         {
-            int numNodes = reader.Reader.ReadInt32();
+            int numNodes = reader.ReadInt32();
             m_Node = new List<Node>();
             for (int i = 0; i < numNodes; i++)
             {
                 m_Node.Add(new Node(reader));
             }
 
-            m_ID = reader.Reader.ReadArray(r => r.ReadUInt32());
+            m_ID = reader.ReadArray(r => r.ReadUInt32());
 
-            int numAxes = reader.Reader.ReadInt32();
+            int numAxes = reader.ReadInt32();
             m_AxesArray = new List<Axes>();
             for (int i = 0; i < numAxes; i++)
             {
@@ -106,7 +106,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Hand(UIReader reader)
         {
-            m_HandBoneIndex = reader.Reader.ReadArray(r => r.ReadInt32());
+            m_HandBoneIndex = reader.ReadArray(r => r.ReadInt32());
         }
     }
 
@@ -119,8 +119,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Handle(UIReader reader)
         {
             m_X = reader.ReadXForm();
-            m_ParentHumanIndex = reader.Reader.ReadUInt32();
-            m_ID = reader.Reader.ReadUInt32();
+            m_ParentHumanIndex = reader.ReadUInt32();
+            m_ID = reader.ReadUInt32();
         }
     }
 
@@ -139,14 +139,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Collider(UIReader reader)
         {
             m_X = reader.ReadXForm();
-            m_Type = reader.Reader.ReadUInt32();
-            m_XMotionType = reader.Reader.ReadUInt32();
-            m_YMotionType = reader.Reader.ReadUInt32();
-            m_ZMotionType = reader.Reader.ReadUInt32();
-            m_MinLimitX = reader.Reader.ReadSingle();
-            m_MaxLimitX = reader.Reader.ReadSingle();
-            m_MaxLimitY = reader.Reader.ReadSingle();
-            m_MaxLimitZ = reader.Reader.ReadSingle();
+            m_Type = reader.ReadUInt32();
+            m_XMotionType = reader.ReadUInt32();
+            m_YMotionType = reader.ReadUInt32();
+            m_ZMotionType = reader.ReadUInt32();
+            m_MinLimitX = reader.ReadSingle();
+            m_MaxLimitX = reader.ReadSingle();
+            m_MaxLimitY = reader.ReadSingle();
+            m_MaxLimitZ = reader.ReadSingle();
         }
     }
 
@@ -185,14 +185,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.LessThan(2018, 2)) //2018.2 down
             {
-                int numHandles = reader.Reader.ReadInt32();
+                int numHandles = reader.ReadInt32();
                 m_Handles = new List<Handle>();
                 for (int i = 0; i < numHandles; i++)
                 {
                     m_Handles.Add(new Handle(reader));
                 }
 
-                int numColliders = reader.Reader.ReadInt32();
+                int numColliders = reader.ReadInt32();
                 m_ColliderArray = new List<Collider>(numColliders);
                 for (int i = 0; i < numColliders; i++)
                 {
@@ -200,30 +200,30 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            m_HumanBoneIndex = reader.Reader.ReadInt32Array();
+            m_HumanBoneIndex = reader.ReadInt32Array();
 
-            m_HumanBoneMass = reader.Reader.ReadArray(r => r.ReadSingle());
+            m_HumanBoneMass = reader.ReadArray(r => r.ReadSingle());
 
             if (version.LessThan(2018, 2)) //2018.2 down
             {
-                m_ColliderIndex = reader.Reader.ReadArray(r => r.ReadInt32());
+                m_ColliderIndex = reader.ReadArray(r => r.ReadInt32());
             }
 
-            m_Scale = reader.Reader.ReadSingle();
-            m_ArmTwist = reader.Reader.ReadSingle();
-            m_ForeArmTwist = reader.Reader.ReadSingle();
-            m_UpperLegTwist = reader.Reader.ReadSingle();
-            m_LegTwist = reader.Reader.ReadSingle();
-            m_ArmStretch = reader.Reader.ReadSingle();
-            m_LegStretch = reader.Reader.ReadSingle();
-            m_FeetSpacing = reader.Reader.ReadSingle();
-            m_HasLeftHand = reader.Reader.ReadBoolean();
-            m_HasRightHand = reader.Reader.ReadBoolean();
+            m_Scale = reader.ReadSingle();
+            m_ArmTwist = reader.ReadSingle();
+            m_ForeArmTwist = reader.ReadSingle();
+            m_UpperLegTwist = reader.ReadSingle();
+            m_LegTwist = reader.ReadSingle();
+            m_ArmStretch = reader.ReadSingle();
+            m_LegStretch = reader.ReadSingle();
+            m_FeetSpacing = reader.ReadSingle();
+            m_HasLeftHand = reader.ReadBoolean();
+            m_HasRightHand = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(5, 2)) //5.2 and up
             {
-                m_HasTDoF = reader.Reader.ReadBoolean();
+                m_HasTDoF = reader.ReadBoolean();
             }
-            reader.Reader.AlignStream();
+            reader.AlignStream();
         }
     }
 
@@ -252,19 +252,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 m_DefaultPose = new SkeletonPose(reader);
 
-                m_SkeletonNameIDArray = reader.Reader.ReadArray(r => r.ReadUInt32());
+                m_SkeletonNameIDArray = reader.ReadArray(r => r.ReadUInt32());
             }
 
             m_Human = new Human(reader);
 
-            m_HumanSkeletonIndexArray = reader.Reader.ReadArray(r => r.ReadInt32());
+            m_HumanSkeletonIndexArray = reader.ReadArray(r => r.ReadInt32());
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                m_HumanSkeletonReverseIndexArray = reader.Reader.ReadArray(r => r.ReadInt32());
+                m_HumanSkeletonReverseIndexArray = reader.ReadArray(r => r.ReadInt32());
             }
 
-            m_RootMotionBoneIndex = reader.Reader.ReadInt32();
+            m_RootMotionBoneIndex = reader.ReadInt32();
             m_RootMotionBoneX = reader.ReadXForm();
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
@@ -272,7 +272,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_RootMotionSkeleton = new Skeleton(reader);
                 m_RootMotionSkeletonPose = new SkeletonPose(reader);
 
-                m_RootMotionSkeletonIndexArray = reader.Reader.ReadArray(r => r.ReadInt32());
+                m_RootMotionSkeletonIndexArray = reader.ReadArray(r => r.ReadInt32());
             }
         }
     }
@@ -285,14 +285,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Avatar(UIReader reader) : base(reader)
         {
-            m_AvatarSize = reader.Reader.ReadUInt32();
+            m_AvatarSize = reader.ReadUInt32();
             m_Avatar = new AvatarConstant(reader);
 
-            int numTOS = reader.Reader.ReadInt32();
+            int numTOS = reader.ReadInt32();
             m_TOS = new Dictionary<uint, string>();
             for (int i = 0; i < numTOS; i++)
             {
-                m_TOS.Add(reader.Reader.ReadUInt32(), reader.ReadAlignedString());
+                m_TOS.Add(reader.ReadUInt32(), reader.ReadAlignedString());
             }
 
             //HumanDescription m_HumanDescription 2019 and up

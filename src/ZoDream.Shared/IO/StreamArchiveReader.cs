@@ -27,7 +27,15 @@ namespace ZoDream.Shared.IO
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
-            return [new ReadOnlyEntry(fileName, stream.Length)];
+            var length = 0L;
+            try
+            {
+                length = stream.Length;
+            }
+            catch (Exception)
+            {
+            }
+            return [new ReadOnlyEntry(fileName, length)];
         }
 
         public void Dispose()

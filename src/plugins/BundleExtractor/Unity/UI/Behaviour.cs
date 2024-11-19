@@ -7,8 +7,8 @@
         protected UIBehaviour(UIReader reader)
             : base(reader)
         {
-            m_Enabled = reader.Reader.ReadByte();
-            reader.Reader.AlignStream();
+            m_Enabled = reader.ReadByte();
+            reader.AlignStream();
         }
     }
 }

@@ -7,7 +7,7 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ExtractDialogViewModel: BindableBase
+    public class ExtractDialogViewModel : BindableBase, IFormValidator
     {
         public ExtractDialogViewModel()
         {
@@ -75,7 +75,22 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _isEncrypted, value);
         }
 
-
+        public bool IsValid {
+            get {
+                if (IsEncrypted == Visibility.Visible)
+                {
+                    if (string.IsNullOrWhiteSpace(DictFileName) || string.IsNullOrWhiteSpace(Password))
+                    {
+                        return false;
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(FileName))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }
 
@@ -105,20 +120,5 @@ namespace ZoDream.Archiver.ViewModels
             DictFileName = res.Path;
         }
 
-        public bool Verify()
-        {
-            if (IsEncrypted == Visibility.Visible)
-            {
-                if (string.IsNullOrWhiteSpace(DictFileName) || string.IsNullOrWhiteSpace(Password))
-                {
-                    return false;
-                }
-            }
-            if (string.IsNullOrWhiteSpace(FileName))
-            {
-                return false;
-            }
-            return true;
-        }
     }
 }

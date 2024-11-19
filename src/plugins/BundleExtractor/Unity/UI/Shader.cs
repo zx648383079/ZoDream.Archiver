@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Hash128(UIReader reader)
         {
-            bytes = reader.Reader.ReadBytes(16);
+            bytes = reader.ReadBytes(16);
         }
     }
 
@@ -28,19 +28,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public StructParameter(UIReader reader)
         {
-            var m_NameIndex = reader.Reader.ReadInt32();
-            var m_Index = reader.Reader.ReadInt32();
-            var m_ArraySize = reader.Reader.ReadInt32();
-            var m_StructSize = reader.Reader.ReadInt32();
+            var m_NameIndex = reader.ReadInt32();
+            var m_Index = reader.ReadInt32();
+            var m_ArraySize = reader.ReadInt32();
+            var m_StructSize = reader.ReadInt32();
 
-            int numVectorParams = reader.Reader.ReadInt32();
+            int numVectorParams = reader.ReadInt32();
             m_VectorParams = new List<VectorParameter>();
             for (int i = 0; i < numVectorParams; i++)
             {
                 m_VectorParams.Add(new VectorParameter(reader));
             }
 
-            int numMatrixParams = reader.Reader.ReadInt32();
+            int numMatrixParams = reader.ReadInt32();
             m_MatrixParams = new List<MatrixParameter>();
             for (int i = 0; i < numMatrixParams; i++)
             {
@@ -56,8 +56,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SamplerParameter(UIReader reader)
         {
-            sampler = reader.Reader.ReadUInt32();
-            bindPoint = reader.Reader.ReadInt32();
+            sampler = reader.ReadUInt32();
+            bindPoint = reader.ReadInt32();
         }
     }
     public enum TextureDimension
@@ -80,7 +80,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedTextureProperty(UIReader reader)
         {
             m_DefaultName = reader.ReadAlignedString();
-            m_TexDim = (TextureDimension)reader.Reader.ReadInt32();
+            m_TexDim = (TextureDimension)reader.ReadInt32();
         }
     }
 
@@ -123,8 +123,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Name = reader.ReadAlignedString();
             m_Description = reader.ReadAlignedString();
             m_Attributes = reader.ReadArray(r => r.ReadString());
-            m_Type = (SerializedPropertyType)reader.Reader.ReadInt32();
-            m_Flags = (SerializedPropertyFlag)reader.Reader.ReadUInt32();
+            m_Type = (SerializedPropertyType)reader.ReadInt32();
+            m_Flags = (SerializedPropertyFlag)reader.ReadUInt32();
             m_DefValue = reader.ReadArray(4, r => r.ReadSingle());
             m_DefTexture = new SerializedTextureProperty(reader);
         }
@@ -136,7 +136,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedProperties(UIReader reader)
         {
-            int numProps = reader.Reader.ReadInt32();
+            int numProps = reader.ReadInt32();
             m_Props = new List<SerializedProperty>();
             for (int i = 0; i < numProps; i++)
             {
@@ -152,7 +152,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedShaderFloatValue(UIReader reader)
         {
-            val = reader.Reader.ReadSingle();
+            val = reader.ReadSingle();
             name = reader.ReadAlignedString();
         }
     }
@@ -160,9 +160,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
     public class SerializedShaderRTBlendState
     {
         public SerializedShaderFloatValue srcBlend;
-        public SerializedShaderFloatValue destBlend;
+        public SerializedShaderFloatValue targetBlend;
         public SerializedShaderFloatValue srcBlendAlpha;
-        public SerializedShaderFloatValue destBlendAlpha;
+        public SerializedShaderFloatValue targetBlendAlpha;
         public SerializedShaderFloatValue blendOp;
         public SerializedShaderFloatValue blendOpAlpha;
         public SerializedShaderFloatValue colMask;
@@ -170,9 +170,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedShaderRTBlendState(UIReader reader)
         {
             srcBlend = new SerializedShaderFloatValue(reader);
-            destBlend = new SerializedShaderFloatValue(reader);
+            targetBlend = new SerializedShaderFloatValue(reader);
             srcBlendAlpha = new SerializedShaderFloatValue(reader);
-            destBlendAlpha = new SerializedShaderFloatValue(reader);
+            targetBlendAlpha = new SerializedShaderFloatValue(reader);
             blendOp = new SerializedShaderFloatValue(reader);
             blendOpAlpha = new SerializedShaderFloatValue(reader);
             colMask = new SerializedShaderFloatValue(reader);
@@ -261,8 +261,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 rtBlend.Add(new SerializedShaderRTBlendState(reader));
             }
-            rtSeparateBlend = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            rtSeparateBlend = reader.ReadBoolean();
+            reader.AlignStream();
             if (version.GreaterThanOrEquals(2017, 2)) //2017.2 and up
             {
                 zClip = new SerializedShaderFloatValue(reader);
@@ -287,21 +287,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
             fogEnd = new SerializedShaderFloatValue(reader);
             fogDensity = new SerializedShaderFloatValue(reader);
             fogColor = new SerializedShaderVectorValue(reader);
-            fogMode = (FogMode)reader.Reader.ReadInt32();
-            gpuProgramID = reader.Reader.ReadInt32();
+            fogMode = (FogMode)reader.ReadInt32();
+            gpuProgramID = reader.ReadInt32();
             m_Tags = new SerializedTagMap(reader);
-            m_LOD = reader.Reader.ReadInt32();
+            m_LOD = reader.ReadInt32();
             if (reader.IsLoveAndDeepSpace())
             {
-                int numOverrideKeywordAndStage = reader.Reader.ReadInt32();
+                int numOverrideKeywordAndStage = reader.ReadInt32();
                 var m_OverrideKeywordAndStage = new List<KeyValuePair<string, uint>>();
                 for (int i = 0; i < numOverrideKeywordAndStage; i++)
                 {
-                    m_OverrideKeywordAndStage.Add(new KeyValuePair<string, uint>(reader.ReadAlignedString(), reader.Reader.ReadUInt32()));
+                    m_OverrideKeywordAndStage.Add(new KeyValuePair<string, uint>(reader.ReadAlignedString(), reader.ReadUInt32()));
                 }
             }
-            lighting = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            lighting = reader.ReadBoolean();
+            reader.AlignStream();
         }
     }
 
@@ -312,8 +312,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ShaderBindChannel(UIReader reader)
         {
-            source = reader.Reader.ReadSByte();
-            target = reader.Reader.ReadSByte();
+            source = reader.ReadSByte();
+            target = reader.ReadSByte();
         }
     }
 
@@ -324,15 +324,15 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ParserBindChannels(UIReader reader)
         {
-            int numChannels = reader.Reader.ReadInt32();
+            int numChannels = reader.ReadInt32();
             m_Channels = new List<ShaderBindChannel>();
             for (int i = 0; i < numChannels; i++)
             {
                 m_Channels.Add(new ShaderBindChannel(reader));
             }
-            reader.Reader.AlignStream();
+            reader.AlignStream();
 
-            m_SourceMap = reader.Reader.ReadUInt32();
+            m_SourceMap = reader.ReadUInt32();
         }
     }
 
@@ -346,12 +346,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public VectorParameter(UIReader reader)
         {
-            m_NameIndex = reader.Reader.ReadInt32();
-            m_Index = reader.Reader.ReadInt32();
-            m_ArraySize = reader.Reader.ReadInt32();
-            m_Type = reader.Reader.ReadSByte();
-            m_Dim = reader.Reader.ReadSByte();
-            reader.Reader.AlignStream();
+            m_NameIndex = reader.ReadInt32();
+            m_Index = reader.ReadInt32();
+            m_ArraySize = reader.ReadInt32();
+            m_Type = reader.ReadSByte();
+            m_Dim = reader.ReadSByte();
+            reader.AlignStream();
         }
     }
 
@@ -365,12 +365,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public MatrixParameter(UIReader reader)
         {
-            m_NameIndex = reader.Reader.ReadInt32();
-            m_Index = reader.Reader.ReadInt32();
-            m_ArraySize = reader.Reader.ReadInt32();
-            m_Type = reader.Reader.ReadSByte();
-            m_RowCount = reader.Reader.ReadSByte();
-            reader.Reader.AlignStream();
+            m_NameIndex = reader.ReadInt32();
+            m_Index = reader.ReadInt32();
+            m_ArraySize = reader.ReadInt32();
+            m_Type = reader.ReadSByte();
+            m_RowCount = reader.ReadSByte();
+            reader.AlignStream();
         }
     }
 
@@ -385,15 +385,15 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            m_NameIndex = reader.Reader.ReadInt32();
-            m_Index = reader.Reader.ReadInt32();
-            m_SamplerIndex = reader.Reader.ReadInt32();
+            m_NameIndex = reader.ReadInt32();
+            m_Index = reader.ReadInt32();
+            m_SamplerIndex = reader.ReadInt32();
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
-                var m_MultiSampled = reader.Reader.ReadBoolean();
+                var m_MultiSampled = reader.ReadBoolean();
             }
-            m_Dim = reader.Reader.ReadSByte();
-            reader.Reader.AlignStream();
+            m_Dim = reader.ReadSByte();
+            reader.AlignStream();
         }
     }
 
@@ -407,11 +407,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            m_NameIndex = reader.Reader.ReadInt32();
-            m_Index = reader.Reader.ReadInt32();
+            m_NameIndex = reader.ReadInt32();
+            m_Index = reader.ReadInt32();
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
-                m_ArraySize = reader.Reader.ReadInt32();
+                m_ArraySize = reader.ReadInt32();
             }
         }
     }
@@ -429,16 +429,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            m_NameIndex = reader.Reader.ReadInt32();
+            m_NameIndex = reader.ReadInt32();
 
-            int numMatrixParams = reader.Reader.ReadInt32();
+            int numMatrixParams = reader.ReadInt32();
             m_MatrixParams = new List<MatrixParameter>();
             for (int i = 0; i < numMatrixParams; i++)
             {
                 m_MatrixParams.Add(new MatrixParameter(reader));
             }
 
-            int numVectorParams = reader.Reader.ReadInt32();
+            int numVectorParams = reader.ReadInt32();
             m_VectorParams = new List<VectorParameter>();
             for (int i = 0; i < numVectorParams; i++)
             {
@@ -446,20 +446,20 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
-                int numStructParams = reader.Reader.ReadInt32();
+                int numStructParams = reader.ReadInt32();
                 m_StructParams = new List<StructParameter>();
                 for (int i = 0; i < numStructParams; i++)
                 {
                     m_StructParams.Add(new StructParameter(reader));
                 }
             }
-            m_Size = reader.Reader.ReadInt32();
+            m_Size = reader.ReadInt32();
 
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up
               version.GreaterThanOrEquals(2021, 1, 4, UnityVersionType.Final, 1)) //2021.1.4f1 and up
             {
-                m_IsPartialCB = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                m_IsPartialCB = reader.ReadBoolean();
+                reader.AlignStream();
             }
         }
     }
@@ -528,57 +528,57 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedProgramParameters(UIReader reader)
         {
-            int numVectorParams = reader.Reader.ReadInt32();
-            m_VectorParams = new List<VectorParameter>();
+            int numVectorParams = reader.ReadInt32();
+            m_VectorParams = [];
             for (int i = 0; i < numVectorParams; i++)
             {
                 m_VectorParams.Add(new VectorParameter(reader));
             }
 
-            int numMatrixParams = reader.Reader.ReadInt32();
+            int numMatrixParams = reader.ReadInt32();
             m_MatrixParams = new List<MatrixParameter>();
             for (int i = 0; i < numMatrixParams; i++)
             {
                 m_MatrixParams.Add(new MatrixParameter(reader));
             }
 
-            int numTextureParams = reader.Reader.ReadInt32();
-            m_TextureParams = new List<TextureParameter>();
+            int numTextureParams = reader.ReadInt32();
+            m_TextureParams = [];
             for (int i = 0; i < numTextureParams; i++)
             {
                 m_TextureParams.Add(new TextureParameter(reader));
             }
 
-            int numBufferParams = reader.Reader.ReadInt32();
-            m_BufferParams = new List<BufferBinding>();
+            int numBufferParams = reader.ReadInt32();
+            m_BufferParams = [];
             for (int i = 0; i < numBufferParams; i++)
             {
                 m_BufferParams.Add(new BufferBinding(reader));
             }
 
-            int numConstantBuffers = reader.Reader.ReadInt32();
-            m_ConstantBuffers = new List<ConstantBuffer>();
+            int numConstantBuffers = reader.ReadInt32();
+            m_ConstantBuffers = [];
             for (int i = 0; i < numConstantBuffers; i++)
             {
                 m_ConstantBuffers.Add(new ConstantBuffer(reader));
             }
 
-            int numConstantBufferBindings = reader.Reader.ReadInt32();
+            int numConstantBufferBindings = reader.ReadInt32();
             m_ConstantBufferBindings = new List<BufferBinding>();
             for (int i = 0; i < numConstantBufferBindings; i++)
             {
                 m_ConstantBufferBindings.Add(new BufferBinding(reader));
             }
 
-            int numUAVParams = reader.Reader.ReadInt32();
+            int numUAVParams = reader.ReadInt32();
             m_UAVParams = new List<UAVParameter>();
             for (int i = 0; i < numUAVParams; i++)
             {
-                m_UAVParams.Add(new UAVParameter(reader.Reader));
+                m_UAVParams.Add(new UAVParameter(reader));
             }
 
-            int numSamplers = reader.Reader.ReadInt32();
-            m_Samplers = new List<SamplerParameter>();
+            int numSamplers = reader.ReadInt32();
+            m_Samplers = [];
             for (int i = 0; i < numSamplers; i++)
             {
                 m_Samplers.Add(new SamplerParameter(reader));
@@ -635,43 +635,43 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_CodeHash = new Hash128(reader);
             }
 
-            m_BlobIndex = reader.Reader.ReadUInt32();
+            m_BlobIndex = reader.ReadUInt32();
             if (HasIsAdditionalBlob(reader.SerializedType))
             {
-                var m_IsAdditionalBlob = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_IsAdditionalBlob = reader.ReadBoolean();
+                reader.AlignStream();
             }
             m_Channels = new ParserBindChannels(reader);
 
             if (version.GreaterThanOrEquals(2019) && version.LessThan(2021, 1) || HasGlobalLocalKeywordIndices(reader.SerializedType)) //2019 ~2021.1
             {
                 var m_GlobalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 var m_LocalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
             else
             {
                 m_KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
                 if (version.GreaterThanOrEquals(2017)) //2017 and up
                 {
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
             }
 
-            m_ShaderHardwareTier = reader.Reader.ReadSByte();
-            m_GpuProgramType = (ShaderGpuProgramType)reader.Reader.ReadSByte();
-            reader.Reader.AlignStream();
+            m_ShaderHardwareTier = reader.ReadSByte();
+            m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+            reader.AlignStream();
 
             if (reader.IsGI() && (m_GpuProgramType == ShaderGpuProgramType.Unknown || !Enum.IsDefined(typeof(ShaderGpuProgramType), m_GpuProgramType)))
             {
                 reader.Position -= 4;
                 var m_LocalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
 
-                m_ShaderHardwareTier = reader.Reader.ReadSByte();
-                m_GpuProgramType = (ShaderGpuProgramType)reader.Reader.ReadSByte();
-                reader.Reader.AlignStream();
+                m_ShaderHardwareTier = reader.ReadSByte();
+                m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+                reader.AlignStream();
             }
 
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up
@@ -681,58 +681,58 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             else
             {
-                int numVectorParams = reader.Reader.ReadInt32();
+                int numVectorParams = reader.ReadInt32();
                 m_VectorParams = new List<VectorParameter>();
                 for (int i = 0; i < numVectorParams; i++)
                 {
                     m_VectorParams.Add(new VectorParameter(reader));
                 }
 
-                int numMatrixParams = reader.Reader.ReadInt32();
+                int numMatrixParams = reader.ReadInt32();
                 m_MatrixParams = new List<MatrixParameter>();
                 for (int i = 0; i < numMatrixParams; i++)
                 {
                     m_MatrixParams.Add(new MatrixParameter(reader));
                 }
 
-                int numTextureParams = reader.Reader.ReadInt32();
+                int numTextureParams = reader.ReadInt32();
                 m_TextureParams = new List<TextureParameter>();
                 for (int i = 0; i < numTextureParams; i++)
                 {
                     m_TextureParams.Add(new TextureParameter(reader));
                 }
 
-                int numBufferParams = reader.Reader.ReadInt32();
+                int numBufferParams = reader.ReadInt32();
                 m_BufferParams = new List<BufferBinding>();
                 for (int i = 0; i < numBufferParams; i++)
                 {
                     m_BufferParams.Add(new BufferBinding(reader));
                 }
 
-                int numConstantBuffers = reader.Reader.ReadInt32();
+                int numConstantBuffers = reader.ReadInt32();
                 m_ConstantBuffers = new List<ConstantBuffer>();
                 for (int i = 0; i < numConstantBuffers; i++)
                 {
                     m_ConstantBuffers.Add(new ConstantBuffer(reader));
                 }
 
-                int numConstantBufferBindings = reader.Reader.ReadInt32();
+                int numConstantBufferBindings = reader.ReadInt32();
                 m_ConstantBufferBindings = new List<BufferBinding>();
                 for (int i = 0; i < numConstantBufferBindings; i++)
                 {
                     m_ConstantBufferBindings.Add(new BufferBinding(reader));
                 }
 
-                int numUAVParams = reader.Reader.ReadInt32();
+                int numUAVParams = reader.ReadInt32();
                 m_UAVParams = new List<UAVParameter>();
                 for (int i = 0; i < numUAVParams; i++)
                 {
-                    m_UAVParams.Add(new UAVParameter(reader.Reader));
+                    m_UAVParams.Add(new UAVParameter(reader));
                 }
 
                 if (version.GreaterThanOrEquals(2017)) //2017 and up
                 {
-                    int numSamplers = reader.Reader.ReadInt32();
+                    int numSamplers = reader.ReadInt32();
                     m_Samplers = new List<SamplerParameter>();
                     for (int i = 0; i < numSamplers; i++)
                     {
@@ -745,17 +745,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (version.GreaterThanOrEquals(2021)) //2021.1 and up
                 {
-                    var m_ShaderRequirements = reader.Reader.ReadInt64();
+                    var m_ShaderRequirements = reader.ReadInt64();
                 }
                 else
                 {
-                    var m_ShaderRequirements = reader.Reader.ReadInt32();
+                    var m_ShaderRequirements = reader.ReadInt32();
                 }
             }
 
             if (HasInstancedStructuredBuffers(reader.SerializedType))
             {
-                int numInstancedStructuredBuffers = reader.Reader.ReadInt32();
+                int numInstancedStructuredBuffers = reader.ReadInt32();
                 var m_InstancedStructuredBuffers = new List<ConstantBuffer>();
                 for (int i = 0; i < numInstancedStructuredBuffers; i++)
                 {
@@ -774,14 +774,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedPlayerSubProgram(UIReader reader)
         {
-            m_BlobIndex = reader.Reader.ReadUInt32();
+            m_BlobIndex = reader.ReadUInt32();
 
             m_KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
-            reader.Reader.AlignStream();
+            reader.AlignStream();
 
-            m_ShaderRequirements = reader.Reader.ReadInt64();
-            m_GpuProgramType = (ShaderGpuProgramType)reader.Reader.ReadSByte();
-            reader.Reader.AlignStream();
+            m_ShaderRequirements = reader.ReadInt64();
+            m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+            reader.AlignStream();
         }
     }
 
@@ -797,7 +797,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Version;
 
-            int numSubPrograms = reader.Reader.ReadInt32();
+            int numSubPrograms = reader.ReadInt32();
             m_SubPrograms = new List<SerializedSubProgram>();
             for (int i = 0; i < numSubPrograms; i++)
             {
@@ -807,19 +807,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2021, 3, 10, UnityVersionType.Final, 1) || //2021.3.10f1 and up
                version.GreaterThanOrEquals(2022, 1, 13, UnityVersionType.Final, 1)) //2022.1.13f1 and up
             {
-                int numPlayerSubPrograms = reader.Reader.ReadInt32();
+                int numPlayerSubPrograms = reader.ReadInt32();
                 m_PlayerSubPrograms = new List<List<SerializedPlayerSubProgram>>();
                 for (int i = 0; i < numPlayerSubPrograms; i++)
                 {
                     m_PlayerSubPrograms.Add(new List<SerializedPlayerSubProgram>());
-                    int numPlatformPrograms = reader.Reader.ReadInt32();
+                    int numPlatformPrograms = reader.ReadInt32();
                     for (int j = 0; j < numPlatformPrograms; j++)
                     {
                         m_PlayerSubPrograms[i].Add(new SerializedPlayerSubProgram(reader));
                     }
                 }
 
-                m_ParameterBlobIndices = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
+                m_ParameterBlobIndices = reader.ReadArrayArray(r => r.ReadUInt32());
             }
 
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up
@@ -831,7 +831,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2022, 1)) //2022.1 and up
             {
                 m_SerializedKeywordStateMask = reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
         }
     }
@@ -872,34 +872,34 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
             {
-                int numEditorDataHash = reader.Reader.ReadInt32();
+                int numEditorDataHash = reader.ReadInt32();
                 m_EditorDataHash = new List<Hash128>();
                 for (int i = 0; i < numEditorDataHash; i++)
                 {
                     m_EditorDataHash.Add(new Hash128(reader));
                 }
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 m_Platforms = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 if (version.LessThan(2021, 1)) //2021.1 and down
                 {
                     m_LocalKeywordMask = reader.ReadArray(r => r.ReadUInt16());
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                     m_GlobalKeywordMask = reader.ReadArray(r => r.ReadUInt16());
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
             }
 
-            int numIndices = reader.Reader.ReadInt32();
+            int numIndices = reader.ReadInt32();
             m_NameIndices = new List<KeyValuePair<string, int>>();
             for (int i = 0; i < numIndices; i++)
             {
-                m_NameIndices.Add(new KeyValuePair<string, int>(reader.ReadAlignedString(), reader.Reader.ReadInt32()));
+                m_NameIndices.Add(new KeyValuePair<string, int>(reader.ReadAlignedString(), reader.ReadInt32()));
             }
 
-            m_Type = (PassType)reader.Reader.ReadInt32();
+            m_Type = (PassType)reader.ReadInt32();
             m_State = new SerializedShaderState(reader);
-            m_ProgramMask = reader.Reader.ReadUInt32();
+            m_ProgramMask = reader.ReadUInt32();
             progVertex = new SerializedProgram(reader);
             progFragment = new SerializedProgram(reader);
             progGeometry = new SerializedProgram(reader);
@@ -909,12 +909,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 progRayTracing = new SerializedProgram(reader);
             }
-            m_HasInstancingVariant = reader.Reader.ReadBoolean();
+            m_HasInstancingVariant = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(2018)) //2018 and up
             {
-                var m_HasProceduralInstancingVariant = reader.Reader.ReadBoolean();
+                var m_HasProceduralInstancingVariant = reader.ReadBoolean();
             }
-            reader.Reader.AlignStream();
+            reader.AlignStream();
             m_UseName = reader.ReadAlignedString();
             m_Name = reader.ReadAlignedString();
             m_TextureName = reader.ReadAlignedString();
@@ -922,7 +922,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.Major == 2021 && version.Minor >= 2) //2021.2 ~2021.x
             {
                 m_SerializedKeywordStateMask = reader.ReadArray(r => r.ReadUInt16());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
         }
     }
@@ -933,7 +933,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedTagMap(UIReader reader)
         {
-            int numTags = reader.Reader.ReadInt32();
+            int numTags = reader.ReadInt32();
             tags = new List<KeyValuePair<string, string>>();
             for (int i = 0; i < numTags; i++)
             {
@@ -950,7 +950,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public SerializedSubShader(UIReader reader)
         {
-            int numPasses = reader.Reader.ReadInt32();
+            int numPasses = reader.ReadInt32();
             m_Passes = new List<SerializedPass>();
             for (int i = 0; i < numPasses; i++)
             {
@@ -958,7 +958,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
 
             m_Tags = new SerializedTagMap(reader);
-            m_LOD = reader.Reader.ReadInt32();
+            m_LOD = reader.ReadInt32();
         }
     }
 
@@ -1005,7 +1005,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             m_PropInfo = new SerializedProperties(reader);
 
-            int numSubShaders = reader.Reader.ReadInt32();
+            int numSubShaders = reader.ReadInt32();
             m_SubShaders = new List<SerializedSubShader>();
             for (int i = 0; i < numSubShaders; i++)
             {
@@ -1016,14 +1016,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 m_KeywordNames = reader.ReadArray(r => r.ReadString());
                 m_KeywordFlags = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
             }
 
             m_Name = reader.ReadAlignedString();
             m_CustomEditorName = reader.ReadAlignedString();
             m_FallbackName = reader.ReadAlignedString();
 
-            int numDependencies = reader.Reader.ReadInt32();
+            int numDependencies = reader.ReadInt32();
             m_Dependencies = new List<SerializedShaderDependency>();
             for (int i = 0; i < numDependencies; i++)
             {
@@ -1032,7 +1032,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2021, 1)) //2021.1 and up
             {
-                int m_CustomEditorForRenderPipelinesSize = reader.Reader.ReadInt32();
+                int m_CustomEditorForRenderPipelinesSize = reader.ReadInt32();
                 m_CustomEditorForRenderPipelines = new List<SerializedCustomEditorForRenderPipeline>();
                 for (int i = 0; i < m_CustomEditorForRenderPipelinesSize; i++)
                 {
@@ -1040,8 +1040,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            m_DisableNoSubshadersMessage = reader.Reader.ReadBoolean();
-            reader.Reader.AlignStream();
+            m_DisableNoSubshadersMessage = reader.ReadBoolean();
+            reader.AlignStream();
         }
     }
 
@@ -1101,9 +1101,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 platforms = reader.ReadArray(r => r.ReadUInt32()).Select(x => (ShaderCompilerPlatform)x).ToArray();
                 if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up
                 {
-                    offsets = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
-                    compressedLengths = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
-                    decompressedLengths = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
+                    offsets = reader.ReadArrayArray(r => r.ReadUInt32());
+                    compressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
+                    decompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
                 }
                 else
                 {
@@ -1112,23 +1112,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     decompressedLengths = reader.ReadArray(r => r.ReadUInt32()).Select(x => new[] { x }).ToArray();
                 }
                 compressedBlob = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 if (reader.IsGISubGroup())
                 {
                     if (BinaryPrimitives.ReadInt32LittleEndian(compressedBlob) == -1)
                     {
                         compressedBlob = reader.ReadArray(r => r.ReadByte()); //blobDataBlocks
-                        reader.Reader.AlignStream();
+                        reader.AlignStream();
                     }
                 }
 
                 if (reader.IsLoveAndDeepSpace())
                 {
-                    var codeOffsets = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
-                    var codeCompressedLengths = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
-                    var codeDecompressedLengths = reader.Reader.ReadArrayArray(r => r.ReadUInt32());
+                    var codeOffsets = reader.ReadArrayArray(r => r.ReadUInt32());
+                    var codeCompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
+                    var codeDecompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
                     var codeCompressedBlob = reader.ReadArray(r => r.ReadByte());
-                    reader.Reader.AlignStream();
+                    reader.AlignStream();
                 }
 
                 if (version.GreaterThanOrEquals(2021, 3, 12, UnityVersionType.Final, 1) || //2021.3.12f1 and up
@@ -1137,7 +1137,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     stageCounts = reader.ReadArray(r => r.ReadUInt32());
                 }
 
-                var m_DependenciesCount = reader.Reader.ReadInt32();
+                var m_DependenciesCount = reader.ReadInt32();
                 for (int i = 0; i < m_DependenciesCount; i++)
                 {
                     new PPtr<Shader>(reader);
@@ -1145,7 +1145,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
                 if (version.GreaterThanOrEquals(2018))
                 {
-                    var m_NonModifiableTexturesCount = reader.Reader.ReadInt32();
+                    var m_NonModifiableTexturesCount = reader.ReadInt32();
                     for (int i = 0; i < m_NonModifiableTexturesCount; i++)
                     {
                         var first = reader.ReadAlignedString();
@@ -1153,17 +1153,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
                 }
 
-                var m_ShaderIsBaked = reader.Reader.ReadBoolean();
-                reader.Reader.AlignStream();
+                var m_ShaderIsBaked = reader.ReadBoolean();
+                reader.AlignStream();
             }
             else
             {
                 m_Script = reader.ReadArray(r => r.ReadByte());
-                reader.Reader.AlignStream();
+                reader.AlignStream();
                 var m_PathName = reader.ReadAlignedString();
                 if (version.Major == 5 && version.Minor >= 3) //5.3 - 5.4
                 {
-                    decompressedSize = reader.Reader.ReadUInt32();
+                    decompressedSize = reader.ReadUInt32();
                     m_SubProgramBlob = reader.ReadArray(r => r.ReadByte());
                 }
             }
@@ -1176,6 +1176,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 return;
             }
             //File.WriteAllText(fileName, );
+            // TODO
         }
     }
 }

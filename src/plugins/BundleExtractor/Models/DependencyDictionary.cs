@@ -42,5 +42,16 @@ namespace ZoDream.BundleExtractor.Models
             }
             Add(key, new DependencyEntry(key, 0, dependencies));
         }
+
+        public bool TryGet(string fileName, out string[] items)
+        {
+            if (!TryGetValue(fileName, out var entry))
+            {
+                items = [];
+                return false;
+            }
+            items = [.. entry.Dependencies];
+            return true;
+        }
     }
 }

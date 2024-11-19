@@ -3,7 +3,6 @@ using ZoDream.Shared.IO;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.BundleExtractor.Models;
-using System.Text.Json.Serialization;
 using System.Text.Json;
 
 namespace ZoDream.BundleExtractor
@@ -18,7 +17,8 @@ namespace ZoDream.BundleExtractor
          * 3. 判断 SerializedFile 建立文件依赖表
          * 4. 根据依赖表拆分文件组进行处理
          */
-        public static void Preload(IBundleSource source, IBundleOptions options)
+        public static void Preload(IBundleSource source, 
+            IBundleOptions options)
         {
             var dependencyFile = Path.Combine(options.Entrance!, "dependency.temp");
             if (File.Exists(dependencyFile))
