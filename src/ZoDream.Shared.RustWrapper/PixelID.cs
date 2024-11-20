@@ -4,10 +4,10 @@
     {
         Unknown,
         Atc,
-        Astc,
+        AsTc,
         Bcn,
         Etc,
-        Pvrtc,
+        PvrTc,
         Crunch,
         UnityCrunch
     }

@@ -190,7 +190,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SKImage? ToImage()
         {
             var data = TextureExtension.Decode(image_data.ToArray(), m_Width,
-                m_Height, m_TextureFormat);
+                m_Height, m_TextureFormat, _reader.Version);
             return data?.ToImage();
         }
     }

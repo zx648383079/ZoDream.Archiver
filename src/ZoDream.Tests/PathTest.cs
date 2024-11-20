@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ZoDream.Shared.Drawing;
 
 namespace ZoDream.Tests
 {
@@ -27,6 +28,20 @@ namespace ZoDream.Tests
             var text = "4.5MB";
             var match = Regex.Match(text, @"([\d\.]+)\s*([PTGMKB]?)");
             Assert.IsTrue(match.Success);
+        }
+
+        [TestMethod]
+        public void TestTake()
+        {
+            var items = new int[] { 2, 3, 6, 8, 9};
+            Assert.IsTrue(items.Take(4).ToArray().Length == 4);
+        }
+        [TestMethod]
+        public void TestColor()
+        {
+            var data = ColorConverter.SplitByte([15, 6], 0, out var i, 2, 1);
+            Assert.AreEqual(data, [3, 1]);
+            Assert.AreEqual(i, 1);
         }
     }
 }

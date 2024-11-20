@@ -3,7 +3,12 @@ use std::io::{Read, Write};
 use compression::lz4::Lz4Compressor;
 use compression::lzxd::LzxdCompressor;
 use compression::{Compressor, Decompressor};
-use drawing::{decode_stream, PixelDecoder};
+use drawing::astc::AstcDecoder;
+use drawing::bcn::BcnDecoder;
+use drawing::crunch::CrunchDecoder;
+use drawing::decode_stream;
+use drawing::etc::EtcDecoder;
+use drawing::pvr::PvrDecoder;
 use encryption::arc4::Arc4;
 use encryption::threeway::ThreeWay;
 use drawing::atc::AtcDecoder;
@@ -89,6 +94,11 @@ pub enum EncryptionID {
 pub enum PixelID {
     Unknown,
     Atc,
+    Astc,
+    Bcn,
+    Etc,
+    Pvrtc,
+    Crunch,
 }
 
 
@@ -363,6 +373,26 @@ impl PainterBox {
         match self.id {
             PixelID::Atc => {
                 let mut instance = AtcDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::Astc => {
+                let mut instance = AstcDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::Bcn => {
+                let mut instance = BcnDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::Etc => {
+                let mut instance = EtcDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::Pvrtc => {
+                let mut instance = PvrDecoder::new();
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::Crunch => {
+                let mut instance = CrunchDecoder::new();
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
             _ => Ok(0)

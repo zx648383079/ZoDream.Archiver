@@ -2,6 +2,11 @@ use std::io::{Read, Write};
 use super::error::Result;
 
 pub mod atc;
+pub mod astc;
+pub mod bcn;
+pub mod etc;
+pub mod pvr;
+pub mod crunch;
 
 pub trait PixelEncoder {
     fn encode(&mut self, input: &[u8], width: u32, height: u32, output: &mut Vec<u8>) -> Result<usize>;
@@ -12,9 +17,9 @@ pub fn encode_stream<T, R, W>(target: & mut T, input: &mut R, width: u32, height
 {
     let mut in_buf = Vec::new();
     let mut out_buf = Vec::new();
-    input.read_to_end(&mut in_buf);
+    input.read_to_end(&mut in_buf)?;
     let len = target.encode(&in_buf, width, height, &mut out_buf)?;
-    output.write(&out_buf[..len]);
+    output.write(&out_buf[..len])?;
     Ok(len)
 }
 
@@ -27,9 +32,9 @@ pub fn decode_stream<T, R, W>(target: & mut T, input: &mut R, width: u32, height
 {
     let mut in_buf = Vec::new();
     let mut out_buf = Vec::new();
-    input.read_to_end(&mut in_buf);
+    input.read_to_end(&mut in_buf)?;
     let len = target.decode(&in_buf, width, height, &mut out_buf)?;
-    output.write(&out_buf[..len]);
+    output.write(&out_buf[..len])?;
     Ok(len)
 }
 
