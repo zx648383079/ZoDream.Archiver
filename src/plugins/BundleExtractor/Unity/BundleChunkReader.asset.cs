@@ -25,9 +25,9 @@ namespace ZoDream.BundleExtractor
                         //{
                         //    Logger.Verbose($"GameObject with {m_GameObject.m_PathID} in file {m_GameObject.assetsFile.fileName} has {m_GameObject.m_Components.Count} components, Attempting to fetch them...");
                         //}
-                        foreach (var pptr in m_GameObject.m_Components)
+                        foreach (var pPtr in m_GameObject.m_Components)
                         {
-                            if (pptr.TryGet(out var m_Component))
+                            if (pPtr.TryGet(out var m_Component))
                             {
                                 switch (m_Component)
                                 {
@@ -99,11 +99,11 @@ namespace ZoDream.BundleExtractor
                                     }
                                     else
                                     {
-                                        if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld) && m_SpriteAtlaOld.m_IsVariant)
+                                        if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.m_IsVariant)
                                         {
                                             //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
                                             //{
-                                            //    Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName} has a variant of the origianl SpriteAtlas, disposing of the variant and assinging to the parent SpriteAtlas...");
+                                            //    Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName} has a variant of the original SpriteAtlas, disposing of the variant and assigning to the parent SpriteAtlas...");
                                             //}
                                             m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
                                         }
@@ -148,7 +148,7 @@ namespace ZoDream.BundleExtractor
                             ElementIDType.MeshFilter => new MeshFilter(reader),
                             ElementIDType.MeshRenderer => new MeshRenderer(reader),
                             ElementIDType.MiHoYoBinData => new MiHoYoBinData(reader),
-                            ElementIDType.MonoBehaviour => new MonoBehaviour(reader),
+                            ElementIDType.MonoBehavior => new MonoBehaviour(reader),
                             ElementIDType.MonoScript => new MonoScript(reader),
                             ElementIDType.MovieTexture => new MovieTexture(reader),
                             ElementIDType.PlayerSettings => new PlayerSettings(reader),

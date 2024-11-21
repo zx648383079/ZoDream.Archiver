@@ -21,7 +21,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (!LocationStorage.TryCreate(fileName, ".txt", mode, out fileName))
+            var extension = Path.GetExtension(fileName);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".txt";
+            }
+            if (!LocationStorage.TryCreate(fileName, extension, mode, out fileName))
             {
                 return;
             }

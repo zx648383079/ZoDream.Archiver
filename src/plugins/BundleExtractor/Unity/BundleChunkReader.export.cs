@@ -20,7 +20,12 @@ namespace ZoDream.BundleExtractor
             {
                 return false;
             }
-            item.GetRawData().SaveAs(exportFullPath);
+            var stream = item.GetRawData();
+            if (stream.Length == 0)
+            {
+                return false;
+            }
+            stream.SaveAs(exportFullPath);
             return true;
         }
 
@@ -43,7 +48,7 @@ namespace ZoDream.BundleExtractor
                 case ElementIDType.TextAsset:
                     ((TextAsset)item)?.SaveAs(exportPath, mode);
                     return true;
-                case ElementIDType.MonoBehaviour:
+                case ElementIDType.MonoBehavior:
                     ((MonoBehaviour)item)?.SaveAs(exportPath, mode);
                     return true;
                 case ElementIDType.Font:

@@ -47,6 +47,8 @@
         <TextBlock
             Grid.Row="2"
             Grid.ColumnSpan="2"
+            MaxWidth="300"
+            MaxLines="5"
             Style="{ThemeResource CaptionTextBlockStyle}"
             Text="{Binding Message}"
             TextWrapping="Wrap" />

@@ -160,7 +160,7 @@ namespace ZoDream.Archiver.ViewModels
             var res = await _app.OpenFormAsync(picker);
             if (!res)
             {
-                _app.Warning("已取消操作！");
+                // _app.Warning("已取消操作！");
                 return;
             }
             _options ??= new BundleOptions();

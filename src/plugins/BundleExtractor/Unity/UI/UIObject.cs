@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.IO;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -70,8 +71,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Stream GetRawData()
         {
-            _reader.BaseStream.Position = 0;
-            return _reader.BaseStream;
+            return new PartialStream(_reader.BaseStream, 
+                _reader.Data.ByteStart, 
+                _reader.Data.ByteSize);
         }
     }
 }
