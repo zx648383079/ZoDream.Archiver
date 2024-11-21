@@ -7,9 +7,24 @@ namespace ZoDream.Shared.RustWrapper
 {
     public unsafe class Painter : IDisposable
     {
-        public Painter(PixelID pixel, int width, int height)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pixel"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="blockWidth">一些其他配置</param>
+        /// <param name="blockHeight">一些其他的配置</param>
+        public Painter(
+            PixelID pixel, 
+            int width, int height,
+            int blockWidth = 0, int blockHeight = 0)
         {
-            _instance = NativeMethods.find_painter(pixel, (uint)width, (uint)height);
+            _instance = NativeMethods.find_painter(pixel, 
+                (uint)width, (uint)height,
+                (uint)blockWidth,
+                (uint)blockHeight
+            );
         }
 
         private readonly PainterRef* _instance;

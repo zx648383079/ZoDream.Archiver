@@ -93,12 +93,20 @@ pub enum EncryptionID {
 #[repr(i8)]
 pub enum PixelID {
     Unknown,
-    Atc,
-    Astc,
+    AtcRgb,
+    AtcRgba,
+    AsTcHdr,
+    AsTcRgb,
+    AsTcRgba,
     Bcn,
-    Etc,
-    Pvrtc,
+    EtcRgb,
+    EtcRgba,
+    EacR,
+    EacRg,
+    PvrTcRgb,
+    PvrTcRgba,
     Crunch,
+    UnityCrunch,
 }
 
 
@@ -356,6 +364,8 @@ pub struct PainterBox {
     id: PixelID,
     width: u32,
     height: u32,
+    block_width: u32,
+    block_heihgt: u32,
 }
 
 impl PainterBox {
@@ -371,28 +381,40 @@ impl PainterBox {
         where R : Read, W : Write
     {
         match self.id {
-            PixelID::Atc => {
-                let mut instance = AtcDecoder::new();
+            PixelID::AtcRgb | PixelID::AtcRgba => {
+                let mut instance = AtcDecoder::new(self.block_width as u8);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
-            PixelID::Astc => {
-                let mut instance = AstcDecoder::new();
+            PixelID::AsTcHdr | PixelID::AsTcRgb | PixelID::AsTcRgba => {
+                let mut instance = AstcDecoder::new(self.block_width as usize, self.block_heihgt as usize);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
             PixelID::Bcn => {
-                let mut instance = BcnDecoder::new();
+                let mut instance = BcnDecoder::new(self.block_width as u8);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
-            PixelID::Etc => {
-                let mut instance = EtcDecoder::new();
+            PixelID::EtcRgb | PixelID::EtcRgba => {
+                let mut instance = EtcDecoder::new(self.block_width as u8, self.block_heihgt as u8);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
-            PixelID::Pvrtc => {
-                let mut instance = PvrDecoder::new();
+            PixelID::EacR => {
+                let mut instance = EtcDecoder::new_signed(3, 1, self.block_width == 1);
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::EacRg => {
+                let mut instance = EtcDecoder::new_signed(3, 2, self.block_width == 1);
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::PvrTcRgb | PixelID::PvrTcRgba => {
+                let mut instance = PvrDecoder::new(self.block_width as u8);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
             PixelID::Crunch => {
-                let mut instance = CrunchDecoder::new();
+                let mut instance = CrunchDecoder::new(1);
+                decode_stream(&mut instance, input, self.width, self.height, output)
+            },
+            PixelID::UnityCrunch => {
+                let mut instance = CrunchDecoder::new(2);
                 decode_stream(&mut instance, input, self.width, self.height, output)
             },
             _ => Ok(0)
@@ -401,9 +423,9 @@ impl PainterBox {
 }
 
 #[ffi_export]
-fn find_painter (id: PixelID, width: u32, height: u32) -> repr_c::Box<PainterBox>
+fn find_painter (id: PixelID, width: u32, height: u32, bw: u32, bh: u32) -> repr_c::Box<PainterBox>
 {
-    Box::new(PainterBox {id: id.into(), width, height})
+    Box::new(PainterBox {id: id.into(), width, height, block_width: bw, block_heihgt: bh})
         .into()
 }
 
@@ -448,6 +470,7 @@ fn free_painter (ctor: Option<repr_c::Box<PainterBox>>)
 }
 
 
+#[cfg(test)]
 mod tests {
     use std::fs::File;
     use super::*;

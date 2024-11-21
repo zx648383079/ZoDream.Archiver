@@ -150,54 +150,61 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 data = decoder.Decode(data);
                 format = Enum.Parse<TextureFormat>(format.ToString()[..^8]);
             }
-            var id = format switch
+            Painter? painter = format switch
             {
-                TextureFormat.ATC_RGB4 => PixelID.Atc,
-                TextureFormat.ATC_RGBA8 => PixelID.Atc,
-                TextureFormat.ASTC_HDR_4x4 => PixelID.AsTc,
-                TextureFormat.ASTC_HDR_5x5 => PixelID.AsTc,
-                TextureFormat.ASTC_HDR_6x6 => PixelID.AsTc,
-                TextureFormat.ASTC_HDR_8x8 => PixelID.AsTc,
-                TextureFormat.ASTC_HDR_10x10 => PixelID.AsTc,
-                TextureFormat.ASTC_HDR_12x12 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_4x4 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_5x5 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_6x6 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_8x8 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_10x10 => PixelID.AsTc,
-                TextureFormat.ASTC_RGB_12x12 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_4x4 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_5x5 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_6x6 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_8x8 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_10x10 => PixelID.AsTc,
-                TextureFormat.ASTC_RGBA_12x12 => PixelID.AsTc,
-                TextureFormat.BC6H => PixelID.Bcn,
-                TextureFormat.BC7 => PixelID.Bcn,
-                TextureFormat.BC4 => PixelID.Bcn,
-                TextureFormat.BC5 => PixelID.Bcn,
-                TextureFormat.ETC2_RGB => PixelID.Etc,
-                TextureFormat.ETC_RGB4 or TextureFormat.ETC_RGB4_3DS 
-                    or TextureFormat.ETC_RGB4Crunched => PixelID.Etc,
-                TextureFormat.EAC_R => PixelID.Etc,
-                TextureFormat.EAC_R_SIGNED => PixelID.Etc,
-                TextureFormat.EAC_RG => PixelID.Etc,
-                TextureFormat.EAC_RG_SIGNED => PixelID.Etc,
-                TextureFormat.ETC2_RGBA1 => PixelID.Etc,
-                TextureFormat.ETC2_RGBA8 or TextureFormat.ETC2_RGBA8Crunched => PixelID.Etc,
-                TextureFormat.ETC_RGBA8_3DS => PixelID.Etc,
-                TextureFormat.PVRTC_RGB2 => PixelID.PvrTc,
-                TextureFormat.PVRTC_RGBA2 => PixelID.PvrTc,
-                TextureFormat.PVRTC_RGB4 => PixelID.PvrTc,
-                TextureFormat.PVRTC_RGBA4 => PixelID.PvrTc,
-                _ => PixelID.Unknown
+                TextureFormat.ATC_RGB4 => new Painter(PixelID.AtcRgb, width, height, 4),
+                TextureFormat.ATC_RGBA8 => new Painter(PixelID.AtcRgba, width, height, 8),
+                TextureFormat.ASTC_HDR_4x4 => new Painter(PixelID.AsTcHdr, width, height, 4, 4),
+                TextureFormat.ASTC_HDR_5x5 => new Painter(PixelID.AsTcHdr, width, height, 5, 5),
+                TextureFormat.ASTC_HDR_6x6 => new Painter(PixelID.AsTcHdr, width, height, 6, 6),
+                TextureFormat.ASTC_HDR_8x8 => new Painter(PixelID.AsTcHdr, width, height, 8, 8),
+                TextureFormat.ASTC_HDR_10x10 => new Painter(PixelID.AsTcHdr, width, height, 10, 10),
+                TextureFormat.ASTC_HDR_12x12 => new Painter(PixelID.AsTcHdr, width, height, 12, 12),
+                TextureFormat.ASTC_RGB_4x4 => new Painter(PixelID.AsTcRgb, width, height, 4, 4),
+                TextureFormat.ASTC_RGB_5x5 => new Painter(PixelID.AsTcRgb, width, height, 5, 5),
+                TextureFormat.ASTC_RGB_6x6 => new Painter(PixelID.AsTcRgb, width, height, 6, 6),
+                TextureFormat.ASTC_RGB_8x8 => new Painter(PixelID.AsTcRgb, width, height, 8, 8),
+                TextureFormat.ASTC_RGB_10x10 => new Painter(PixelID.AsTcRgb, width, height, 10, 10),
+                TextureFormat.ASTC_RGB_12x12 => new Painter(PixelID.AsTcRgb, width, height, 12, 12),
+                TextureFormat.ASTC_RGBA_4x4 => new Painter(PixelID.AsTcRgba, width, height, 4, 4),
+                TextureFormat.ASTC_RGBA_5x5 => new Painter(PixelID.AsTcRgba, width, height, 5, 5),
+                TextureFormat.ASTC_RGBA_6x6 => new Painter(PixelID.AsTcRgba, width, height, 6, 6),
+                TextureFormat.ASTC_RGBA_8x8 => new Painter(PixelID.AsTcRgba, width, height, 8, 8),
+                TextureFormat.ASTC_RGBA_10x10 => new Painter(PixelID.AsTcRgba, width, height, 10, 10),
+                TextureFormat.ASTC_RGBA_12x12 => new Painter(PixelID.AsTcRgba, width, height, 12, 12),
+                TextureFormat.BC6H => new Painter(PixelID.Bcn, width, height, 6),
+                TextureFormat.BC7 => new Painter(PixelID.Bcn, width, height, 7),
+                TextureFormat.BC4 => new Painter(PixelID.Bcn, width, height, 4),
+                TextureFormat.BC5 => new Painter(PixelID.Bcn, width, height, 5),
+                TextureFormat.ETC2_RGB => new Painter(PixelID.EtcRgb, width, height, 2),
+                TextureFormat.ETC_RGB4 or TextureFormat.ETC_RGB4_3DS
+                    or TextureFormat.ETC_RGB4Crunched => new Painter(PixelID.EtcRgb, width, height, 1, 4),
+                TextureFormat.EAC_R => new Painter(PixelID.EacR, width, height),
+                TextureFormat.EAC_R_SIGNED => new Painter(PixelID.EacR, width, height, 1),
+                TextureFormat.EAC_RG => new Painter(PixelID.EacRg, width, height),
+                TextureFormat.EAC_RG_SIGNED => new Painter(PixelID.EacRg, width, height, 1),
+                TextureFormat.ETC2_RGBA1 => new Painter(PixelID.EtcRgba, width, height, 2, 1),
+                TextureFormat.ETC2_RGBA8 or TextureFormat.ETC2_RGBA8Crunched =>
+                new Painter(PixelID.EtcRgba, width, height, 2, 8),
+                TextureFormat.ETC_RGBA8_3DS => new Painter(PixelID.EtcRgba, width, height, 1, 8),
+                TextureFormat.PVRTC_RGB2 => new Painter(PixelID.PvrTcRgb, width, height, 2),
+                TextureFormat.PVRTC_RGBA2 => new Painter(PixelID.PvrTcRgba, width, height, 2),
+                TextureFormat.PVRTC_RGB4 => new Painter(PixelID.PvrTcRgb, width, height, 4),
+                TextureFormat.PVRTC_RGBA4 => new Painter(PixelID.PvrTcRgba, width, height, 4),
+                _ => null
             };
-            if (id == PixelID.Unknown)
+            if (painter is null)
             {
                 return BitmapFactory.Decode(data, width, height, Convert(format));
             }
-            using var painter = new Painter(id, width, height);
-            return BitmapFactory.Decode(painter.Decode(data), width, height, BitmapFormat.RGBA8888);
+            try
+            {
+                return BitmapFactory.Decode(painter.Decode(data), width, height, BitmapFormat.RGBA8888);
+            }
+            finally
+            {
+                painter?.Dispose();
+            }
         }
     }
 }

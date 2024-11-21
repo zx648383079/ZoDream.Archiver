@@ -3,12 +3,19 @@
     public enum PixelID: byte
     {
         Unknown,
-        Atc,
-        AsTc,
+        AtcRgb,
+        AtcRgba,
+        AsTcHdr,
+        AsTcRgb,
+        AsTcRgba,
         Bcn,
-        Etc,
-        PvrTc,
+        EtcRgb,
+        EtcRgba,
+        EacR,
+        EacRg,
+        PvrTcRgb,
+        PvrTcRgba,
         Crunch,
-        UnityCrunch
+        UnityCrunch,
     }
 }

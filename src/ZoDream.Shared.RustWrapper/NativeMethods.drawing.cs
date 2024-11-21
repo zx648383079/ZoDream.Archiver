@@ -7,7 +7,7 @@ namespace ZoDream.Shared.RustWrapper
         
 
         [DllImport(RustDllName, ExactSpelling = true)]
-        public static unsafe extern PainterRef* find_painter(PixelID pixel, uint width, uint height);
+        public static unsafe extern PainterRef* find_painter(PixelID pixel, uint width, uint height, uint bw, uint bh);
 
         [DllImport(RustDllName, ExactSpelling = true)]
         public static unsafe extern long encode_painter(PainterRef* compressor, ref InputStreamRef input, ref OutputStreamRef output, ref LoggerRef logger);
