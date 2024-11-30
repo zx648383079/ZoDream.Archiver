@@ -11,7 +11,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
-    public class SerializedFileReader : IArchiveReader, ISerializedFile
+    internal class SerializedFileReader : IArchiveReader, ISerializedFile
     {
         public SerializedFileReader(EndianReader reader, string fullPath, IArchiveOptions? options)
         {

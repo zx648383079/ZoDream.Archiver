@@ -1,7 +1,6 @@
-﻿using SkiaSharp;
-using System;
+﻿using System;
 using System.Numerics;
-using ZoDream.Shared.Drawing.Pvr;
+using ZoDream.Shared.Drawing.PVRTC;
 
 namespace ZoDream.Shared.Drawing
 {
@@ -10,27 +9,27 @@ namespace ZoDream.Shared.Drawing
         public byte[] Decode(byte[] data, int width, int height)
         {
             var size = Math.Max(width, height);
-            var xblocks = size / 4;
-            var yblocks = size / 4;
-            var xblockMask = xblocks - 1;
-            var yblockMask = yblocks - 1;
+            var xBlocks = size / 4;
+            var yBlocks = size / 4;
+            var xBlockMask = xBlocks - 1;
+            var yBlockMask = yBlocks - 1;
 
             var buffer = new byte[size * size * 4];
 
-            var packets = new PvrtcPacket[xblocks * yblocks];
+            var packets = new Packet[xBlocks * yBlocks];
             var eightBytes = new byte[8];
             for (var i = 0; i < packets.Length; i++)
             {
-                packets[i] = new PvrtcPacket();
+                packets[i] = new Packet();
                 Buffer.BlockCopy(data, i * 8, eightBytes, 0, 8);
                 packets[i].InitFromBytes(eightBytes);
             }
 
             var currentFactorIndex = 0;
 
-            for (var y = 0; y < yblocks; ++y)
+            for (var y = 0; y < yBlocks; ++y)
             {
-                for (var x = 0; x < xblocks; ++x)
+                for (var x = 0; x < xBlocks; ++x)
                 {
                     currentFactorIndex = 0;
 
@@ -41,21 +40,21 @@ namespace ZoDream.Shared.Drawing
                     for (int py = 0; py < 4; ++py)
                     {
                         int yOffset = py < 2 ? -1 : 0;
-                        int y0 = y + yOffset & yblockMask;
-                        int y1 = y0 + 1 & yblockMask;
+                        int y0 = y + yOffset & yBlockMask;
+                        int y1 = y0 + 1 & yBlockMask;
 
                         for (int px = 0; px < 4; ++px)
                         {
                             int xOffset = px < 2 ? -1 : 0;
-                            int x0 = x + xOffset & xblockMask;
-                            int x1 = x0 + 1 & xblockMask;
+                            int x0 = x + xOffset & xBlockMask;
+                            int x1 = x0 + 1 & xBlockMask;
 
                             var p0 = packets[MortonTable.GetMortonNumber(x0, y0)];
                             var p1 = packets[MortonTable.GetMortonNumber(x1, y0)];
                             var p2 = packets[MortonTable.GetMortonNumber(x0, y1)];
                             var p3 = packets[MortonTable.GetMortonNumber(x1, y1)];
 
-                            var currentFactors = PvrtcPacket.BILINEAR_FACTORS[currentFactorIndex];
+                            var currentFactors = Packet.BILINEAR_FACTORS[currentFactorIndex];
 
                             var ca = p0.GetColorRgbA() * currentFactors[0] +
                                                 p1.GetColorRgbA() * currentFactors[1] +
@@ -67,7 +66,7 @@ namespace ZoDream.Shared.Drawing
                                                 p2.GetColorRgbB() * currentFactors[2] +
                                                 p3.GetColorRgbB() * currentFactors[3];
 
-                            var currentWeights = PvrtcPacket.WEIGHTS[4 * packet.GetPunchthroughAlpha() + mod & 3];
+                            var currentWeights = Packet.WEIGHTS[4 * packet.GetPunchThroughAlpha() + mod & 3];
 
 
                             var red = (byte)((int)(ca.X * currentWeights[0] + cb.X * currentWeights[1]) >> 7);
@@ -102,10 +101,10 @@ namespace ZoDream.Shared.Drawing
             int blocks = size / 4;
             int blockMask = blocks - 1;
 
-            var packets = new PvrtcPacket[blocks * blocks];
+            var packets = new Packet[blocks * blocks];
             for (int i = 0; i < packets.Length; i++)
             {
-                packets[i] = new PvrtcPacket();
+                packets[i] = new Packet();
             }
 
             for (int y = 0; y < blocks; ++y)
@@ -114,8 +113,8 @@ namespace ZoDream.Shared.Drawing
                 {
                     (byte[] minColor, byte[] maxColor) = GetMinMaxColors(data, 4 * x, 4 * y);
 
-                    PvrtcPacket packet = packets[MortonTable.GetMortonNumber(x, y)];
-                    packet.SetPunchthroughAlpha(false);
+                    Packet packet = packets[MortonTable.GetMortonNumber(x, y)];
+                    packet.SetPunchThroughAlpha(false);
                     packet.SetColorA(minColor[0], minColor[1], minColor[2]);
                     packet.SetColorB(maxColor[0], maxColor[1], maxColor[2]);
                 }
@@ -144,12 +143,12 @@ namespace ZoDream.Shared.Drawing
                             int x0 = x + xOffset & blockMask;
                             int x1 = x0 + 1 & blockMask;
 
-                            PvrtcPacket p0 = packets[MortonTable.GetMortonNumber(x0, y0)];
-                            PvrtcPacket p1 = packets[MortonTable.GetMortonNumber(x1, y0)];
-                            PvrtcPacket p2 = packets[MortonTable.GetMortonNumber(x0, y1)];
-                            PvrtcPacket p3 = packets[MortonTable.GetMortonNumber(x1, y1)];
+                            Packet p0 = packets[MortonTable.GetMortonNumber(x0, y0)];
+                            Packet p1 = packets[MortonTable.GetMortonNumber(x1, y0)];
+                            Packet p2 = packets[MortonTable.GetMortonNumber(x0, y1)];
+                            Packet p3 = packets[MortonTable.GetMortonNumber(x1, y1)];
 
-                            var currentFactors = PvrtcPacket.BILINEAR_FACTORS[currentFactorIndex];
+                            var currentFactors = Packet.BILINEAR_FACTORS[currentFactorIndex];
 
                             var ca = p0.GetColorRgbA() * currentFactors[0] +
                                                 p1.GetColorRgbA() * currentFactors[1] +
@@ -181,7 +180,7 @@ namespace ZoDream.Shared.Drawing
                         }
                     }
 
-                    PvrtcPacket packet = packets[MortonTable.GetMortonNumber(x, y)];
+                    Packet packet = packets[MortonTable.GetMortonNumber(x, y)];
                     packet.SetModulationData(modulationData);
                 }
             }

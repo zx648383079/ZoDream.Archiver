@@ -6,7 +6,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class StreamedResource
+    internal class StreamedResource
     {
         public string m_Source;
         public long m_Offset; //ulong
@@ -20,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    public sealed class VideoClip : NamedObject, IFileWriter
+    internal sealed class VideoClip : NamedObject, IFileWriter
     {
         public Stream m_VideoData;
         public string m_OriginalPath;

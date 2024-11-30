@@ -14,6 +14,9 @@
     <ContentDialog.DataContext>
         <vm:SettingDialogViewModel />
     </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
     <StackPanel>
         <TextBlock Text="FFmpeg" />
         <Grid>
@@ -22,9 +25,30 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding FFmpegBin, Mode=TwoWay}" />
-            <Button Grid.Column="1" Command="{Binding OpenCommand}">
-                <FontIcon Glyph="&#xE8E5;" />
-            </Button>
+            <Button
+                Grid.Column="1"
+                Command="{Binding OpenCommand}"
+                Content="&#xE8E5;"
+                Style="{StaticResource IconBtn}" />
+        </Grid>
+        <TextBlock Text="缓存目录" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding TemporaryFolder, Mode=TwoWay}" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding OpenTemporaryCommand}"
+                Content="&#xE8E5;"
+                Style="{StaticResource IconBtn}" />
+            <Button
+                Grid.Column="2"
+                Command="{Binding ClearTemporaryCommand}"
+                Content="&#xED62;"
+                Style="{StaticResource IconBtn}" />
         </Grid>
     </StackPanel>
 </ContentDialog>

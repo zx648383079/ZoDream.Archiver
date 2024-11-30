@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class Index
+    internal class Index
     {
         public PPtr<UIObject> Object;
         public ulong Size;
@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    public sealed class IndexObject : NamedObject
+    internal sealed class IndexObject : NamedObject
     {
         public int Count;
         public List<KeyValuePair<string, Index>> AssetMap;

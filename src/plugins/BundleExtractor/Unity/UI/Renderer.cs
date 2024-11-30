@@ -6,7 +6,7 @@ using ZoDream.BundleExtractor.Unity.SerializedFiles;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class StaticBatchInfo
+    internal class StaticBatchInfo
     {
         public ushort firstSubMesh;
         public ushort subMeshCount;
@@ -18,7 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    public abstract class UIRenderer : UIComponent
+    internal abstract class UIRenderer : UIComponent
     {
         public List<PPtr<Material>> m_Materials;
         public StaticBatchInfo m_StaticBatchInfo;

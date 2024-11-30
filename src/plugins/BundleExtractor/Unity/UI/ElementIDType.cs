@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZoDream.BundleExtractor.Unity.UI
+﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public enum ElementIDType
+    internal enum ElementIDType
     {
         UnknownType = -1,
         Object = 0,

@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class BuildSettings : UIObject
+    internal sealed class BuildSettings : UIObject
     {
         public string m_Version;
 

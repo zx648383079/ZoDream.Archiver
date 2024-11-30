@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using YamlDotNet.Serialization;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -27,6 +30,7 @@ namespace ZoDream.Archiver.ViewModels
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             _scheme = new(_app.Logger);
+            LoadSetting();
         }
 
         private readonly AppViewModel _app = App.ViewModel;
@@ -66,7 +70,18 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             await picker.ViewModel.SaveAsync();
+            LoadSetting();
         }
+
+        private void LoadSetting()
+        {
+            var temporary = _app.Setting.Get<string>(SettingNames.TemporaryPath);
+            if (!string.IsNullOrWhiteSpace(temporary))
+            {
+                _scheme.Add<ITemporaryStorage>(new TemporaryStorage(temporary));
+            }
+        }
+
         private async void TapView(object? _)
         {
             if (FileItems.Count == 0)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class MeshRenderer : UIRenderer
+    internal sealed class MeshRenderer : UIRenderer
     {
         public PPtr<Mesh> m_AdditionalVertexStreams;
         public MeshRenderer(UIReader reader) : base(reader)

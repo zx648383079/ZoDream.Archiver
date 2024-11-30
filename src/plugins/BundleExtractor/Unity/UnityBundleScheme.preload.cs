@@ -17,7 +17,8 @@ namespace ZoDream.BundleExtractor
          * 3. 判断 SerializedFile 建立文件依赖表
          * 4. 根据依赖表拆分文件组进行处理
          */
-        public static void Preload(IBundleSource source, 
+        public static void Preload(
+            IBundleSource source, 
             IBundleOptions options)
         {
             var dependencyFile = Path.Combine(options.Entrance!, "dependency.temp");

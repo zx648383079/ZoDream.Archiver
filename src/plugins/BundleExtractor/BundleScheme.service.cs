@@ -9,11 +9,18 @@ namespace ZoDream.BundleExtractor
 {
     public partial class BundleScheme : IBundleService, IDisposable
     {
-        public BundleScheme(ILogger logger)
+        public BundleScheme(
+            ILogger logger, 
+            ITemporaryStorage storage)
         {
             Add(logger);
-            Add<ITemporaryStorage>(new TemporaryStorage());
+            Add(storage);
             Initialize();
+        }
+        public BundleScheme(ILogger logger)
+            : this (logger, new TemporaryStorage())
+        {
+            
         }
 
         private readonly ConcurrentDictionary<Type, object> _instanceItems = [];

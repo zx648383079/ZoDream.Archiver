@@ -26,9 +26,11 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Text="{Binding FileName, Mode=TwoWay}" />
-                <Button Grid.Column="1" Command="{Binding OpenCommand}">
-                    <FontIcon Glyph="&#xE8DA;" />
-                </Button>
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding OpenCommand}"
+                    Content="&#xE8DA;"
+                    Style="{StaticResource IconBtn}" />
             </Grid>
 
             <ComboBox
@@ -60,9 +62,11 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Text="{Binding Entrance, Mode=TwoWay}" />
-                <Button Grid.Column="1" Command="{Binding FolderCommand}">
-                    <FontIcon Glyph="&#xE8DA;" />
-                </Button>
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding FolderCommand}"
+                    Content="&#xE8DA;"
+                    Style="{StaticResource IconBtn}" />
             </Grid>
 
             <TextBox

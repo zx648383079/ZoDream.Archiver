@@ -6,7 +6,7 @@ using ZoDream.BundleExtractor.Unity.UI;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class UnityBundleChunkReader
+    internal partial class UnityBundleChunkReader
     {
         private void ProcessAssets(CancellationToken token)
         {

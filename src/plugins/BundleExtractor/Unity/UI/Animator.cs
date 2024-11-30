@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class Animator : UIBehaviour, IFileWriter
+    internal sealed class Animator : UIBehavior, IFileWriter
     {
         public PPtr<Avatar> m_Avatar;
         public PPtr<RuntimeAnimatorController> m_Controller;

@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class AssetInfo
+    internal class AssetInfo
     {
         public int preloadIndex;
         public int preloadSize;
@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    public sealed class AssetBundle : NamedObject
+    internal sealed class AssetBundle : NamedObject
     {
         public List<PPtr<UIObject>> m_PreloadTable;
         public List<KeyValuePair<string, AssetInfo>> m_Container;

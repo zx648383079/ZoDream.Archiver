@@ -29,6 +29,8 @@
 
   <ItemGroup>
     <Folder Include="Platforms\Android\" />
+    <Folder Include="Shader\" />
+    <Folder Include="Lua\" />
   </ItemGroup>
 
   <ItemGroup>

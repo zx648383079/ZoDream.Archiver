@@ -4,7 +4,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class Texture2DArray: Texture
+    internal class Texture2DArray: Texture
     {
         public int m_Width;
         public int m_Height;

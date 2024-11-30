@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using ZoDream.BundleExtractor.Unity.UI;
+﻿using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class UnityBundleChunkReader
+    internal partial class UnityBundleChunkReader
     {
-        public bool ExportRawFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        internal bool ExportRawFile(UIObject item, string exportPath, ArchiveExtractMode mode)
         {
             if (!LocationStorage.TryCreate(exportPath,  ".dat", mode, out var exportFullPath))
             {
@@ -29,7 +22,7 @@ namespace ZoDream.BundleExtractor
             return true;
         }
 
-        public bool ExportConvertFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        internal bool ExportConvertFile(UIObject item, string exportPath, ArchiveExtractMode mode)
         {
             switch (item.Type)
             {
@@ -82,7 +75,7 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        public bool ExportJSONFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        internal bool ExportJSONFile(UIObject item, string exportPath, ArchiveExtractMode mode)
         {
             //if (!TryExportFile(exportPath, item, ".json", out var exportFullPath))
             //    return false;

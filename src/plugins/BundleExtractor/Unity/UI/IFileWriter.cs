@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public interface IFileWriter
+    internal interface IFileWriter
     {
 
         public void SaveAs(string fileName, ArchiveExtractMode mode);

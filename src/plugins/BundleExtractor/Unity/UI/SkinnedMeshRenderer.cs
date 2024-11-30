@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class SkinnedMeshRenderer : UIRenderer
+    internal sealed class SkinnedMeshRenderer : UIRenderer
     {
         public PPtr<Mesh> m_Mesh;
         public List<PPtr<Transform>> m_Bones;

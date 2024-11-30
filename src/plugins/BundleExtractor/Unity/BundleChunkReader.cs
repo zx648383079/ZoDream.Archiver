@@ -14,7 +14,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class UnityBundleChunkReader : IBundleReader, IBundleContainer
+    internal partial class UnityBundleChunkReader : IBundleReader, IBundleContainer
     {
 
         public UnityBundleChunkReader(

@@ -1,10 +1,10 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public abstract class UIBehaviour : UIComponent
+    internal abstract class UIBehavior : UIComponent
     {
         public byte m_Enabled;
 
-        protected UIBehaviour(UIReader reader)
+        protected UIBehavior(UIReader reader)
             : base(reader)
         {
             m_Enabled = reader.ReadByte();

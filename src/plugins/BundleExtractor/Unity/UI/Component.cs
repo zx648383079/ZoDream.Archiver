@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public abstract class UIComponent : EditorExtension
+    internal abstract class UIComponent : EditorExtension
     {
         public PPtr<GameObject> m_GameObject;
 

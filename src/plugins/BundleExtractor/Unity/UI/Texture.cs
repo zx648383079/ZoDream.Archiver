@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public abstract class Texture : NamedObject
+    internal abstract class Texture : NamedObject
     {
         protected Texture(UIReader reader) : this(reader, true)
         {

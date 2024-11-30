@@ -10,7 +10,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class TextAsset : NamedObject, IFileWriter
+    internal sealed class TextAsset : NamedObject, IFileWriter
     {
         public Stream Script;
 

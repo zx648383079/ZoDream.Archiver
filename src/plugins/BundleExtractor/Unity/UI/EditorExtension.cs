@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public abstract class EditorExtension : UIObject
+    internal abstract class EditorExtension : UIObject
     {
         protected EditorExtension(UIReader reader) 
             : this(reader, true)

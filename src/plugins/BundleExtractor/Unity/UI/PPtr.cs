@@ -5,7 +5,7 @@ using ZoDream.BundleExtractor.Unity.SerializedFiles;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class PPtr<T> where T : UIObject
+    internal sealed class PPtr<T> where T : UIObject
     {
         public int m_FileID;
         public long m_PathID;

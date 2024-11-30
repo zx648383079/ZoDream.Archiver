@@ -6,7 +6,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class MonoBehaviour : UIBehaviour, IFileWriter
+    internal sealed class MonoBehaviour : UIBehavior, IFileWriter
     {
         public PPtr<MonoScript> m_Script;
         public string m_Name;

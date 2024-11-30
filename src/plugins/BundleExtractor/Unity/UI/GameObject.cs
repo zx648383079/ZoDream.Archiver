@@ -6,7 +6,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class GameObject : EditorExtension, IFileWriter
+    internal sealed class GameObject : EditorExtension, IFileWriter
     {
         public List<PPtr<UIComponent>> m_Components;
         public string m_Name;

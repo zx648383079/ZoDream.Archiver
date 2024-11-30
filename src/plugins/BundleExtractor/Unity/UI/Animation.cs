@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class Animation : UIBehaviour
+    internal sealed class Animation : UIBehavior
     {
         public List<PPtr<AnimationClip>> m_Animations;
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public interface IYamlWriter
+    internal interface IYamlWriter
     {
 
     }

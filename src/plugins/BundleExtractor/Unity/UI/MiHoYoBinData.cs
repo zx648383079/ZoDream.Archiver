@@ -5,13 +5,13 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public enum MiHoYoBinDataType
+    internal enum MiHoYoBinDataType
     {
         None,
         Bytes,
         JSON
     }
-    public sealed class MiHoYoBinData : UIObject, IFileWriter
+    internal sealed class MiHoYoBinData : UIObject, IFileWriter
     {
         private static Regex ASCII = new Regex("[^\u0020-\u007E]", RegexOptions.Compiled);
 

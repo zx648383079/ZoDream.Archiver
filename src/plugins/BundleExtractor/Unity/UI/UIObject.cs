@@ -5,7 +5,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class UIObject
+    internal class UIObject
     {
 
         public UIObject(UIReader reader)

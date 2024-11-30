@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class NamedObject : EditorExtension
+    internal class NamedObject : EditorExtension
     {
         public string m_Name;
 

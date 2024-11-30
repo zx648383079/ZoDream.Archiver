@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class RectTransform : Transform
+    internal sealed class RectTransform : Transform
     {
         public RectTransform(UIReader reader) : base(reader)
         {

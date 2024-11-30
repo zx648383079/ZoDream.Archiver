@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class Transform : UIComponent
+    internal class Transform : UIComponent
     {
         public Vector4 m_LocalRotation;
         public Vector3 m_LocalPosition;

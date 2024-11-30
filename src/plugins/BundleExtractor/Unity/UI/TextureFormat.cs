@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public enum TextureFormat
+    internal enum TextureFormat
     {
         Alpha8 = 1,
         ARGB4444,

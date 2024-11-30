@@ -9,7 +9,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
-    public static class TypeTreeHelper
+    internal static class TypeTreeHelper
     {
         public static string ReadTypeString(TypeTree m_Type, EndianReader reader)
         {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class MeshFilter : UIComponent
+    internal sealed class MeshFilter : UIComponent
     {
         public PPtr<Mesh> m_Mesh;
 

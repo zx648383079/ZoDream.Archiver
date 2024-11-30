@@ -1,0 +1,38 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ZoDream.BundleExtractor.Unity.UI
+{
+    internal class Axes
+    {
+        public Vector4 m_PreQ;
+        public Vector4 m_PostQ;
+        public object m_Sgn;
+        public Limit m_Limit;
+        public float m_Length;
+        public uint m_Type;
+
+        public Axes(UIReader reader)
+        {
+            var version = reader.Version;
+            m_PreQ = reader.ReadVector4();
+            m_PostQ = reader.ReadVector4();
+            if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
+            {
+                m_Sgn = reader.ReadVector3();
+            }
+            else
+            {
+                m_Sgn = reader.ReadVector4();
+            }
+            m_Limit = new Limit(reader);
+            m_Length = reader.ReadSingle();
+            m_Type = reader.ReadUInt32();
+        }
+    }
+
+}

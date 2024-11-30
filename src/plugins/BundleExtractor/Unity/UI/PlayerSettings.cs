@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class PlayerSettings : UIObject
+    internal sealed class PlayerSettings : UIObject
     {
         public string companyName;
         public string productName;

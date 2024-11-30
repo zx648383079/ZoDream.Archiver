@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity
 {
-    public interface IBundleContainer
+    internal interface IBundleContainer
     {
         /// <summary>
         /// 判断文件在 Asset 中的位置

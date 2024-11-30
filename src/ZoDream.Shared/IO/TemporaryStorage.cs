@@ -30,6 +30,10 @@ namespace ZoDream.Shared.IO
             return File.Create(fullPath, 1024, FileOptions.DeleteOnClose);
         }
 
+        public void Clear()
+        {
+        }
+
         public void Dispose()
         {
             while (_fileItems.TryDequeue(out var fileName))
@@ -43,5 +47,7 @@ namespace ZoDream.Shared.IO
 
         [GeneratedRegex(@"[\\/.:\<\>\(\)]")]
         private static partial Regex SafePathRegex();
+
+        
     }
 }

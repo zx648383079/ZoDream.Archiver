@@ -2,12 +2,12 @@ using System;
 using System.Collections.Specialized;
 using System.Numerics;
 
-namespace ZoDream.Shared.Drawing.Pvr
+namespace ZoDream.Shared.Drawing.PVRTC
 {
     /// <summary>
     /// @see https://github.com/mcraiha/CSharp-PVRTC-encdec
     /// </summary>
-    public sealed class PvrtcPacket
+    public sealed class Packet
     {
         public static readonly byte[][] BILINEAR_FACTORS =
         {
@@ -50,13 +50,13 @@ namespace ZoDream.Shared.Drawing.Pvr
         };
 
         uint _modulationData;
-        bool _usePunchthroughAlpha;
+        bool _usePunchThroughAlpha;
         bool _colorAIsOpaque;
         bool _colorBIsOpaque;
         uint _colorA;
         uint _colorB;
 
-        public PvrtcPacket()
+        public Packet()
         {
             // Default constructor doesn't do anything
         }
@@ -71,18 +71,18 @@ namespace ZoDream.Shared.Drawing.Pvr
             _modulationData = newValue;
         }
 
-        public int GetPunchthroughAlpha()
+        public int GetPunchThroughAlpha()
         {
-            if (_usePunchthroughAlpha)
+            if (_usePunchThroughAlpha)
             {
                 return 1;
             }
             return 0;
         }
 
-        public void SetPunchthroughAlpha(bool newValue)
+        public void SetPunchThroughAlpha(bool newValue)
         {
-            _usePunchthroughAlpha = newValue;
+            _usePunchThroughAlpha = newValue;
         }
 
         public bool GetColorAIsOpaque()
@@ -288,7 +288,7 @@ namespace ZoDream.Shared.Drawing.Pvr
 
             var tempBitVector = new BitVector32(0);
             int currentIndex = 0;
-            tempBitVector[1 << currentIndex] = _usePunchthroughAlpha;
+            tempBitVector[1 << currentIndex] = _usePunchThroughAlpha;
             currentIndex++;
 
             var tempBitVectorColorA = new BitVector32((int)_colorA);
@@ -328,15 +328,15 @@ namespace ZoDream.Shared.Drawing.Pvr
             _modulationData = BitConverter.ToUInt32(modulationDataByteArray, 0);
             var tempBitVector = new BitVector32(BitConverter.ToInt32(otherDataByteArray, 0));
 
-            var punchthroughAlphaSection = BitVector32.CreateSection(1);
-            var colorASection = BitVector32.CreateSection(16383 /*(1 << 14) - 1*/, punchthroughAlphaSection);
+            var punchThroughAlphaSection = BitVector32.CreateSection(1);
+            var colorASection = BitVector32.CreateSection(16383 /*(1 << 14) - 1*/, punchThroughAlphaSection);
             var colorAIsOpaque = BitVector32.CreateSection(1, colorASection);
             var colorBSection = BitVector32.CreateSection(32767 /*(1 << 15) - 1*/, colorAIsOpaque);
             var colorBIsOpaque = BitVector32.CreateSection(1, colorBSection);
 
-            if (tempBitVector[punchthroughAlphaSection] == 1)
+            if (tempBitVector[punchThroughAlphaSection] == 1)
             {
-                _usePunchthroughAlpha = true;
+                _usePunchThroughAlpha = true;
             }
 
             _colorA = (uint)tempBitVector[colorASection];

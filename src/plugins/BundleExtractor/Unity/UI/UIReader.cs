@@ -10,7 +10,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class UIReader(EndianReader reader,
+    internal class UIReader(EndianReader reader,
         ObjectInfo data,
         ISerializedFile source,
         IBundleOptions options): EndianReader(reader.BaseStream, reader.EndianType, reader.IsAlignArray)

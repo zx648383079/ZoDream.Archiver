@@ -11,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 {
     
 
-    public class GLTextureSettings
+    internal class GLTextureSettings
     {
         public int m_FilterMode;
         public int m_Aniso;
@@ -44,7 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    public sealed class Texture2D : Texture, IFileWriter
+    internal sealed class Texture2D : Texture, IFileWriter
     {
         public int m_Width;
         public int m_Height;

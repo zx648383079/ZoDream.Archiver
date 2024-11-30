@@ -4,7 +4,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class Font : NamedObject, IFileWriter
+    internal sealed class Font : NamedObject, IFileWriter
     {
         public byte[] m_FontData;
 

@@ -11,5 +11,10 @@ namespace ZoDream.Shared.Interfaces
 
         public Stream Create();
         public Stream Create(string guid);
+
+        /// <summary>
+        /// 清除所有缓存文件
+        /// </summary>
+        public void Clear();
     }
 }

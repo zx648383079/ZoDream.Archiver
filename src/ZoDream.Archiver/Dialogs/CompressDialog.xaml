@@ -26,9 +26,11 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding FileName, Mode=TwoWay}" />
-            <Button Grid.Column="1" Command="{Binding OpenCommand}">
-                <FontIcon Glyph="&#xE8E5;" />
-            </Button>
+            <Button
+                Grid.Column="1"
+                Command="{Binding OpenCommand}"
+                Content="&#xE8E5;"
+                Style="{StaticResource IconBtn}" />
         </Grid>
         <StackPanel Orientation="Horizontal">
             <ComboBox
@@ -58,9 +60,11 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding DictFileName, Mode=TwoWay}" />
-            <Button Grid.Column="1" Command="{Binding DictCommand}">
-                <FontIcon Glyph="&#xE8E5;" />
-            </Button>
+            <Button
+                Grid.Column="1"
+                Command="{Binding DictCommand}"
+                Content="&#xE8E5;"
+                Style="{StaticResource IconBtn}" />
         </Grid>
     </StackPanel>
 </ContentDialog>

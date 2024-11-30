@@ -5,7 +5,7 @@ using ZoDream.Shared.RustWrapper;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public static class TextureExtension
+    internal static class TextureExtension
     {
         public static BitmapFormat Convert(TextureFormat textureFormat)
         {

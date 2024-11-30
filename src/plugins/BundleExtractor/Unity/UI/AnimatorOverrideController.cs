@@ -2,19 +2,8 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class AnimationClipOverride
-    {
-        public PPtr<AnimationClip> m_OriginalClip;
-        public PPtr<AnimationClip> m_OverrideClip;
 
-        public AnimationClipOverride(UIReader reader)
-        {
-            m_OriginalClip = new PPtr<AnimationClip>(reader);
-            m_OverrideClip = new PPtr<AnimationClip>(reader);
-        }
-    }
-
-    public sealed class AnimatorOverrideController : RuntimeAnimatorController
+    internal sealed class AnimatorOverrideController : RuntimeAnimatorController
     {
         public PPtr<RuntimeAnimatorController> m_Controller;
         public List<AnimationClipOverride> m_Clips;

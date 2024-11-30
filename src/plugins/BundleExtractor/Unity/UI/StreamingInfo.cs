@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class StreamingInfo
+    internal class StreamingInfo
     {
         public long offset; //ulong
         public uint size;

@@ -14,6 +14,9 @@
     <ContentDialog.DataContext>
         <vm:SearchDialogViewModel />
     </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
     <StackPanel>
         <TextBox Header="文件名" Text="{Binding Pattern, Mode=TwoWay}" />
         <ToggleSwitch Header="正则匹配" IsOn="{Binding UseRegex, Mode=TwoWay}" />

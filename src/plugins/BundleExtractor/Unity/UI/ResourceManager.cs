@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public class ResourceManager : UIObject
+    internal class ResourceManager : UIObject
     {
         public List<KeyValuePair<string, PPtr<UIObject>>> m_Container;
 

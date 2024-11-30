@@ -1,4 +1,4 @@
-namespace ZoDream.Shared.Drawing.Pvr
+namespace ZoDream.Shared.Drawing.PVRTC
 {
 
     /// <summary>

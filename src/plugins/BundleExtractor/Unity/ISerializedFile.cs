@@ -7,7 +7,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity
 {
-    public interface ISerializedFile : IDisposable
+    internal interface ISerializedFile : IDisposable
     {
         public string FullPath { get; }
         public IBundleContainer? Container { get; }

@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class MonoScript : NamedObject
+    internal sealed class MonoScript : NamedObject
     {
         public string m_ClassName;
         public string m_Namespace;

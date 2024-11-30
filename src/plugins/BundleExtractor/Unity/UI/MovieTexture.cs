@@ -9,7 +9,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    public sealed class MovieTexture : Texture, IFileWriter
+    internal sealed class MovieTexture : Texture, IFileWriter
     {
         public Stream MovieData;
         public PPtr<AudioClip> m_AudioClip;
