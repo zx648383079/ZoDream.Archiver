@@ -1,5 +1,5 @@
 ﻿using ZoDream.BundleExtractor.Models;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return !unityVersion.Equals(0, 0, 0) && unityVersion < WriteIDHashForScriptTypeVersion;
         }
 
-        protected override void ReadTypeDependencies(EndianReader reader)
+        protected override void ReadTypeDependencies(IBundleBinaryReader reader)
         {
             TypeDependencies = reader.ReadInt32Array();
         }

@@ -1,28 +1,14 @@
 ﻿using System.Collections.Specialized;
 using System.IO;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class UIObject
+    internal class UIObject(UIReader reader) : IElementLoader
     {
-
-        public UIObject(UIReader reader)
-        {
-            _reader = reader;
-        }
-
-        public UIObject(UIReader reader, bool isReadable)
-            : this(reader)
-        {
-            if (isReadable && _reader.Platform == BuildTarget.NoTarget)
-            {
-                var m_ObjectHideFlags = reader.ReadUInt32();
-            }
-        }
-
-        protected readonly UIReader _reader;
+        protected readonly UIReader _reader = reader;
 
         public long FileID => _reader.Data.FileID;
         public ISerializedFile AssetFile => _reader.Source;
@@ -31,6 +17,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public ElementIDType Type => _reader.Type;
 
         public virtual string Name => string.Empty;
+
+        public virtual void Read(IBundleBinaryReader reader)
+        {
+            if (_reader.Platform == BuildTarget.NoTarget)
+            {
+                var m_ObjectHideFlags = reader.ReadUInt32();
+            }
+        }
 
 
         public string Dump()
@@ -75,5 +69,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 _reader.Data.ByteStart, 
                 _reader.Data.ByteSize);
         }
+
+        
     }
 }

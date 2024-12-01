@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -18,9 +20,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Curve = [];
         }
 
-        public AnimationCurve(UIReader reader, Func<T> readerFunc)
+        public AnimationCurve(IBundleBinaryReader reader, Func<T> readerFunc)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             int numCurves = reader.ReadInt32();
             m_Curve = new List<Keyframe<T>>();
             for (int i = 0; i < numCurves; i++)

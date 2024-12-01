@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -14,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedShaderFloatValue w;
         public string name;
 
-        public SerializedShaderVectorValue(UIReader reader)
+        public SerializedShaderVectorValue(IBundleBinaryReader reader)
         {
             x = new SerializedShaderFloatValue(reader);
             y = new SerializedShaderFloatValue(reader);

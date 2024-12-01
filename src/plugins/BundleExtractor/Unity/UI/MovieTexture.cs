@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class MovieTexture : Texture, IFileWriter
+    internal sealed class MovieTexture(UIReader reader) : Texture(reader), IFileWriter
     {
         public Stream MovieData;
         public PPtr<AudioClip> m_AudioClip;
 
-        public MovieTexture(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             var m_Loop = reader.ReadBoolean();
             reader.AlignStream();
             m_AudioClip = new PPtr<AudioClip>(reader);

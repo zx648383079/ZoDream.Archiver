@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -12,9 +14,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint word1;
         public uint word2;
 
-        public HumanPoseMask(UIReader reader)
+        public HumanPoseMask(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             word0 = reader.ReadUInt32();
             word1 = reader.ReadUInt32();

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -14,15 +16,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_DefaultState;
         public uint m_MotionSetCount;
 
-        public StateMachineConstant(UIReader reader)
+        public StateMachineConstant(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
-
+            var version = reader.Get<UnityVersion>();
+            var scanner = reader.Get<IBundleElementScanner>();
             int numStates = reader.ReadInt32();
             m_StateConstantArray = new List<StateConstant>();
             for (int i = 0; i < numStates; i++)
             {
-                m_StateConstantArray.Add(new StateConstant(reader));
+                var node = new StateConstant();
+                scanner.TryRead(reader, node);
+                m_StateConstantArray.Add(node);
             }
 
             int numAnyStates = reader.ReadInt32();
@@ -35,7 +39,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(5)) //5.0 and up
             {
                 int numSelectors = reader.ReadInt32();
-                m_SelectorStateConstantArray = new List<SelectorStateConstant>();
+                m_SelectorStateConstantArray = [];
                 for (int i = 0; i < numSelectors; i++)
                 {
                     m_SelectorStateConstantArray.Add(new SelectorStateConstant(reader));

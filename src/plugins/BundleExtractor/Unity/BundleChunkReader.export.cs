@@ -1,4 +1,5 @@
-﻿using ZoDream.BundleExtractor.Unity.UI;
+﻿using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -42,7 +43,7 @@ namespace ZoDream.BundleExtractor
                     ((TextAsset)item)?.SaveAs(exportPath, mode);
                     return true;
                 case ElementIDType.MonoBehavior:
-                    ((MonoBehaviour)item)?.SaveAs(exportPath, mode);
+                    ((MonoBehavior)item)?.SaveAs(exportPath, mode);
                     return true;
                 case ElementIDType.Font:
                     ((Font)item)?.SaveAs(exportPath, mode);

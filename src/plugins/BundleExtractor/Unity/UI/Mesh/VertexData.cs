@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,9 +17,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<StreamInfo> m_Streams;
         public byte[] m_DataSize;
 
-        public VertexData(UIReader reader)
+        public VertexData(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             if (version.LessThan(2018))//2018 down
             {
@@ -30,7 +31,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(4)) //4.0 and up
             {
                 var m_ChannelsSize = reader.ReadInt32();
-                m_Channels = new List<ChannelInfo>();
+                m_Channels = [];
                 for (int i = 0; i < m_ChannelsSize; i++)
                 {
                     m_Channels.Add(new ChannelInfo(reader));
@@ -40,7 +41,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.LessThan(5)) //5.0 down
             {
                 var numStreams = version.LessThan(4) ? 4 : reader.ReadInt32();
-                m_Streams = new List<StreamInfo>();
+                m_Streams = [];
                 for (int i = 0; i < numStreams; i++)
                 {
                     m_Streams.Add(new StreamInfo(reader));
@@ -63,7 +64,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         private void GetStreams(UnityVersion version)
         {
             var streamCount = m_Channels.Max(x => x.stream) + 1;
-            m_Streams = new List<StreamInfo>();
+            m_Streams = [];
             uint offset = 0;
             for (int s = 0; s < streamCount; s++)
             {

@@ -1,7 +1,9 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
     internal class EmptyACLClip : ACLClip
     {
-        public override void Read(UIReader reader) { }
+        public override void Read(IBundleBinaryReader reader) { }
     }
 }

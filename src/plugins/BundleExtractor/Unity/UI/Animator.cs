@@ -1,8 +1,11 @@
-﻿using ZoDream.Shared.Models;
+﻿using System;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Animator : UIBehavior, IFileWriter
+    internal sealed class Animator(UIReader reader) : UIBehavior(reader), IFileWriter
     {
         public PPtr<Avatar> m_Avatar;
         public PPtr<RuntimeAnimatorController> m_Controller;
@@ -10,26 +13,28 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override string Name => m_GameObject.Name;
 
-        public Animator(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
+            ReadBase(reader, () => {
+                var m_CullingMode = reader.ReadInt32();
+
+                if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
+                {
+                    var m_UpdateMode = reader.ReadInt32();
+                }
+            });
+        }
+
+        public void ReadBase(IBundleBinaryReader reader, Action cb)
+        {
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             m_Avatar = new PPtr<Avatar>(reader);
             m_Controller = new PPtr<RuntimeAnimatorController>(reader);
-            if (reader.IsGISubGroup())
-            {
-                var m_FBIKAvatar = new PPtr<UIObject>(reader); //FBIKAvatar placeholder
-            }
-            var m_CullingMode = reader.ReadInt32();
-
-            if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
-            {
-                var m_UpdateMode = reader.ReadInt32();
-            }
-
-            if (reader.IsSR())
-            {
-                var m_MotionSkeletonMode = reader.ReadInt32();
-            }
+            cb.Invoke();
+            
 
             var m_ApplyRootMotion = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 5) && version.LessThan(5)) //4.5 and up - 5.0 down

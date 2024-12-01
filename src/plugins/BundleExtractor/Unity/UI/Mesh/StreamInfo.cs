@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -17,9 +19,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public StreamInfo() { }
 
-        public StreamInfo(UIReader reader)
+        public StreamInfo(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             channelMask = reader.ReadUInt32();
             offset = reader.ReadUInt32();

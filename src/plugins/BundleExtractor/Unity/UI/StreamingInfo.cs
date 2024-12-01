@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -14,9 +11,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public StreamingInfo() {}
 
-        public StreamingInfo(UIReader reader)
+        public StreamingInfo(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             if (version.Major >= 2020) //2020.1 and up
             {

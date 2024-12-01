@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using ZoDream.Shared.IO;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     public class SgsStream(Stream stream) : DeflateStream(stream)
     {

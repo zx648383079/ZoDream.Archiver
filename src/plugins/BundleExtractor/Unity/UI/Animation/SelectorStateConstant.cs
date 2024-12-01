@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -12,10 +9,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_FullPathID;
         public bool m_isEntry;
 
-        public SelectorStateConstant(UIReader reader)
+        public SelectorStateConstant(IBundleBinaryReader reader)
         {
             int numTransitions = reader.ReadInt32();
-            m_TransitionConstantArray = new List<SelectorTransitionConstant>();
+            m_TransitionConstantArray = [];
             for (int i = 0; i < numTransitions; i++)
             {
                 m_TransitionConstantArray.Add(new SelectorTransitionConstant(reader));

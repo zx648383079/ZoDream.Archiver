@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -17,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<UAVParameter> m_UAVParams;
         public List<SamplerParameter> m_Samplers;
 
-        public SerializedProgramParameters(UIReader reader)
+        public SerializedProgramParameters(IBundleBinaryReader reader)
         {
             int numVectorParams = reader.ReadInt32();
             m_VectorParams = [];
@@ -55,14 +52,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
 
             int numConstantBufferBindings = reader.ReadInt32();
-            m_ConstantBufferBindings = new List<BufferBinding>();
+            m_ConstantBufferBindings = [];
             for (int i = 0; i < numConstantBufferBindings; i++)
             {
                 m_ConstantBufferBindings.Add(new BufferBinding(reader));
             }
 
             int numUAVParams = reader.ReadInt32();
-            m_UAVParams = new List<UAVParameter>();
+            m_UAVParams = [];
             for (int i = 0; i < numUAVParams; i++)
             {
                 m_UAVParams.Add(new UAVParameter(reader));

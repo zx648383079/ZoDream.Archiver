@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,7 +6,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public int[] m_HandBoneIndex;
 
-        public Hand(UIReader reader)
+        public Hand(IBundleBinaryReader reader)
         {
             m_HandBoneIndex = reader.ReadArray(r => r.ReadInt32());
         }

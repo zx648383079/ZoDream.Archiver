@@ -1,16 +1,19 @@
 ﻿using System.IO;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Font : NamedObject, IFileWriter
+    internal sealed class Font(UIReader reader) : NamedObject(reader), IFileWriter
     {
         public byte[] m_FontData;
 
-        public Font(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(5, 5))//5.5 and up
             {
                 var m_LineSpacing = reader.ReadSingle();

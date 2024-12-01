@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint[] m_ChildBlendEventIDArray;
         public bool m_NormalizedBlendValues;
 
-        public BlendDirectDataConstant(UIReader reader)
+        public BlendDirectDataConstant(IBundleBinaryReader reader)
         {
             m_ChildBlendEventIDArray = reader.ReadArray(r => r.ReadUInt32());
             m_NormalizedBlendValues = reader.ReadBoolean();

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,15 +9,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<BlendTreeNodeConstant> m_NodeArray;
         public ValueArrayConstant m_BlendEventArrayConstant;
 
-        public BlendTreeConstant(UIReader reader)
+        public BlendTreeConstant(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
-
+            var version = reader.Get<UnityVersion>();
+            var scanner = reader.Get<IBundleElementScanner>();
             int numNodes = reader.ReadInt32();
-            m_NodeArray = new List<BlendTreeNodeConstant>();
+            m_NodeArray = [];
             for (int i = 0; i < numNodes; i++)
             {
-                m_NodeArray.Add(new BlendTreeNodeConstant(reader));
+                var node = new BlendTreeNodeConstant();
+                scanner.TryRead(reader, node);
+                m_NodeArray.Add(node);
             }
 
             if (version.LessThan(4, 5)) //4.5 down

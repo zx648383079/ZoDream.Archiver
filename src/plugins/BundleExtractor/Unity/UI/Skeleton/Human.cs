@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -31,9 +33,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool m_HasRightHand;
         public bool m_HasTDoF;
 
-        public Human(UIReader reader)
+        public Human(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             m_RootX = reader.ReadXForm();
             m_Skeleton = new Skeleton(reader);
             m_SkeletonPose = new SkeletonPose(reader);

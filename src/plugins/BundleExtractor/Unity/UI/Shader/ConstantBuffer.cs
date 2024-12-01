@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -15,9 +13,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_Size;
         public bool m_IsPartialCB;
 
-        public ConstantBuffer(UIReader reader)
+        public ConstantBuffer(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_NameIndex = reader.ReadInt32();
 
@@ -29,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
 
             int numVectorParams = reader.ReadInt32();
-            m_VectorParams = new List<VectorParameter>();
+            m_VectorParams = [];
             for (int i = 0; i < numVectorParams; i++)
             {
                 m_VectorParams.Add(new VectorParameter(reader));
@@ -37,7 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
                 int numStructParams = reader.ReadInt32();
-                m_StructParams = new List<StructParameter>();
+                m_StructParams = [];
                 for (int i = 0; i < numStructParams; i++)
                 {
                     m_StructParams.Add(new StructParameter(reader));

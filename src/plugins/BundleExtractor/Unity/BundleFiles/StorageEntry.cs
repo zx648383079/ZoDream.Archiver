@@ -1,5 +1,6 @@
 ﻿using System;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -11,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
 
         public override CompressionType CompressionType => (CompressionType)(Flags & StorageEntryFlags.CompressionTypeMask);
 
-        public static StorageEntry Read(EndianReader reader)
+        public static StorageEntry Read(IBundleBinaryReader reader)
         {
             return new(reader.ReadUInt32(), reader.ReadUInt32())
             {

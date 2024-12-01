@@ -1,4 +1,5 @@
-﻿using ZoDream.Shared.IO;
+﻿using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -18,8 +19,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         //    return file is not null && file.NameFixed == PathName;
         //}
 
-        public void Read(EndianReader reader, FormatVersion version)
+        public void Read(IBundleBinaryReader reader)
         {
+            var version = reader.Get<FormatVersion>();
             if (HasAssetPath(version))
             {
                 AssetPath = reader.ReadStringZeroTerm();

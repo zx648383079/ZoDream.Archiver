@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -23,12 +25,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool m_Atomic;
         public bool m_CanTransitionToSelf;
 
-        public TransitionConstant(UIReader reader)
+        public TransitionConstant(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             int numConditions = reader.ReadInt32();
-            m_ConditionConstantArray = new List<ConditionConstant>();
+            m_ConditionConstantArray = [];
             for (int i = 0; i < numConditions; i++)
             {
                 m_ConditionConstantArray.Add(new ConditionConstant(reader));

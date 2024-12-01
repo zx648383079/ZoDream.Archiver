@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ZoDream.Shared.IO;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class MuvLuvDimensionsStream(Stream stream): DeflateStream(stream)
+    public class MuvLuvDimensionsStream(Stream stream) : DeflateStream(stream)
     {
 
         private readonly byte[] _keys = [0xFD, 0x13, 0x7B, 0xEE, 0xC5, 0xFE, 0x50, 0x12, 0x4D, 0x38];

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_ParentId;
         public int m_AxesId;
 
-        public Node(UIReader reader)
+        public Node(IBundleBinaryReader reader)
         {
             m_ParentId = reader.ReadInt32();
             m_AxesId = reader.ReadInt32();

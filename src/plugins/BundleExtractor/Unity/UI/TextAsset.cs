@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+﻿using System.IO;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class TextAsset : NamedObject, IFileWriter
+    internal sealed class TextAsset(UIReader reader) : NamedObject(reader), IFileWriter
     {
         public Stream Script;
 
-        public TextAsset(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             Script = reader.ReadAsStream();
         }
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -17,9 +19,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint vertexCount;
         public AABB localAABB;
 
-        public SubMesh(UIReader reader)
+        public SubMesh(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             firstByte = reader.ReadUInt32();
             indexCount = reader.ReadUInt32();

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -26,9 +28,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Vector4 uvTransform;
         public float downscaleMultiplier;
 
-        public SpriteRenderData(UIReader reader)
+        public SpriteRenderData(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             texture = new PPtr<Texture2D>(reader);
             if (version.GreaterThanOrEquals(5, 2)) //5.2 and up
@@ -49,7 +51,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
                 var m_SubMeshesSize = reader.ReadInt32();
-                m_SubMeshes = new List<SubMesh>();
+                m_SubMeshes = [];
                 for (int i = 0; i < m_SubMeshesSize; i++)
                 {
                     m_SubMeshes.Add(new SubMesh(reader));

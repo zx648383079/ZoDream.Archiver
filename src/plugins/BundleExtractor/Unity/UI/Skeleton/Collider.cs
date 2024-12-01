@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -19,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float m_MaxLimitY;
         public float m_MaxLimitZ;
 
-        public Collider(UIReader reader)
+        public Collider(IBundleBinaryReader reader)
         {
             m_X = reader.ReadXForm();
             m_Type = reader.ReadUInt32();

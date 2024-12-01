@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,10 +7,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public List<ValueConstant> m_ValueArray;
 
-        public ValueArrayConstant(UIReader reader)
+        public ValueArrayConstant(IBundleBinaryReader reader)
         {
             int numVals = reader.ReadInt32();
-            m_ValueArray = new List<ValueConstant>();
+            m_ValueArray = [];
             for (int i = 0; i < numVals; i++)
             {
                 m_ValueArray.Add(new ValueConstant(reader));

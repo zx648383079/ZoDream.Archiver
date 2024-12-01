@@ -4,6 +4,7 @@ using LzhamWrapper.Enums;
 using System.IO;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Exceptions;
 using ZoDream.Shared.IO;
@@ -13,9 +14,9 @@ namespace ZoDream.BundleExtractor
     public static class BundleCodec
     {
 
-        public static EndianReader Decode(EndianReader input, CompressionType type, long compressedSize, long uncompressedSize)
+        public static IBundleBinaryReader Decode(IBundleBinaryReader input, CompressionType type, long compressedSize, long uncompressedSize)
         {
-            return new EndianReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input.EndianType);
+            return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input.EndianType);
         }
 
         public static Stream Decode(Stream input, CompressionType type, long compressedSize, long uncompressedSize)

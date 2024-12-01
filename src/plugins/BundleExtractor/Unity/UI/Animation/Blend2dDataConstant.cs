@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -15,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float[] m_ChildPairAvgMagInvArray;
         public List<MotionNeighborList> m_ChildNeighborListArray;
 
-        public Blend2dDataConstant(UIReader reader)
+        public Blend2dDataConstant(IBundleBinaryReader reader)
         {
             m_ChildPositionArray = reader.ReadArray(_ => reader.ReadVector2());
             m_ChildMagnitudeArray = reader.ReadArray(r => r.ReadSingle());

@@ -1,9 +1,10 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.BundleExtractor.Unity.UI
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal enum MiHoYoBinDataType
     {
@@ -11,9 +12,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         Bytes,
         JSON
     }
-    internal sealed class MiHoYoBinData : UIObject, IFileWriter
+    internal sealed class MiHoYoBinData(UIReader reader) : UIObject(reader), IFileWriter
     {
-        private static Regex ASCII = new Regex("[^\u0020-\u007E]", RegexOptions.Compiled);
+        private static Regex ASCII = new("[^\u0020-\u007E]", RegexOptions.Compiled);
 
         public static bool Exportable;
         public static bool Encrypted;
@@ -21,8 +22,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public byte[] RawData;
 
-        public MiHoYoBinData(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             RawData = reader.ReadArray(r => r.ReadByte());
         }
 
@@ -64,10 +66,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         //    }
         //}
 
-        private byte[] Data
-        {
-            get
-            {
+        private byte[] Data {
+            get {
                 if (Encrypted)
                 {
                     byte[] bytes = new byte[RawData.Length];

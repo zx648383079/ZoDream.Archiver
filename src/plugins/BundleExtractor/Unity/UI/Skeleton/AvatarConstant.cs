@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -22,9 +24,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SkeletonPose m_RootMotionSkeletonPose;
         public int[] m_RootMotionSkeletonIndexArray;
 
-        public AvatarConstant(UIReader reader)
+        public AvatarConstant(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             m_AvatarSkeleton = new Skeleton(reader);
             m_AvatarSkeletonPose = new SkeletonPose(reader);
 

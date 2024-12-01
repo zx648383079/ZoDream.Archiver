@@ -1,10 +1,9 @@
-﻿using SharpCompress.Compressors.Xz;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -15,18 +14,18 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         where THeader : RawWebBundleHeader, new()
     {
 
-        public RawWebBundleReader(EndianReader reader, IArchiveOptions? options)
+        public RawWebBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
 
             _options = options;
             _basePosition = reader.BaseStream.Position;
             _header.Read(reader);
             _headerLength = reader.BaseStream.Position - _basePosition;
-            _reader = new EndianReader(ReadRawStream(reader.BaseStream), EndianType.BigEndian);
+            _reader = new BundleBinaryReader(ReadRawStream(reader.BaseStream), EndianType.BigEndian);
         }
 
         private readonly THeader _header = new();
-        private readonly EndianReader _reader;
+        private readonly IBundleBinaryReader _reader;
         private readonly IArchiveOptions? _options;
         private readonly long _basePosition;
         private readonly long _headerLength;

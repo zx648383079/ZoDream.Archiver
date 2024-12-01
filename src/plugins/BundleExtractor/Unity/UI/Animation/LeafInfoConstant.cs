@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint[] m_IDArray;
         public uint m_IndexOffset;
 
-        public LeafInfoConstant(UIReader reader)
+        public LeafInfoConstant(IBundleBinaryReader reader)
         {
             m_IDArray = reader.ReadArray(r => r.ReadUInt32());
             m_IndexOffset = reader.ReadUInt32();

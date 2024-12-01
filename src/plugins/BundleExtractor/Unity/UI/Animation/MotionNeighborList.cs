@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,7 +6,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public uint[] m_NeighborArray;
 
-        public MotionNeighborList(UIReader reader)
+        public MotionNeighborList(IBundleBinaryReader reader)
         {
             m_NeighborArray = reader.ReadArray(r => r.ReadUInt32());
         }

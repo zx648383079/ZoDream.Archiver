@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedShaderFloatValue zFail;
         public SerializedShaderFloatValue comp;
 
-        public SerializedStencilOp(UIReader reader)
+        public SerializedStencilOp(IBundleBinaryReader reader)
         {
             pass = new SerializedShaderFloatValue(reader);
             fail = new SerializedShaderFloatValue(reader);

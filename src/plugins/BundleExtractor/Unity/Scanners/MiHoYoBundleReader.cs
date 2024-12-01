@@ -1,25 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class MhyBundleReader : IArchiveReader
+    public class MiHoYoBundleReader : IArchiveReader
     {
-        public MhyBundleReader(Stream stream, IArchiveOptions? option)
-            : this(new EndianReader(stream, EndianType.LittleEndian), option)
+        public MiHoYoBundleReader(Stream stream, IArchiveOptions? option)
+            : this(new BundleBinaryReader(stream, EndianType.LittleEndian), option)
         {
 
         }
-        public MhyBundleReader(EndianReader reader, IArchiveOptions? options)
+        public MiHoYoBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
             _reader = reader;
             _options = options;
@@ -28,11 +25,11 @@ namespace ZoDream.BundleExtractor.Producers
             _headerLength = reader.BaseStream.Position - _basePosition;
         }
 
-        private readonly EndianReader _reader;
+        private readonly IBundleBinaryReader _reader;
         private readonly IArchiveOptions? _options;
         private readonly long _basePosition;
         private readonly long _headerLength;
-        private readonly MhyBundleHeader _header = new();
+        private readonly MiHoYoBundleHeader _header = new();
         private readonly SplitStreamCollection _storageItems = [];
 
         public void Dispose()
@@ -61,13 +58,13 @@ namespace ZoDream.BundleExtractor.Producers
         public int ReadMhyInt()
         {
             var buffer = _reader.ReadBytes(6);
-            return buffer[2] | (buffer[4] << 8) | (buffer[0] << 0x10) | (buffer[5] << 0x18);
+            return buffer[2] | buffer[4] << 8 | buffer[0] << 0x10 | buffer[5] << 0x18;
         }
 
         public uint ReadMhyUInt()
         {
             var buffer = _reader.ReadBytes(7);
-            return (uint)(buffer[1] | (buffer[6] << 8) | (buffer[3] << 0x10) | (buffer[2] << 0x18));
+            return (uint)(buffer[1] | buffer[6] << 8 | buffer[3] << 0x10 | buffer[2] << 0x18);
         }
 
         public string ReadMhyString()

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,14 +12,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float[] m_DefValue;
         public SerializedTextureProperty m_DefTexture;
 
-        public SerializedProperty(UIReader reader)
+        public SerializedProperty(IBundleBinaryReader reader)
         {
             m_Name = reader.ReadAlignedString();
             m_Description = reader.ReadAlignedString();
             m_Attributes = reader.ReadArray(r => r.ReadString());
             m_Type = (SerializedPropertyType)reader.ReadInt32();
             m_Flags = (SerializedPropertyFlag)reader.ReadUInt32();
-            m_DefValue = reader.ReadArray(4, r => r.ReadSingle());
+            m_DefValue = reader.ReadArray(4, (r, _) => r.ReadSingle());
             m_DefTexture = new SerializedTextureProperty(reader);
         }
     }

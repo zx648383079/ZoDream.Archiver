@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,10 +7,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public List<SkeletonMaskElement> m_Data;
 
-        public SkeletonMask(UIReader reader)
+        public SkeletonMask(IBundleBinaryReader reader)
         {
             int numElements = reader.ReadInt32();
-            m_Data = new List<SkeletonMaskElement>();
+            m_Data = [];
             for (int i = 0; i < numElements; i++)
             {
                 m_Data.Add(new SkeletonMaskElement(reader));

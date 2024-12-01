@@ -1,4 +1,6 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
     internal class PPtrKeyframe : IYamlWriter
     {
@@ -11,7 +13,7 @@
             this.value = value;
         }
 
-        public PPtrKeyframe(UIReader reader)
+        public PPtrKeyframe(IBundleBinaryReader reader)
         {
             time = reader.ReadSingle();
             value = new PPtr<UIObject>(reader);

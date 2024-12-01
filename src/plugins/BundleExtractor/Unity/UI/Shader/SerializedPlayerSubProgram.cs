@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public long m_ShaderRequirements;
         public ShaderGpuProgramType m_GpuProgramType;
 
-        public SerializedPlayerSubProgram(UIReader reader)
+        public SerializedPlayerSubProgram(IBundleBinaryReader reader)
         {
             m_BlobIndex = reader.ReadUInt32();
 

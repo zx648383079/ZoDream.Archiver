@@ -1,4 +1,5 @@
 ﻿using System;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -8,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public byte[] m_Data;
         public byte m_BitSize;
 
-        public PackedIntVector(UIReader reader)
+        public PackedIntVector(IBundleBinaryReader reader)
         {
             m_NumItems = reader.ReadUInt32();
 

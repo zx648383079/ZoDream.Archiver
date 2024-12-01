@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Media;
 using ZoDream.Shared.Models;
@@ -6,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class AudioClip : NamedObject, IFileWriter
+    internal sealed class AudioClip(UIReader reader) : NamedObject(reader), IFileWriter
     {
         public int m_Format;
         public FMODSoundType m_Type;
@@ -31,11 +33,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public long m_Size; //ulong
         public Stream m_AudioData;
 
-        public AudioClip(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            if (reader.Version.LessThan(5))
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
+            if (version.LessThan(5))
             {
-                var version = reader.Version;
                 m_Format = reader.ReadInt32();
                 m_Type = (FMODSoundType)reader.ReadInt32();
                 m_3D = reader.ReadBoolean();
@@ -47,10 +50,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     int m_Stream = reader.ReadInt32();
                     m_Size = reader.ReadInt32();
                     var tsize = m_Size % 4 != 0 ? m_Size + 4 - m_Size % 4 : m_Size;
-                    if (reader.Data.ByteSize + reader.Data.ByteStart - reader.Position != tsize)
+                    if (_reader.Data.ByteSize + _reader.Data.ByteStart - reader.Position != tsize)
                     {
                         m_Offset = reader.ReadUInt32();
-                        m_Source = reader.FullPath + ".resS";
+                        m_Source = _reader.FullPath + ".resS";
                     }
                 }
                 else
@@ -82,7 +85,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (!string.IsNullOrEmpty(m_Source))
             {
-                m_AudioData = new PartialStream(reader.OpenResource(m_Source), m_Offset, m_Size);
+                m_AudioData = new PartialStream(_reader.OpenResource(m_Source), m_Offset, m_Size);
             } else
             {
                 m_AudioData = new PartialStream(reader.BaseStream, m_Size);

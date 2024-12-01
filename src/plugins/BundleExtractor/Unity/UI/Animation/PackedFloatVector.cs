@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public byte[] m_Data;
         public byte m_BitSize;
 
-        public PackedFloatVector(UIReader reader)
+        public PackedFloatVector(IBundleBinaryReader reader)
         {
             m_NumItems = reader.ReadUInt32();
             m_Range = reader.ReadSingle();

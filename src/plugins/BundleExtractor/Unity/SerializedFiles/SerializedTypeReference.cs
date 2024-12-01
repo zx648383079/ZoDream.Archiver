@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -29,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return false;
         }
 
-        protected override void ReadTypeDependencies(EndianReader reader)
+        protected override void ReadTypeDependencies(IBundleBinaryReader reader)
         {
             ClassName = reader.ReadStringZeroTerm();
             Namespace = reader.ReadStringZeroTerm();

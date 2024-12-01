@@ -34,7 +34,7 @@ namespace ZoDream.BundleExtractor.Unity
         //     The maximum valid value for this enumeration
         MaxValue = 5
     }
-    public static class UnityVersionTypeExtentions
+    public static class UnityVersionTypeExtensions
     {
         public static char ToCharacter(this UnityVersionType type)
         {

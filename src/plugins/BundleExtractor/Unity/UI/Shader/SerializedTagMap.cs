@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public List<KeyValuePair<string, string>> tags;
 
-        public SerializedTagMap(UIReader reader)
+        public SerializedTagMap(IBundleBinaryReader reader)
         {
             int numTags = reader.ReadInt32();
             tags = new List<KeyValuePair<string, string>>();

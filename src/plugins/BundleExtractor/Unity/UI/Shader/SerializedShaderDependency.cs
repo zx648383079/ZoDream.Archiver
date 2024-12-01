@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public string from;
         public string to;
 
-        public SerializedShaderDependency(UIReader reader)
+        public SerializedShaderDependency(IBundleBinaryReader reader)
         {
             from = reader.ReadAlignedString();
             to = reader.ReadAlignedString();

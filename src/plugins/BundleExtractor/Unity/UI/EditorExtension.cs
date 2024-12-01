@@ -1,20 +1,17 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
-{
-    internal abstract class EditorExtension : UIObject
-    {
-        protected EditorExtension(UIReader reader) 
-            : this(reader, true)
-        {
-            
-        }
+﻿using ZoDream.Shared.Bundle;
 
-        protected EditorExtension(UIReader reader, bool isReadable)
-            : base(reader, isReadable)
+namespace ZoDream.BundleExtractor.Unity.UI
+{
+    internal abstract class EditorExtension(UIReader reader) : UIObject(reader)
+    {
+        public override void Read(IBundleBinaryReader reader)
         {
-            if (isReadable && reader.Platform == BuildTarget.NoTarget)
+            base.Read(reader);
+            if (_reader.Platform == BuildTarget.NoTarget)
             {
-                var m_PrefabParentObject = new PPtr<EditorExtension>(reader);
-                var m_PrefabInternal = new PPtr<UIObject>(reader); //PPtr<Prefab>
+                var m_PrefabParentObject = new PPtr<EditorExtension>(_reader);
+                
+                var m_PrefabInternal = new PPtr<UIObject>(_reader); //PPtr<Prefab>
             }
         }
     }

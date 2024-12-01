@@ -3,15 +3,17 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Shader : NamedObject, IFileWriter
+    internal class Shader(UIReader reader) : NamedObject(reader), IElementLoader, IFileWriter
     {
         public byte[] m_Script;
         //5.3 - 5.4
@@ -28,18 +30,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override string Name => m_ParsedForm?.m_Name ?? m_Name;
 
-        public Shader(UIReader reader) : base(reader)
+        public void ReadBase(IBundleBinaryReader reader, Action cb)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(5, 5)) //5.5 and up
             {
                 m_ParsedForm = new SerializedShader(reader);
                 platforms = reader.ReadArray(r => r.ReadUInt32()).Select(x => (ShaderCompilerPlatform)x).ToArray();
                 if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up
                 {
-                    offsets = reader.ReadArrayArray(r => r.ReadUInt32());
-                    compressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
-                    decompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
+                    offsets = reader.Read2DArray((r, _, _) => r.ReadUInt32());
+                    compressedLengths = reader.Read2DArray((r, _, _) => r.ReadUInt32());
+                    decompressedLengths = reader.Read2DArray((r, _, _) => r.ReadUInt32());
                 }
                 else
                 {
@@ -49,23 +52,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
                 compressedBlob = reader.ReadArray(r => r.ReadByte());
                 reader.AlignStream();
-                if (reader.IsGISubGroup())
-                {
-                    if (BinaryPrimitives.ReadInt32LittleEndian(compressedBlob) == -1)
-                    {
-                        compressedBlob = reader.ReadArray(r => r.ReadByte()); //blobDataBlocks
-                        reader.AlignStream();
-                    }
-                }
-
-                if (reader.IsLoveAndDeepSpace())
-                {
-                    var codeOffsets = reader.ReadArrayArray(r => r.ReadUInt32());
-                    var codeCompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
-                    var codeDecompressedLengths = reader.ReadArrayArray(r => r.ReadUInt32());
-                    var codeCompressedBlob = reader.ReadArray(r => r.ReadByte());
-                    reader.AlignStream();
-                }
+                cb.Invoke();
 
                 if (version.GreaterThanOrEquals(2021, 3, 12, UnityVersionType.Final, 1) || //2021.3.12f1 and up
                     version.GreaterThanOrEquals(2022, 1, 21, UnityVersionType.Final, 1)) //2022.1.21f1 and up
@@ -103,6 +90,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     m_SubProgramBlob = reader.ReadArray(r => r.ReadByte());
                 }
             }
+        }
+
+        public override void Read(IBundleBinaryReader reader)
+        {
+            ReadBase(reader, () => {
+            });
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

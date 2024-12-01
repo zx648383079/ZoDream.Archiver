@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,13 +10,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public ValueArrayConstant m_Values;
         public ValueArray m_DefaultValues;
 
-        public ControllerConstant(UIReader reader)
+        public ControllerConstant(IBundleBinaryReader reader)
         {
+            var scanner = reader.Get<IBundleElementScanner>();
             int numLayers = reader.ReadInt32();
-            m_LayerArray = new List<LayerConstant>();
+            m_LayerArray = [];
             for (int i = 0; i < numLayers; i++)
             {
-                m_LayerArray.Add(new LayerConstant(reader));
+                var node = new LayerConstant();
+                scanner.TryRead(reader, node);
+                m_LayerArray.Add(node);
             }
 
             int numStates = reader.ReadInt32();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity
@@ -26,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity
         public int IndexOf(string dependency);
 
         public int AddDependency(string dependency);
-        public EndianReader Create(ObjectInfo info);
+        public IBundleBinaryReader Create(ObjectInfo info);
 
         public UIObject? this[long pathID] { get; }
         public void AddChild(UIObject obj);

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -14,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float width;
         public float height;
 
-        public Rectf(BinaryReader reader)
+        public Rectf(IBundleBinaryReader reader)
         {
             x = reader.ReadSingle();
             y = reader.ReadSingle();

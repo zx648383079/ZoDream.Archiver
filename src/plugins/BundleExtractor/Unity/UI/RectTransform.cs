@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZoDream.BundleExtractor.Unity.UI
+﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class RectTransform : Transform
+    internal sealed class RectTransform(UIReader reader) : Transform(reader)
     {
-        public RectTransform(UIReader reader) : base(reader)
-        {
-        }
     }
 }

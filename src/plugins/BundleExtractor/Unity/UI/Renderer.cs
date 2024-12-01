@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,30 +11,30 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public ushort firstSubMesh;
         public ushort subMeshCount;
 
-        public StaticBatchInfo(UIReader reader)
+        public StaticBatchInfo(IBundleBinaryReader reader)
         {
             firstSubMesh = reader.ReadUInt16();
             subMeshCount = reader.ReadUInt16();
         }
     }
 
-    internal abstract class UIRenderer : UIComponent
+    internal abstract class UIRenderer(UIReader reader) : UIComponent(reader)
     {
         public List<PPtr<Material>> m_Materials;
         public StaticBatchInfo m_StaticBatchInfo;
         public uint[] m_SubsetIndices;
-        private bool isNewHeader = false;
 
-        public static bool HasPrope(SerializedType type)
+        
+
+        public void ReadBase(IBundleBinaryReader reader)
         {
-            var hash = Convert.ToHexString(type.OldTypeHash);
-            return hash == "F622BC5EE0E86D7BDF8C912DD94DCBF5"
-            || hash == "9255FA54269ADD294011FDA525B5FCAC";
+            base.Read(reader);
         }
 
-        protected UIRenderer(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.Major < 5) //5.0 down
             {
                 var m_Enabled = reader.ReadBoolean();
@@ -46,14 +46,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
                 {
-                    if (reader.IsGI())
-                    {
-                        CheckHeader(reader, 0x1A);
-                    }
-                    if (reader.IsBH3())
-                    {
-                        CheckHeader(reader, 0x12);
-                    }
                     var m_Enabled = reader.ReadBoolean();
                     var m_CastShadows = reader.ReadByte();
                     var m_ReceiveShadows = reader.ReadByte();
@@ -61,57 +53,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     {
                         var m_DynamicOccludee = reader.ReadByte();
                     }
-                    if (reader.IsBH3Group())
-                    {
-                        var m_AllowHalfResolution = reader.ReadByte();
-                        int m_EnableGpuQuery = isNewHeader ? reader.ReadByte() : 0;
-                    }
-                    if (reader.IsGIGroup())
-                    {
-                        var m_ReceiveDecals = reader.ReadByte();
-                        var m_EnableShadowCulling = reader.ReadByte();
-                        var m_EnableGpuQuery = reader.ReadByte();
-                        var m_AllowHalfResolution = reader.ReadByte();
-                        if (!reader.IsGICB1())
-                        {
-                            if (reader.IsGI())
-                            {
-                                var m_AllowPerMaterialProp = isNewHeader ?
-                                    reader.ReadByte() : 0;
-                            }
-                            var m_IsRainOccluder = reader.ReadByte();
-                            if (!reader.IsGICB2())
-                            {
-                                var m_IsDynamicAOOccluder = reader.ReadByte();
-                                if (reader.IsGI())
-                                {
-                                    var m_IsHQDynamicAOOccluder = reader.ReadByte();
-                                    var m_IsCloudObject = reader.ReadByte();
-                                    var m_IsInteriorVolume = reader.ReadByte();
-                                }
-                            }
-                            if (!reader.IsGIPack())
-                            {
-                                var m_IsDynamic = reader.ReadByte();
-                            }
-                            if (reader.IsGI())
-                            {
-                                var m_UseTessellation = reader.ReadByte();
-                                var m_IsTerrainTessInfo = isNewHeader ? reader.ReadByte() : 0;
-                                var m_UseVertexLightInForward = isNewHeader ? reader.ReadByte() : 0;
-                                var m_CombineSubMeshInGeoPass = isNewHeader ? reader.ReadByte() : 0;
-                            }
-                        }
-                    }
                     if (version.Major >= 2021) //2021.1 and up
                     {
                         var m_StaticShadowCaster = reader.ReadByte();
-                        if (reader.IsArknightsEndfield())
-                        {
-                            var m_RealtimeShadowCaster = reader.ReadByte();
-                            var m_SubMeshRenderMode = reader.ReadByte();
-                            var m_CharacterIndex = reader.ReadByte();
-                        }
+                       
                     }
                     var m_MotionVectors = reader.ReadByte();
                     var m_LightProbeUsage = reader.ReadByte();
@@ -124,10 +69,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     {
                         var m_RayTraceProcedural = reader.ReadByte();
                     }
-                    if (reader.IsGI() || reader.IsGICB3() || reader.IsGICB3Pre())
-                    {
-                        var m_MeshShowQuality = reader.ReadByte();
-                    }
                     reader.AlignStream();
                 }
                 else
@@ -139,7 +80,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     reader.AlignStream();
                 }
 
-                if (version.Major >= 2018 || reader.IsBH3() && isNewHeader) //2018 and up
+                if (version.Major >= 2018) //2018 and up
                 {
                     var m_RenderingLayerMask = reader.ReadUInt32();
                 }
@@ -151,10 +92,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
                 var m_LightmapIndex = reader.ReadUInt16();
                 var m_LightmapIndexDynamic = reader.ReadUInt16();
-                if (reader.IsGIGroup() && (m_LightmapIndex != 0xFFFF || m_LightmapIndexDynamic != 0xFFFF))
-                {
-                    throw new Exception("Not Supported !! skipping....");
-                }
+               
             }
 
             if (version.Major >= 3) //3.0 and up
@@ -167,13 +105,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_LightmapTilingOffsetDynamic = reader.ReadVector4();
             }
 
-            if (reader.IsGIGroup())
-            {
-                var m_ViewDistanceRatio = reader.ReadSingle();
-                var m_ShaderLODDistanceRatio = reader.ReadSingle();
-            }
             var m_MaterialsSize = reader.ReadInt32();
-            m_Materials = new List<PPtr<Material>>();
+            m_Materials = [];
             for (int i = 0; i < m_MaterialsSize; i++)
             {
                 m_Materials.Add(new PPtr<Material>(reader));
@@ -197,30 +130,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_StaticBatchRoot = new PPtr<Transform>(reader);
             }
 
-            if (reader.IsGIGroup())
+
+            if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
             {
-                var m_MatLayers = reader.ReadInt32();
+                var m_ProbeAnchor = new PPtr<Transform>(reader);
+                var m_LightProbeVolumeOverride = new PPtr<GameObject>(reader);
             }
-
-            if (!reader.IsSR() || !HasPrope(reader.SerializedType))
+            else if (version.GreaterThanOrEquals(3, 5)) //3.5 - 5.3
             {
-                if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
-                {
-                    var m_ProbeAnchor = new PPtr<Transform>(reader);
-                    var m_LightProbeVolumeOverride = new PPtr<GameObject>(reader);
-                }
-                else if (version.GreaterThanOrEquals(3, 5)) //3.5 - 5.3
-                {
-                    var m_UseLightProbes = reader.ReadBoolean();
-                    reader.AlignStream();
+                var m_UseLightProbes = reader.ReadBoolean();
+                reader.AlignStream();
 
-                    if (version.Major >= 5)//5.0 and up
-                    {
-                        var m_ReflectionProbeUsage = reader.ReadInt32();
-                    }
-
-                    var m_LightProbeAnchor = new PPtr<Transform>(reader); //5.0 and up m_ProbeAnchor
+                if (version.Major >= 5)//5.0 and up
+                {
+                    var m_ReflectionProbeUsage = reader.ReadInt32();
                 }
+
+                var m_LightProbeAnchor = new PPtr<Transform>(reader); //5.0 and up m_ProbeAnchor
             }
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
@@ -237,29 +163,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 //SInt16 m_SortingLayer 5.6 and up
                 var m_SortingOrder = reader.ReadInt16();
                 reader.AlignStream();
-                if (reader.IsGIGroup() || reader.IsBH3())
-                {
-                    var m_UseHighestMip = reader.ReadBoolean();
-                    reader.AlignStream();
-                }
-                if (reader.IsSR())
-                {
-                    var RenderFlag = reader.ReadUInt32();
-                    reader.AlignStream();
-                }
             }
         }
 
-        private void CheckHeader(UIReader reader, int offset)
-        {
-            short value = 0;
-            var pos = reader.Position;
-            while (value != -1 && reader.Position <= pos + offset)
-            {
-                value = reader.ReadInt16();
-            }
-            isNewHeader = reader.Position - pos == offset;
-            reader.Position = pos;
-        }
+        
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -15,16 +17,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Vector3[] m_TDoFArray;
         public HumanPose() { }
 
-        public HumanPose(UIReader reader)
+        public HumanPose(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             m_RootX = reader.ReadXForm();
             m_LookAtPosition = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() :
-                UIReader.Parse(reader.ReadVector4());//5.4 and up
+                UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
             m_LookAtWeight = reader.ReadVector4();
 
             int numGoals = reader.ReadInt32();
-            m_GoalArray = new List<HumanGoal>();
+            m_GoalArray = [];
             for (int i = 0; i < numGoals; i++)
             {
                 m_GoalArray.Add(new HumanGoal(reader));
@@ -41,32 +43,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
         }
 
-        public static HumanPose ParseGI(UIReader reader)
-        {
-            var version = reader.Version;
-            var humanPose = new HumanPose();
-
-            humanPose.m_RootX = UIReader.Parse(reader.ReadXForm4());
-            humanPose.m_LookAtPosition = UIReader.Parse(reader.ReadVector4());
-            humanPose.m_LookAtWeight = reader.ReadVector4();
-
-            humanPose.m_GoalArray = new List<HumanGoal>();
-            for (int i = 0; i < 4; i++)
-            {
-                humanPose.m_GoalArray.Add(HumanGoal.ParseGI(reader));
-            }
-
-            humanPose.m_LeftHandPose = HandPose.ParseGI(reader);
-            humanPose.m_RightHandPose = HandPose.ParseGI(reader);
-
-            humanPose.m_DoFArray = reader.ReadArray(0x37, r => r.ReadSingle());
-
-            humanPose.m_TDoFArray = reader.ReadArray(0x15, _ => UIReader.Parse(reader.ReadVector4()));
-
-            reader.Position += 4;
-
-            return humanPose;
-        }
     }
 
 }

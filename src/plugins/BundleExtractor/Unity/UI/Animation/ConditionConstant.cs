@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float m_EventThreshold;
         public float m_ExitTime;
 
-        public ConditionConstant(UIReader reader)
+        public ConditionConstant(IBundleBinaryReader reader)
         {
             m_ConditionMode = reader.ReadUInt32();
             m_EventID = reader.ReadUInt32();

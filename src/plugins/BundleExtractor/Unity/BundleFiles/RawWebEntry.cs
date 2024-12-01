@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.Shared.IO;
+﻿using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -13,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public long Offset { get; set; }
 
 
-        public static RawWebEntry Read(EndianReader reader)
+        public static RawWebEntry Read(IBundleBinaryReader reader)
         {
             var path = reader.ReadStringZeroTerm();
             var offset = reader.ReadInt32();

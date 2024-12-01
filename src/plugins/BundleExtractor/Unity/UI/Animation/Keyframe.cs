@@ -1,5 +1,6 @@
 ﻿using System;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -24,13 +25,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
             outWeight = weight;
         }
 
-        public Keyframe(UIReader reader, Func<T> readerFunc)
+        public Keyframe(IBundleBinaryReader reader, Func<T> readerFunc)
         {
             time = reader.ReadSingle();
             value = readerFunc();
             inSlope = readerFunc();
             outSlope = readerFunc();
-            if (reader.Version.Major >= 2018) //2018 and up
+            if (reader.Get<UnityVersion>().Major >= 2018) //2018 and up
             {
                 weightedMode = reader.ReadInt32();
                 inWeight = readerFunc();

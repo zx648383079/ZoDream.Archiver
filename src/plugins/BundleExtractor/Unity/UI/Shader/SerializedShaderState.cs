@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class SerializedShaderState
+    internal class SerializedShaderState: IElementLoader
     {
         public string m_Name;
         public List<SerializedShaderRTBlendState> rtBlend;
@@ -35,9 +33,15 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_LOD;
         public bool lighting;
 
-        public SerializedShaderState(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            ReadBase(reader);
+            lighting = reader.ReadBoolean();
+            reader.AlignStream();
+        }
+        public void ReadBase(IBundleBinaryReader reader)
+        {
+            var version = reader.Get<UnityVersion>();
 
             m_Name = reader.ReadAlignedString();
             rtBlend = new List<SerializedShaderRTBlendState>();
@@ -75,17 +79,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             gpuProgramID = reader.ReadInt32();
             m_Tags = new SerializedTagMap(reader);
             m_LOD = reader.ReadInt32();
-            if (reader.IsLoveAndDeepSpace())
-            {
-                int numOverrideKeywordAndStage = reader.ReadInt32();
-                var m_OverrideKeywordAndStage = new List<KeyValuePair<string, uint>>();
-                for (int i = 0; i < numOverrideKeywordAndStage; i++)
-                {
-                    m_OverrideKeywordAndStage.Add(new KeyValuePair<string, uint>(reader.ReadAlignedString(), reader.ReadUInt32()));
-                }
-            }
-            lighting = reader.ReadBoolean();
-            reader.AlignStream();
+            
         }
     }
 

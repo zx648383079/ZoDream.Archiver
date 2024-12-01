@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<ShaderBindChannel> m_Channels;
         public uint m_SourceMap;
 
-        public ParserBindChannels(UIReader reader)
+        public ParserBindChannels(IBundleBinaryReader reader)
         {
             int numChannels = reader.ReadInt32();
             m_Channels = new List<ShaderBindChannel>();

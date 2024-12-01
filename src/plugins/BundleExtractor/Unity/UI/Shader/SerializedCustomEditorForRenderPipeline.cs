@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public string customEditorName;
         public string renderPipelineType;
 
-        public SerializedCustomEditorForRenderPipeline(UIReader reader)
+        public SerializedCustomEditorForRenderPipeline(IBundleBinaryReader reader)
         {
             customEditorName = reader.ReadAlignedString();
             renderPipelineType = reader.ReadAlignedString();

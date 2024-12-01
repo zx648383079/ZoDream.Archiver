@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -12,10 +13,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedTagMap m_Tags;
         public int m_LOD;
 
-        public SerializedSubShader(UIReader reader)
+        public SerializedSubShader(IBundleBinaryReader reader)
         {
             int numPasses = reader.ReadInt32();
-            m_Passes = new List<SerializedPass>();
+            m_Passes = [];
             for (int i = 0; i < numPasses; i++)
             {
                 m_Passes.Add(new SerializedPass(reader));

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -19,9 +21,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SpriteSettings settingsRaw;
         public List<SecondarySpriteTexture> secondaryTextures;
 
-        public SpriteAtlasData(UIReader reader)
+        public SpriteAtlasData(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             texture = new PPtr<Texture2D>(reader);
             alphaTexture = new PPtr<Texture2D>(reader);
             textureRect = new Rectf(reader);

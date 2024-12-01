@@ -1,20 +1,14 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
-{
-    internal abstract class Texture : NamedObject
-    {
-        protected Texture(UIReader reader) : this(reader, true)
-        {
-            
-        }
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
-        protected Texture(UIReader reader, bool isReadable)
-            : base(reader, isReadable)
+namespace ZoDream.BundleExtractor.Unity.UI
+{
+    internal abstract class Texture(UIReader reader) : NamedObject(reader)
+    {
+        public override void Read(IBundleBinaryReader reader)
         {
-            if (!isReadable)
-            {
-                return;
-            }
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
                 var m_ForcedFallbackFormat = reader.ReadInt32();

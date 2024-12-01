@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class LayerConstant
+    internal class LayerConstant: IElementLoader
     {
         public uint m_StateMachineIndex;
         public uint m_StateMachineMotionSetIndex;
@@ -18,18 +15,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool m_IKPass;
         public bool m_SyncedLayerAffectsTiming;
 
-        public LayerConstant(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_StateMachineIndex = reader.ReadUInt32();
             m_StateMachineMotionSetIndex = reader.ReadUInt32();
             m_BodyMask = new HumanPoseMask(reader);
             m_SkeletonMask = new SkeletonMask(reader);
-            if (reader.IsLoveAndDeepSpace())
-            {
-                var m_GenericMask = new SkeletonMask(reader);
-            }
             m_Binding = reader.ReadUInt32();
             m_LayerBlendingMode = reader.ReadInt32();
             if (version.GreaterThanOrEquals(4, 2)) //4.2 and up

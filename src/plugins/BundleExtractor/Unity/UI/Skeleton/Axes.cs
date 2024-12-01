@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,9 +18,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float m_Length;
         public uint m_Type;
 
-        public Axes(UIReader reader)
+        public Axes(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             m_PreQ = reader.ReadVector4();
             m_PostQ = reader.ReadVector4();
             if (version.GreaterThanOrEquals(5, 4)) //5.4 and up

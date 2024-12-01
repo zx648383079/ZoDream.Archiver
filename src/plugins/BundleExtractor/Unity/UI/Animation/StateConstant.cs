@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class StateConstant
+    internal class StateConstant : IElementLoader
     {
         public List<TransitionConstant> m_TransitionConstantArray;
         public int[] m_BlendTreeConstantIndexArray;
@@ -26,12 +24,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool m_Loop;
         public bool m_Mirror;
 
-        public StateConstant(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            ReadBase(reader);
+
+            reader.AlignStream();
+        }
+
+        public void ReadBase(IBundleBinaryReader reader)
+        {
+            var version = reader.Get<UnityVersion>();
 
             int numTransistions = reader.ReadInt32();
-            m_TransitionConstantArray = new List<TransitionConstant>();
+            m_TransitionConstantArray = [];
             for (int i = 0; i < numTransistions; i++)
             {
                 m_TransitionConstantArray.Add(new TransitionConstant(reader));
@@ -42,7 +47,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.LessThan(5, 2)) //5.2 down
             {
                 int numInfos = reader.ReadInt32();
-                m_LeafInfoArray = new List<LeafInfoConstant>();
+                m_LeafInfoArray = [];
                 for (int i = 0; i < numInfos; i++)
                 {
                     m_LeafInfoArray.Add(new LeafInfoConstant(reader));
@@ -96,13 +101,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_Mirror = reader.ReadBoolean();
             }
 
-            if (reader.IsArknightsEndfield())
-            {
-                var m_SyncGroupID = reader.ReadUInt32();
-                var m_SyncGroupRole = reader.ReadUInt32();
-            }
-
-            reader.AlignStream();
+            
         }
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -22,9 +19,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public PackedIntVector m_Colors;
         public uint m_UVInfo;
 
-        public CompressedMesh(UIReader reader)
+        public CompressedMesh(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_Vertices = new PackedFloatVector(reader);
             m_UV = new PackedFloatVector(reader);

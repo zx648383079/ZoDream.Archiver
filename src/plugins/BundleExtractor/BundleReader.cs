@@ -17,6 +17,7 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
+            scheme.Add(scheme.Get<IBundleProducer>().GetScanner(options));
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)

@@ -1,4 +1,5 @@
-﻿using ZoDream.Shared.Bundle;
+﻿using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {
@@ -10,6 +11,11 @@ namespace ZoDream.BundleExtractor.Producers
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
             return false;
+        }
+
+        public IBundleElementScanner GetScanner(IBundleOptions options)
+        {
+            return new PaperElementScanner(options.Package);
         }
     }
 }

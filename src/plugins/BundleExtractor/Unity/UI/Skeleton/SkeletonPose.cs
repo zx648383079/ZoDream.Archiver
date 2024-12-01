@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public XForm<Vector3>[] m_X;
 
-        public SkeletonPose(UIReader reader)
+        public SkeletonPose(IBundleBinaryReader reader)
         {
             m_X = reader.ReadXFormArray();
         }

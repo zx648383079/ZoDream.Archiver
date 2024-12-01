@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -29,9 +27,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedTagMap m_Tags;
         public ushort[] m_SerializedKeywordStateMask;
 
-        public SerializedPass(UIReader reader)
+        public SerializedPass(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
             {
@@ -61,7 +59,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
 
             m_Type = (PassType)reader.ReadInt32();
-            m_State = new SerializedShaderState(reader);
+            m_State = new();
+            reader.Get<IBundleElementScanner>().TryRead(reader, m_State);
             m_ProgramMask = reader.ReadUInt32();
             progVertex = new SerializedProgram(reader);
             progFragment = new SerializedProgram(reader);

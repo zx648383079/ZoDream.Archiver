@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -10,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     {
         public List<SerializedProperty> m_Props;
 
-        public SerializedProperties(UIReader reader)
+        public SerializedProperties(IBundleBinaryReader reader)
         {
             int numProps = reader.ReadInt32();
             m_Props = new List<SerializedProperty>();

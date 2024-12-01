@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
 {
@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         /// Actual engine version
         /// </summary>
         public string? UnityWebMinimumRevision { get; set; }
-        public virtual void Read(EndianReader reader)
+        public virtual void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -21,9 +23,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
             flags = 0;
         }
 
-        public PPtrCurve(UIReader reader)
+        public PPtrCurve(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             int numCurves = reader.ReadInt32();
             curve = new List<PPtrKeyframe>();

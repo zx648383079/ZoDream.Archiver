@@ -1,11 +1,14 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class BuildSettings : UIObject
+    internal sealed class BuildSettings(UIReader reader) : UIObject(reader)
     {
         public string m_Version;
 
-        public BuildSettings(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             var levels = reader.ReadArray(r => r.ReadString());
 
             var hasRenderTexture = reader.ReadBoolean();

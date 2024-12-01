@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -22,12 +23,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
             this.assetsFile = assetsFile;
         }
 
-        public PPtr(UIReader reader)
+        public PPtr(IBundleBinaryReader reader)
         {
             m_FileID = reader.ReadInt32();
-            m_PathID = reader.Source.Version < FormatVersion.Unknown_14 ?
+            m_PathID = reader.Get<FormatVersion>() < FormatVersion.Unknown_14 ?
                 reader.ReadInt32() : reader.ReadInt64();
-            assetsFile = reader.Source;
+            assetsFile = reader.Get<ISerializedFile>();
         }
 
         //public YAMLNode ExportYAML(int[] version)

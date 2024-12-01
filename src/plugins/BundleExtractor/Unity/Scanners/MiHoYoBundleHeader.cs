@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Bundle;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class MhyBundleHeader : BundleHeader
+    public class MiHoYoBundleHeader : BundleHeader
     {
         internal const string UnityArchiveMagic = "mhy0";
         protected override string MagicString => UnityArchiveMagic;
@@ -19,7 +14,7 @@ namespace ZoDream.BundleExtractor.Producers
 
         public BundleFlags Flags { get; set; }
 
-        public override void Read(EndianReader reader)
+        public override void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);

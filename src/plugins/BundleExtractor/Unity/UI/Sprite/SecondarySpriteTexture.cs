@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public PPtr<Texture2D> texture;
         public string name;
 
-        public SecondarySpriteTexture(UIReader reader)
+        public SecondarySpriteTexture(IBundleBinaryReader reader)
         {
             texture = new PPtr<Texture2D>(reader);
             name = reader.ReadStringZeroTerm();

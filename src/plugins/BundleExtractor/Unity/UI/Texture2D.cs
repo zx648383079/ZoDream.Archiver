@@ -1,7 +1,9 @@
 ﻿using SkiaSharp;
 using System;
 using System.IO;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -11,26 +13,22 @@ namespace ZoDream.BundleExtractor.Unity.UI
 {
     
 
-    internal class GLTextureSettings
+    internal class GLTextureSettings : IElementLoader
     {
         public int m_FilterMode;
         public int m_Aniso;
         public float m_MipBias;
         public int m_WrapMode;
 
-        public GLTextureSettings() {}
+        
 
-        public GLTextureSettings(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_FilterMode = reader.ReadInt32();
             m_Aniso = reader.ReadInt32();
             m_MipBias = reader.ReadSingle();
-            if (reader.IsExAstris())
-            {
-                var m_TextureGroup = reader.ReadInt32();
-            }
             if (version.Major >= 2017)//2017.x and up
             {
                 m_WrapMode = reader.ReadInt32(); //m_WrapU
@@ -44,7 +42,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    internal sealed class Texture2D : Texture, IFileWriter
+    internal sealed class Texture2D(UIReader reader) : 
+        Texture(reader), IFileWriter, IElementTypeLoader
     {
         public int m_Width;
         public int m_Height;
@@ -55,36 +54,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Stream image_data;
         public StreamingInfo m_StreamData;
 
-        private static bool HasGNFTexture(SerializedType type) =>
-            Convert.ToHexString(type.OldTypeHash) == "1D52BB98AA5F54C67C22C39E8B2E400F";
-        private static bool HasExternalMipRelativeOffset(SerializedType type)
-        {
-            return Convert.ToHexString(type.OldTypeHash) switch
-            {
-                "1D52BB98AA5F54C67C22C39E8B2E400F" or "5390A985F58D5524F95DB240E8789704" => true,
-                _ => false
-            };
-        }
 
-        public Texture2D(UIReader reader)
-            : this (reader, true)
+        public void Read(IBundleBinaryReader reader, TypeTree typeMaps)
         {
-            
-        }
-
-        public Texture2D(UIReader reader, bool isReadable) : 
-            base(reader, isReadable)
-        {
-            if (!isReadable)
+            TypeTreeHelper.ReadType(typeMaps, reader, this);
+            if (!string.IsNullOrEmpty(m_StreamData?.path))
             {
-                TypeTreeHelper.ReadType(reader.SerializedType.OldType, reader, this);
-                if (!string.IsNullOrEmpty(m_StreamData?.path))
-                {
-                    image_data = reader.OpenResource(m_StreamData);
-                }
-                return;
+                image_data = _reader.OpenResource(m_StreamData);
             }
-            var version = reader.Version;
+        }
+
+        public void ReadBase(IBundleBinaryReader reader)
+        {
+            base.Read(reader);
+        }
+
+        public override void Read(IBundleBinaryReader reader)
+        {
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             m_Width = reader.ReadInt32();
             m_Height = reader.ReadInt32();
             var m_CompleteImageSize = reader.ReadInt32();
@@ -104,10 +92,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
             {
                 var m_IsReadable = reader.ReadBoolean();
-                if (reader.IsGI() && HasGNFTexture(reader.SerializedType))
-                {
-                    var m_IsGNFTexture = reader.ReadBoolean();
-                }
+            
             }
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
@@ -134,17 +119,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_StreamingMipmaps = reader.ReadBoolean();
             }
             reader.AlignStream();
-            if (reader.IsGI() && HasGNFTexture(reader.SerializedType))
-            {
-                var m_TextureGroup = reader.ReadInt32();
-            }
             if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
             {
                 var m_StreamingMipmapsPriority = reader.ReadInt32();
             }
             var m_ImageCount = reader.ReadInt32();
             var m_TextureDimension = reader.ReadInt32();
-            m_TextureSettings = new GLTextureSettings(reader);
+            m_TextureSettings = new GLTextureSettings();
+            reader.Get<IBundleElementScanner>().TryRead(reader, m_TextureSettings);
             if (version.GreaterThanOrEquals(3)) //3.0 and up
             {
                 var m_LightmapFormat = reader.ReadInt32();
@@ -161,16 +143,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var image_data_size = reader.ReadInt32();
             if (image_data_size == 0 && version.GreaterThanOrEquals(5, 3))//5.3.0 and up
             {
-                if (reader.IsGI() && HasExternalMipRelativeOffset(reader.SerializedType))
-                {
-                    var m_externalMipRelativeOffset = reader.ReadUInt32();
-                }
                 m_StreamData = new StreamingInfo(reader);
             }
 
             if (!string.IsNullOrEmpty(m_StreamData?.path))
             {
-                image_data = reader.OpenResource(m_StreamData);
+                image_data = _reader.OpenResource(m_StreamData);
             } else
             {
                 image_data = new PartialStream(reader.BaseStream, image_data_size);

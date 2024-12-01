@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_PathHash;
         public float m_Weight;
 
-        public SkeletonMaskElement(UIReader reader)
+        public SkeletonMaskElement(IBundleBinaryReader reader)
         {
             m_PathHash = reader.ReadUInt32();
             m_Weight = reader.ReadSingle();

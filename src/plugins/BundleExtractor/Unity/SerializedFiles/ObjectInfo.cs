@@ -1,4 +1,5 @@
 ﻿using System;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -30,8 +31,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// </summary>
         public static bool HasLargeFilesSupport(FormatVersion generation) => generation >= FormatVersion.LargeFilesSupport;
 
-        public void Read(EndianReader reader, FormatVersion version)
+        public void Read(IBundleBinaryReader reader)
         {
+            var version = reader.Get<FormatVersion>();
             if (IsLongID(version))
             {
                 reader.AlignStream();

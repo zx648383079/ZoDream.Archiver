@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class SerializedSubProgram
+    internal class SerializedSubProgram: IElementLoader
     {
         public uint m_BlobIndex;
         public ParserBindChannels m_Channels;
@@ -47,24 +46,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
         public static bool HasIsAdditionalBlob(SerializedType type) => Convert.ToHexString(type.OldTypeHash) == "B239746E4EC6E4D6D7BA27C84178610A";
 
-        public SerializedSubProgram(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
-
-            if (reader.IsLoveAndDeepSpace())
-            {
-                var m_CodeHash = new Hash128(reader);
-            }
+            var version = reader.Get<UnityVersion>();
 
             m_BlobIndex = reader.ReadUInt32();
-            if (HasIsAdditionalBlob(reader.SerializedType))
+            if (HasIsAdditionalBlob(reader.Get<SerializedType>()))
             {
                 var m_IsAdditionalBlob = reader.ReadBoolean();
                 reader.AlignStream();
             }
             m_Channels = new ParserBindChannels(reader);
 
-            if (version.GreaterThanOrEquals(2019) && version.LessThan(2021, 1) || HasGlobalLocalKeywordIndices(reader.SerializedType)) //2019 ~2021.1
+            if (version.GreaterThanOrEquals(2019) && version.LessThan(2021, 1) || HasGlobalLocalKeywordIndices(reader.Get<SerializedType>())) //2019 ~2021.1
             {
                 var m_GlobalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
                 reader.AlignStream();
@@ -84,16 +78,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
             reader.AlignStream();
 
-            if (reader.IsGI() && (m_GpuProgramType == ShaderGpuProgramType.Unknown || !Enum.IsDefined(typeof(ShaderGpuProgramType), m_GpuProgramType)))
-            {
-                reader.Position -= 4;
-                var m_LocalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
-                reader.AlignStream();
-
-                m_ShaderHardwareTier = reader.ReadSByte();
-                m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
-                reader.AlignStream();
-            }
+            ReadBase(reader);
+        }
+        public void ReadBase(IBundleBinaryReader reader)
+        {
+            var version = reader.Get<UnityVersion>();
 
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up
               version.GreaterThanOrEquals(2021, 1, 4, UnityVersionType.Final, 1)) //2021.1.4f1 and up
@@ -174,7 +163,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 }
             }
 
-            if (HasInstancedStructuredBuffers(reader.SerializedType))
+            if (HasInstancedStructuredBuffers(reader.Get<SerializedType>()))
             {
                 int numInstancedStructuredBuffers = reader.ReadInt32();
                 var m_InstancedStructuredBuffers = new List<ConstantBuffer>();

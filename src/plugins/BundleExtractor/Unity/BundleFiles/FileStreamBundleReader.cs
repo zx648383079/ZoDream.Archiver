@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -12,12 +13,12 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
 {
     public class FileStreamBundleReader : IArchiveReader
     {
-        public FileStreamBundleReader(Stream stream, IArchiveOptions? options) : this(new EndianReader(stream, EndianType.BigEndian), options)
+        public FileStreamBundleReader(Stream stream, IArchiveOptions? options) : this(new BundleBinaryReader(stream, EndianType.BigEndian), options)
         {
 
         }
 
-        public FileStreamBundleReader(EndianReader reader, IArchiveOptions? options)
+        public FileStreamBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
             _reader = reader;
             _options = options;
@@ -26,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             _headerLength = reader.BaseStream.Position - _basePosition;
         }
 
-        private readonly EndianReader _reader;
+        private readonly IBundleBinaryReader _reader;
         private readonly IArchiveOptions? _options;
         private readonly long _basePosition;
         private readonly long _headerLength;

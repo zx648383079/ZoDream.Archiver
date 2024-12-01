@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,12 +8,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_Destination;
         public List<ConditionConstant> m_ConditionConstantArray;
 
-        public SelectorTransitionConstant(UIReader reader)
+        public SelectorTransitionConstant(IBundleBinaryReader reader)
         {
             m_Destination = reader.ReadUInt32();
 
             int numConditions = reader.ReadInt32();
-            m_ConditionConstantArray = new List<ConditionConstant>();
+            m_ConditionConstantArray = [];
             for (int i = 0; i < numConditions; i++)
             {
                 m_ConditionConstantArray.Add(new ConditionConstant(reader));

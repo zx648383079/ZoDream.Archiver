@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -12,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Vector3 m_Min;
         public Vector3 m_Max;
 
-        public MinMaxAABB(UIReader reader)
+        public MinMaxAABB(IBundleBinaryReader reader)
         {
             m_Min = reader.ReadVector3();
             m_Max = reader.ReadVector3();

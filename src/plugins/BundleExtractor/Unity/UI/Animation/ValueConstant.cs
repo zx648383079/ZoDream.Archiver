@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,9 +10,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_Type;
         public uint m_Index;
 
-        public ValueConstant(UIReader reader)
+        public ValueConstant(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             m_ID = reader.ReadUInt32();
             if (version.LessThan(5, 5))//5.5 down
             {

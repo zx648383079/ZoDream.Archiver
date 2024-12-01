@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
@@ -13,33 +14,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint curveCount;
         public StreamedClip() { }
 
-        public StreamedClip(UIReader reader)
+        public StreamedClip(IBundleBinaryReader reader)
         {
             data = reader.ReadArray(r => r.ReadUInt32());
             curveCount = reader.ReadUInt32();
-        }
-        public static StreamedClip ParseGI(UIReader reader)
-        {
-            var streamedClipCount = (int)reader.ReadUInt64();
-            var streamedClipOffset = reader.Position + reader.ReadInt64();
-            var streamedClipCurveCount = (uint)reader.ReadUInt64();
-            if (streamedClipOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = streamedClipOffset;
-
-            var streamedClip = new StreamedClip()
-            {
-                data = reader.ReadArray(streamedClipCount, r => r.ReadUInt32()),
-                curveCount = streamedClipCurveCount
-            };
-
-            reader.Position = pos;
-
-            return streamedClip;
         }
 
         public class StreamedCurveKey
@@ -51,10 +29,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             public float outSlope;
             public float inSlope;
 
-            public StreamedCurveKey(EndianReader reader)
+            public StreamedCurveKey(IBundleBinaryReader reader)
             {
                 index = reader.ReadInt32();
-                coeff = reader.ReadArray(4, r => r.ReadSingle());
+                coeff = reader.ReadArray(4, (r, _) => r.ReadSingle());
 
                 outSlope = coeff[2];
                 value = coeff[3];
@@ -82,12 +60,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
             public float time;
             public List<StreamedCurveKey> keyList;
 
-            public StreamedFrame(EndianReader reader)
+            public StreamedFrame(IBundleBinaryReader reader)
             {
                 time = reader.ReadSingle();
 
                 int numKeys = reader.ReadInt32();
-                keyList = new List<StreamedCurveKey>();
+                keyList = [];
                 for (int i = 0; i < numKeys; i++)
                 {
                     keyList.Add(new StreamedCurveKey(reader));
@@ -100,7 +78,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var frameList = new List<StreamedFrame>();
             var buffer = new byte[data.Length * 4];
             Buffer.BlockCopy(data, 0, buffer, 0, buffer.Length);
-            using (var reader = new EndianReader(new MemoryStream(buffer), EndianType.LittleEndian))
+            using (var reader = new BundleBinaryReader(new MemoryStream(buffer), EndianType.LittleEndian))
             {
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {

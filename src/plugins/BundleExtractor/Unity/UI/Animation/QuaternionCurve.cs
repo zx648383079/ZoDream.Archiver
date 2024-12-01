@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             this.path = path;
         }
 
-        public QuaternionCurve(UIReader reader)
+        public QuaternionCurve(IBundleBinaryReader reader)
         {
             curve = new AnimationCurve<Vector4>(reader, reader.ReadVector4);
             path = reader.ReadAlignedString();

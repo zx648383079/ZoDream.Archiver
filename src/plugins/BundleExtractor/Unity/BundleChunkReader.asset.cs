@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
@@ -118,6 +120,7 @@ namespace ZoDream.BundleExtractor
 
         private void ReadAssets(CancellationToken token)
         {
+            var scanner = _service.Get<IBundleElementScanner>();
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.ObjectMetaItems)
@@ -130,10 +133,11 @@ namespace ZoDream.BundleExtractor
                     try
                     {
                         var reader = new UIReader(asset.Create(obj), obj, asset, _options);
+                        reader.Add(scanner);
                         UIObject res = reader.Type switch
                         {
                             ElementIDType.Animation => new Animation(reader),
-                            ElementIDType.AnimationClip => new AnimationClip(reader, reader.SerializedType.OldType is null),
+                            ElementIDType.AnimationClip => new AnimationClip(reader),
                             ElementIDType.Animator => new Animator(reader),
                             ElementIDType.AnimatorController => new AnimatorController(reader),
                             ElementIDType.AnimatorOverrideController => new AnimatorOverrideController(reader),
@@ -148,7 +152,7 @@ namespace ZoDream.BundleExtractor
                             ElementIDType.MeshFilter => new MeshFilter(reader),
                             ElementIDType.MeshRenderer => new MeshRenderer(reader),
                             ElementIDType.MiHoYoBinData => new MiHoYoBinData(reader),
-                            ElementIDType.MonoBehavior => new MonoBehaviour(reader),
+                            ElementIDType.MonoBehavior => new MonoBehavior(reader),
                             ElementIDType.MonoScript => new MonoScript(reader),
                             ElementIDType.MovieTexture => new MovieTexture(reader),
                             ElementIDType.PlayerSettings => new PlayerSettings(reader),
@@ -158,13 +162,21 @@ namespace ZoDream.BundleExtractor
                             ElementIDType.Sprite => new Sprite(reader),
                             ElementIDType.SpriteAtlas => new SpriteAtlas(reader),
                             ElementIDType.TextAsset => new TextAsset(reader),
-                            ElementIDType.Texture2D => new Texture2D(reader, reader.SerializedType.OldType is null),
-                            ElementIDType.Texture2DArray => new Texture2D(reader, reader.SerializedType.OldType is null),
+                            ElementIDType.Texture2D => new Texture2D(reader),
+                            ElementIDType.Texture2DArray => new Texture2D(reader),
                             ElementIDType.Transform => new Transform(reader),
                             ElementIDType.VideoClip => new VideoClip(reader),
                             ElementIDType.ResourceManager => new ResourceManager(reader),
                             _ => new UIObject(reader),
                         };
+                        if (reader.SerializedType.OldType is not null && 
+                            res is IElementTypeLoader tl)
+                        {
+                            tl.Read(reader, reader.SerializedType.OldType);
+                        } else if (
+                            res is IElementLoader l
+                            && scanner.TryRead(reader, l))
+                        {}
                         asset.AddChild(res);
                     }
                     catch (Exception e)

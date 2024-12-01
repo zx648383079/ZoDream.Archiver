@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.BundleExtractor.Unity.CompressedFiles;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
@@ -49,7 +50,7 @@ namespace ZoDream.BundleExtractor
         public static IArchiveReader? OpenBundle(Stream stream, IArchiveOptions? options = null)
         {
             var pos = stream.Position;
-            var reader = new EndianReader(stream, Shared.Models.EndianType.BigEndian);
+            var reader = new BundleBinaryReader(stream, Shared.Models.EndianType.BigEndian);
             var found = reader.ReadStringZeroTerm(0x20, out var signature);
             stream.Position = pos;
             if (!found)

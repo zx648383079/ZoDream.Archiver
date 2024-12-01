@@ -5,13 +5,15 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     internal static class TypeTreeHelper
     {
-        public static string ReadTypeString(TypeTree m_Type, EndianReader reader)
+        public static string ReadTypeString(TypeTree m_Type, 
+            IBundleBinaryReader reader)
         {
             var sb = new StringBuilder();
             List<TypeTreeNode>? m_Nodes = m_Type.Nodes;
@@ -24,7 +26,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         private static void ReadStringValue(StringBuilder sb, 
             List<TypeTreeNode> m_Nodes,
-            EndianReader reader, 
+            IBundleBinaryReader reader, 
             ref int i)
         {
             TypeTreeNode? m_Node = m_Nodes[i];
@@ -176,7 +178,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <param name="m_Types"></param>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static OrderedDictionary ReadType(TypeTree m_Types, EndianReader reader)
+        public static OrderedDictionary ReadType(TypeTree m_Types, 
+            IBundleBinaryReader reader)
         {
             var obj = new OrderedDictionary();
             var m_Nodes = m_Types.Nodes;
@@ -189,7 +192,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return obj;
         }
 
-        public static void ReadType<T>(TypeTree m_Types, EndianReader reader, 
+        public static void ReadType<T>(TypeTree m_Types, 
+            IBundleBinaryReader reader, 
             T instance)
             where T : UIObject 
         {
@@ -250,7 +254,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return Convert.ChangeType(val, type);
         }
 
-        private static object ReadValue(List<TypeTreeNode> m_Nodes, EndianReader reader, ref int i)
+        private static object ReadValue(List<TypeTreeNode> m_Nodes, 
+            IBundleBinaryReader reader, ref int i)
         {
             var m_Node = m_Nodes[i];
             var varTypeStr = m_Node.Type;

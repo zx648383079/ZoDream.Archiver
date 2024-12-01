@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,9 +8,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public object m_Min;
         public object m_Max;
 
-        public Limit(UIReader reader)
+        public Limit(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(5, 4))//5.4 and up
             {
                 m_Min = reader.ReadVector3();

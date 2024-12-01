@@ -2,6 +2,7 @@
 using System.IO;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -66,8 +67,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             bool swapEndian = ReadSwapEndian(stream, header);
             EndianType endian = swapEndian ? EndianType.BigEndian : EndianType.LittleEndian;
-            using var reader = new EndianReader(stream, endian);
-            Read(reader, header.Version);
+            using var reader = new BundleBinaryReader(stream, endian);
+            reader.Add(header.Version);
+            Read(reader);
         }
 
         private bool ReadSwapEndian(Stream stream, SerializedFileHeader header)
@@ -86,29 +88,30 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
             else
             {
-                return header.Endianess;
+                return header.Endian;
             }
         }
 
-        private void Read(EndianReader reader, FormatVersion generation)
+        private void Read(IBundleBinaryReader reader)
         {
+            var generation = reader.Get<FormatVersion>();
             if (HasSignature(generation))
             {
                 string signature = reader.ReadStringZeroTerm();
                 UnityVersion = UnityVersion.Parse(signature);
-                // reader.Version = UnityVersion;
+                reader.Add(UnityVersion);
             }
             if (HasPlatform(generation))
             {
                 TargetPlatform = (BuildTarget)reader.ReadUInt32();
             }
 
-            EnableTypeTree = ReadEnableTypeTree(reader, generation);
+            EnableTypeTree = ReadEnableTypeTree(reader);
 
-            Types = reader.ReadArray(r =>
+            Types = reader.ReadArray(() =>
             {
                 var o = new SerializedType();
-                o.Read(r, generation, UnityVersion, EnableTypeTree);
+                o.Read(reader, UnityVersion, EnableTypeTree);
                 return o;
             });
 
@@ -118,36 +121,36 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
 
             //TODO: pass LongFileID to ObjectInfo
-            Object = reader.ReadArray(r =>
+            Object = reader.ReadArray(() =>
             {
                 var o = new ObjectInfo();
-                o.Read(r, generation);
+                o.Read(reader);
                 return o;
             });
 
             if (HasScriptTypes(generation))
             {
-                ScriptTypes = reader.ReadArray(r =>
+                ScriptTypes = reader.ReadArray(() =>
                 {
                     var o = new LocalSerializedObjectIdentifier();
-                    o.Read(r, generation);
+                    o.Read(reader);
                     return o;
                 });
             }
 
-            Externals = reader.ReadArray(r =>
+            Externals = reader.ReadArray(() =>
             {
                 var o = new FileIdentifier();
-                o.Read(r, generation);
+                o.Read(reader);
                 return o;
             });
 
             if (HasRefTypes(generation))
             {
-                RefTypes = reader.ReadArray(r =>
+                RefTypes = reader.ReadArray(() =>
                 {
                     var o = new SerializedTypeReference();
-                    o.Read(r, generation, UnityVersion, EnableTypeTree);
+                    o.Read(reader, UnityVersion, EnableTypeTree);
                     return o;
                 });
             }
@@ -157,9 +160,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
         }
 
-        private static bool ReadEnableTypeTree(EndianReader reader, FormatVersion generation)
+        private static bool ReadEnableTypeTree(IBundleBinaryReader reader)
         {
-            if (HasEnableTypeTree(generation))
+            if (HasEnableTypeTree(reader.Get<FormatVersion>()))
             {
                 return reader.ReadBoolean();
             }

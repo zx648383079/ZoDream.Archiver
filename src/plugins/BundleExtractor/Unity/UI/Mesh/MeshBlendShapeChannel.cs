@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int frameIndex;
         public int frameCount;
 
-        public MeshBlendShapeChannel(UIReader reader)
+        public MeshBlendShapeChannel(IBundleBinaryReader reader)
         {
             name = reader.ReadAlignedString();
             nameHash = reader.ReadUInt32();

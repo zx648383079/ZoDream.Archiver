@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -11,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public string m_DefaultName;
         public TextureDimension m_TexDim;
 
-        public SerializedTextureProperty(UIReader reader)
+        public SerializedTextureProperty(IBundleBinaryReader reader)
         {
             m_DefaultName = reader.ReadAlignedString();
             m_TexDim = (TextureDimension)reader.ReadInt32();

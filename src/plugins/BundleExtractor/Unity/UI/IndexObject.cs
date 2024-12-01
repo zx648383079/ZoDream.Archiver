@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -7,24 +8,25 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public PPtr<UIObject> Object;
         public ulong Size;
 
-        public Index(UIReader reader)
+        public Index(IBundleBinaryReader reader)
         {
             Object = new PPtr<UIObject>(reader);
             Size = reader.ReadUInt64();
         }
     }
 
-    internal sealed class IndexObject : NamedObject
+    internal sealed class IndexObject(UIReader reader) : NamedObject(reader)
     {
         public int Count;
         public List<KeyValuePair<string, Index>> AssetMap;
 
         public override string Name => "IndexObject";
 
-        public IndexObject(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             Count = reader.ReadInt32();
-            AssetMap = new List<KeyValuePair<string, Index>>();
+            AssetMap = [];
             for (int i = 0; i < Count; i++)
             {
                 AssetMap.Add(new KeyValuePair<string, Index>(reader.ReadAlignedString(), new Index(reader)));

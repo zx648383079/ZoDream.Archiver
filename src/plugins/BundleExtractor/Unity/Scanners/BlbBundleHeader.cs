@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Bundle;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     public class BlbBundleHeader : BundleHeader
     {
@@ -12,7 +12,7 @@ namespace ZoDream.BundleExtractor.Producers
         public int CompressedBlocksInfoSize { get; set; }
         public int UncompressedBlocksInfoSize { get; set; }
 
-        public override void Read(EndianReader reader)
+        public override void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -12,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public long m_Offset; //ulong
         public long m_Size; //ulong
 
-        public StreamedResource(UIReader reader)
+        public StreamedResource(IBundleBinaryReader reader)
         {
             m_Source = reader.ReadAlignedString();
             m_Offset = reader.ReadInt64();
@@ -20,15 +22,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    internal sealed class VideoClip : NamedObject, IFileWriter
+    internal sealed class VideoClip(UIReader reader) : NamedObject(reader), IFileWriter
     {
         public Stream m_VideoData;
         public string m_OriginalPath;
         public StreamedResource m_ExternalResources;
 
-        public VideoClip(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             m_OriginalPath = reader.ReadAlignedString();
             var m_ProxyWidth = reader.ReadUInt32();
             var m_ProxyHeight = reader.ReadUInt32();

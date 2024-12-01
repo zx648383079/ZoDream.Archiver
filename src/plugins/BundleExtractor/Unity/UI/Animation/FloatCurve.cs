@@ -1,4 +1,7 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
     internal class FloatCurve : IYamlWriter
     {
@@ -19,9 +22,9 @@
             flags = 0;
         }
 
-        public FloatCurve(UIReader reader)
+        public FloatCurve(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             curve = new AnimationCurve<float>(reader, reader.ReadSingle);
             attribute = reader.ReadAlignedString();

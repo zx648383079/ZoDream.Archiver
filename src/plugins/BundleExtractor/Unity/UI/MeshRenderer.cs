@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class MeshRenderer : UIRenderer
+    internal sealed class MeshRenderer(UIReader reader) : UIRenderer(reader)
     {
         public PPtr<Mesh> m_AdditionalVertexStreams;
-        public MeshRenderer(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             m_AdditionalVertexStreams = new PPtr<Mesh>(reader);
         }
     }

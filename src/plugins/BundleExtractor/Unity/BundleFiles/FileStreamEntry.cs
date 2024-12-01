@@ -1,4 +1,5 @@
 ﻿using System;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
@@ -10,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
 
         public NodeFlags Flags { get; set; }
 
-        public static FileStreamEntry Read(EndianReader reader)
+        public static FileStreamEntry Read(IBundleBinaryReader reader)
         {
             var offset = reader.ReadInt64();
             var size = reader.ReadInt64();

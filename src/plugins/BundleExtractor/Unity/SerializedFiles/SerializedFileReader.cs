@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     internal class SerializedFileReader : IArchiveReader, ISerializedFile
     {
-        public SerializedFileReader(EndianReader reader, string fullPath, IArchiveOptions? options)
+        public SerializedFileReader(IBundleBinaryReader reader, string fullPath, IArchiveOptions? options)
         {
             FullPath = fullPath;
             _reader = reader;
@@ -37,7 +38,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         }
 
         private readonly IArchiveOptions? _options;
-        private readonly EndianReader _reader;
+        private readonly IBundleBinaryReader _reader;
         private readonly SerializedFileHeader _header = new();
         private readonly SerializedFileMetadata _metadata = new();
         private readonly Dictionary<long, UIObject> _childrenDict = [];
@@ -76,11 +77,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return _dependencyItems.FindIndex(x => x.PathName.Equals(dependency, StringComparison.OrdinalIgnoreCase));
         }
 
-        public EndianReader Create(ObjectInfo info)
+        public IBundleBinaryReader Create(ObjectInfo info)
         {
-            bool swapEndian = SerializedFileHeader.HasEndianess(_header.Version) ?
-                _header.Endianess : _metadata.SwapEndian;
-            return new EndianReader(
+            bool swapEndian = SerializedFileHeader.HasEndian(_header.Version) ?
+                _header.Endian : _metadata.SwapEndian;
+            return new BundleBinaryReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
                 swapEndian ? EndianType.BigEndian : EndianType.LittleEndian);
         }

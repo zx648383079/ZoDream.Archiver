@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -9,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override bool IsSet => m_ClipData is not null && m_ClipData.Length > 0;
         public override uint CurveCount => m_CurveCount;
-        public override void Read(UIReader reader)
+        public override void Read(IBundleBinaryReader reader)
         {
             m_CurveCount = reader.ReadUInt32();
             var compressedTransformTracksSize = reader.ReadUInt32();

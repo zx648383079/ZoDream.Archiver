@@ -1,4 +1,5 @@
-﻿using ZoDream.Shared.Bundle;
+﻿using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {
@@ -7,6 +8,11 @@ namespace ZoDream.BundleExtractor.Producers
         internal const string ProducerName = "MiHoYo";
 
         public string AliasName => ProducerName;
+
+        public IBundleElementScanner GetScanner(IBundleOptions options)
+        {
+            return new MiHoYoElementScanner(options.Package);
+        }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {

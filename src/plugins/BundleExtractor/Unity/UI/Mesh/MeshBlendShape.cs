@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class MeshBlendShape
+    internal class MeshBlendShape : IElementLoader
     {
         public string name;
         public uint firstVertex;
@@ -14,9 +11,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool hasNormals;
         public bool hasTangents;
 
-        public MeshBlendShape(UIReader reader)
+        public void ReadBase(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             if (version.LessThan(4, 3)) //4.3 down
             {
@@ -31,7 +28,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             hasNormals = reader.ReadBoolean();
             hasTangents = reader.ReadBoolean();
-            if (!reader.IsLoveAndDeepSpace() && version.GreaterThanOrEquals(4, 3)) //4.3 and up
+        }
+
+        public void Read(IBundleBinaryReader reader)
+        {
+            ReadBase(reader);
+            var version = reader.Get<UnityVersion>();
+            if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 reader.AlignStream();
             }

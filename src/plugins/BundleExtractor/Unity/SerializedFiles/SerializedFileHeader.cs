@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.Shared.IO;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
-    public class SerializedFileHeader
+    public class SerializedFileHeader: IBundleHeader
     {
         /// <summary>
 		/// Size of the metadata parts of the file
@@ -28,7 +25,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// Presumably controls the byte order of the data structure. This field is normally set to 0, which may indicate a little endian byte order.
         /// </summary>
-        public bool Endianess { get; set; }
+        public bool Endian { get; set; }
 
         public const int HeaderMinSize = 16;
 
@@ -38,13 +35,13 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// 3.5.0 and greater / Format Version 9 +
         /// </summary>
-        public static bool HasEndianess(FormatVersion generation) => generation >= FormatVersion.Unknown_9;
+        public static bool HasEndian(FormatVersion generation) => generation >= FormatVersion.Unknown_9;
 
         /// <summary>
         /// 2020.1.0 and greater / Format Version 22 +
         /// </summary>
         public static bool HasLargeFilesSupport(FormatVersion generation) => generation >= FormatVersion.LargeFilesSupport;
-        public void Read(EndianReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             //For gen 22+ these will be zero
             MetadataSize = reader.ReadInt32();
@@ -56,9 +53,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             //For gen 22+ this will be zero
             DataOffset = reader.ReadUInt32();
 
-            if (HasEndianess(Version))
+            if (HasEndian(Version))
             {
-                Endianess = reader.ReadBoolean();
+                Endian = reader.ReadBoolean();
                 reader.AlignStream();
             }
             if (HasLargeFilesSupport(Version))

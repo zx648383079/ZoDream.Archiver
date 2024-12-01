@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -14,15 +16,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedProgramParameters m_CommonParameters;
         public ushort[] m_SerializedKeywordStateMask;
 
-        public SerializedProgram(UIReader reader)
+        public SerializedProgram(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
-
+            var version = reader.Get<UnityVersion>();
+            var scanner = reader.Get<IBundleElementScanner>();
             int numSubPrograms = reader.ReadInt32();
-            m_SubPrograms = new List<SerializedSubProgram>();
+            m_SubPrograms = [];
             for (int i = 0; i < numSubPrograms; i++)
             {
-                m_SubPrograms.Add(new SerializedSubProgram(reader));
+                var sub = new SerializedSubProgram();
+                scanner.TryRead(reader, sub);
+                m_SubPrograms.Add(sub);
             }
 
             if (version.GreaterThanOrEquals(2021, 3, 10, UnityVersionType.Final, 1) || //2021.3.10f1 and up
@@ -40,7 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
                 }
 
-                m_ParameterBlobIndices = reader.ReadArrayArray(r => r.ReadUInt32());
+                m_ParameterBlobIndices = reader.Read2DArray((r, _, _) => r.ReadUInt32());
             }
 
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up

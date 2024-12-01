@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -31,7 +32,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             }
         }
 
-        public override void Read(EndianReader reader)
+        public override void Read(IBundleBinaryReader reader)
         {
             base.Read(reader);
             Size = reader.ReadInt64();

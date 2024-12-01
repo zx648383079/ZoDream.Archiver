@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -22,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            var r = new EndianReader(stream, EndianType.BigEndian);
+            var r = new BundleBinaryReader(stream, EndianType.BigEndian);
             if (!IsReadable(r))
             {
                 return null;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SpritePackingRotation packingRotation;
         public SpriteMeshType meshType;
 
-        public SpriteSettings(BinaryReader reader)
+        public SpriteSettings(IBundleBinaryReader reader)
         {
             settingsRaw = reader.ReadUInt32();
 

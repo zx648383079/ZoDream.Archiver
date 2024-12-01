@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -12,7 +13,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public uint CompressedSize { get; private set; }
         public uint DecompressedSize { get; private set; }
 
-        public static BundleScene Read(EndianReader reader)
+        public static BundleScene Read(IBundleBinaryReader reader)
         {
             return new()
             {

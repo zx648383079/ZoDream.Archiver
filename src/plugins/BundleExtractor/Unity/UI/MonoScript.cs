@@ -1,6 +1,9 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class MonoScript : NamedObject
+    internal sealed class MonoScript(UIReader reader) : NamedObject(reader)
     {
         public string m_ClassName;
         public string m_Namespace;
@@ -8,9 +11,11 @@
 
         public override string Name => string.IsNullOrEmpty(m_Name) ? m_ClassName : m_Name;
 
-        public MonoScript(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(3, 4)) //3.4 and up
             {
                 var m_ExecutionOrder = reader.ReadInt32();

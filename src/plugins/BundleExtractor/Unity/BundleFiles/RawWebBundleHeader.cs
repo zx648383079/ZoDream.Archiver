@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -27,7 +28,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public uint CompleteFileSize { get; set; }
         public int UncompressedBlocksInfoSize { get; set; }
 
-        public sealed override void Read(EndianReader reader)
+        public sealed override void Read(IBundleBinaryReader reader)
         {
             base.Read(reader);
             if (HasHash(Version))

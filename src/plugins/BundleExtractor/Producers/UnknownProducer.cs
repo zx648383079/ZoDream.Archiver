@@ -13,5 +13,10 @@ namespace ZoDream.BundleExtractor.Producers
         {
             return false;
         }
+
+        public IBundleElementScanner GetScanner(IBundleOptions options)
+        {
+            return new BundleElementScanner();
+        }
     }
 }

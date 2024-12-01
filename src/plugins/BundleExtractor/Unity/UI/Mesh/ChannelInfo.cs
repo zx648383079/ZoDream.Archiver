@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -15,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public ChannelInfo() { }
 
-        public ChannelInfo(UIReader reader)
+        public ChannelInfo(IBundleBinaryReader reader)
         {
             stream = reader.ReadByte();
             offset = reader.ReadByte();

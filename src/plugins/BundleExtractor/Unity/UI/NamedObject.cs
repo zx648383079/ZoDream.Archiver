@@ -1,29 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class NamedObject : EditorExtension
+    internal class NamedObject(UIReader reader) : EditorExtension(reader)
     {
         public string m_Name;
 
         public override string Name => m_Name;
 
-        protected NamedObject(UIReader reader) : 
-            this(reader, true)
+        public override void Read(IBundleBinaryReader reader)
         {
-            
-        }
-
-        protected NamedObject(UIReader reader, bool isReadable)
-            : base(reader, isReadable)
-        {
-            if (isReadable)
-            {
-                m_Name = reader.ReadAlignedString();
-            }
+            base.Read(reader);
+            m_Name = reader.ReadAlignedString();
         }
     }
 }

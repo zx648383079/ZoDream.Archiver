@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
@@ -10,8 +11,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     public sealed class TypeTree
     {
-        public void Read(EndianReader reader, FormatVersion version)
+        public void Read(IBundleBinaryReader reader)
         {
+            var version = reader.Get<FormatVersion>();
             if (TypeTreeNode.IsFormat5(version))
             {
                 IsFormat5 = true;
@@ -33,7 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 for (int i = 0; i < nodesCount; i++)
                 {
                     var node = new TypeTreeNode();
-                    node.Read(reader, version);
+                    node.Read(reader);
                     Nodes.Add(node);
                 }
                 if (stringBufferSize == 0)
@@ -42,8 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 }
                 else
                 {
-                    StringBuffer = new byte[stringBufferSize];
-                    reader.Read(StringBuffer, 0, StringBuffer.Length);
+                    StringBuffer = reader.ReadBytes(stringBufferSize);
                 }
                 SetNamesFromBuffer();
             }
@@ -51,22 +52,23 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 IsFormat5 = false;
                 Nodes.Clear();
-                ReadTreeNode(reader, version, Nodes, 0);
+                ReadTreeNode(reader, Nodes, 0);
             }
         }
 
-        private static void ReadTreeNode(EndianReader reader, FormatVersion version,
+        private static void ReadTreeNode(IBundleBinaryReader reader, 
             ICollection<TypeTreeNode> nodes, byte depth)
         {
+            var version = reader.Get<FormatVersion>();
             var node = new TypeTreeNode();
-            node.Read(reader, version);
+            node.Read(reader);
             node.Level = depth;
             nodes.Add(node);
 
             int childCount = reader.ReadInt32();
             for (int i = 0; i < childCount; i++)
             {
-                ReadTreeNode(reader, version, nodes, (byte)(depth + 1));
+                ReadTreeNode(reader, nodes, (byte)(depth + 1));
             }
         }
 
@@ -127,7 +129,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             var customTypes = new Dictionary<uint, string>();
             using (var stream = new MemoryStream(StringBuffer))
             {
-                using var reader = new EndianReader(stream, EndianType.LittleEndian);
+                using var reader = new BundleBinaryReader(stream, EndianType.LittleEndian);
                 while (stream.Position < stream.Length)
                 {
                     uint position = (uint)stream.Position;

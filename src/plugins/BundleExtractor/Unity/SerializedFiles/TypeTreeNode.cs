@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -38,8 +39,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             MetaFlag = metaFlag;
         }
 
-        public void Read(EndianReader reader, FormatVersion version)
+        public void Read(IBundleBinaryReader reader)
         {
+            var version = reader.Get<FormatVersion>();
             if (IsFormat5(version))
             {
                 Version = reader.ReadUInt16();

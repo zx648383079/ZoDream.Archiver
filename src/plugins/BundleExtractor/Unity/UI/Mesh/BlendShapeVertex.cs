@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public BlendShapeVertex() { }
 
-        public BlendShapeVertex(UIReader reader)
+        public BlendShapeVertex(IBundleBinaryReader reader)
         {
             vertex = reader.ReadVector3();
             normal = reader.ReadVector3();

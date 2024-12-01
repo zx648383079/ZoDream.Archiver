@@ -28,7 +28,6 @@ namespace ZoDream.Shared.IO
             }
         }
 
-        public bool IsAlignArray { get; }
 
         public long Position 
         {
@@ -42,16 +41,11 @@ namespace ZoDream.Shared.IO
         /// </summary>
         public long RemainingLength => checked(BaseStream.Length - BaseStream.Position);
 
-        public EndianReader(Stream stream, EndianType endian)
-            : this(stream, endian, alignArray: false)
-        {
-        }
 
-        protected EndianReader(Stream stream, EndianType endian, bool alignArray)
+        public EndianReader(Stream stream, EndianType endian)
             : base(stream, Encoding.UTF8, leaveOpen: true)
         {
             EndianType = endian;
-            IsAlignArray = alignArray;
         }
 
         ~EndianReader()

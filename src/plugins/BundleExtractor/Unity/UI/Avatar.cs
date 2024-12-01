@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Avatar : NamedObject
+    internal sealed class Avatar(UIReader reader) : NamedObject(reader)
     {
         public uint m_AvatarSize;
         public AvatarConstant m_Avatar;
         public Dictionary<uint, string> m_TOS;
 
-        public Avatar(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            base.Read(reader);
             m_AvatarSize = reader.ReadUInt32();
             m_Avatar = new AvatarConstant(reader);
 

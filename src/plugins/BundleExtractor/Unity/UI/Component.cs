@@ -1,13 +1,15 @@
-﻿namespace ZoDream.BundleExtractor.Unity.UI
+﻿using ZoDream.Shared.Bundle;
+
+namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal abstract class UIComponent : EditorExtension
+    internal abstract class UIComponent(UIReader reader) : EditorExtension(reader)
     {
         public PPtr<GameObject> m_GameObject;
 
-        protected UIComponent(UIReader reader)
-            : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            m_GameObject = new PPtr<GameObject>(reader);
+            base.Read(reader);
+            m_GameObject = new PPtr<GameObject>(_reader);
         }
     }
 }

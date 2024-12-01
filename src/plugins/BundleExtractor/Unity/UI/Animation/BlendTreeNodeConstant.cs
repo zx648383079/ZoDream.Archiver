@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class BlendTreeNodeConstant
+    internal class BlendTreeNodeConstant : IElementLoader
     {
         public uint m_BlendType;
         public uint m_BlendEventID;
@@ -22,9 +19,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public float m_CycleOffset;
         public bool m_Mirror;
 
-        public BlendTreeNodeConstant(UIReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            ReadBase(reader);
+            var version = reader.Get<UnityVersion>();
+            if (version.GreaterThanOrEquals(4, 1, 3)) //4.1.3 and up
+            {
+                m_CycleOffset = reader.ReadSingle();
+                m_Mirror = reader.ReadBoolean();
+                reader.AlignStream();
+            }
+        }
+
+        public void ReadBase(IBundleBinaryReader reader)
+        {
+            var version = reader.Get<UnityVersion>();
 
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
@@ -60,16 +69,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             m_Duration = reader.ReadSingle();
 
-            if (version.GreaterThanOrEquals(4, 1, 3)) //4.1.3 and up
-            {
-                m_CycleOffset = reader.ReadSingle();
-                if (reader.IsArknightsEndfield())
-                {
-                    var m_StateNameHash = reader.ReadUInt32();
-                }
-                m_Mirror = reader.ReadBoolean();
-                reader.AlignStream();
-            }
+            
         }
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -13,9 +10,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_SamplerIndex;
         public sbyte m_Dim;
 
-        public TextureParameter(UIReader reader)
+        public TextureParameter(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_NameIndex = reader.ReadInt32();
             m_Index = reader.ReadInt32();

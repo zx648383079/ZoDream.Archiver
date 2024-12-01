@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -19,9 +17,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<SerializedCustomEditorForRenderPipeline> m_CustomEditorForRenderPipelines;
         public bool m_DisableNoSubshadersMessage;
 
-        public SerializedShader(UIReader reader)
+        public SerializedShader(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             m_PropInfo = new SerializedProperties(reader);
 
@@ -44,7 +42,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_FallbackName = reader.ReadAlignedString();
 
             int numDependencies = reader.ReadInt32();
-            m_Dependencies = new List<SerializedShaderDependency>();
+            m_Dependencies = [];
             for (int i = 0; i < numDependencies; i++)
             {
                 m_Dependencies.Add(new SerializedShaderDependency(reader));
@@ -53,7 +51,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2021, 1)) //2021.1 and up
             {
                 int m_CustomEditorForRenderPipelinesSize = reader.ReadInt32();
-                m_CustomEditorForRenderPipelines = new List<SerializedCustomEditorForRenderPipeline>();
+                m_CustomEditorForRenderPipelines = [];
                 for (int i = 0; i < m_CustomEditorForRenderPipelinesSize; i++)
                 {
                     m_CustomEditorForRenderPipelines.Add(new SerializedCustomEditorForRenderPipeline(reader));

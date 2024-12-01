@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -20,36 +18,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint m_nScaleCurves;
         public uint m_nGenericCurves;
 
-        public ACLDenseClip(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
+            ReadBase(reader, () => {
+            });
+        }
+
+        public void ReadBase(IBundleBinaryReader reader, Action cb)
+        {
+            base.Read(reader);
             m_ACLType = reader.ReadInt32();
-            if (reader.IsArknightsEndfield())
-            {
-                m_ACLArray = reader.ReadArray(r => r.ReadByte());
-                reader.AlignStream();
-                m_PositionFactor = reader.ReadSingle();
-                m_EulerFactor = reader.ReadSingle();
-                m_ScaleFactor = reader.ReadSingle();
-                m_FloatFactor = reader.ReadSingle();
-                m_nPositionCurves = reader.ReadUInt32();
-                m_nRotationCurves = reader.ReadUInt32();
-                m_nEulerCurves = reader.ReadUInt32();
-                m_nScaleCurves = reader.ReadUInt32();
-            }
-            else if (reader.IsExAstris())
-            {
-                m_nPositionCurves = reader.ReadUInt32();
-                m_nRotationCurves = reader.ReadUInt32();
-                m_nEulerCurves = reader.ReadUInt32();
-                m_nScaleCurves = reader.ReadUInt32();
-                m_nGenericCurves = reader.ReadUInt32();
-                m_PositionFactor = reader.ReadSingle();
-                m_EulerFactor = reader.ReadSingle();
-                m_ScaleFactor = reader.ReadSingle();
-                m_FloatFactor = reader.ReadSingle();
-                m_ACLArray = reader.ReadArray(r => r.ReadByte());
-                reader.AlignStream();
-            }
+            
             Process();
         }
 

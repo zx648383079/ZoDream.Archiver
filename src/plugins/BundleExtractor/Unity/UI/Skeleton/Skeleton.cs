@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -12,10 +9,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public uint[] m_ID;
         public List<Axes> m_AxesArray;
 
-        public Skeleton(UIReader reader)
+        public Skeleton(IBundleBinaryReader reader)
         {
             int numNodes = reader.ReadInt32();
-            m_Node = new List<Node>();
+            m_Node = [];
             for (int i = 0; i < numNodes; i++)
             {
                 m_Node.Add(new Node(reader));
@@ -24,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_ID = reader.ReadArray(r => r.ReadUInt32());
 
             int numAxes = reader.ReadInt32();
-            m_AxesArray = new List<Axes>();
+            m_AxesArray = [];
             for (int i = 0; i < numAxes; i++)
             {
                 m_AxesArray.Add(new Axes(reader));

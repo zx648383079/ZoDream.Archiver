@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -7,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Vector3 m_Center;
         public Vector3 m_Extent;
 
-        public AABB(UIReader reader)
+        public AABB(IBundleBinaryReader reader)
         {
             m_Center = reader.ReadVector3();
             m_Extent = reader.ReadVector3();

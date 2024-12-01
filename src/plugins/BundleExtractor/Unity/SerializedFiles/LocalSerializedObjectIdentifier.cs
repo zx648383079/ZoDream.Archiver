@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     public struct LocalSerializedObjectIdentifier
     {
-        public void Read(EndianReader reader, FormatVersion version)
+        public void Read(IBundleBinaryReader reader)
         {
+            var version = reader.Get<FormatVersion>();
             LocalSerializedFileIndex = reader.ReadInt32();
             if (ObjectInfo.IsLongID(version))
             {

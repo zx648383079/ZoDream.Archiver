@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -17,10 +18,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             boneIndex = new int[4];
         }
 
-        public BoneWeights4(UIReader reader)
+        public BoneWeights4(IBundleBinaryReader reader)
         {
-            weight = reader.ReadArray(4, r => r.ReadSingle());
-            boneIndex = reader.ReadArray(4, r => r.ReadInt32());
+            weight = reader.ReadArray(4, (r, _) => r.ReadSingle());
+            boneIndex = reader.ReadArray(4, (r, _) => r.ReadInt32());
         }
     }
 

@@ -1,4 +1,6 @@
 ﻿
+using ZoDream.Shared.Bundle;
+
 namespace ZoDream.BundleExtractor.Unity.UI
 {
     internal class CompressedAnimationCurve : IYamlWriter
@@ -10,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_PreInfinity;
         public int m_PostInfinity;
 
-        public CompressedAnimationCurve(UIReader reader)
+        public CompressedAnimationCurve(IBundleBinaryReader reader)
         {
             m_Path = reader.ReadAlignedString();
             m_Times = new PackedIntVector(reader);

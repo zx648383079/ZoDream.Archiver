@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -16,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedShaderFloatValue blendOpAlpha;
         public SerializedShaderFloatValue colMask;
 
-        public SerializedShaderRTBlendState(UIReader reader)
+        public SerializedShaderRTBlendState(IBundleBinaryReader reader)
         {
             srcBlend = new SerializedShaderFloatValue(reader);
             targetBlend = new SerializedShaderFloatValue(reader);

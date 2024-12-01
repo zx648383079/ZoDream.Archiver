@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -17,9 +14,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Vector4[] m_QuaternionValues;
         public Vector3[] m_ScaleValues;
 
-        public ValueArray(UIReader reader)
+        public ValueArray(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            var version = reader.Get<UnityVersion>();
 
             if (version.LessThan(5, 5)) //5.5 down
             {

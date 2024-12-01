@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -20,9 +21,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public GenericBinding() { }
 
-        public GenericBinding(UIReader reader)
+        public GenericBinding(IBundleBinaryReader reader)
         {
-            version = reader.Version;
+            version = reader.Get<UnityVersion>();
             path = reader.ReadUInt32();
             attribute = reader.ReadUInt32();
             script = new PPtr<UIObject>(reader);

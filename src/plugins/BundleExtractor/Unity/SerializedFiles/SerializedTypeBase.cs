@@ -1,4 +1,5 @@
 ﻿using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -47,11 +48,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public byte[] ScriptID { get; set; } = [];
         public byte[] OldTypeHash { get; set; } = [];
 
-        public void Read(EndianReader reader,
-            FormatVersion version,
+        public void Read(IBundleBinaryReader reader,
             UnityVersion unityVersion,
             bool hasTypeTree)
         {
+            var version = reader.Get<FormatVersion>();
             RawTypeID = reader.ReadInt32();
             int typeIdLocal;
             if (version < FormatVersion.RefactoredClassId)
@@ -85,7 +86,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
             if (hasTypeTree)
             {
-                OldType.Read(reader, version);
+                OldType.Read(reader);
                 if (version < FormatVersion.HasTypeTreeHashes)
                 {
                     //OldTypeHash gets recalculated here in a complicated way on 2023.
@@ -97,7 +98,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
         }
 
-        protected abstract void ReadTypeDependencies(EndianReader reader);
+        protected abstract void ReadTypeDependencies(IBundleBinaryReader reader);
 
         protected abstract bool IgnoreScriptTypeForHash(FormatVersion formatVersion, UnityVersion unityVersion);
 

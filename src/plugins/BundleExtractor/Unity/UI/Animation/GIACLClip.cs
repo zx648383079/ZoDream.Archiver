@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -18,11 +19,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             m_CurveCount = 0;
             m_ConstCurveCount = 0;
-            m_ClipData = Array.Empty<byte>();
-            m_DatabaseData = Array.Empty<byte>();
+            m_ClipData = [];
+            m_DatabaseData = [];
         }
 
-        public override void Read(UIReader reader)
+        public override void Read(IBundleBinaryReader reader)
         {
             var aclTracksCount = (int)reader.ReadUInt64();
             var aclTracksOffset = reader.Position + reader.ReadInt64();

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class GameObject : EditorExtension, IFileWriter
+    internal sealed class GameObject(UIReader reader) : EditorExtension(reader), IFileWriter
     {
         public List<PPtr<UIComponent>> m_Components;
         public string m_Name;
@@ -19,9 +21,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public Animation m_Animation;
 
         public override string Name => m_Name;
-        public GameObject(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             int m_Component_size = reader.ReadInt32();
             m_Components = [];
             for (int i = 0; i < m_Component_size; i++)

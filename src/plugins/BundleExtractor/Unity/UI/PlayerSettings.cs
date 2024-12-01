@@ -2,23 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class PlayerSettings : UIObject
+    internal sealed class PlayerSettings(UIReader reader) : UIObject(reader)
     {
         public string companyName;
         public string productName;
 
-        public PlayerSettings(UIReader reader) : base(reader)
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(5, 4)) //5.4.0 nad up
             {
                 var productGUID = reader.ReadBytes(16);
             }
 
             var AndroidProfiler = reader.ReadBoolean();
+
             //bool AndroidFilterTouchesWhenObscured 2017.2 and up
             //bool AndroidEnableSustainedPerformanceMode 2018 and up
             reader.AlignStream();

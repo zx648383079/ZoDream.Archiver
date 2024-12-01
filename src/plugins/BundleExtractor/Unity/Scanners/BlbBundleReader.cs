@@ -8,20 +8,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
-namespace ZoDream.BundleExtractor.Producers
+namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     public class BlbBundleReader : IArchiveReader
     {
         public BlbBundleReader(Stream stream, IArchiveOptions? option)
-            : this(new EndianReader(stream, EndianType.LittleEndian), option)
+            : this(new BundleBinaryReader(stream, EndianType.LittleEndian), option)
         {
-            
+
         }
-        public BlbBundleReader(EndianReader reader, IArchiveOptions? options)
+        public BlbBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
             _reader = reader;
             _options = options;
@@ -30,7 +31,7 @@ namespace ZoDream.BundleExtractor.Producers
             _headerLength = reader.BaseStream.Position - _basePosition;
         }
 
-        private readonly EndianReader _reader;
+        private readonly IBundleBinaryReader _reader;
         private readonly IArchiveOptions? _options;
         private readonly long _basePosition;
         private readonly long _headerLength;
@@ -92,8 +93,8 @@ namespace ZoDream.BundleExtractor.Producers
                 var compressedSize = _reader.ReadUInt32();
 
                 _storageItems.Add(new(
-                    i == blocksInfoCount - 1 ? lastUncompressedSize : uncompressedSize, 
-                    compressedSize, 
+                    i == blocksInfoCount - 1 ? lastUncompressedSize : uncompressedSize,
+                    compressedSize,
                     compressionType)
                 );
             }
@@ -121,7 +122,7 @@ namespace ZoDream.BundleExtractor.Producers
                 items[i] = new FileStreamEntry(path, size)
                 {
                     Offset = offset,
-                    Flags = (NodeFlags)((flag & (1 << i)) * 4)
+                    Flags = (NodeFlags)((flag & 1 << i) * 4)
                 };
             }
             _dataBeginPosition = _reader.BaseStream.Position;

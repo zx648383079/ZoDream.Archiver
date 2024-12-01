@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Texture2DArray: Texture
+    internal class Texture2DArray(UIReader reader) : Texture(reader)
     {
         public int m_Width;
         public int m_Height;
@@ -18,19 +20,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public StreamingInfo m_StreamData;
         public List<Texture2D> TextureList;
 
-        public Texture2DArray(UIReader reader)
-            : this (reader, true)
+        public override void Read(IBundleBinaryReader reader)
         {
-            
-        }
-
-        public Texture2DArray(UIReader reader, bool isReadable) : 
-            base(reader, isReadable)
-        {
-            if (!isReadable)
-            {
-                return;
-            }
+            base.Read(reader);
             m_ColorSpace = reader.ReadInt32();
             m_Format = (GraphicsFormat)reader.ReadInt32();
             m_Width = reader.ReadInt32();
@@ -38,8 +30,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Depth = reader.ReadInt32();
             m_MipCount = reader.ReadInt32();
             m_DataSize = reader.ReadUInt32();
-            m_TextureSettings = new GLTextureSettings(reader);
-            if (reader.Version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
+            m_TextureSettings = new GLTextureSettings();
+            reader.Get<IBundleElementScanner>().TryRead(reader, m_TextureSettings);
+            if (reader.Get<UnityVersion>().GreaterThanOrEquals(2020, 2)) //2020.2 and up
             {
                 var m_UsageMode = reader.ReadInt32();
             }
@@ -54,7 +47,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (!string.IsNullOrEmpty(m_StreamData?.path))
             {
-                image_data = reader.OpenResource(m_StreamData);
+                image_data = _reader.OpenResource(m_StreamData);
             }
             else
             {
