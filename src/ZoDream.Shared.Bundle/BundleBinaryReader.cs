@@ -14,6 +14,17 @@ namespace ZoDream.Shared.Bundle
         : EndianReader(stream, endian), IBundleBinaryReader
     {
 
+        public BundleBinaryReader(Stream stream, IBundleBinaryReader parent)
+            : this (stream, parent.EndianType, parent)
+        {
+            
+        }
+
+        public BundleBinaryReader(Stream stream, EndianType endian, IBundleBinaryReader parent)
+            : this(stream, endian, parent.IsAlignStream)
+        {
+            CopyFrom(parent);
+        }
 
         public bool IsAlignStream { get; private set; } = isAlignStream;
 
@@ -58,6 +69,20 @@ namespace ZoDream.Shared.Bundle
         public bool TryGet<T>([NotNullWhen(true)] out T? instance)
         {
             return TryGet(typeof(T).Name, out instance);
+        }
+        /// <summary>
+        /// 继承其他的类型
+        /// </summary>
+        /// <param name="parent"></param>
+        public void CopyFrom(IBundleBinaryReader parent)
+        {
+            if (parent is BundleBinaryReader i)
+            {
+                foreach (var item in i.Items)
+                {
+                    Items.Add(item.Key, item.Value);
+                }
+            }
         }
 
         #endregion

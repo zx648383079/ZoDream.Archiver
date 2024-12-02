@@ -17,7 +17,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
             _key = (byte)(0x7C ^ nameBytes.Aggregate((a, b) => (byte)(a ^ b)));
             _beginPosition = table[nameBytes.Aggregate((a, b) => (byte)(a + b)) % table.Length];
-
         }
 
         private readonly Stream _baseStream;
@@ -37,7 +36,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 var j = pos + i;
                 if (j >= _beginPosition)
                 {
-                    buffer[i] ^= (byte)(_key ^ i / 8 + 1);
+                    buffer[offset + i] ^= (byte)(_key ^ i / 8 + 1);
                 }
             }
             return res;

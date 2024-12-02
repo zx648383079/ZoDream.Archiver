@@ -9,13 +9,29 @@ namespace ZoDream.Shared.IO
 {
     public static class StreamExtension
     {
+        /// <summary>
+        /// 剩余部分全部读取出来
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static byte[] ToArray(this Stream input)
         {
-            if (input is null)
+            if (input is null || input.Length <= input.Position)
             {
                 return [];
             }
-            var buffer = new byte[input.Length];
+            var buffer = new byte[input.Length - input.Position];
+            input.ReadExactly(buffer);
+            return buffer;
+        }
+
+        public static byte[] ReadBytes(this Stream input, int length)
+        {
+            if (input is null || length <= 0)
+            {
+                return [];
+            }
+            var buffer = new byte[length];
             input.ReadExactly(buffer);
             return buffer;
         }

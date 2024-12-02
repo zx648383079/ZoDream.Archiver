@@ -3,20 +3,19 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {
-    public class MiHoYoProducer : IBundleProducer
+    public class BluePoChProducer : IBundleProducer
     {
-        internal const string ProducerName = "MiHoYo";
-
-        public string AliasName => ProducerName;
+        public string AliasName => "BLUEPOCH";
+    
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
-            return new MiHoYoElementScanner(options.Package);
+            return new BluePoChElementScanner(options.Package);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
-            return new MiHoYoElementScanner(options.Package);
+            return new BluePoChElementScanner(options.Package);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

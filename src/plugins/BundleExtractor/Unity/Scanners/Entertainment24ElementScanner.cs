@@ -1,13 +1,20 @@
-﻿using ZoDream.BundleExtractor.Models;
+﻿using System.IO;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class Entertainment24ElementScanner(string package) : IBundleElementScanner
+    public class Entertainment24ElementScanner(string package) : 
+        IBundleElementScanner, IBundleStorage
     {
 
         public bool IsNaraka => package.Contains("naraka");
+
+        public Stream Open(string path)
+        {
+            return File.OpenRead(path);
+        }
 
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {

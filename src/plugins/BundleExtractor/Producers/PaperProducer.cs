@@ -8,14 +8,22 @@ namespace ZoDream.BundleExtractor.Producers
         internal const string ProducerName = "Paper";
 
         public string AliasName => ProducerName;
-        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
-        {
-            return false;
-        }
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
             return new PaperElementScanner(options.Package);
         }
+
+        public IBundleStorage GetStorage(IBundleOptions options)
+        {
+            return new PaperElementScanner(options.Package);
+        }
+
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
+        {
+            return false;
+        }
+
+        
     }
 }

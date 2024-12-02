@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             _basePosition = reader.BaseStream.Position;
             _header.Read(reader);
             _headerLength = reader.BaseStream.Position - _basePosition;
-            _reader = new BundleBinaryReader(ReadRawStream(reader.BaseStream), EndianType.BigEndian);
+            _reader = new BundleBinaryReader(ReadRawStream(reader.BaseStream), EndianType.BigEndian, reader);
         }
 
         private readonly THeader _header = new();

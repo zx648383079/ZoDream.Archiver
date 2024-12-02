@@ -12,12 +12,13 @@ namespace ZoDream.BundleExtractor
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
+            // 从配置获取引擎
             var engine = scheme.Get<IBundleEngine>(options);
             if (engine is null)
             {
                 return;
             }
-            scheme.Add(scheme.Get<IBundleProducer>().GetScanner(options));
+            TryLoad();
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
@@ -34,6 +35,24 @@ namespace ZoDream.BundleExtractor
                     scheme.Get<ILogger>().Error(ex.Message);
                 }
             }
+        }
+        /// <summary>
+        /// 局部配置初始化
+        /// </summary>
+        private void TryLoad()
+        {
+            // 从配置获取制作者
+            var producer = scheme.Get<IBundleProducer>(options);
+            if (producer is null)
+            {
+                scheme.Add<IBundleElementScanner>(new BundleElementScanner());
+                scheme.Add<IBundleStorage>(new BundleStorage());
+                return;
+            }
+            var instance = producer.GetScanner(options);
+            scheme.Add<IBundleElementScanner>(instance);
+            scheme.Add<IBundleStorage>(instance is IBundleStorage storage ? 
+                storage : producer.GetStorage(options));
         }
 
         public void Dispose()

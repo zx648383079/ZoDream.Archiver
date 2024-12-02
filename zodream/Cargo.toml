@@ -20,6 +20,7 @@ lzxd = "0.2.5"
 zip = "2.2.0"
 zstd = "0.13.2"
 twox-hash = "1.6.3"
+luac-parser = "0.5.2"
 texture2ddecoder = "0.1.1"
 safer-ffi.version = "0.1.12"
 safer-ffi.features = [

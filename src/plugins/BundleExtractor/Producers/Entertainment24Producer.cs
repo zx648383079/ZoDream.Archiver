@@ -7,6 +7,11 @@ namespace ZoDream.BundleExtractor.Producers
     {
         public string AliasName => "24 Entertainment";
 
+        public IBundleStorage GetStorage(IBundleOptions options)
+        {
+            return new Entertainment24ElementScanner(options.Package);
+        }
+
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
             return new Entertainment24ElementScanner(options.Package);

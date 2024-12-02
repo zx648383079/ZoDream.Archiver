@@ -5,5 +5,6 @@
         Unknown,
         Lz4,
         Lzxd,
+        Lua,
     }
 }

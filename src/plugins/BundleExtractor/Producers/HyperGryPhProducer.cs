@@ -14,6 +14,11 @@ namespace ZoDream.BundleExtractor.Producers
             return new HyperGryPhElementScanner(options.Package);
         }
 
+        public IBundleStorage GetStorage(IBundleOptions options)
+        {
+            return new HyperGryPhElementScanner(options.Package);
+        }
+
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
             return false;

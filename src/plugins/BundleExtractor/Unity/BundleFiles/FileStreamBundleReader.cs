@@ -115,29 +115,5 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             return items;
         }
 
-
-        private void ReadFileStreamData()
-        {
-
-
-            //using var blockReader = new BundleFileBlockReader(stream, BlocksInfo);
-            //foreach (FileStreamNode entry in DirectoryInfo.Nodes)
-            //{
-            //    try
-            //    {
-            //        SmartStream entryStream = blockReader.ReadEntry(entry);
-            //        AddResourceFile(new ResourceFile(entryStream, FilePath, entry.Path));
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        AddFailedFile(new FailedFile()
-            //        {
-            //            Name = entry.Path,
-            //            FilePath = FilePath,
-            //            StackTrace = ex.ToString(),
-            //        });
-            //    }
-            //}
-        }
     }
 }

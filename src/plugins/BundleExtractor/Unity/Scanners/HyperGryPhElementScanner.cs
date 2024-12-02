@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class HyperGryPhElementScanner(string package) : IBundleElementScanner
+    public class HyperGryPhElementScanner(string package) : 
+        IBundleElementScanner, IBundleStorage
     {
 
         public bool IsArkNightsEndfield => package.Contains("endfield");
 
         public bool IsExAstris => package.Contains("exa");
+
+        public Stream Open(string path)
+        {
+            return File.OpenRead(path);
+        }
 
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {

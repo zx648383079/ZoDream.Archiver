@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
@@ -7,11 +8,17 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal class PaperElementScanner(string package) : IBundleElementScanner
+    internal partial class PaperElementScanner(string package) : 
+        IBundleElementScanner, IBundleStorage
     {
         public bool IsLoveAndDeepSpace => package.Contains("deepspace");
 
         public bool IsShiningNikki => package.Contains(".nn4");
+
+        public Stream Open(string path)
+        {
+            return File.OpenRead(path);
+        }
 
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {

@@ -3,6 +3,7 @@ use super::error::Result;
 
 pub mod lzxd;
 pub mod lz4;
+pub mod lua;
 
 const DEFAULT_BLOCK_SIZE: usize = 1024;
 

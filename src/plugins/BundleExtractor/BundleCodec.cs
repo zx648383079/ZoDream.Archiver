@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor
 
         public static IBundleBinaryReader Decode(IBundleBinaryReader input, CompressionType type, long compressedSize, long uncompressedSize)
         {
-            return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input.EndianType);
+            return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input);
         }
 
         public static Stream Decode(Stream input, CompressionType type, long compressedSize, long uncompressedSize)

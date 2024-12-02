@@ -149,10 +149,10 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
-            var fs = File.OpenRead(fullName);
-            if (fs.Length == 0)
+            var fs = _service.Get<IBundleStorage>().Open(fullName);
+            if (fs is null || fs.Length == 0)
             {
-                fs.Dispose();
+                fs?.Dispose();
                 return;
             }
             try

@@ -6,6 +6,16 @@ namespace ZoDream.Shared.IO
 {
     public class PartialStream: Stream, IReadOnlyStream
     {
+        /// <summary>
+        /// 从当前位置获取剩余部分
+        /// </summary>
+        /// <param name="stream"></param>
+        public PartialStream(Stream stream)
+            : this (stream, stream.Position, stream.Length - stream.Position)
+        {
+            
+        }
+
         public PartialStream(Stream stream, long byteLength)
             : this(stream, stream.Position, byteLength)
         { 

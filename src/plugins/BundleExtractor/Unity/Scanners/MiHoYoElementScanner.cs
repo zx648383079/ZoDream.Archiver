@@ -3,7 +3,6 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
@@ -11,7 +10,8 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public partial class MiHoYoElementScanner(string package) : IBundleElementScanner
+    public partial class MiHoYoElementScanner(string package) : 
+        IBundleElementScanner, IBundleStorage
     {
         /// <summary>
         /// 原神
@@ -50,6 +50,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         /// 绝区零
         /// </summary>
         internal bool IsZZZCB1 => package.Contains("zzz");
+
+        public Stream Open(string path)
+        {
+            return File.OpenRead(path);
+        }
 
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {
