@@ -10,5 +10,7 @@ namespace ZoDream.Shared.Bundle
         /// <param name="path"></param>
         /// <returns></returns>
         public Stream Open(string path);
+        public IBundleBinaryReader OpenRead(string path);
+        public IBundleBinaryReader OpenRead(Stream input);
     }
 }

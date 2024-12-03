@@ -10,5 +10,9 @@
   </PropertyGroup>
 
 	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
+	</ItemGroup>
 	
 </Project>

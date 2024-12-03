@@ -40,6 +40,21 @@ namespace ZoDream.Shared.Bundle
         #endregion
 
         #region 拓展BinaryReader的功能
+        /// <summary>
+        /// 读取 string 直到 0x0 停止
+        /// </summary>
+        /// <returns></returns>
+        public string ReadStringZeroTerm();
+        /// <summary>
+        /// 读取 string 直到 0x0 停止
+        /// </summary>
+        /// <returns></returns>
+        public string ReadStringZeroTerm(int maxLength);
+        /// <summary>
+        /// 读取 string 直到 0x0 停止
+        /// </summary>
+        /// <returns></returns>
+        public bool ReadStringZeroTerm(int maxLength, [NotNullWhen(true)] out string? result);
         public string ReadString(int length);
         public string ReadAlignedString();
         public T[] ReadArray<T>(int count, Func<IBundleBinaryReader, int, T> cb);
@@ -72,7 +87,7 @@ namespace ZoDream.Shared.Bundle
         /// <param name="alignment"></param>
         /// <returns></returns>
         public T AlignStream<T>(Func<IBundleBinaryReader, T> cb, int alignment = 4);
-        public string ReadStringZeroTerm();
+        
         #endregion
         #region 设置获取一些已知信息
         public void Add(string name, object value);

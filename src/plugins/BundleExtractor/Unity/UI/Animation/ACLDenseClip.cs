@@ -43,7 +43,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             var size = m_ACLType >> 2;
             var factor = (float)((1 << m_ACLType) - 1);
-            var aclSpan = ToUInt4Array(m_ACLArray).AsSpan();
+            var aclSpan = m_ACLArray.To4bArray().AsSpan();
             var buffer = (stackalloc byte[8]);
 
             for (int i = 0; i < m_FrameCount; i++)
@@ -83,7 +83,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var factor = (float)((1 << m_ACLType) - 1);
 
             aclSpan.Slice(curveIndex, curveSize).CopyTo(buffer);
-            var temp = ToUInt8Array(buffer.ToArray(), 0, curveSize);
+            var temp = buffer.ToArray().From4bToArray(0, curveSize);
             buffer.Clear();
             temp.CopyTo(buffer);
 
@@ -104,34 +104,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return curve;
         }
 
-        public static byte[] ToUInt4Array(byte[] source) => ToUInt4Array(source, 0, source.Length);
-        public static byte[] ToUInt4Array(byte[] source, int offset, int size)
-        {
-            var buffer = new byte[size * 2];
-            for (var i = 0; i < size; i++)
-            {
-                var idx = i * 2;
-                buffer[idx] = (byte)(source[offset + i] >> 4);
-                buffer[idx + 1] = (byte)(source[offset + i] & 0xF);
-            }
-            return buffer;
-        }
-        public static byte[] ToUInt8Array(byte[] source, int offset, int size)
-        {
-            var buffer = new byte[size / 2];
-            for (var i = 0; i < size; i++)
-            {
-                var idx = i / 2;
-                if (i % 2 == 0)
-                {
-                    buffer[idx] = (byte)(source[offset + i] << 4);
-                }
-                else
-                {
-                    buffer[idx] |= source[offset + i];
-                }
-            }
-            return buffer;
-        }
+        
     }
 }

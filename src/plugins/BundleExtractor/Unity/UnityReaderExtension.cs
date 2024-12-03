@@ -7,6 +7,55 @@ namespace ZoDream.BundleExtractor.Unity
 {
     internal static class UnityReaderExtension
     {
+        /// <summary>
+        /// 一个字节分两半
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static byte[] To4bArray(this byte[] source) => To4bArray(source, 0, source.Length);
+        /// <summary>
+        /// 一个字节分两半，
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="offset"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static byte[] To4bArray(this byte[] source, int offset, int size)
+        {
+            var buffer = new byte[size * 2];
+            for (var i = 0; i < size; i++)
+            {
+                var idx = i * 2;
+                buffer[idx] = (byte)(source[offset + i] >> 4);
+                buffer[idx + 1] = (byte)(source[offset + i] & 0xF);
+            }
+            return buffer;
+        }
+        /// <summary>
+        /// 从 4b 合成 8b 一个字节
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="offset"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static byte[] From4bToArray(this byte[] source, int offset, int size)
+        {
+            var buffer = new byte[size / 2];
+            for (var i = 0; i < size; i++)
+            {
+                var idx = i / 2;
+                if (i % 2 == 0)
+                {
+                    buffer[idx] = (byte)(source[offset + i] << 4);
+                }
+                else
+                {
+                    buffer[idx] |= source[offset + i];
+                }
+            }
+            return buffer;
+        }
+
         public static int[] ReadInt32Array(this IBundleBinaryReader reader)
         {
             return reader.ReadArray(reader.ReadInt32);

@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.RustWrapper
 {
-    public unsafe class Encryptor: IDisposable
+    public unsafe class Encryptor: IEncryptCipher, IDecryptCipher, IDisposable
     {
         public Encryptor(EncryptionID encryption)
         {

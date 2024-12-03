@@ -4,6 +4,7 @@ using System.IO.Pipelines;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -13,14 +14,14 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
     internal partial class OtherBundleElementScanner
     {
 
-        private static void JumpNotZeroString(Stream input)
+        internal static void JumpNotZeroString(Stream input)
         {
             while (input.ReadByte() > 0)
             {
             }
         }
 
-        private static long GetBundleFileSize(Stream input, long pos)
+        internal static long GetBundleFileSize(Stream input, long pos)
         {
             input.Position = pos;
             JumpNotZeroString(input);// UnityFS
@@ -32,7 +33,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         private Stream ParseFakeHeader(Stream input)
         {
-            var finder = new StreamFinder("UnityFS")
+            var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {
                 IsMatchFirst = true,
             };
@@ -51,7 +52,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         private Stream DecryptAnchorPanic(Stream input, string fullPath)
         {
-            var finder = new StreamFinder("UnityFS")
+            var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {
                 IsMatchFirst = true,
             };
@@ -87,7 +88,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var output = new CodenameJumpStream(input);
             var signature = output.ReadBytes(7);
             input.Position = 0;
-            if (Encoding.ASCII.GetString(signature) == "UnityFS")
+            if (Encoding.ASCII.GetString(signature) == FileStreamBundleHeader.UnityFSMagic)
             {
                 return output;
             }

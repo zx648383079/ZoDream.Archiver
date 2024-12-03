@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
@@ -10,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         {
             var buffer = input.ReadBytes(7);
             input.Position = 0;
-            if (Encoding.ASCII.GetString(buffer) == "UnityFS")
+            if (Encoding.ASCII.GetString(buffer) == FileStreamBundleHeader.UnityFSMagic)
             {
                 return input;
             }
@@ -19,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 buffer[i] ^= key;
             }
-            if (Encoding.ASCII.GetString(buffer) != "UnityFS")
+            if (Encoding.ASCII.GetString(buffer) != FileStreamBundleHeader.UnityFSMagic)
             {
                 return input;
             }

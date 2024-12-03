@@ -4,15 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.WebFiles
 {
-    public class WebFileReader(EndianReader reader, IArchiveOptions? options) : IArchiveReader
+    public class WebFileReader(IBundleBinaryReader reader, IArchiveOptions? options) : IArchiveReader
     {
         private const string Signature = "UnityWebData1.0";
+        private const string CNSignature = "TuanjieWebData1.0";
         private readonly long _basePosition = reader.BaseStream.Position;
 
         public void Dispose()
@@ -55,7 +57,7 @@ namespace ZoDream.BundleExtractor.Unity.WebFiles
         {
             reader.BaseStream.Seek(_basePosition, SeekOrigin.Begin);
             var signature = reader.ReadStringZeroTerm();
-            Debug.Assert(signature == Signature, $"Signature '{signature}' doesn't match to '{Signature}'");
+            Debug.Assert(signature is Signature or CNSignature, $"Signature '{signature}' doesn't match to '{Signature}'");
 
             var headerLength = reader.ReadInt32(); //total size of the header including the signature and all the entries.
             while (reader.BaseStream.Position - _basePosition < headerLength)
@@ -66,7 +68,7 @@ namespace ZoDream.BundleExtractor.Unity.WebFiles
 
         public bool IsSupport()
         {
-            return reader.ReadStringZeroTerm() == Signature;
+            return reader.ReadStringZeroTerm() is Signature or CNSignature;
         }
     }
 }

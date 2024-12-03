@@ -6,7 +6,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public partial class MiHoYoElementScanner
+    internal partial class MiHoYoElementScanner
     {
 
         private void GICreateInstance(IBundleBinaryReader reader,

@@ -38,6 +38,9 @@ namespace ZoDream.Shared.IO
         private readonly byte[][][] _items;
         private List<StreamMatchResult>[] _matchItems = [];
         private List<StreamMatchProcess>[] _processItems = [];
+        /// <summary>
+        /// 是否只需要找第一个
+        /// </summary>
         public bool IsMatchFirst { get; set; } = true;
 
         private long _position = -1;

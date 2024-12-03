@@ -247,6 +247,16 @@ namespace ZoDream.Shared.IO
             throw new Exception("Can't find end of string");
         }
 
+        public string ReadStringZeroTerm(int maxLength)
+        {
+            if (ReadStringZeroTerm(maxLength, out var result))
+            {
+                return result;
+            }
+
+            throw new Exception("Can't find end of string");
+        }
+
         //
         // 摘要:
         //     Read C like UTF8 format zero terminated string

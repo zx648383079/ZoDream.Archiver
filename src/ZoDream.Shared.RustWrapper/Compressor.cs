@@ -2,10 +2,11 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.RustWrapper
 {
-    public unsafe class Compressor : IDisposable
+    public unsafe class Compressor : ICompressor, IDecompressor, IDisposable
     {
         public Compressor(CompressionID compression)
         {

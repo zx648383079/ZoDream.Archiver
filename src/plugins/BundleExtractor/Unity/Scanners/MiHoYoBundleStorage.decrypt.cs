@@ -2,6 +2,9 @@
 using System.Buffers.Binary;
 using System.IO;
 using System.Text;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
+using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
@@ -12,65 +15,55 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         {
             const int PackSize = 0x880;
             const string PackSignature = "pack";
-            const string UnityFSSignature = "UnityFS";
 
-            var data = new byte[input.Length];
-            input.ReadExactly(data);
-            var packIdx = data.Search(PackSignature);
-            if (packIdx == -1)
+            var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
+            {
+                IsMatchFirst = true
+            };
+            if (!finder.MatchFile(input))
             {
                 input.Position = 0;
                 return input;
             }
-            Logger.Verbose($"Found signature {PackSignature} at offset 0x{packIdx:X8}");
-            var mr0kIdx = data.Search("mr0k", packIdx);
-            if (mr0kIdx == -1)
+            finder = new StreamFinder("mr0k")
+            {
+                IsMatchFirst = true
+            };
+            if (!finder.MatchFile(input))
             {
                 input.Position = 0;
                 return input;
             }
             var ms = new MemoryStream();
+            // TODO 配置密钥
+            var cipher = new Mr0kCipher();
             try
             {
-                var mr0k = (Mr0k)game;
-
                 long readSize = 0;
                 long bundleSize = 0;
-                reader.Position = 0;
-                while (reader.Remaining > 0)
+                input.Position = 0;
+                var reader = new BundleBinaryReader(input);
+                while (reader.RemainingLength > 0)
                 {
-                    var pos = reader.Position;
-                    var signature = reader.ReadStringToNull(4);
+                    var pos = input.Position;
+                    var signature = reader.ReadStringZeroTerm(4);
                     if (signature == PackSignature)
                     {
-                        Logger.Verbose($"Found {PackSignature} chunk at position {reader.Position - PackSignature.Length}");
                         var isMr0k = reader.ReadBoolean();
-                        Logger.Verbose("Chunk is mr0k encrypted");
                         var blockSize = BinaryPrimitives.ReadInt32LittleEndian(reader.ReadBytes(4));
 
-                        Logger.Verbose($"Chunk size is 0x{blockSize:X8}");
-                        Span<byte> buffer = new byte[blockSize];
+                        var buffer = new byte[blockSize];
                         reader.Read(buffer);
                         if (isMr0k)
                         {
-                            buffer = Mr0kUtils.Decrypt(buffer, mr0k);
+                            buffer = cipher.Decrypt(buffer);
                         }
                         ms.Write(buffer);
 
                         if (bundleSize == 0)
                         {
-                            Logger.Verbose("This is header chunk !! attempting to read the bundle size");
-                            using var blockReader = new EndianBinaryReader(new MemoryStream(buffer.ToArray()));
-                            var header = new Header()
-                            {
-                                signature = blockReader.ReadStringToNull(),
-                                version = blockReader.ReadUInt32(),
-                                unityVersion = blockReader.ReadStringToNull(),
-                                unityRevision = blockReader.ReadStringToNull(),
-                                size = blockReader.ReadInt64()
-                            };
-                            bundleSize = header.size;
-                            Logger.Verbose($"Bundle size is 0x{bundleSize:X8}");
+                            using var blockReader = new MemoryStream(buffer);
+                            bundleSize = OtherBundleElementScanner.GetBundleFileSize(blockReader, 0);
                         }
 
                         readSize += buffer.Length;
@@ -79,12 +72,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         {
                             var padding = PackSize - 9 - blockSize;
                             reader.Position += padding;
-                            Logger.Verbose($"Skip 0x{padding:X8} padding");
                         }
 
                         if (readSize == bundleSize)
                         {
-                            Logger.Verbose($"Bundle has been read entirely !!");
                             readSize = 0;
                             bundleSize = 0;
                         }
@@ -93,35 +84,17 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     }
 
                     reader.Position = pos;
-                    signature = reader.ReadStringToNull();
-                    if (signature == UnityFSSignature)
+                    signature = reader.ReadStringZeroTerm();
+                    if (signature == FileStreamBundleHeader.UnityFSMagic)
                     {
-                        Logger.Verbose($"Found {UnityFSSignature} chunk at position {reader.Position - (UnityFSSignature.Length + 1)}");
-                        var header = new Header()
-                        {
-                            signature = reader.ReadStringToNull(),
-                            version = reader.ReadUInt32(),
-                            unityVersion = reader.ReadStringToNull(),
-                            unityRevision = reader.ReadStringToNull(),
-                            size = reader.ReadInt64()
-                        };
-
-                        Logger.Verbose($"Bundle size is 0x{header.size:X8}");
+                        var size = OtherBundleElementScanner.GetBundleFileSize(reader.BaseStream, pos);
                         reader.Position = pos;
-                        reader.BaseStream.CopyTo(ms, header.size);
+                        reader.BaseStream.CopyTo(ms, size);
                         continue;
                     }
 
-                    throw new InvalidOperationException($"Expected signature {PackSignature} or {UnityFSSignature}, got {signature} instead !!");
+                    throw new InvalidOperationException($"Expected signature {PackSignature} or {FileStreamBundleHeader.UnityFSMagic}, got {signature} instead !!");
                 }
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(GameType.GI_Pack)} ({nameof(Mr0k)}) but got {game.Name} ({game.GetType().Name}) !!");
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"Error while reading pack file {reader.FullPath}", e);
             }
             finally
             {
@@ -176,5 +149,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             output.Position = 0;
             return output;
         }
+
     }
 }

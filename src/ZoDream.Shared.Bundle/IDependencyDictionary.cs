@@ -5,6 +5,10 @@ namespace ZoDream.Shared.Bundle
     public interface IDependencyEntry
     {
         public string Path { get; }
+        /// <summary>
+        /// 定义在依赖文件中的
+        /// </summary>
+        public long Offset { get; }
 
         public IList<string> Dependencies { get; }
 

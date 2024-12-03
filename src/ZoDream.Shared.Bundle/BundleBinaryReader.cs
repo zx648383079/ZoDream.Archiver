@@ -9,7 +9,7 @@ namespace ZoDream.Shared.Bundle
 {
     public class BundleBinaryReader(
         Stream stream, 
-        EndianType endian,
+        EndianType endian = EndianType.LittleEndian,
         bool isAlignStream = false)
         : EndianReader(stream, endian), IBundleBinaryReader
     {
