@@ -18,6 +18,8 @@ mod encryption;
 mod compression;
 mod drawing;
 mod error;
+mod storage;
+mod io;
 
 use error::{Error, Result};
 use encryption::blowfish::Blowfish;

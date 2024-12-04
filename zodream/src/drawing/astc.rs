@@ -1,7 +1,6 @@
-use byteorder::{BigEndian, WriteBytesExt};
 use texture2ddecoder::decode_astc;
 
-use super::{PixelDecoder, Result};
+use super::{PixelDecoder, Result, super::io::ByteWriteExt};
 
 pub struct AstcDecoder
 {
@@ -23,7 +22,7 @@ impl PixelDecoder for AstcDecoder
         let mut buffer = Vec::new();
         decode_astc(input, width as usize, height as usize, self.block_width, self.block_height, &mut buffer)?;
         for i in buffer {
-            output.write_u32::<BigEndian>(i).unwrap();
+            output.write_u32_be(i).unwrap();
         }
         Ok(output.len())
     }

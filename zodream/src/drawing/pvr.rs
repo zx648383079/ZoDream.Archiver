@@ -1,7 +1,6 @@
-use byteorder::{BigEndian, WriteBytesExt};
 use texture2ddecoder::decode_pvrtc;
 
-use super::{PixelDecoder, Result};
+use super::{PixelDecoder, Result, super::io::ByteWriteExt};
 
 pub struct PvrDecoder
 {
@@ -22,7 +21,7 @@ impl PixelDecoder for PvrDecoder
         let mut buffer = Vec::new();
         decode_pvrtc(input, width as usize, height as usize, &mut buffer, self.version == 2)?;
         for i in buffer {
-            output.write_u32::<BigEndian>(i).unwrap();
+            output.write_u32_be(i)?;
         }
         Ok(output.len())
     }

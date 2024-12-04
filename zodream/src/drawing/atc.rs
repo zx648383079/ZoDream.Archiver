@@ -1,5 +1,6 @@
-use byteorder::{BigEndian, WriteBytesExt};
 use texture2ddecoder::{decode_atc_rgb4, decode_atc_rgba8};
+
+use crate::io::ByteWriteExt;
 
 use super::{PixelDecoder, Result};
 
@@ -26,7 +27,7 @@ impl PixelDecoder for AtcDecoder
             decode_atc_rgb4(input, width as usize, height as usize, &mut buffer)?;
         }
         for i in buffer {
-            output.write_u32::<BigEndian>(i).unwrap();
+            output.write_u32_be(i).unwrap();
         }
         Ok(output.len())
     }

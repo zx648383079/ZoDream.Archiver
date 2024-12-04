@@ -1,5 +1,6 @@
-use byteorder::{BigEndian, WriteBytesExt};
 use texture2ddecoder::{decode_eacr, decode_eacr_signed, decode_eacrg, decode_eacrg_signed, decode_etc1, decode_etc2_rgb, decode_etc2_rgba1, decode_etc2_rgba8};
+
+use crate::io::ByteWriteExt;
 
 use super::{PixelDecoder, Result};
 
@@ -45,7 +46,7 @@ impl PixelDecoder for EtcDecoder
             decode_eacrg_signed(input, width as usize, height as usize, &mut buffer)?;
         }
         for i in buffer {
-            output.write_u32::<BigEndian>(i).unwrap();
+            output.write_u32_be(i).unwrap();
         }
         Ok(output.len())
     }
