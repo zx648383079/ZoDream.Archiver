@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Numerics;
-using System.Reflection.Metadata;
 
 namespace ZoDream.Shared.Drawing
 {
@@ -106,14 +105,14 @@ namespace ZoDream.Shared.Drawing
         public static void SaveAs(this SKImage image, string fileName)
         {
             using var fs = File.OpenWrite(fileName);
-            using var pixmap = image.PeekPixels();
-            pixmap?.Encode(fs, ConvertFormat(fileName), 100);
+            using var pixMap = image.PeekPixels();
+            pixMap?.Encode(fs, ConvertFormat(fileName), 100);
         }
 
         public static void Encode(this SKImage image, Stream dst, SKEncodedImageFormat format, int quality)
         {
-            using var pixmap = image.PeekPixels();
-            pixmap?.Encode(dst, format, quality);
+            using var pixMap = image.PeekPixels();
+            pixMap?.Encode(dst, format, quality);
         }
 
         /// <summary>
@@ -151,10 +150,7 @@ namespace ZoDream.Shared.Drawing
             return Mutate(rect.Width, rect.Height, canvas => {
                 // canvas.Clear(SKColors.Transparent);
                 canvas.DrawBitmap(source, rect,
-                    SKRect.Create(0, 0, rect.Width, rect.Height), new SKPaint()
-                    {
-                        FilterQuality = SKFilterQuality.High
-                    });
+                    SKRect.Create(0, 0, rect.Width, rect.Height));
             });
         }
 
@@ -167,10 +163,7 @@ namespace ZoDream.Shared.Drawing
             }
             return Mutate((int)rect.Width, (int)rect.Height, canvas => {
                 canvas.DrawBitmap(source, rect,
-                   SKRect.Create(0, 0, rect.Width, rect.Height), new SKPaint()
-                   {
-                       FilterQuality = SKFilterQuality.High
-                   });
+                   SKRect.Create(0, 0, rect.Width, rect.Height));
                 path.Offset(-rect.Left, -rect.Top);
                 canvas.ClipPath(path, SKClipOperation.Difference);
                 canvas.Clear();
@@ -186,10 +179,7 @@ namespace ZoDream.Shared.Drawing
             }
             return MutateImage((int)rect.Width, (int)rect.Height, canvas => {
                 canvas.DrawImage(source, rect,
-                   SKRect.Create(0, 0, rect.Width, rect.Height), new SKPaint()
-                   {
-                       FilterQuality = SKFilterQuality.High
-                   });
+                   SKRect.Create(0, 0, rect.Width, rect.Height));
                 path.Offset(-rect.Left, -rect.Top);
                 canvas.ClipPath(path, SKClipOperation.Difference);
                 canvas.Clear();
@@ -200,9 +190,9 @@ namespace ZoDream.Shared.Drawing
         {
             var target = SKImage.Create(new SKImageInfo(rect.Width, 
                 rect.Height));
-            using var targetPixmap = target.PeekPixels();
-            using var imagePixmap = source.PeekPixels();
-            if (imagePixmap.ExtractSubset(targetPixmap, 
+            using var targetPixMap = target.PeekPixels();
+            using var imagePixMap = source.PeekPixels();
+            if (imagePixMap.ExtractSubset(targetPixMap, 
                 rect))
             {
                 return target;
@@ -210,6 +200,12 @@ namespace ZoDream.Shared.Drawing
             target.Dispose();
             return null;
         }
+
+        public static SKBitmap Mutate(SKRect rect, Action<SKCanvas> action)
+        {
+            return Mutate((int)rect.Width, (int)rect.Height, action);
+        }
+
         public static SKBitmap Mutate(int width, 
             int height, 
             Action<SKCanvas> action)
@@ -234,7 +230,7 @@ namespace ZoDream.Shared.Drawing
         {
             return MutateImage(bitmap.Width, bitmap.Height, surface => {
                 surface.Flip(isHorizontal);
-                surface.DrawImage(bitmap, new SKPoint());
+                surface.DrawImage(bitmap, 0, 0);
             });
         }
         public static SKImage Rotate(this SKImage bitmap, float angle)
@@ -248,16 +244,16 @@ namespace ZoDream.Shared.Drawing
             });
         }
 
-        public static SKImage? Resize(this SKImage image, SKImageInfo info, SKFilterQuality quality)
+        public static SKImage? Resize(this SKImage image, SKImageInfo info, SKSamplingOptions sampling)
         {
             if (info.IsEmpty)
             {
                 return null;
             }
             var target = SKImage.Create(info);
-            using var targetPixmap = target.PeekPixels();
-            using var imagePixmap = image.PeekPixels();
-            if (imagePixmap.ScalePixels(targetPixmap, quality))
+            using var targetPixMap = target.PeekPixels();
+            using var imagePixMap = image.PeekPixels();
+            if (imagePixMap.ScalePixels(targetPixMap, sampling))
             {
                 return target;
             }

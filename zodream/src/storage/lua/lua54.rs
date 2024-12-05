@@ -5,9 +5,11 @@ use super::*;
 pub fn load_string(input: & mut Cursor<&[u8]>) -> Result<Vec<u8>> {
     let n = input.read_u8()? as u64;
     if n == 0 {
-        return Ok(vec![0]);
+        return Ok(vec![0;0]);
     }
-    input.read_bytes(n - 1)
+    let res =  input.read_bytes(n - 1)?;
+    input.seek_relative(1)?; // 去除结尾的 0x0
+    Ok(res)
 }
 
 pub fn load_upvalue(input: & mut Cursor<&[u8]>) -> Result<UpVal> {

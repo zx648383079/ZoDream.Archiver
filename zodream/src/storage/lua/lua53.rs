@@ -8,9 +8,11 @@ pub fn load_string(input: & mut Cursor<&[u8]>) -> Result<Vec<u8>> {
         n = input.read_u64_le()?;
     }
     if n == 0 {
-        return Ok(vec![0]);
+        return Ok(vec![0;0]);
     }
-    input.read_bytes(n as u64 - 1)
+    let res = input.read_bytes(n as u64 - 1)?;
+    input.seek_relative(1)?; // 去除结尾的 0x0
+    Ok(res)
 }
 
 pub fn lua_local<'a>(header: &LuaHeader, input: & mut Cursor<&[u8]>) -> Result<LuaLocal> {

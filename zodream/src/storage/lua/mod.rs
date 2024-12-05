@@ -27,10 +27,6 @@ impl LuaHeader {
     pub fn version(&self) -> LuaVersion {
         LuaVersion(self.lua_version)
     }
-
-    pub fn test_luajit_flag(&self, flag: u8) -> bool {
-        self.lj_flags & flag != 0
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -126,7 +122,9 @@ pub struct UpVal {
 #[derive(Default)]
 pub struct LuaChunk {
     pub name: Vec<u8>,
+    // 第一行的行号
     pub line_defined: u64,
+    // 最后一行的行号
     pub last_line_defined: u64,
     pub num_upvalues: u8,
     pub num_params: u8,
@@ -187,7 +185,7 @@ pub struct LuaBytecode {
 fn lua_header(input: & mut Cursor<&[u8]>) -> Result<LuaHeader> {
     let magic = input.read_bytes(4)?;
     if magic != b"\x1BLua" {
-        return Err(Error::form_str("magic error"));
+        return Err(Error::form_str("lua magic error"));
     }
     let version = input.read_u8()?;
     match version  {

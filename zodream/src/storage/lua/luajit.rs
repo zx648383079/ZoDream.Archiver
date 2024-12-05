@@ -7,19 +7,19 @@ use super::*;
 /* Header flags of bytecode */
 pub const FLAG_IS_BIG_ENDIAN: u8 = 0b00000001;
 pub const FLAG_IS_STRIPPED: u8 = 0b00000010;
-// pub const FLAG_HAS_FFI: u8 = 0b00000100;
-// // for luajit2.x
-// pub const FLAG_F_FR2: u8 = 0x08;
+pub const FLAG_HAS_FFI: u8 = 0b00000100;
+// for luajit2.x
+pub const FLAG_F_FR2: u8 = 0x08;
 
 /* Flags for prototype. */
-// pub const PROTO_CHILD: u8 = 0x01; /* Has child prototypes. */
+pub const PROTO_CHILD: u8 = 0x01; /* Has child prototypes. */
 pub const PROTO_VARARG: u8 = 0x02; /* Vararg function. */
-// pub const PROTO_FFI: u8 = 0x04; /* Uses BC_KCDATA for FFI datatypes. */
-// pub const PROTO_NOJIT: u8 = 0x08; /* JIT disabled for this function. */
-// pub const PROTO_ILOOP: u8 = 0x10; /* Patched bytecode with ILOOP etc. */
+pub const PROTO_FFI: u8 = 0x04; /* Uses BC_KCDATA for FFI datatypes. */
+pub const PROTO_NOJIT: u8 = 0x08; /* JIT disabled for this function. */
+pub const PROTO_ILOOP: u8 = 0x10; /* Patched bytecode with ILOOP etc. */
 // /* Only used during parsing. */
-// pub const PROTO_HAS_RETURN: u8 = 0x20; /* Already emitted a return. */
-// pub const PROTO_FIXUP_RETURN: u8 = 0x40; /* Need to fixup emitted returns. */
+pub const PROTO_HAS_RETURN: u8 = 0x20; /* Already emitted a return. */
+pub const PROTO_FIXUP_RETURN: u8 = 0x40; /* Need to fixup emitted returns. */
 
 pub const BCDUMP_KGC_CHILD: u64 = 0;
 pub const BCDUMP_KGC_TAB: u64 = 1;
@@ -35,35 +35,35 @@ pub const BCDUMP_KTAB_INT: usize = 3;
 pub const BCDUMP_KTAB_NUM: usize = 4;
 pub const BCDUMP_KTAB_STR: usize = 5;
 
+const VARNAME_END: u8 = 0;
+const VARNAME_FOR_IDX: u8 = 1;
+const VARNAME_FOR_STOP: u8 = 2;
+const VARNAME_FOR_STEP: u8 = 3;
+const VARNAME_FOR_GEN: u8 = 4;
+const VARNAME_FOR_STATE: u8 = 5;
+const VARNAME_FOR_CTL: u8 = 6;
+const VARNAME_MAX: u8 = 7;
+
+const INTERNAL_VARNAMES: [&str; 7] = ["", "<index>", "<limit>", "<step>", "<generator>", "<state>", "<control>", ];
+
+pub fn has_luajit_flag(header: & LuaHeader, flag: u8) -> bool {
+    header.lj_flags & flag != 0
+}
+
 
 pub fn lj_header(input: & mut Cursor<&[u8]>) -> Result<LuaHeader> {
-    let magic = input.read_bytes(4)?;
+    let magic = input.read_bytes(3)?;
     if magic != b"\x1bLJ" {
-        return Err(Error::form_str("magic error"));
+        return Err(Error::form_str("lj magic error"));
     }
     let version = input.read_u8()?;
+    
     match version  {
-        0x1 => {
+        0x1 | 0x2 => {
             let lj_flags = input.read_u8()?;
             Ok(
                 LuaHeader {
-                    lua_version: LUAJ1.0,
-                    format_version: 0,
-                    big_endian: lj_flags & FLAG_IS_BIG_ENDIAN != 0,
-                    int_size: 4,
-                    size_t_size: 4,
-                    instruction_size: 4,
-                    number_size: 4,
-                    number_integral: false,
-                    lj_flags,
-                }
-            )
-        },
-        0x2 => {
-            let lj_flags = input.read_u8()?;
-            Ok(
-                LuaHeader {
-                    lua_version: LUAJ2.0,
+                    lua_version: if version == 0x2 {LUAJ2.0} else {LUAJ1.0},
                     format_version: 0,
                     big_endian: lj_flags & FLAG_IS_BIG_ENDIAN != 0,
                     int_size: 4,
@@ -190,8 +190,10 @@ fn lj_proto<'a, 'h>(
     let mut line_defined = 0;
     let mut numline = 0;
     let mut debuginfo_size = 0;
-    if !header.test_luajit_flag(FLAG_IS_STRIPPED) {
+    if !has_luajit_flag(header, FLAG_IS_STRIPPED) {
         debuginfo_size = input.read_leb128_u64()?;
+    }
+    if debuginfo_size > 0 {
         line_defined = input.read_leb128_u64()?;
         numline = input.read_leb128_u64()?;
     }
@@ -224,7 +226,34 @@ fn lj_proto<'a, 'h>(
     constants.reverse();
 
     if debuginfo_size > 0 {
-        input.seek_relative(debuginfo_size as i64)?;
+        // input.seek_relative(debuginfo_size as i64)?;
+        let line_infos = read_array_count(input, instructions_count as usize, |i| {
+            let mut offset: u32;
+            if numline >= 65536 {
+                offset = i.read_u32_le()?;
+            } else if numline >= 256 {
+                offset = i.read_u16_le()? as _;
+            } else {
+                offset = i.read_u8()? as _;
+            }
+            Ok(line_defined as u32 + offset)
+        })?;
+        let names = read_array_count(input, num_upvalues as usize, |i| {
+            i.read_string_zero_term()
+        })?;
+        let mut last_addr = 0;
+        loop {
+            let internal_vartype = input.read_u8()?;
+            if internal_vartype == VARNAME_END {
+                break;
+            }
+            if internal_vartype >= VARNAME_MAX {
+                let addr_name = input.read_string_zero_term()?;
+            }
+            let start_addr = last_addr + input.read_leb128_unsigned(0)?;
+            let end_addr = start_addr + input.read_leb128_unsigned(0)?;
+            last_addr = start_addr;
+        }
     }
     Ok(
         Some(LuaChunk {
@@ -254,14 +283,14 @@ pub fn lj_chunk<'h, 'a: 'h>(
     header: &'h LuaHeader,
     input: & mut Cursor<&[u8]>
 ) -> Result<LuaChunk> {
-    let mut name = vec![0];
-    if !header.test_luajit_flag(FLAG_IS_STRIPPED) {
+    let mut name = vec![0;0];
+    if !has_luajit_flag(header, FLAG_IS_STRIPPED) {
         let namelen = input.read_leb128_u32()?;
         name = input.read_bytes(namelen as u64)?;
     }
     let protos = RefCell::new(vec![]);
 
-    while let Some(proto) = lj_proto(&header,  input, &protos)? {
+    while let Some(proto) = lj_proto(&header, input, &protos)? {
         protos.borrow_mut().push(proto);
     }
     let mut protos = protos.into_inner();

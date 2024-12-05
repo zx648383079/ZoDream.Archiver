@@ -6,7 +6,7 @@ pub fn read_string_ref<'a>(input: & mut Cursor<&[u8]>, stable: &[Vec<u8>]) -> Re
     if i > 0 {
         Ok(stable[i - 1].clone())
     } else {
-        Ok(vec![0])
+        Ok(vec![0;0])
     } 
 }
 
@@ -42,8 +42,8 @@ pub fn read_array<'a, T, F>(input: & mut Cursor<&[u8]>, cb: F) -> Result<Vec<T>>
 pub fn read_array_count<'a, T, F>(input: & mut Cursor<&[u8]>, count: usize, cb: F) -> Result<Vec<T>>
     where F : Fn(& mut Cursor<&[u8]>) -> Result<T> {
     let mut items = Vec::with_capacity(count);
-    for i in 0..count {
-        items[i] = cb(input)?;
+    for _ in 0..count {
+        items.push(cb(input)?);
     }
     Ok(items)
  }
@@ -127,9 +127,9 @@ pub fn bytecode(input: & mut Cursor<&[u8]>) -> Result<LuaChunk> {
 
         let num = input.read_leb128_unsigned(0)? as usize;
         let mut prototypes = Vec::with_capacity(num);
-        for i in 0..num {
+        for _ in 0..num {
             let n = input.read_leb128_unsigned(0)? as usize;
-            prototypes[i] = core::mem::take(&mut protos[n])
+            prototypes.push(core::mem::take(&mut protos[n]));
         }
         let line_defined = input.read_leb128_unsigned(0)?;
         let name = read_string_ref(input, &stable)?;

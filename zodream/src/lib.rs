@@ -14,12 +14,12 @@ use encryption::threeway::ThreeWay;
 use drawing::atc::AtcDecoder;
 use ::safer_ffi::prelude::*;
 
-mod encryption;
-mod compression;
-mod drawing;
+pub mod encryption;
+pub mod compression;
+pub mod drawing;
 mod error;
-mod storage;
-mod io;
+pub mod storage;
+pub mod io;
 
 use error::{Error, Result};
 use encryption::blowfish::Blowfish;
@@ -213,7 +213,7 @@ pub struct EncryptorBox {
 }
 
 impl EncryptorBox {
-    fn encrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+    pub fn encrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
         where R : Read, W : Write
     {
         match &self.key {
@@ -246,7 +246,7 @@ impl EncryptorBox {
         }
     }
 
-    fn decrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
+    pub fn decrypt<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
         where R : Read, W : Write
     {
         match &self.key {
@@ -289,7 +289,7 @@ fn find_encryptor (id: EncryptionID) -> repr_c::Box<EncryptorBox>
 }
 
 #[ffi_export]
-fn find_encryptor_with_key (id: EncryptionID, key: char_p::Ref<'_>) -> repr_c::Box<EncryptorBox>
+pub fn find_encryptor_with_key (id: EncryptionID, key: char_p::Ref<'_>) -> repr_c::Box<EncryptorBox>
 {
     // let instance: Option<Box<dyn Encryptor>> = match id {
     //     EncryptionID::Blowfish => {
@@ -474,25 +474,4 @@ fn decode_painter (
 fn free_painter (ctor: Option<repr_c::Box<PainterBox>>)
 {
     drop(ctor)
-}
-
-
-#[cfg(test)]
-mod tests {
-    use std::fs::File;
-    use super::*;
-
-    
-    #[test]
-    fn test_decrypt() {
-        //File::options().read(true).write(true).open();
-        let mut input = File::open("texture_00.ktx").unwrap();
-        let length = input.metadata().unwrap().len();
-        //input.set_len(input.metadata().unwrap().len() - 8).unwrap();
-        let mut output = File::create("texture.png").unwrap();
-        let key = char_p::new("");
-        let instance = find_encryptor_with_key(EncryptionID::BlowfishCBC, key.as_ref());
-        let res = instance.decrypt(&mut input, &mut output).unwrap();
-        assert_eq!(res, length as usize);
-    }
 }

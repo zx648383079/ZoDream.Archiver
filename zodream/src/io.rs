@@ -10,7 +10,7 @@ pub trait ByteReadExt : Read {
     #[inline]
     fn read_bytes(&mut self, count: u64) -> Result<Vec<u8>>
     {
-        let mut buf = Vec::with_capacity(count as usize);
+        let mut buf = vec![0;count as usize];
         self.read_exact(&mut buf)?;
         Ok(buf)
     }
@@ -287,6 +287,30 @@ pub trait ByteReadExt : Read {
             result |= -(1 << shift);
         }
         Ok(result)
+    }
+
+    #[inline]
+    fn read_string_zero_term(&mut self) -> Result<String>
+    {
+        let mut res = Vec::new();
+        let mut buf = [0; 1];
+        let mut is_end = false;
+        while !is_end {
+            match self.read_exact(&mut buf) {
+                Ok(()) => {
+                    if buf[0] == 0x0 {
+                        is_end = true;
+                    } else {
+                        res.push(buf[0]);
+                    }
+                    
+                },
+                Err(_) => {
+                    is_end = true;
+                }
+            }
+        }
+        Ok(String::from_utf8_lossy(&res).to_string())
     }
 }
 

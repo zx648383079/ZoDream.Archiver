@@ -4,10 +4,12 @@ use super::*;
 
 pub fn lua_string<'a>(header: &LuaHeader, input: & mut Cursor<&[u8]>) -> Result<Vec<u8>> {
     let count = lua_size_t(header, input)?;
-    if count <= 1 {
-        return Ok(vec![0]);
+    if count < 1 {
+        return Ok(vec![0;0]);
     }
-    Ok(input.read_bytes(count - 1)?.clone())
+    let res =  input.read_bytes(count - 1)?;
+    input.seek_relative(1)?; // 去除结尾的 0x0
+    Ok(res)
 }
 
 pub fn lua_local<'a>(header: &LuaHeader, input: & mut Cursor<&[u8]>) -> Result<LuaLocal> {
@@ -55,19 +57,19 @@ pub fn lua_chunk<'h, 'a: 'h>(
             _ => Err(Error::form_str("count constants error"))
         }
     })?;
-    let num = lua_int(header, input)? as usize;
+    let num =  lua_int(header, input)? as usize;
     let prototypes = read_array_count(input, num, |i| {
         lua_chunk(header, i)
     })?;
-    let num = lua_int(header, input)? as usize;
+    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
     let source_lines = read_array_count(input, num, |i| {
         Ok((lua_int(header, i)? as u32, 0u32))
     })?;
-    let num = lua_int(header, input)? as usize;
+    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
     let locals = read_array_count(input, num, |i| {
         lua_local(header, i)
     })?;
-    let num = lua_int(header, input)? as usize;
+    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
     let upvalue_names =  read_array_count(input, num, |i| {
         lua_string(header, i)
     })?;
