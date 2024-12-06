@@ -447,7 +447,7 @@ namespace ZoDream.ChmExtractor.Lzx
                                 return -1; //TODO throw proper exception
                             }
                             var temp_buffer = new byte[this_run];
-                            inData.Read(temp_buffer, 0, this_run);
+                            inData.ReadExactly(temp_buffer, 0, this_run);
                             temp_buffer.CopyTo(window, window_posn);
                             window_posn += (uint)this_run;
                             break;
@@ -504,7 +504,7 @@ namespace ZoDream.ChmExtractor.Lzx
                         }
                         outData.Seek(data, SeekOrigin.Begin);
                         var buffer = new byte[4];
-                        outData.Read(buffer, 0, buffer.Length);
+                        outData.ReadExactly(buffer);
                         abs_off = buffer[0] | (buffer[1] << 8) | (buffer[2] << 16) | (buffer[3] << 24);
                         if ((abs_off >= -curpos) && (abs_off < filesize))
                         {

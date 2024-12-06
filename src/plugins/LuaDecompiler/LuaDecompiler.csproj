@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <LangVersion>12</LangVersion>
+	  <Nullable>enable</Nullable>
+	  <Version>1.0.0</Version>
+	  <EnableDynamicLoading>true</EnableDynamicLoading>
+	  <BaseOutputPath>..\..\bin</BaseOutputPath>
+	  <RootNamespace>ZoDream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	  <AssemblyName>ZoDream.$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+  </ItemGroup>
+
+</Project>

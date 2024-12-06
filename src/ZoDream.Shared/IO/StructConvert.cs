@@ -41,7 +41,7 @@ namespace ZoDream.Shared.IO
         {
             var size = SizeOf<T>();
             var buffer = new byte[size];
-            input.Read(buffer, 0, size);
+            input.ReadExactly(buffer, 0, size);
             return ToStruct<T>(buffer);
         }
 

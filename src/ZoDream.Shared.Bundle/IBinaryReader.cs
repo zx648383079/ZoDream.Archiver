@@ -18,7 +18,15 @@ namespace ZoDream.Shared.Bundle
         public bool IsAlignStream { get; }
 
         #region 默认BinaryReader 功能
+        /// <summary>
+        /// 读取7位压缩的 uint
+        /// </summary>
+        /// <returns></returns>
         public int Read7BitEncodedInt();
+        /// <summary>
+        /// 读取7位压缩的 ulong
+        /// </summary>
+        /// <returns></returns>
         public long Read7BitEncodedInt64();
         public bool ReadBoolean();
         public byte ReadByte();

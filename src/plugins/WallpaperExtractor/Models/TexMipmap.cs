@@ -12,7 +12,7 @@ namespace ZoDream.WallpaperExtractor.Models
         public byte[] Read()
         {
             var buffer = new byte[Data.Length];
-            Data.Read(buffer, 0, buffer.Length);
+            Data.ReadExactly(buffer);
             if (!IsLZ4Compressed)
             {
                 return buffer;

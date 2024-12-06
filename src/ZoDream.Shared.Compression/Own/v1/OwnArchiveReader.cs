@@ -64,7 +64,7 @@ namespace ZoDream.Shared.Compression.Own
             var length = ReadLength();
             var buffer = new byte[length];
             var deflator = new OwnDeflateStream(stream, key, _nextPadding);
-            deflator.Read(buffer, 0, buffer.Length);
+            deflator.ReadExactly(buffer);
             _nextPadding = !_nextPadding;
             return Encoding.UTF8.GetString(buffer);
         }

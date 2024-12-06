@@ -34,7 +34,7 @@ namespace ZoDream.Shared.Compression.Own
         public void Read(Stream input)
         {
             var buffer = new byte[4];
-            input.Read(buffer, 0, 4);
+            input.ReadExactly(buffer, 0, 4);
             if (buffer[0] != 0x23 || buffer[1] != 0x5A)
             {
                 throw new NotSupportedException("Own Archive Header error");

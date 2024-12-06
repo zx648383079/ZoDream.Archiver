@@ -25,7 +25,7 @@ pub const BCDUMP_KGC_CHILD: u64 = 0;
 pub const BCDUMP_KGC_TAB: u64 = 1;
 pub const BCDUMP_KGC_I64: u64 = 2;
 pub const BCDUMP_KGC_U64: u64 = 3;
-// pub const BCDUMP_KGC_COMPLEX: u64 = 4;
+pub const BCDUMP_KGC_COMPLEX: u64 = 4;
 pub const BCDUMP_KGC_STR: u64 = 5;
 
 pub const BCDUMP_KTAB_NIL: usize = 0;
@@ -100,6 +100,15 @@ pub fn lj_complex_constant<'a, 'h>(
                 (lo as u64 | ((hi as u64) << 32)) as i64,
             )))
         },
+        BCDUMP_KGC_COMPLEX => {
+            let lo = input.read_leb128_u32()?;
+            let hi = input.read_leb128_u32()?;
+            let lo = input.read_leb128_u32()?;
+            let hi = input.read_leb128_u32()?;
+            Ok(LuaConstant::Number(LuaNumber::Integer(
+                (lo as u64 | ((hi as u64) << 32)) as i64,
+            )))
+        }
         BCDUMP_KGC_TAB => lj_tab(input, big_endian),
         BCDUMP_KGC_CHILD => match stack.borrow_mut().pop() {
             Some(proto) => {

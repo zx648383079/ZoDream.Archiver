@@ -117,7 +117,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     {
                         var width = (int)(m_Texture2D.m_Width / downscaleMultiplier);
                         var height = (int)(m_Texture2D.m_Height / downscaleMultiplier);
-                        originalImage = originalImage.Resize(new SKImageInfo(width, height), SKFilterQuality.High);
+                        originalImage = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
                     }
                     var rectX = (int)Math.Floor(textureRect.x);
                     var rectY = (int)Math.Floor(textureRect.y);

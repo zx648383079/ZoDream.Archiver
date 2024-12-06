@@ -15,7 +15,7 @@ namespace ZoDream.ChmExtractor
         {
             var pos = stream.Position;
             var buffer = new byte[4];
-            stream.Read(buffer, 0, buffer.Length);
+            stream.ReadExactly(buffer);
             stream.Seek(pos, SeekOrigin.Begin);
             return Encoding.ASCII.GetString(buffer) == "ITSF";
         }

@@ -20,14 +20,7 @@ namespace ZoDream.Shared.Drawing
         {
             if (rect.Width != bitmap.Width || rect.Height != bitmap.Height)
             {
-                bitmap = bitmap.Resize(new SKImageInfo(rect.Width, rect.Height), SKFilterQuality.High
-                //    quality switch
-                //{
-                //    >= 80 => SKFilterQuality.High,
-                //    >= 40 => SKFilterQuality.Medium,
-                //    _ => SKFilterQuality.Low,
-                //}
-                )!;
+                bitmap = bitmap.Resize(new SKImageInfo(rect.Width, rect.Height), SKSamplingOptions.Default)!;
                 if (bitmap is null)
                 {
                     return;

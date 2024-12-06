@@ -49,7 +49,7 @@ namespace ZoDream.BundleExtractor.Cocos
             }
             var buffer = new byte[8];
             input.Seek(-8, SeekOrigin.End);
-            input.Read(buffer, 0, 8);
+            input.ReadExactly(buffer, 0, 8);
             //input.Seek(0, SeekOrigin.Begin);
             var res = SignatureEq(CONST_IMG, buffer) || SignatureEq(CONST_LUA, buffer);
             extension = res ? Encoding.ASCII.GetString(buffer, 5, 3).ToLower() : string.Empty;
@@ -65,7 +65,7 @@ namespace ZoDream.BundleExtractor.Cocos
             }
             var buffer = new byte[8];
             input.Seek(-8, SeekOrigin.End);
-            input.Read(buffer, 0, 8);
+            input.ReadExactly(buffer, 0, 8);
             var format = FileFormat.None;
             if (SignatureEq(CONST_IMG, buffer))
             {

@@ -61,15 +61,15 @@ pub fn lua_chunk<'h, 'a: 'h>(
     let prototypes = read_array_count(input, num, |i| {
         lua_chunk(header, i)
     })?;
-    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
+    let num = lua_int(header, input)? as usize;
     let source_lines = read_array_count(input, num, |i| {
         Ok((lua_int(header, i)? as u32, 0u32))
     })?;
-    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
+    let num = lua_int(header, input)? as usize;
     let locals = read_array_count(input, num, |i| {
         lua_local(header, i)
     })?;
-    let num = input.read_leb128_u32()? as usize; //lua_int(header, input)? as usize;
+    let num = lua_int(header, input)? as usize;
     let upvalue_names =  read_array_count(input, num, |i| {
         lua_string(header, i)
     })?;
