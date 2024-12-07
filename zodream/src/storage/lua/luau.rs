@@ -33,14 +33,14 @@ pub fn read_table<'a>(input: & mut Cursor<&[u8]>, k: &[LuaConstant]) -> Result<C
     Ok(result)
 }
 
-pub fn read_array<'a, T, F>(input: & mut Cursor<&[u8]>, cb: F) -> Result<Vec<T>> 
-    where F : Fn(& mut Cursor<&[u8]>) -> Result<T> {
+pub fn read_array<'a, T, F>(input: & mut Cursor<&[u8]>, mut cb: F) -> Result<Vec<T>> 
+    where F : FnMut(& mut Cursor<&[u8]>) -> Result<T> {
    let num = input.read_leb128_unsigned(0)? as usize;
    read_array_count(input, num, cb)
 }
 
-pub fn read_array_count<'a, T, F>(input: & mut Cursor<&[u8]>, count: usize, cb: F) -> Result<Vec<T>>
-    where F : Fn(& mut Cursor<&[u8]>) -> Result<T> {
+pub fn read_array_count<'a, T, F>(input: & mut Cursor<&[u8]>, count: usize, mut cb: F) -> Result<Vec<T>>
+    where F : FnMut(& mut Cursor<&[u8]>) -> Result<T> {
     let mut items = Vec::with_capacity(count);
     for _ in 0..count {
         items.push(cb(input)?);

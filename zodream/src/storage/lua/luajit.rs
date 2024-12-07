@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, collections::VecDeque};
 
 use luau::read_array_count;
 
@@ -80,8 +80,8 @@ pub fn lj_header(input: & mut Cursor<&[u8]>) -> Result<LuaHeader> {
 }
 
 pub fn lj_complex_constant<'a, 'h>(
-    stack: &'h RefCell<Vec<LuaChunk>>,
-    protos: &'h RefCell<Vec<LuaChunk>>,
+    stack: &'h mut VecDeque<LuaChunk>,
+    protos: &'h mut Vec<LuaChunk>,
     input: & mut Cursor<&[u8]>, 
     big_endian: bool
 ) -> Result<LuaConstant> {
@@ -110,10 +110,10 @@ pub fn lj_complex_constant<'a, 'h>(
             )))
         }
         BCDUMP_KGC_TAB => lj_tab(input, big_endian),
-        BCDUMP_KGC_CHILD => match stack.borrow_mut().pop() {
+        BCDUMP_KGC_CHILD => match stack.pop_front() {
             Some(proto) => {
-                let result = LuaConstant::Proto(protos.borrow().len());
-                protos.borrow_mut().push(proto);
+                let result = LuaConstant::Proto(protos.len());
+                protos.push(proto);
                 Ok(result)
             }
             None => Err(Error::form_str("pop proto")),
@@ -182,7 +182,7 @@ fn lj_num_constant<'a>(
 fn lj_proto<'a, 'h>(
     header: &'h LuaHeader,
     input: & mut Cursor<&[u8]>,
-    stack: &'h RefCell<Vec<LuaChunk>>,
+    stack: &'h mut VecDeque<LuaChunk>,
 ) -> Result<Option<LuaChunk>> {
     let size = input.read_leb128_u32()?;
     if size == 0 {
@@ -209,7 +209,7 @@ fn lj_proto<'a, 'h>(
     let last_line_defined = line_defined + numline;
 
 
-    let protos = RefCell::new(vec![]);
+    let mut protos = vec![];
 
     let instructions = read_array_count(input, instructions_count as usize, |i| {
         if header.big_endian {
@@ -226,7 +226,7 @@ fn lj_proto<'a, 'h>(
         })
     })?;
     let mut constants= read_array_count(input, complex_constants_count as usize, |i| {
-        lj_complex_constant(stack, &protos, i, header.big_endian)
+        lj_complex_constant(stack, &mut protos, i, header.big_endian)
     })?;
     let num_constants= read_array_count(input, numeric_constants_count as usize, |i| {
         lj_num_constant(i, header.big_endian)
@@ -282,7 +282,7 @@ fn lj_proto<'a, 'h>(
             } else {
                 None
             },
-            prototypes: protos.into_inner(),
+            prototypes: protos,
             ..Default::default()
         })
     )
@@ -297,13 +297,12 @@ pub fn lj_chunk<'h, 'a: 'h>(
         let namelen = input.read_leb128_u32()?;
         name = input.read_bytes(namelen as u64)?;
     }
-    let protos = RefCell::new(vec![]);
+    let mut protos: VecDeque<LuaChunk> = VecDeque::new();
 
-    while let Some(proto) = lj_proto(&header, input, &protos)? {
-        protos.borrow_mut().push(proto);
+    while let Some(proto) = lj_proto(&header, input, &mut protos)? {
+        protos.push_back(proto);
     }
-    let mut protos = protos.into_inner();
-    if let Some(mut chunk) = protos.pop().filter(|_| protos.is_empty()) {
+    if let Some(mut chunk) = protos.pop_front() {
         chunk.name = name.to_vec();
         Ok(chunk)
     } else {

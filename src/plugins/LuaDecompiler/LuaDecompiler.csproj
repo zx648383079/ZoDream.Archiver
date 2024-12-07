@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+    <ProjectReference Include="..\..\ZoDream.Shared.Language\ZoDream.Shared.Language.csproj" />
   </ItemGroup>
 
 </Project>

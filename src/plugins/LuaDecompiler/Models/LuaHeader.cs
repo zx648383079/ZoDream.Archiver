@@ -12,6 +12,10 @@ namespace ZoDream.LuaDecompiler.Models
         public byte SizeOfInstruction { get; set; }
         public byte SizeOfNumber { get; set; }
         public bool IsNumberIntegral { get; set; }
+        public ulong LuacInt { get; set; }
+        public double LuacNumber { get; set; }
+
+        public byte SizeOfUpValue { get; set; }
 
         public LuaHeaderFlags? Flags { get; set; }
     }

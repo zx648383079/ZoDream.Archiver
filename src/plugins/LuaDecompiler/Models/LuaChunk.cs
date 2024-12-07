@@ -19,11 +19,6 @@
 
         public LuaChunk[] PrototypeItems { get; internal set; } = [];
 
-        public (uint, uint)[] SourceLineItems { get; internal set; } = [];
-
-        public LuaLocalVar[] LocalItems { get; internal set; } = [];
-
-        public LuaUpValue[] UpValueItems { get; internal set; } = [];
-        public string[] UpValueNameItems { get; internal set; } = [];
+        public LuaDebugInfo DebugInfo { get; internal set; } = new();
     }
 }
