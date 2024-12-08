@@ -39,10 +39,11 @@ namespace ZoDream.LuaDecompiler
                 name = Encoding.UTF8.GetString(
                     reader.ReadBytes(reader.Read7BitEncodedInt()));
             }
+            var extractor = new JitOperandExtractor(data.Header.Version);
             var items = new Queue<LuaChunk>();
             while (true)
             {
-                var chunk = ReadChunk(reader, data.Header, items);
+                var chunk = ReadChunk(reader, data.Header, items, extractor);
                 if (chunk is null)
                 {
                     break;
@@ -61,7 +62,8 @@ namespace ZoDream.LuaDecompiler
         private LuaChunk? ReadChunk(
             BundleBinaryReader reader, 
             LuaHeader header,
-            Queue<LuaChunk> protoItems)
+            Queue<LuaChunk> protoItems,
+            JitOperandExtractor extractor)
         {
             var size = reader.Read7BitEncodedInt();
             if (size == 0)
@@ -88,8 +90,8 @@ namespace ZoDream.LuaDecompiler
                 lineCount = (ulong)reader.Read7BitEncodedInt64();
             }
             chunk.LastLineDefined = chunk.LineDefined + lineCount;
-            chunk.InstructionItems = reader.ReadArray(instructionsCount, (_, _) => {
-                return reader.ReadUInt32();
+            chunk.OpcodeItems = reader.ReadArray(instructionsCount, (_, _) => {
+                return extractor.Extract(reader.ReadBytes(4));
             });
             chunk.DebugInfo.UpValueItems = reader.ReadArray(chunk.UpValueCount, (_, _) => {
                 var code = reader.ReadUInt16();

@@ -15,5 +15,6 @@
         IMMEDIATE_SIGNED_INTEGER,
         IMMEDIATE_FLOAT,
         JUMP,
+        JUMP_NEGATIVE,
     }
 }

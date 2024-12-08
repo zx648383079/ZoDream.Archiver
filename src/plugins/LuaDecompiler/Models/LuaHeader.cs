@@ -6,7 +6,7 @@ namespace ZoDream.LuaDecompiler.Models
     {
         public LuaVersion Version { get; set; }
         public byte FormatVersion { get; set; }
-        public EndianType Endianness { get; set; } = EndianType.BigEndian;
+        public EndianType Endianness { get; set; } = EndianType.LittleEndian;
         public byte SizeOfInt { get; set; }
         public byte SizeOfSizeT { get; set; }
         public byte SizeOfInstruction { get; set; }

@@ -1,10 +1,14 @@
 ﻿using System;
-using ZoDream.LuaDecompiler.Models;
+using System.Reflection;
+using ZoDream.LuaDecompiler.Attributes;
 
-namespace ZoDream.LuaDecompiler
+namespace ZoDream.LuaDecompiler.Models
 {
-    public partial class LuaJitReader
+    public partial class JitOperandExtractor
     {
+        #region op
+
+        
 
         private static readonly JitOperand[] _opcodeMapV20 = [
             JitOperand.ISLT,
@@ -312,5 +316,49 @@ namespace ZoDream.LuaDecompiler
             JitOperand.FUNCCW
         ];
 
+
+        public static JitOperand ParseOperand(byte code, LuaHeader header)
+        {
+            return ParseOperand(code, header.Version);
+        }
+        public static JitOperand ParseOperand(byte code, LuaVersion version)
+        {
+            if (version == LuaVersion.LuaJit1)
+            {
+                if (code < (byte)JitOperand.ISTYPE)
+                {
+                    return (JitOperand)code;
+                }
+                if (code < (byte)JitOperand.TGETR - 2)
+                {
+                    return (JitOperand)(code + 2);
+                }
+                if (code >= (byte)JitOperand.TSETR - 3)
+                {
+                    return (JitOperand)(code + 4);
+                }
+                return (JitOperand)(code + 3);
+            }
+            if (version == LuaVersion.LuaJit2)
+            {
+                return _opcodeMapV20[code];
+            }
+            return _opcodeMapV21[code];
+        }
+
+        public static bool IsABCFormat(JitOperand operand)
+        {
+            var type = operand.GetType();
+            var name = Enum.GetName(operand);
+            if (name is null)
+            {
+                return false;
+            }
+            var field = type.GetField(name);
+            var attr = field?.GetCustomAttribute<JitOperandAttribute>();
+            return attr?.ArgsCount == 3;
+        }
+        #endregion
+        
     }
 }

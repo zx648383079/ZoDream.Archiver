@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using ZoDream.LuaDecompiler.Models;
@@ -15,13 +16,15 @@ namespace ZoDream.LuaDecompiler
         {
             var data = new LuaBytecode();
             var reader = ReadHeader(stream, data.Header);
-            data.MainChunk = ReadChunk(reader, data.Header);
+            var extractor = new OperandExtractor(data.Header.Version);
+            data.MainChunk = ReadChunk(reader, data.Header, extractor);
             return data;
         }
 
 
 
-        private LuaChunk ReadChunk(IBundleBinaryReader reader, LuaHeader header)
+        private LuaChunk ReadChunk(IBundleBinaryReader reader, 
+            LuaHeader header, OperandExtractor extractor)
         {
             var chunk = new LuaChunk();
             if (header.Version != LuaVersion.Lua52)
@@ -51,17 +54,15 @@ namespace ZoDream.LuaDecompiler
                 chunk.VarArg = new() { NeedArg = true, HasArg = true };
             }
             chunk.MaxStack = reader.ReadByte();
-            chunk.InstructionItems = ReadArray(reader, header, () => {
-                if (header.SizeOfInstruction == 4)
-                {
-                    return reader.ReadUInt32();
-                }
-                return 0u;
+            Debug.WriteLine($"p:{reader.Position:x}");
+            var opcodeItems = ReadArray(reader, header, () => {
+                return header.SizeOfInstruction == 4 ? reader.ReadUInt32() : 0;
             });
+            chunk.OpcodeItems = extractor.Extract(opcodeItems);
             chunk.ConstantItems = ReadArray(reader, header, () => {
                 return ReadConstant(reader, header);
             });
-            if (header.Version is LuaVersion.Lua53 or LuaVersion.Lua54)
+            if (header.Version >= LuaVersion.Lua53)
             {
                 chunk.DebugInfo.UpValueItems = ReadArray(reader, header, () => {
                     var val = new LuaUpValue()
@@ -77,7 +78,7 @@ namespace ZoDream.LuaDecompiler
                 });
             }
             chunk.PrototypeItems = ReadArray(reader, header, () => {
-                return ReadChunk(reader, header);
+                return ReadChunk(reader, header, extractor);
             });
             if (header.Version == LuaVersion.Lua52)
             {
@@ -173,7 +174,7 @@ namespace ZoDream.LuaDecompiler
 
         public T[] ReadArray<T>(IBundleBinaryReader reader, LuaHeader header, Func<T> cb)
         {
-            var count = header.Version == LuaVersion.Lua54 ? 
+            var count = header.Version >= LuaVersion.Lua54 ? 
                 (int)ReadLeb54(reader) : (int)ReadInt(reader, header);
             return reader.ReadArray(count, (_, _) => {
                 return cb.Invoke();
@@ -208,7 +209,7 @@ namespace ZoDream.LuaDecompiler
                 return string.Empty;
             }
             var buffer = reader.ReadBytes(length - 1);
-            if (header.Version != LuaVersion.Lua54)
+            if (header.Version < LuaVersion.Lua53)
             {
                 reader.ReadByte(); // 去除结尾的 0x0
             }
@@ -276,6 +277,7 @@ namespace ZoDream.LuaDecompiler
         private IBundleBinaryReader ReadHeader(Stream stream, LuaHeader header)
         {
             stream.Seek(Signature.Length, SeekOrigin.Current);
+            header.Endianness = EndianType.LittleEndian;
             header.Version = (LuaVersion)stream.ReadByte();
             header.FormatVersion = (byte)stream.ReadByte();
             if (header.Version is LuaVersion.Lua51 or LuaVersion.Lua52)
