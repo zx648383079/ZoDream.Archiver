@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -66,6 +67,7 @@ namespace ZoDream.LuaDecompiler
             JitOperandExtractor extractor)
         {
             var size = reader.Read7BitEncodedInt();
+            var nextPosition = reader.Position + size;
             if (size == 0)
             {
                 return null;
@@ -177,6 +179,7 @@ namespace ZoDream.LuaDecompiler
                 }
                 chunk.DebugInfo.LocalItems = [.. localItems];
             }
+            reader.BaseStream.Seek(nextPosition, SeekOrigin.Begin);
             return chunk;
         }
 
