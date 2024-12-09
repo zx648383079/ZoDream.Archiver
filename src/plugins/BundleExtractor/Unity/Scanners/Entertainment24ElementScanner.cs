@@ -12,19 +12,19 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public bool IsNaraka => package.Contains("naraka");
 
-        public Stream Open(string path)
+        public Stream Open(string fullPath)
         {
-            return File.OpenRead(path);
+            return File.OpenRead(fullPath);
         }
 
-        public IBundleBinaryReader OpenRead(string path)
+        public IBundleBinaryReader OpenRead(string fullPath)
         {
-            return OpenRead(Open(path));
+            return OpenRead(Open(fullPath), fullPath);
         }
 
-        public IBundleBinaryReader OpenRead(Stream input)
+        public IBundleBinaryReader OpenRead(Stream input, string fileName)
         {
-            return new BundleBinaryReader(input, EndianType.LittleEndian);
+            return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
         public bool TryRead(IBundleBinaryReader reader, object instance)

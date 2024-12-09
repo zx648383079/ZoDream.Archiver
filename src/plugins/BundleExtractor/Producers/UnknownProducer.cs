@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Engines;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
@@ -16,11 +18,19 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
+            if (options.Engine == UnityEngine.EngineName)
+            {
+                return new OtherBundleElementScanner(options.Package);
+            }
             return new BundleElementScanner();
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
+            if (options.Engine == UnityEngine.EngineName)
+            {
+                return new OtherBundleElementScanner(options.Package);
+            }
             return new BundleStorage();
         }
     }

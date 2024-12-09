@@ -139,8 +139,7 @@ namespace ZoDream.Archiver.ViewModels
             return TypeIndex switch
             {
                 4 => new OwnDictionaryWriter(fs, option),
-                3 => VersionIndex == 2 ? new ZoDream.Shared.Compression.Own.V2.OwnArchiveWriter(fs, option) 
-                        : new OwnArchiveWriter(fs, option),
+                3 => new OwnArchiveWriter(fs, (OwnVersion)VersionIndex, option),
                 2 or 1 => new TarArchiveWriter(fs, option),
                 _ => new ZipArchiveWriter(fs, option),
             };

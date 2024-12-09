@@ -5,6 +5,30 @@ namespace ZoDream.BundleExtractor.Unity
 {
     public static class FilenameHelper
     {
+
+        public static string GetExtension(string fileName)
+        {
+            var i = fileName.LastIndexOf('.');
+            if (i < 0)
+            {
+                return string.Empty;
+            }
+            return fileName[(i + 1)..].ToLower();
+        }
+        /// <summary>
+        /// 判断是否是普通文件类型
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool IsCommonFile(string filename)
+        {
+            return GetExtension(filename) switch
+            {
+                "dex" or "json" or "txt" or "so" or "dll" or "properties" or "xml" or "html" or "htm" => true,
+                _ => false,
+            };
+        }
+
         public static bool IsEngineResource(string? fileName)
         {
             return IsDefaultResource(fileName) || IsEditorResource(fileName);

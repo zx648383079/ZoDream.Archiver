@@ -6,6 +6,7 @@ using System.Linq;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression;
+using ZoDream.Shared.Compression.Lz4;
 using ZoDream.Shared.Exceptions;
 using ZoDream.Shared.IO;
 
@@ -34,12 +35,11 @@ namespace ZoDream.BundleExtractor
                 case CompressionType.Lz4:
                 case CompressionType.Lz4HC:
                     {
-                        var uncompressedBytes = new byte[uncompressedSize];
                         var compressedBytes = input.ToArray();
-                        var bytesWritten = LZ4Codec.Decode(compressedBytes, uncompressedBytes);
-                        if (bytesWritten != uncompressedSize)
+                        var uncompressedBytes = new Lz4Decompressor(uncompressedSize).Decompress(compressedBytes);
+                        if (uncompressedBytes.Length != uncompressedSize)
                         {
-                            throw new DecompressionFailedException("lz");
+                            throw new DecompressionFailedException($"{type} wants: {uncompressedSize} not {uncompressedBytes.Length}");
                         }
                         return new MemoryStream(uncompressedBytes);
                     }

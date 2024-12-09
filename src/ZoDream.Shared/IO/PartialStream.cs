@@ -54,7 +54,7 @@ namespace ZoDream.Shared.IO
         public override long Position {
             get => _current - _beginPosition;
             set {
-                Seek(value + _beginPosition, SeekOrigin.Begin);
+                Seek(value, SeekOrigin.Begin);
             }
         }
 

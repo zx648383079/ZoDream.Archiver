@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.Shared.Compression.Own;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.Tests
 {
@@ -19,6 +21,18 @@ namespace ZoDream.Tests
             var (c, d) = OwnDictionaryWriter.SplitByte(b);
             Assert.AreEqual(c, index);
             Assert.AreEqual(d, count);
+        }
+
+        //[TestMethod]
+        public void TestFinder()
+        {
+            var finder = new StreamFinder("UnityFS")
+            {
+                IsMatchFirst = true,
+            };
+            using var fs = File.OpenRead(".bundle");
+            var res = finder.MatchFile(fs);
+            Assert.IsTrue(res);
         }
     }
 }

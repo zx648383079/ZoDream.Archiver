@@ -1,7 +1,5 @@
 ﻿using K4os.Compression.LZ4;
-using System;
 using System.IO;
-using ZoDream.Shared.RustWrapper;
 
 namespace ZoDream.WallpaperExtractor.Models
 {

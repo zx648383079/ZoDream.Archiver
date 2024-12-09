@@ -7,10 +7,10 @@ namespace ZoDream.Shared.Bundle
         /// <summary>
         /// 打开文件
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="fullPath"></param>
         /// <returns></returns>
-        public Stream Open(string path);
-        public IBundleBinaryReader OpenRead(string path);
-        public IBundleBinaryReader OpenRead(Stream input);
+        public Stream Open(string fullPath);
+        public IBundleBinaryReader OpenRead(string fullPath);
+        public IBundleBinaryReader OpenRead(Stream input, string fileName);
     }
 }

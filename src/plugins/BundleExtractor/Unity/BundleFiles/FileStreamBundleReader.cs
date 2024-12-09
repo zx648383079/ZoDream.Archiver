@@ -6,7 +6,6 @@ using System.Threading;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -22,9 +21,9 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         {
             _reader = reader;
             _options = options;
-            _basePosition = reader.BaseStream.Position;
+            _basePosition = reader.Position;
             _header.Read(reader);
-            _headerLength = reader.BaseStream.Position - _basePosition;
+            _headerLength = reader.Position - _basePosition;
         }
 
         private readonly IBundleBinaryReader _reader;

@@ -18,7 +18,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {
-                IsMatchFirst = true
+                IsMatchFirst = true,
+                MaxPosition = 1024,
             };
             if (!finder.MatchFile(input))
             {
@@ -27,7 +28,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             finder = new StreamFinder("mr0k")
             {
-                IsMatchFirst = true
+                IsMatchFirst = true,
+                MaxPosition = 1024,
             };
             if (!finder.MatchFile(input))
             {

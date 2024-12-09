@@ -42,6 +42,10 @@ namespace ZoDream.Shared.IO
         /// 是否只需要找第一个
         /// </summary>
         public bool IsMatchFirst { get; set; } = true;
+        /// <summary>
+        /// 最多查找字数
+        /// </summary>
+        public long MaxPosition { get; set; }
 
         private long _position = -1;
 
@@ -70,6 +74,10 @@ namespace ZoDream.Shared.IO
                 }
                 MatchByte(code);
                 if (IsMatchFirst && IsMatched)
+                {
+                    break;
+                }
+                if (MaxPosition > 0 && _position >= MaxPosition)
                 {
                     break;
                 }

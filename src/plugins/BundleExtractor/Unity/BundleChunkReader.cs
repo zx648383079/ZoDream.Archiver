@@ -167,7 +167,7 @@ namespace ZoDream.BundleExtractor
 
         private void LoadFile(Stream stream, string fullName, CancellationToken token)
         {
-            var reader = _service.Get<IBundleStorage>().OpenRead(stream);
+            var reader = _service.Get<IBundleStorage>().OpenRead(stream, fullName);
             if (reader is null || reader.Length == 0)
             {
                 reader?.Dispose();

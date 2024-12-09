@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
-using System.IO.Pipelines;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,7 +13,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal partial class OtherBundleElementScanner
     {
-
         internal static void JumpNotZeroString(Stream input)
         {
             while (input.ReadByte() > 0)
@@ -28,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             input.Seek(4, SeekOrigin.Current); // version
             JumpNotZeroString(input); // unityVersion
             JumpNotZeroString(input); // unityRevision
-            return BitConverter.ToInt64(input.ReadBytes(8));
+            return BinaryPrimitives.ReadInt64BigEndian(input.ReadBytes(8));
         }
 
         private Stream ParseFakeHeader(Stream input)
@@ -36,6 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {
                 IsMatchFirst = true,
+                MaxPosition = 1024
             };
             while (finder.MatchFile(input))
             {
@@ -55,6 +55,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {
                 IsMatchFirst = true,
+                MaxPosition = 1024
             };
             if (finder.MatchFile(input))
             {

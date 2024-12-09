@@ -30,6 +30,12 @@ namespace ZoDream.Shared.Compression.Own
             _options = options;
         }
 
+        public OwnArchiveWriter(Stream stream, OwnVersion version, IArchiveOptions options)
+            : this(stream, OwnArchiveScheme.CreateKey(options), new OwnFileHeader(true) { Version = version})
+        {
+            
+        }
+
         private readonly IOwnKey _key;
         private readonly OwnFileHeader _header;
         private readonly Stream BaseStream;
