@@ -348,17 +348,21 @@ namespace ZoDream.LuaDecompiler.Models
 
         public static bool IsABCFormat(JitOperand operand)
         {
+            return GetAttribute(operand)?.ArgsCount == 3;
+        }
+
+        public static JitOperandAttribute? GetAttribute(JitOperand operand)
+        {
             var type = operand.GetType();
             var name = Enum.GetName(operand);
             if (name is null)
             {
-                return false;
+                return null;
             }
             var field = type.GetField(name);
-            var attr = field?.GetCustomAttribute<JitOperandAttribute>();
-            return attr?.ArgsCount == 3;
+            return field?.GetCustomAttribute<JitOperandAttribute>();
         }
         #endregion
-        
+
     }
 }

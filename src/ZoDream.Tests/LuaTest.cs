@@ -16,7 +16,7 @@ namespace ZoDream.Tests
         public void TestDecompiler()
         {
             var root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../zodream/tests"));
-            var path = Path.Combine(root, "luajit//test.luac");
+            var path = Path.Combine(root, "luajit//float.luac");
             var scheme = new LuaScheme();
             using var fs = File.OpenRead(path);
             var res = scheme.Open(fs, string.Empty, string.Empty);

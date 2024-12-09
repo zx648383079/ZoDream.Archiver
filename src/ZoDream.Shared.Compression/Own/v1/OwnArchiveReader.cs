@@ -10,49 +10,48 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Compression.Own
 {
-    public class OwnArchiveReader(Stream stream, IOwnKey key) : IArchiveReader
+    public class OwnArchiveReader : IArchiveReader
     {
+
+        public OwnArchiveReader(Stream stream, IOwnKey key)
+        {
+            _key = key;
+            BaseStream = stream;
+            _header.Read(stream);
+            _compressor = _header.Version switch
+            {
+                OwnVersion.V3 => new V3.OwnArchiveCompressor(key),
+                OwnVersion.V2 => new V2.OwnArchiveCompressor(key),
+                _ => new OwnArchiveCompressor(key)
+            };
+        }
+
         public OwnArchiveReader(Stream stream, IArchiveOptions options)
             : this (stream, OwnArchiveScheme.CreateKey(options))
         {
             _options = options;
         }
 
+        private readonly IOwnKey _key;
+        private readonly Stream BaseStream;
         private readonly IArchiveOptions? _options;
         private readonly OwnFileHeader _header = new();
+        private readonly IOwnArchiveCompressor _compressor;
         private bool _nextPadding = false;
 
 
         private long ReadLength()
         {
-            var code = stream.ReadByte();
-            while (code == 0)
+            while (true)
             {
+                var length = OwnHelper.ReadLength(BaseStream);
+                if (length != 0)
+                {
+                    return length;
+                }
                 // 跳过长度为0的乱字符
                 _nextPadding = !_nextPadding;
-                code = stream.ReadByte();
             }
-            if (code <= 250)
-            {
-                return code;
-            }
-            if (code <= 252)
-            {
-                return stream.ReadByte() + code * (code - 250);
-            }
-            var len = code - 251;
-            var buffer = new byte[len];
-            stream.Read(buffer, 0, len);
-            var res = 0L;
-            for (var j = len - 2; j >= 0; j--)
-            {
-                res += (long)Math.Pow(code, j);
-            }
-            for (var i = 0; i < len; i++)
-            {
-                res += (long)(buffer[i] * Math.Pow(256, len - i - 1));
-            }
-            return res;
         }
 
         public string ReadName()
@@ -62,8 +61,12 @@ namespace ZoDream.Shared.Compression.Own
                 return string.Empty;
             }
             var length = ReadLength();
+            if (length < 0)
+            {
+                return string.Empty;
+            }
             var buffer = new byte[length];
-            var deflator = new OwnDeflateStream(stream, key, _nextPadding);
+            var deflator = _compressor.CreateDeflator(BaseStream, length, _nextPadding);
             deflator.ReadExactly(buffer);
             _nextPadding = !_nextPadding;
             return Encoding.UTF8.GetString(buffer);
@@ -75,7 +78,7 @@ namespace ZoDream.Shared.Compression.Own
             {
                 return;
             }
-            var deflator = new OwnDeflateStream(stream, key, _nextPadding);
+            var deflator = _compressor.CreateDeflator(BaseStream, length, _nextPadding);
             deflator.CopyTo(output, length);
             _nextPadding = !_nextPadding;
         }
@@ -87,21 +90,20 @@ namespace ZoDream.Shared.Compression.Own
 
         private void JumpPart(long length)
         {
-            stream.Seek(length, SeekOrigin.Current);
-            key.Seek(length, SeekOrigin.Current);
+            BaseStream.Seek(length, SeekOrigin.Current);
+            _key.Seek(length, SeekOrigin.Current);
             _nextPadding = !_nextPadding;
         }
 
         public IEnumerable<string> ReadFile()
         {
-            IsSupport();
             if (!_header.Multiple)
             {
                 var fileName = ReadName();
                 yield return fileName;
                 yield break;
             }
-            while (stream.Position < stream.Length)
+            while (BaseStream.Position < BaseStream.Length)
             {
                 var name = ReadName();
                 JumpPart();
@@ -133,14 +135,13 @@ namespace ZoDream.Shared.Compression.Own
 
         public IEnumerable<string> ReadFile(string folder)
         {
-            IsSupport();
             if (!_header.Multiple)
             {
                 var fileName = ReadToFile(folder);
                 yield return fileName;
                 yield break;
             }
-            while (stream.Position < stream.Length)
+            while (BaseStream.Position < BaseStream.Length)
             {
                 var name = ReadToFile(folder);
                 yield return name;
@@ -149,14 +150,13 @@ namespace ZoDream.Shared.Compression.Own
 
         public IEnumerable<string> ReadFile(string folder, params string[] items)
         {
-            IsSupport();
             if (!_header.Multiple)
             {
                 var fileName = ReadToFile(folder);
                 yield return fileName;
                 yield break;
             }
-            while (stream.Position < stream.Length)
+            while (BaseStream.Position < BaseStream.Length)
             {
                 var name = ReadName();
                 if (!items.Contains(name))
@@ -169,32 +169,16 @@ namespace ZoDream.Shared.Compression.Own
             }
         }
 
-        public bool IsSupport()
-        {
-            stream.Seek(0, SeekOrigin.Begin);
-            try
-            {
-                _header.Read(stream);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
-            IsSupport();
             if (!_header.Multiple)
             {
                 var fileName = ReadName();
                 yield return new ReadOnlyEntry(fileName, ReadLength());
                 yield break;
             }
-            while (stream.Position < stream.Length)
+            while (BaseStream.Position < BaseStream.Length)
             {
                 var name = ReadName();
                 var length = ReadLength();
@@ -205,14 +189,13 @@ namespace ZoDream.Shared.Compression.Own
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
-            IsSupport();
             if (!_header.Multiple)
             {
                 ReadName();
                 ReadStream(output);
                 return;
             }
-            while (stream.Position < stream.Length)
+            while (BaseStream.Position < BaseStream.Length)
             {
                 var name = ReadName();
                 if (entry.Name != name)
@@ -233,16 +216,16 @@ namespace ZoDream.Shared.Compression.Own
                 {
                     return;
                 }
-                progressFn?.Invoke((double)stream.Position / stream.Length);
+                progressFn?.Invoke((double)BaseStream.Position / BaseStream.Length);
             }
         }
 
         public void Dispose()
         {
-            key.Dispose();
+            _key.Dispose();
             if (_options?.LeaveStreamOpen == false)
             {
-                stream.Dispose();
+                BaseStream.Dispose();
             }
         }
     }

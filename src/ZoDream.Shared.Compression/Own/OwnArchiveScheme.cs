@@ -23,10 +23,6 @@ namespace ZoDream.Shared.Compression.Own
             {
                 return null;
             }
-            if (header.Version == OwnVersion.V2)
-            {
-                return new V2.OwnArchiveReader(stream, options);
-            }
             return new OwnArchiveReader(stream, options);
         }
 

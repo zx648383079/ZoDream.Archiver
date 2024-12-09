@@ -8,10 +8,11 @@ using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.BundleExtractor.Unity.CompressedFiles;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    public partial class UnityBundleScheme : IArchiveScheme
+    public partial class UnityBundleScheme : IArchiveScheme, IBundleArchiveScheme
     {
 
         #region ArchiveReader
@@ -26,33 +27,40 @@ namespace ZoDream.BundleExtractor
         }
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            var reader = OpenBundle(stream);
+            return Open(new BundleBinaryReader(stream, EndianType.BigEndian), filePath, fileName, options);
+        }
+        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            var r = OpenBundle(reader);
             if (reader is not null)
             {
-                return reader;
+                return r;
             }
-            IArchiveScheme[] schemes = [
+            IBundleArchiveScheme[] schemes = [
                 new BrotliFileScheme(),
                 new GZipFileScheme(),
                 new SerializedFileScheme(),
             ];
             foreach (var scheme in schemes) 
             {
-                reader = scheme.Open(stream, filePath, fileName, options);
+                r = scheme.Open(reader, filePath, fileName, options);
                 if (reader is not null)
                 {
-                    return reader;
+                    return r;
                 }
             }
-            return reader;
+            return null;
         }
 
         public static IArchiveReader? OpenBundle(Stream stream, IArchiveOptions? options = null)
         {
-            var pos = stream.Position;
-            var reader = new BundleBinaryReader(stream, Shared.Models.EndianType.BigEndian);
+            return OpenBundle(new BundleBinaryReader(stream, EndianType.BigEndian));
+        }
+        public static IArchiveReader? OpenBundle(IBundleBinaryReader reader, IArchiveOptions? options = null)
+        {
+            var pos = reader.Position;
             var found = reader.ReadStringZeroTerm(0x20, out var signature);
-            stream.Position = pos;
+            reader.Position = pos;
             if (!found)
             {
                 return null;

@@ -2,13 +2,14 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 {
-    public class GZipFileScheme : IArchiveScheme
+    public class GZipFileScheme : IArchiveScheme, IBundleArchiveScheme
     {
         public IArchiveWriter Create(Stream stream, IArchiveOptions? options = null)
         {
@@ -22,14 +23,13 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 return false;
             }
             var pos = stream.Position;
-            var reader = new EndianReader(stream, EndianType.BigEndian);
+
             try
             {
-                return reader.ReadUInt16() == 0x1F8B;
+                return stream.ReadByte() == 0x1F && stream.ReadByte() == 0x8B;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
                 return false;
             } finally
             {
@@ -46,6 +46,11 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             return new StreamArchiveReader(fileName,
                 new GZipStream(stream, CompressionMode.Decompress, options?.LeaveStreamOpen != false),
                 options);
+        }
+
+        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            return Open(reader.BaseStream, filePath, fileName, options);
         }
     }
 }

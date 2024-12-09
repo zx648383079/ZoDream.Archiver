@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 {
-    public class BrotliFileScheme : IArchiveScheme
+    public class BrotliFileScheme : IArchiveScheme, IBundleArchiveScheme
     {
         private static ReadOnlySpan<byte> BrotliSignature => "UnityWeb Compressed Content (brotli)"u8;
         public IArchiveWriter Create(Stream stream, IArchiveOptions? options = null)
@@ -51,10 +51,10 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 return false;
             }
 
-            Span<byte> buffer = stackalloc byte[BrotliSignature.Length];
+            var buffer = new byte[BrotliSignature.Length];
             stream.ReadExactly(buffer);
             stream.Position = position;
-            return buffer.SequenceEqual(BrotliSignature);
+            return buffer.StartsWith(BrotliSignature);
         }
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
@@ -66,6 +66,11 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             return new StreamArchiveReader(fileName,
                 new BrotliStream(stream, CompressionMode.Decompress, options?.LeaveStreamOpen != false),
                 options);
+        }
+
+        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            return Open(reader.BaseStream, filePath, fileName, options);
         }
     }
 }

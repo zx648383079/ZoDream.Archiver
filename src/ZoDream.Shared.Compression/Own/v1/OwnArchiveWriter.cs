@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -17,6 +16,12 @@ namespace ZoDream.Shared.Compression.Own
             _key = key;
             _header = header;
             _header.Write(stream);
+            _compressor = _header.Version switch
+            {
+                OwnVersion.V3 => new V3.OwnArchiveCompressor(key),
+                OwnVersion.V2 => new V2.OwnArchiveCompressor(key),
+                _ => new OwnArchiveCompressor(key)
+            };
         }
 
         public OwnArchiveWriter(Stream stream, IArchiveOptions options)
@@ -28,6 +33,7 @@ namespace ZoDream.Shared.Compression.Own
         private readonly IOwnKey _key;
         private readonly OwnFileHeader _header;
         private readonly Stream BaseStream;
+        private readonly IOwnArchiveCompressor _compressor;
         private readonly IArchiveOptions? _options;
         private bool _nextPadding = false;
 
@@ -36,57 +42,14 @@ namespace ZoDream.Shared.Compression.Own
             var buffer = Encoding.UTF8.GetBytes(fileName);
             WriteLength(buffer.Length);
             using var ms = new MemoryStream(buffer);
-            var inflator = new OwnInflateStream(ms, _key, _nextPadding);
+            var inflator = _compressor.CreateInflator(ms, buffer.Length, _nextPadding);
             inflator.CopyTo(BaseStream);
             _nextPadding = !_nextPadding;
         }
 
         private void WriteLength(long length)
         {
-            if (length <= 250)
-            {
-                BaseStream.WriteByte((byte)length);
-                return;
-            }
-            var i = 0;
-            var basic = 250;
-            // 相加
-            for (i = 251; i <= 252; i++)
-            {
-                var plus = i * (i - basic);
-                if (length <= plus + 255)
-                {
-                    BaseStream.WriteByte((byte)i);
-                    BaseStream.WriteByte((byte)(length - plus));
-                    return;
-                }
-            }
-            // 倍数
-            basic = 252;
-            i = 253;
-            for (; i <= 255; i++)
-            {
-                var len = i - basic + 1;
-                var buffer = new byte[len + 1];
-                buffer[len] = (byte)i;
-                var b = 0L;
-                for (var j = len - 2; j >= 0; j--)
-                {
-                    b += (long)Math.Pow(i, j);
-                }
-                var rate = length - b;
-                for (var j = 0; j < len; j++)
-                {
-                    buffer[j] = (byte)(rate % 256);
-                    rate /= 256;
-                }
-                if (rate == 0)
-                {
-                    BaseStream.Write(buffer.Reverse().ToArray());
-                    break;
-                }
-            }
-
+            OwnHelper.WriteLength(BaseStream, length);
         }
 
 
@@ -94,7 +57,7 @@ namespace ZoDream.Shared.Compression.Own
         {
             var length = input.Length - input.Position;
             WriteLength(length);
-            var inflator = new OwnInflateStream(input, _key, _nextPadding);
+            var inflator = _compressor.CreateInflator(input, length, _nextPadding);
             inflator.CopyTo(BaseStream, length);
             _nextPadding = !_nextPadding;
         }

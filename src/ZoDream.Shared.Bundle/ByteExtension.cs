@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -11,6 +12,26 @@ namespace ZoDream.Shared.Bundle
         /// <param name="value"></param>
         /// <returns></returns>
         public static bool StartsWith(this byte[] buffer, byte[] value)
+        {
+            return IsMatch(buffer, 0, value, 0, value.Length);
+        }
+        /// <summary>
+        /// 匹配字节
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool StartsWith(this byte[] buffer, Span<byte> value)
+        {
+            return IsMatch(buffer, 0, value, 0, value.Length);
+        }
+        /// <summary>
+        /// 匹配字节
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool StartsWith(this byte[] buffer, ReadOnlySpan<byte> value)
         {
             return IsMatch(buffer, 0, value, 0, value.Length);
         }
@@ -100,6 +121,50 @@ namespace ZoDream.Shared.Bundle
             if (valCount == 0 
                 || valOffset + valCount > value.Length
                 ||  offset + valCount > buffer.Length)
+            {
+                return false;
+            }
+            for (var i = 0; i < valCount; i++)
+            {
+                if (buffer[offset + i] != value[valOffset + i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool IsMatch(this byte[] buffer,
+            int offset,
+            Span<byte> value,
+            int valOffset,
+            int valCount)
+        {
+            if (valCount == 0
+                || valOffset + valCount > value.Length
+                || offset + valCount > buffer.Length)
+            {
+                return false;
+            }
+            for (var i = 0; i < valCount; i++)
+            {
+                if (buffer[offset + i] != value[valOffset + i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool IsMatch(this byte[] buffer,
+            int offset,
+            ReadOnlySpan<byte> value,
+            int valOffset,
+            int valCount)
+        {
+            if (valCount == 0
+                || valOffset + valCount > value.Length
+                || offset + valCount > buffer.Length)
             {
                 return false;
             }

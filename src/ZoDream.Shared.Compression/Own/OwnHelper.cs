@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SharpCompress.Compressors.Xz;
+using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -39,5 +41,115 @@ namespace ZoDream.Shared.Compression.Own
             var res = val % max;
             return res >= 0 ? res : (res + max);
         }
+
+
+        public static long ReadLength(Stream input)
+        {
+            var code = input.ReadByte();
+            if (code <= 250)
+            {
+                return code;
+            }
+            if (code <= 252)
+            {
+                return input.ReadByte() + code * (code - 250);
+            }
+            var len = code - 251;
+            var buffer = new byte[len];
+            input.ReadExactly(buffer, 0, len);
+            var res = 0L;
+            for (var j = len - 2; j >= 0; j--)
+            {
+                res += (long)Math.Pow(code, j);
+            }
+            for (var i = 0; i < len; i++)
+            {
+                res += (long)(buffer[i] * Math.Pow(256, len - i - 1));
+            }
+            return res;
+        }
+
+        public static long ReadLength(byte[] buffer, out int usedCount)
+        {
+            return ReadLength(buffer, 0, out usedCount);
+        }
+
+        public static long ReadLength(byte[] buffer, int offset, out int usedCount)
+        {
+            var code = buffer[offset++];
+            usedCount = 1;
+            if (code <= 250)
+            {
+                return code;
+            }
+            if (code <= 252)
+            {
+                usedCount++;
+                return buffer[offset] + code * (code - 250);
+            }
+            var len = code - 251;
+            var res = 0L;
+            for (var j = len - 2; j >= 0; j--)
+            {
+                res += (long)Math.Pow(code, j);
+            }
+            for (var i = 0; i < len; i++)
+            {
+                res += (long)(buffer[i + offset] * Math.Pow(256, len - i - 1));
+            }
+            usedCount += len;
+            return res;
+        }
+
+
+        public static void WriteLength(Stream input, long length)
+        {
+            input.Write(WriteLength(length));
+        }
+
+        public static byte[] WriteLength(long length)
+        {
+            if (length <= 250)
+            {
+                return [(byte)length];
+            }
+            var i = 0;
+            var basic = 250;
+            // 相加
+            for (i = 251; i <= 252; i++)
+            {
+                var plus = i * (i - basic);
+                if (length <= plus + 255)
+                {
+                    return [(byte)i, (byte)(length - plus)];
+                }
+            }
+            // 倍数
+            basic = 252;
+            i = 253;
+            for (; i <= 255; i++)
+            {
+                var len = i - basic + 1;
+                var buffer = new byte[len + 1];
+                buffer[len] = (byte)i;
+                var b = 0L;
+                for (var j = len - 2; j >= 0; j--)
+                {
+                    b += (long)Math.Pow(i, j);
+                }
+                var rate = length - b;
+                for (var j = 0; j < len; j++)
+                {
+                    buffer[j] = (byte)(rate % 256);
+                    rate /= 256;
+                }
+                if (rate == 0)
+                {
+                    return buffer.Reverse().ToArray();
+                }
+            }
+            throw new ArgumentOutOfRangeException();
+        }
+
     }
 }

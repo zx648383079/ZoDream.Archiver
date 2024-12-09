@@ -149,15 +149,15 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
-            var fs = _service.Get<IBundleStorage>().Open(fullName);
-            if (fs is null || fs.Length == 0)
+            var reader = _service.Get<IBundleStorage>().OpenRead(fullName);
+            if (reader is null || reader.Length == 0)
             {
-                fs?.Dispose();
+                reader?.Dispose();
                 return;
             }
             try
             {
-                LoadFile(fs, fullName, token);
+                LoadFile(reader, fullName, token);
             }
             catch (Exception e)
             {
@@ -165,9 +165,24 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-
-
         private void LoadFile(Stream stream, string fullName, CancellationToken token)
+        {
+            var reader = _service.Get<IBundleStorage>().OpenRead(stream);
+            if (reader is null || reader.Length == 0)
+            {
+                reader?.Dispose();
+                return;
+            }
+            try
+            {
+                LoadFile(reader, fullName, token);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.Message);
+            }
+        }
+        private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
         {
             using var reader = _scheme.Open(stream, fullName, Path.GetFileName(fullName), new ArchiveOptions()
             {
@@ -180,7 +195,7 @@ namespace ZoDream.BundleExtractor
             }
             if (reader is null)
             {
-                _resourceItems.TryAdd(Path.GetFileName(fullName), stream);
+                _resourceItems.TryAdd(Path.GetFileName(fullName), stream.BaseStream);
                 // stream.Dispose();
                 return;
             }

@@ -170,6 +170,7 @@ namespace ZoDream.LuaDecompiler
                     var item = new LuaLocalVar();
                     if (internalVarType >= 7)
                     {
+                        reader.Position--;
                         item.Name = reader.ReadStringZeroTerm();
                     }
                     item.StartPc = lastPc + (ulong)reader.Read7BitEncodedInt64();

@@ -2,12 +2,11 @@
 using System.IO;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
-    public class SerializedFileScheme : IArchiveScheme
+    public class SerializedFileScheme : IArchiveScheme, IBundleArchiveScheme
     {
         public IArchiveWriter Create(Stream stream, IArchiveOptions? options = null)
         {
@@ -16,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public bool IsReadable(Stream stream)
         {
-            return IsReadable(new EndianReader(stream, EndianType.BigEndian));
+            return IsReadable(new BundleBinaryReader(stream, EndianType.BigEndian));
         }
 
 
@@ -31,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return new SerializedFileReader(r, filePath, options);
         }
 
-        private static bool IsReadable(EndianReader reader)
+        private static bool IsReadable(IBundleBinaryReader reader)
         {
             var initialPosition = reader.BaseStream.Position;
             if (reader.BaseStream.Position + SerializedFileHeader.HeaderMinSize > reader.BaseStream.Length)
@@ -60,6 +59,15 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 && headerDefinedFileSize >= SerializedFileHeader.HeaderMinSize + SerializedFileHeader.MetadataMinSize
                 && reader.BaseStream.Length >= 0
                 && headerDefinedFileSize == reader.BaseStream.Length;
+        }
+
+        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            if (!IsReadable(reader))
+            {
+                return null;
+            }
+            return new SerializedFileReader(reader, filePath, options);
         }
     }
 }

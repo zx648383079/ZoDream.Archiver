@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
 {
-    public class ArchiveBundleReader(EndianReader _reader, IArchiveOptions? _options) : IArchiveReader
+    public class ArchiveBundleReader(IBundleBinaryReader _reader, IArchiveOptions? _options) : IArchiveReader
     {
         public void Dispose()
         {

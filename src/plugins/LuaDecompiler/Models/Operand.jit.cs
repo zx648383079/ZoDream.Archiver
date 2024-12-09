@@ -100,7 +100,7 @@ namespace ZoDream.LuaDecompiler.Models
         [JitOperand("POW", JitOperandFormat.DST, JitOperandFormat.VAR, JitOperandFormat.VAR)]
         POW, // {A} = {B} ^ {C} (pow)
         [JitOperand("CAT", JitOperandFormat.DST, JitOperandFormat.RBS, JitOperandFormat.RBS)]
-        CAT, // {A} = {concaJitOperandFormat.from_B_to_C}
+        CAT, // {A} = {concat_from_B_to_C}
 
         // Constant ops.
 
