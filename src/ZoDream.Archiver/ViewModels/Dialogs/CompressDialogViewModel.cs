@@ -34,7 +34,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        public string[] VersionItems => ["默认", "v1", "v2"];
+        public string[] VersionItems => ["默认", "v1", "v2", "v3"];
 
         private int _versionIndex;
 

@@ -11,7 +11,7 @@ namespace ZoDream.Shared.Language
         public void Write(Stream output, GlobalExpression data)
         {
             Writer = new StreamWriter(output);
-            this.Visit(data);
+            Visit(data);
             Writer.Close();
         }
     }

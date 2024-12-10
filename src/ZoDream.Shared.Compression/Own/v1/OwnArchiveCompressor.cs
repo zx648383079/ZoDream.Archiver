@@ -6,12 +6,12 @@ namespace ZoDream.Shared.Compression.Own
     {
         public Stream CreateDeflator(Stream input, long length, bool padding)
         {
-            return new OwnInflateStream(input, key, padding);
+            return new OwnDeflateStream(input, key, padding);
         }
 
         public Stream CreateInflator(Stream input, long length, bool padding)
         {
-            return new OwnDeflateStream(input, key, padding);
+            return new OwnInflateStream(input, key, padding);
         }
     }
 }

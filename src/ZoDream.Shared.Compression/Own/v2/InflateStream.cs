@@ -7,7 +7,7 @@ namespace ZoDream.Shared.Compression.Own.V2
     public class OwnInflateStream(Stream stream, IOwnKey key, byte[] iv, bool padding = true) : InflateStream(stream), IInflateStream
     {
         private long _position;
-
+        public override bool CanSeek => false;
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException(string.Empty);
@@ -21,7 +21,7 @@ namespace ZoDream.Shared.Compression.Own.V2
                 var code = key.ReadByte();
                 var pos = _position % iv.Length;
                 var index = offset + i;
-                iv[pos] = buffer[index] = (byte)(OwnHelper.Clamp(
+                iv[pos] = buffer[index] = (byte)((byte)OwnHelper.Clamp(
                     padding ? (buffer[index] + code) : (buffer[index] - code)
                     , 256) ^ iv[pos]);
                 _position ++;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -51,17 +52,19 @@ namespace ZoDream.Shared.IO
             {
                 throw new NotSupportedException(string.Empty);
             }
-            var buffer = new byte[Math.Min(length, 1024 * 5)];
+            var maxLength = (int)Math.Min(length, 1024 * 5);
+            var buffer = ArrayPool<byte>.Shared.Rent(maxLength);
             var len = 0L;
             while (len < length)
             {
-                var res = input.Read(buffer, 0, (int)Math.Min(buffer.Length, length - len));
+                var res = input.Read(buffer, 0, (int)Math.Min(maxLength, length - len));
                 if (res == 0)
                 {
                     break;
                 }
                 len += res;
             }
+            ArrayPool<byte>.Shared.Return(buffer); 
         }
         /// <summary>
         /// 复制指定长度的内容
@@ -72,11 +75,12 @@ namespace ZoDream.Shared.IO
         /// <returns></returns>
         public static long CopyTo(this Stream input, Stream output, long length)
         {
-            var buffer = new byte[Math.Min(length, 1024 * 5)];
+            var maxLength = (int)Math.Min(length, 1024 * 5);
+            var buffer = ArrayPool<byte>.Shared.Rent(maxLength);
             var len = 0L;
             while (len < length)
             {
-                var res = input.Read(buffer, 0, (int)Math.Min(buffer.Length, length - len));
+                var res = input.Read(buffer, 0, (int)Math.Min(maxLength, length - len));
                 if (res == 0)
                 {
                     break;
@@ -84,6 +88,7 @@ namespace ZoDream.Shared.IO
                 output.Write(buffer, 0, res);
                 len += res;
             }
+            ArrayPool<byte>.Shared.Return(buffer);
             return len;
         }
         /// <summary>
@@ -97,16 +102,17 @@ namespace ZoDream.Shared.IO
             Func<byte[], byte[]> cb)
         {
             var length = input.Length - input.Position;
-            var buffer = new byte[Math.Min(length, 1024 * 5)];
+            var maxLength = (int)Math.Min(length, 1024 * 5);
+            var buffer = ArrayPool<byte>.Shared.Rent(maxLength);
             var len = 0L;
             while (len < length)
             {
-                var res = input.Read(buffer, 0, (int)Math.Min(buffer.Length, length - len));
+                var res = input.Read(buffer, 0, (int)Math.Min(maxLength, length - len));
                 if (res == 0)
                 {
                     break;
                 }
-                var compressed = res == buffer.Length ? buffer : buffer.Take(res).ToArray();
+                var compressed = res == maxLength ? buffer : buffer.Take(res).ToArray();
                 var uncompressed = cb.Invoke(compressed);
                 res = uncompressed.Length;
                 if (res == 0)
@@ -116,6 +122,7 @@ namespace ZoDream.Shared.IO
                 output.Write(uncompressed, 0, res);
                 len += res;
             }
+            ArrayPool<byte>.Shared.Return(buffer);
             return len;
         }
 

@@ -70,6 +70,49 @@ namespace ZoDream.Shared.Bundle
             return fileItems.Select(i => new BundleChunk(i));
         }
 
+        public IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount)
+        {
+            var items = new List<string>();
+            var options = new EnumerationOptions()
+            {
+                RecurseSubdirectories = true,
+                MatchType = MatchType.Win32,
+                AttributesToSkip = FileAttributes.None,
+                IgnoreInaccessible = false
+            };
+            foreach (var item in fileItems)
+            {
+                if (File.Exists(item))
+                {
+                    yield return new BundleChunk(item);
+                }
+                var res = new FileSystemEnumerable<string>(item, delegate (ref FileSystemEntry entry)
+                {
+                    return entry.ToSpecifiedFullPath();
+                }, options)
+                {
+                    ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
+                    {
+                        return !entry.IsDirectory;
+                    }
+                };
+                foreach (var it in res)
+                {
+                    items.Add(it);
+                    if (items.Count >= maxFileCount)
+                    {
+                        yield return new BundleChunk(item, [.. items]);
+                        items.Clear();
+                    }
+                }
+                if (items.Count > 0)
+                {
+                    yield return new BundleChunk(item, [.. items]);
+                    items.Clear();
+                }
+            }
+        }
+
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
         {
             foreach (var item in GetFiles())

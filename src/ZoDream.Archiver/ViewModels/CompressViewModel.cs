@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -142,24 +143,33 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     return;
                 }
-                if (writer is OwnDictionaryWriter d)
+                try
                 {
-                    d.AddFile(FileItems.Select(i => i.FullPath).ToArray(), 
-                        app.UpdateProgress, token);
-                    app.CloseProgress();
-                    return;
-                }
-                var i = 0D;
-                foreach (var item in FileItems)
-                {
-                    if (token.IsCancellationRequested)
+                    if (writer is OwnDictionaryWriter d)
                     {
+                        d.AddFile(FileItems.Select(i => i.FullPath).ToArray(),
+                            app.UpdateProgress, token);
+                        app.CloseProgress();
+                        app.Success("压缩已完成！");
                         return;
                     }
-                    writer.AddEntry(item.Name, item.FullPath);
-                    app.UpdateProgress(++ i / FileItems.Count);
+                    var i = 0D;
+                    foreach (var item in FileItems)
+                    {
+                        if (token.IsCancellationRequested)
+                        {
+                            return;
+                        }
+                        writer.AddEntry(item.Name, item.FullPath);
+                        app.UpdateProgress(++i / FileItems.Count);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
                 }
                 app.CloseProgress();
+                app.Success("压缩已完成！");
             }, token);
             
         }

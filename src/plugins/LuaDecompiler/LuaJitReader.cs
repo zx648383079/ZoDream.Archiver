@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq.Expressions;
+using System.Net;
 using System.Reflection.Emit;
 using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Language;
@@ -272,40 +274,83 @@ namespace ZoDream.LuaDecompiler
                         Translate(chunk, index, (int)code.D, attr.CDType)
                         );
                 case JitOperand.KNIL:
-                    break;
+                    {
+                        var items = new List<Expression>();
+                        for (var i = code.A; i <= code.D; i++)
+                        {
+                            items.Add(
+                                Translate(chunk, index, i, JitOperandFormat.VAR)
+                             );
+                        }
+                        return GlobalExpression.Assign(items, Expression.Constant(null));
+                    }
                 case JitOperand.UGET:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)code.D, attr.CDType)
+                        );
                 case JitOperand.USETV:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)code.D, attr.CDType)
+                        );
                 case JitOperand.USETS:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)code.D, attr.CDType)
+                        );
                 case JitOperand.USETN:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)code.D, attr.CDType)
+                        );
                 case JitOperand.USETP:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)code.D, attr.CDType)
+                        );
                 case JitOperand.UCLO:
                     break;
                 case JitOperand.FNEW:
                     return GlobalExpression.Function(TranslateName(chunk, index, code.A, attr.AType), Translate(chunk, index, (int)code.D, attr.CDType));
                 case JitOperand.TNEW:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        GlobalExpression.NewMap(
+                            code.D & 0b0000011111111111,
+                            (uint)Math.Pow(2, code.D >> 11)
+                            )
+                        );
                 case JitOperand.TDUP:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        GlobalExpression.Clone(Translate(chunk, index, (int)code.D, attr.CDType))
+                        );
                 case JitOperand.GGET:
-                    break;
+                    return Expression.Assign(
+                        Translate(chunk, index, code.A, attr.AType),
+                        Expression.ArrayIndex(
+                            Expression.Constant("_env"),
+                            Translate(chunk, index, (int)code.D, attr.CDType))
+                        );
                 case JitOperand.GSET:
-                    break;
+                    return Expression.Assign(
+                        Expression.ArrayIndex(
+                            Expression.Constant("_env"),
+                            Translate(chunk, index, (int)code.D, attr.CDType)),
+                        Translate(chunk, index, code.A, attr.AType)
+                        );
                 case JitOperand.TGETV:
                     return Expression.Assign(
                         Translate(chunk, index, code.A, attr.AType),
                         Expression.ArrayIndex(
-                            Translate(chunk, index, code.B, attr.BType), 
+                            Translate(chunk, index, code.B, attr.BType),
                             Translate(chunk, index, code.C, attr.CDType))
                         );
                 case JitOperand.TGETS:
                     return Expression.Assign(
                         Translate(chunk, index, code.A, attr.AType),
-                        Expression.ArrayIndex(
+                        GlobalExpression.Field(
                             Translate(chunk, index, code.B, attr.BType),
                             Translate(chunk, index, code.C, attr.CDType))
                         );
@@ -332,7 +377,7 @@ namespace ZoDream.LuaDecompiler
                         );
                 case JitOperand.TSETS:
                     return Expression.Assign(
-                         Expression.ArrayIndex(
+                         GlobalExpression.Field(
                              Translate(chunk, index, code.B, attr.BType),
                              Translate(chunk, index, code.C, attr.CDType)),
                          Translate(chunk, index, code.A, attr.AType)
@@ -354,22 +399,109 @@ namespace ZoDream.LuaDecompiler
                          Translate(chunk, index, code.A, attr.AType)
                          );
                 case JitOperand.CALLM:
-                    break;
+                    {
+                        var items = new Expression[code.D];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.VAR);
+                        }
+                        var args = new Expression[code.B - 1];
+                        for (int i = 0; i < args.Length; i++)
+                        {
+                            args[i] = Translate(chunk, index, code.A + i, JitOperandFormat.DST);
+                        }
+                        return GlobalExpression.Assign(
+                            args,
+                            GlobalExpression.FunctionCall(
+                                Translate(chunk, index, code.A, JitOperandFormat.VAR),
+                                items
+                                )
+                            );
+                    }
                 case JitOperand.CALL:
-                    break;
+                    {
+                        var items = new Expression[code.D - 1];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.VAR);
+                        }
+                        var args = new Expression[code.B - 1];
+                        for (int i = 0; i < args.Length; i++)
+                        {
+                            args[i] = Translate(chunk, index, code.A + i, JitOperandFormat.DST);
+                        }
+                        return GlobalExpression.Assign(
+                            args,
+                            GlobalExpression.FunctionCall(
+                                Translate(chunk, index, code.A, JitOperandFormat.VAR),
+                                items
+                                )
+                            );
+                    }
                 case JitOperand.CALLMT:
-                    break;
+                    {
+                        var items = new Expression[code.D - 1];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.VAR);
+                        }
+                        return GlobalExpression.Return([
+                            GlobalExpression.FunctionCall(
+                                Translate(chunk, index, code.A, JitOperandFormat.VAR),
+                                [..items, Expression.Default(typeof(Array))]
+                                )
+                            ]);
+                    }
                 case JitOperand.CALLT:
-                    break;
+                    {
+                        var items = new Expression[code.D - 1];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.VAR);
+                        }
+                        return GlobalExpression.Return([
+                            GlobalExpression.FunctionCall(
+                                Translate(chunk, index, code.A, JitOperandFormat.VAR),
+                                items
+                                )
+                            ]);
+                    }
                 case JitOperand.ITERC:
-                    break;
                 case JitOperand.ITERN:
+                    {
+                        var A_minus_three = Translate(chunk, index, code.A - 3, JitOperandFormat.VAR);
+                        var A_minus_two = Translate(chunk, index, code.A - 2, JitOperandFormat.VAR);
+                        var A_minus_one = Translate(chunk, index, code.A - 1, JitOperandFormat.VAR);
+                        var items = new Expression[code.B - 1];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.DST);
+                        }
+                        return Expression.Block(
+                            GlobalExpression.Assign([
+                                Translate(chunk, index, code.A, JitOperandFormat.DST),
+                                Translate(chunk, index, code.A + 1, JitOperandFormat.DST),
+                                Translate(chunk, index, code.A + 2, JitOperandFormat.DST),
 
-
-
-                    break;
+                                ], A_minus_three, A_minus_two, A_minus_one),
+                            GlobalExpression.Assign(
+                                items,
+                                GlobalExpression.FunctionCall(
+                                    A_minus_three,
+                                    [A_minus_two, A_minus_one]
+                                    )
+                                )
+                        );
+                    }
                 case JitOperand.VARG:
-                    break;
+                    {
+                        var items = new Expression[code.B - 1];
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            items[i] = Translate(chunk, index, code.A + i, JitOperandFormat.VAR);
+                        }
+                        return GlobalExpression.Return(items);
+                    }
                 case JitOperand.ISNEXT:
                     break;
                 case JitOperand.RETM:
@@ -395,6 +527,7 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.RET1:
                     return GlobalExpression.Return([Translate(chunk, index, code.A, attr.AType)]);
                 case JitOperand.FORI:
+                case JitOperand.JFORI:
                     {
                         var label = Expression.Label(typeof(int));
                         var result = Translate(chunk, index, code.A + 3, JitOperandFormat.VAR);
@@ -413,9 +546,9 @@ namespace ZoDream.LuaDecompiler
                             )
                         );
                     }
-                case JitOperand.JFORI:
-                    break;
                 case JitOperand.FORL:
+                case JitOperand.IFORL:
+                case JitOperand.JFORL:
                     {
                         var a = Translate(chunk, index, code.A + 3, JitOperandFormat.VAR);
                         var two = Translate(chunk, index, code.A + 2, JitOperandFormat.VAR);
@@ -428,21 +561,29 @@ namespace ZoDream.LuaDecompiler
                                 GlobalExpression.FunctionCall("cmp", a, two, Translate(chunk, index, code.A + 1, JitOperandFormat.VAR)),
                                 Expression.Goto(
                                     Expression.Label()
-                                    //Translate(chunk, index, (int)code.D, JitOperandFormat.JMP)
+                                //Translate(chunk, index, (int)code.D, JitOperandFormat.JMP)
                                 )
                             )
                         );
                     }
-                case JitOperand.IFORL:
-                    break;
-                case JitOperand.JFORL:
-                    break;
                 case JitOperand.ITERL:
-                    break;
                 case JitOperand.IITERL:
-                    break;
                 case JitOperand.JITERL:
-                    break;
+                    {
+                        var a = Translate(chunk, index, code.A, JitOperandFormat.VAR);
+                        return Expression.Block(
+                            Expression.Assign(
+                                Translate(chunk, index, code.A - 1, JitOperandFormat.VAR),
+                                a           
+                            ),
+                            Expression.IfThen(
+                                Expression.NotEqual(a, Expression.Constant(null)),
+                                Expression.Goto(Expression.Label(
+                                    // Translate(chunk, index, (int)code.D, JitOperandFormat.JMP)
+                                ))
+                            )
+                        );
+                    }
                 case JitOperand.LOOP:
                     break;
                 case JitOperand.ILOOP:

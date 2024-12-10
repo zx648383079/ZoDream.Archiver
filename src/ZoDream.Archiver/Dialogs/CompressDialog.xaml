@@ -47,8 +47,8 @@
             HorizontalAlignment="Stretch"
             Header="Subvolume(MB)"
             IsEditable="True"
-            ItemsSource="{Binding SubvolumeItems}"
-            Text="{Binding SubvolumeText, Mode=TwoWay}" />
+            ItemsSource="{Binding SubVolumeItems}"
+            Text="{Binding SubVolumeText, Mode=TwoWay}" />
         <PasswordBox Header="Password" Password="{Binding Password, Mode=TwoWay}" />
         <TextBlock
             Style="{StaticResource InputHeaderTb}"

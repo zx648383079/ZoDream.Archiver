@@ -18,6 +18,12 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         /// <returns></returns>
         public IEnumerable<IBundleChunk> EnumerateChunk();
+        /// <summary>
+        /// 根据文件数量拆分组
+        /// </summary>
+        /// <param name="maxFileCount"></param>
+        /// <returns></returns>
+        public IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount);
 
         /// <summary>
         /// 根据依赖拆分组

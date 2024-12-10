@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -17,6 +18,8 @@ namespace ZoDream.Shared.Compression.Own.V3
         private long _bufferPosition; // buffer 的开始位置
         private int _bufferSize; // buffer 中的有效尺寸
 
+        public override bool CanSeek => false;
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException(string.Empty);
@@ -25,26 +28,61 @@ namespace ZoDream.Shared.Compression.Own.V3
         public override int Read(byte[] buffer, int offset, int count)
         {
             var res = 0;
-            var chunkTotal = _chunkSize * _chunkCount;
-            while (true)
+            while (res < count)
             {
-                if (_bufferSize == 0 || _position > _bufferPosition + _bufferSize)
+                if (_position >= maxLength)
                 {
-                    
-                    _bufferPosition += _bufferSize;
-                    _bufferSize = stream.Read(_buffer, 0, (int)Math.Min(_buffer.Length, maxLength - _bufferPosition));
+                    break;
+                }
+                if (_bufferSize == 0 || _position >= _bufferPosition + _bufferSize)
+                {
+                    TryRead();
+                }
+                if (_bufferSize == 0)
+                {
+                    break;
                 }
                 var i = _position - _bufferPosition;
-                var len = Math.Min(_bufferSize - i, count - res);
-                var end = i + len;
-                //for (; i < end; i++)
-                //{
-
-                //    buffer[offset + i] = Math.Floor(i / (double)chunkTotal) * chunkTotal + i ;
-                //}
+                var len = (int)Math.Min(_bufferSize - i, count - res);
+                if (len <= 0)
+                {
+                    break;
+                }
+                Array.Copy(_buffer, i, buffer, offset + res, len);
+                res += len;
+                _position += len;
             }
-            _position += res;
             return res;
+        }
+
+        private void TryRead()
+        {
+            _bufferPosition += _bufferSize;
+            var length = (int)Math.Min(_buffer.Length, maxLength - _bufferPosition);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            _bufferSize = stream.Read(buffer, 0, length);
+            if (_bufferSize == 0)
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+                return;
+            }
+            var chunkTotal = _chunkSize * _chunkCount;
+            var maxChunkOffset = _bufferSize - (_bufferSize % chunkTotal);
+            for (var i = 0; i < _bufferSize; i++)
+            {
+                var code = key.ReadByte();
+                var j = i;
+                if (i < maxChunkOffset)
+                {
+                    var rate = i % chunkTotal;
+                    var max = i - rate;
+                    j = max + rate % _chunkCount * _chunkSize + rate / _chunkCount;
+                }
+                _buffer[i] = (byte)OwnHelper.Clamp(
+                    padding ? (buffer[j] + code) : (buffer[j] - code)
+                    , 256);
+            }
+            ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 }

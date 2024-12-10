@@ -62,6 +62,11 @@ namespace ZoDream.Shared.Language.AST
             return new FunctionCallExpression(name, new ReadOnlyCollection<Expression>(arguments.ToArray()));
         }
 
+        public static FunctionCallExpression FunctionCall(Expression name, IEnumerable<Expression> arguments)
+        {
+            return new FunctionCallExpression(name, new ReadOnlyCollection<Expression>(arguments.ToArray()));
+        }
+
         public static FunctionExpression FunctionCall(string name, params Expression[] arguments)
         {
             return FunctionCall(name, arguments);
@@ -79,6 +84,28 @@ namespace ZoDream.Shared.Language.AST
         public static ReturnExpression Return(IEnumerable<Expression> values)
         {
             return new ReturnExpression(new ReadOnlyCollection<Expression>(values.ToArray()));
+        }
+
+        public static BatchAssignExpression Assign(
+            IEnumerable<Expression> parameters, params Expression[] values)
+        {
+            return new BatchAssignExpression(new ReadOnlyCollection<Expression>(parameters.ToArray()),
+                new ReadOnlyCollection<Expression>(values.ToArray()));
+        }
+
+        public static NewMapExpression NewMap(uint count, uint dictCount)
+        {
+            return new NewMapExpression(count, dictCount);
+        }
+
+        public static CloneExpression Clone(Expression value)
+        {
+            return new CloneExpression(value);
+        }
+
+        public static FieldExpression Field(Expression instance, Expression fieldName)
+        {
+            return new FieldExpression(instance, fieldName);
         }
     }
 }

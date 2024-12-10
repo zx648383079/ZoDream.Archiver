@@ -7,7 +7,7 @@ namespace ZoDream.Shared.Compression.Own.V2
     public class OwnDeflateStream(Stream stream, IOwnKey key, byte[] iv, bool padding = true) : DeflateStream(stream), IDeflateStream
     {
         private long _position;
-
+        public override bool CanSeek => false;
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException(string.Empty);
