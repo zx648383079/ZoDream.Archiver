@@ -11,10 +11,7 @@ namespace ZoDream.BundleExtractor.Engines
         public string AliasName => EngineName;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
         {
-            foreach (var item in fileItems)
-            {
-                yield return new BundleChunk(item);
-            }
+            return fileItems.EnumerateChunk(500);
         }
 
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)

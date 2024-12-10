@@ -218,6 +218,7 @@ namespace ZoDream.BundleExtractor
                 ms.Position = 0;
                 LoadFile(ms, item.Name, token);
             }
+            stream.BaseStream.Dispose();
             stream.Dispose();
         }
 

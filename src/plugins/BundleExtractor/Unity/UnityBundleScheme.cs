@@ -32,7 +32,7 @@ namespace ZoDream.BundleExtractor
         public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
         {
             var r = OpenBundle(reader);
-            if (reader is not null)
+            if (r is not null)
             {
                 return r;
             }
@@ -44,7 +44,7 @@ namespace ZoDream.BundleExtractor
             foreach (var scheme in schemes) 
             {
                 r = scheme.Open(reader, filePath, fileName, options);
-                if (reader is not null)
+                if (r is not null)
                 {
                     return r;
                 }

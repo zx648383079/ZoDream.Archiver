@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
         {
-            return fileItems.Select(i => new BundleChunk(i));
+            return fileItems.EnumerateChunk(500);
         }
 
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)

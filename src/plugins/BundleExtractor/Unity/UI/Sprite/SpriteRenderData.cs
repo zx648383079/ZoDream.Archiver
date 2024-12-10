@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
@@ -20,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public List<SpriteVertex> vertices;
         public ushort[] indices;
         public Matrix4x4[] m_Bindpose;
-        public List<BoneWeights4> m_SourceSkin;
+        public List<BoneWeights4> m_SourceSkin = [];
         public Rectf textureRect;
         public Vector2 textureRectOffset;
         public Vector2 atlasRectOffset;
@@ -41,7 +37,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2019)) //2019 and up
             {
                 var secondaryTexturesSize = reader.ReadInt32();
-                secondaryTextures = new List<SecondarySpriteTexture>();
+                secondaryTextures = [];
                 for (int i = 0; i < secondaryTexturesSize; i++)
                 {
                     secondaryTextures.Add(new SecondarySpriteTexture(reader));
@@ -65,7 +61,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             else
             {
                 var verticesSize = reader.ReadInt32();
-                vertices = new List<SpriteVertex>();
+                vertices = [];
                 for (int i = 0; i < verticesSize; i++)
                 {
                     vertices.Add(new SpriteVertex(reader));

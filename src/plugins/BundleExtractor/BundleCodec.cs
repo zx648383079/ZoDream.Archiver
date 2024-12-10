@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor
 
         public static IBundleBinaryReader Decode(IBundleBinaryReader input, CompressionType type, long compressedSize, long uncompressedSize)
         {
-            return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input);
+            return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input, false);
         }
 
         public static Stream Decode(Stream input, CompressionType type, long compressedSize, long uncompressedSize)
@@ -36,11 +36,18 @@ namespace ZoDream.BundleExtractor
                 case CompressionType.Lz4HC:
                     {
                         var compressedBytes = input.ToArray();
-                        var uncompressedBytes = new Lz4Decompressor(uncompressedSize).Decompress(compressedBytes);
-                        if (uncompressedBytes.Length != uncompressedSize)
+                        var uncompressedBytes = new byte[uncompressedSize];
+                        var bytesWritten = LZ4Codec.Decode(compressedBytes, uncompressedBytes);
+                        if (bytesWritten != uncompressedSize)
                         {
-                            throw new DecompressionFailedException($"{type} wants: {uncompressedSize} not {uncompressedBytes.Length}");
+                            bytesWritten = new Lz4Decompressor(uncompressedSize)
+                                .Decompress(compressedBytes, uncompressedBytes);
+                            if (bytesWritten != uncompressedSize)
+                            {
+                                throw new DecompressionFailedException($"{type} wants: {uncompressedSize} not {bytesWritten}");
+                            }
                         }
+                        
                         return new MemoryStream(uncompressedBytes);
                     }
 

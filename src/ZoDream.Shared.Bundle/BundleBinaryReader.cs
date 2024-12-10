@@ -10,23 +10,26 @@ namespace ZoDream.Shared.Bundle
     public class BundleBinaryReader(
         Stream stream, 
         EndianType endian = EndianType.LittleEndian,
-        bool isAlignStream = false)
-        : EndianReader(stream, endian), IBundleBinaryReader
+        bool isAlignStream = false,
+        bool leaveOpen = true)
+        : EndianReader(stream, endian, leaveOpen), IBundleBinaryReader
     {
 
-        public BundleBinaryReader(Stream stream, IBundleBinaryReader parent)
-            : this (stream, parent.EndianType, parent)
+        public BundleBinaryReader(Stream stream, IBundleBinaryReader parent, bool leaveOpen = true)
+            : this (stream, parent.EndianType, parent, leaveOpen)
         {
             
         }
 
-        public BundleBinaryReader(Stream stream, EndianType endian, IBundleBinaryReader parent)
-            : this(stream, endian, parent.IsAlignStream)
+        public BundleBinaryReader(Stream stream, EndianType endian, IBundleBinaryReader parent, bool leaveOpen = true)
+            : this(stream, endian, parent.IsAlignStream, leaveOpen)
         {
             CopyFrom(parent);
         }
 
         public bool IsAlignStream { get; private set; } = isAlignStream;
+
+        public bool LeaveStreamOpen { get; set; } = leaveOpen;
 
         #region 附加信息存储
         public Dictionary<string, object> Items { get; private set; } = [];
@@ -175,6 +178,15 @@ namespace ZoDream.Shared.Bundle
         public Stream ReadAsStream(long length)
         {
             return new PartialStream(BaseStream, length);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (LeaveStreamOpen == false)
+            {
+                BaseStream.Dispose();
+            }
         }
     }
 }

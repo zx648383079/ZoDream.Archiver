@@ -1,6 +1,5 @@
 ﻿using System;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles

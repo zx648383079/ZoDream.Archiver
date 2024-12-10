@@ -79,7 +79,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public IBundleBinaryReader Create(ObjectInfo info)
         {
-            bool swapEndian = SerializedFileHeader.HasEndian(_header.Version) ?
+            var swapEndian = SerializedFileHeader.HasEndian(_header.Version) ?
                 _header.Endian : _metadata.SwapEndian;
             return new BundleBinaryReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
@@ -125,6 +125,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             if (_options?.LeaveStreamOpen == false)
             {
+                _reader.LeaveStreamOpen = false;
                 _reader.Dispose();
             }
         }

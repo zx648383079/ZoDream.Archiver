@@ -42,8 +42,8 @@ namespace ZoDream.Shared.IO
         public long RemainingLength => checked(BaseStream.Length - BaseStream.Position);
 
 
-        public EndianReader(Stream stream, EndianType endian)
-            : base(stream, Encoding.UTF8, leaveOpen: true)
+        public EndianReader(Stream stream, EndianType endian, bool leaveOpen = true)
+            : base(stream, Encoding.UTF8, leaveOpen: leaveOpen)
         {
             EndianType = endian;
         }

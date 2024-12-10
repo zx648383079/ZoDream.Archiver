@@ -8,6 +8,9 @@ namespace ZoDream.Shared.Bundle
     public interface IBundleBinaryReader: IDisposable
     {
         public Stream BaseStream { get; }
+
+        public bool LeaveStreamOpen { get; set; }
+
         public long Length { get; }
         public long Position { get; set; }
         /// <summary>

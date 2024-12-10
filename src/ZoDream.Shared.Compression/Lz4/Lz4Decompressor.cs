@@ -10,9 +10,15 @@ namespace ZoDream.Shared.Compression.Lz4
     {
         public byte[] Decompress(byte[] input)
         {
+            var output = new byte[unCompressedSize];
+            var outputPos = Decompress(input, output);
+            return outputPos == output.Length ? output : output[..outputPos];
+        }
+
+        public int Decompress(byte[] input, byte[] output)
+        {
             int inputPos = 0;
             int outputPos = 0;
-            var output = new byte[unCompressedSize];
             do
             {
                 var (encCount, litCount) = GetLiteralToken(input, ref inputPos);
@@ -49,7 +55,7 @@ namespace ZoDream.Shared.Compression.Lz4
                 }
             } while (inputPos < input.Length && outputPos < output.Length);
 
-            return outputPos == output.Length ? output : output[..outputPos];
+            return outputPos;
         }
 
         public void Decompress(Stream input, Stream output)
