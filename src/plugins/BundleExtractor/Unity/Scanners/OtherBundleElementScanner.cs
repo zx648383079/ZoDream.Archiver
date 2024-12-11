@@ -37,7 +37,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public IBundleBinaryReader OpenRead(Stream input, string fileName)
         {
-            if (IsFakeHeader && !FilenameHelper.IsCommonFile(fileName))
+            if (IsFakeHeader && !FileNameHelper.IsCommonFile(fileName))
             {
                 input = ParseFakeHeader(input);
             }

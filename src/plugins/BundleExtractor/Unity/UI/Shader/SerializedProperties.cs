@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SerializedProperties(IBundleBinaryReader reader)
         {
             int numProps = reader.ReadInt32();
-            m_Props = new List<SerializedProperty>();
+            m_Props = [];
             for (int i = 0; i < numProps; i++)
             {
                 m_Props.Add(new SerializedProperty(reader));

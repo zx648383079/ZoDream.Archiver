@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
@@ -138,13 +137,28 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public byte[] Decrypt(byte[] input)
         {
-            var length = Decrypt(input, 0, input.Length);
+            return Decrypt(input, input.Length);
+        }
+        public byte[] Decrypt(byte[] input, int inputLength)
+        {
+            var length = Decrypt(input, 0, inputLength);
             return input[..length];
         }
 
         public void Decrypt(Stream input, Stream output)
         {
-            output.Write(Decrypt(input.ToArray()));
+            var length = (int)(input.Length - input.Position);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                input.ReadExactly(buffer, 0, length);
+                var res = Decrypt(buffer, 0, length);
+                output.Write(buffer, 0, res);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
     }
 }

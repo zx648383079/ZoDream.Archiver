@@ -10,6 +10,7 @@ namespace ZoDream.BundleExtractor
     {
         internal bool ExportRawFile(UIObject item, string exportPath, ArchiveExtractMode mode)
         {
+            return false;
             if (!LocationStorage.TryCreate(exportPath,  ".dat", mode, out var exportFullPath))
             {
                 return false;

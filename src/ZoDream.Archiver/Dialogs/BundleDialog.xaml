@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZoDream.Archiver.ViewModels"
     Title="提取文件"
+    IsPrimaryButtonEnabled="{Binding IsValid}"
     PrimaryButtonText="确认"
     SecondaryButtonText="取消"
     mc:Ignorable="d">

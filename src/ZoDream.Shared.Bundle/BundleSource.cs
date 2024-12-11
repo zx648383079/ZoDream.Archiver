@@ -85,6 +85,7 @@ namespace ZoDream.Shared.Bundle
                 if (File.Exists(item))
                 {
                     yield return new BundleChunk(item);
+                    continue;
                 }
                 var res = new FileSystemEnumerable<string>(item, delegate (ref FileSystemEntry entry)
                 {

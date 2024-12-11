@@ -9,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public override void Read(IBundleBinaryReader reader)
         {
             base.Read(reader);
-            var levels = reader.ReadArray(r => r.ReadString());
+            var levels = reader.ReadArray(r => r.ReadAlignedString());
 
             var hasRenderTexture = reader.ReadBoolean();
             var hasPROVersion = reader.ReadBoolean();

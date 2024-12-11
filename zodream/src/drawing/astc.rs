@@ -1,3 +1,4 @@
+use safer_ffi::libc::size_t;
 use texture2ddecoder::decode_astc;
 
 use super::{PixelDecoder, Result, super::io::ByteWriteExt};
@@ -19,7 +20,8 @@ impl AstcDecoder
 impl PixelDecoder for AstcDecoder 
 {
     fn decode(&mut self, input: &[u8], width: u32, height: u32, output: &mut Vec<u8>) -> Result<usize> {
-        let mut buffer = Vec::new();
+        let len = width * height;
+        let mut buffer = vec![0u32; len as usize];
         decode_astc(input, width as usize, height as usize, self.block_width, self.block_height, &mut buffer)?;
         for i in buffer {
             output.write_u32_be(i).unwrap();

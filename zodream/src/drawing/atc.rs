@@ -20,7 +20,8 @@ impl AtcDecoder
 impl PixelDecoder for AtcDecoder 
 {
     fn decode(&mut self, input: &[u8], width: u32, height: u32, output: &mut Vec<u8>) -> Result<usize> {
-        let mut buffer = Vec::new();
+        let len = width * height;
+        let mut buffer = vec![0u32; len as usize];
         if self.version == 8 {
             decode_atc_rgba8(input, width as usize, height as usize, &mut buffer)?;
         } else {

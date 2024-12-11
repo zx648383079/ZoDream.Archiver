@@ -1,6 +1,8 @@
 ﻿using K4os.Compression.LZ4;
 using LzhamWrapper;
 using LzhamWrapper.Enums;
+using System;
+using System.Buffers;
 using System.IO;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
@@ -34,23 +36,7 @@ namespace ZoDream.BundleExtractor
 
                 case CompressionType.Lz4:
                 case CompressionType.Lz4HC:
-                    {
-                        var compressedBytes = input.ToArray();
-                        var uncompressedBytes = new byte[uncompressedSize];
-                        var bytesWritten = LZ4Codec.Decode(compressedBytes, uncompressedBytes);
-                        if (bytesWritten != uncompressedSize)
-                        {
-                            bytesWritten = new Lz4Decompressor(uncompressedSize)
-                                .Decompress(compressedBytes, uncompressedBytes);
-                            if (bytesWritten != uncompressedSize)
-                            {
-                                throw new DecompressionFailedException($"{type} wants: {uncompressedSize} not {bytesWritten}");
-                            }
-                        }
-                        
-                        return new MemoryStream(uncompressedBytes);
-                    }
-
+                    return DecodeLz4(input, (int)uncompressedSize);
                 case CompressionType.Lzham:
                     return DecodeLzham(input);
                 default:
@@ -58,6 +44,32 @@ namespace ZoDream.BundleExtractor
             }
         }
 
+        public static Stream DecodeLz4(Stream input, int uncompressedSize)
+        {
+            var compressedLength = (int)(input.Length - input.Position);
+            var compressedBytes = ArrayPool<byte>.Shared.Rent(compressedLength);
+            try
+            {
+                input.ReadExactly(compressedBytes, 0, compressedLength);
+                var uncompressedBytes = new byte[uncompressedSize];
+                var bytesWritten = 0; //LZ4Codec.Decode(compressedBytes, 0, compressedLength, uncompressedBytes, 0, uncompressedSize);
+                if (bytesWritten != uncompressedSize)
+                {
+                    bytesWritten = new Lz4Decompressor(uncompressedSize)
+                        .Decompress(compressedBytes, compressedLength,
+                        uncompressedBytes, uncompressedSize);
+                    if (bytesWritten != uncompressedSize)
+                    {
+                        throw new DecompressionFailedException($"lz4 wants: {uncompressedSize} not {bytesWritten}");
+                    }
+                }
+                return new MemoryStream(uncompressedBytes);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(compressedBytes);
+            }
+        }
         public static Stream DecodeLzham(Stream input)
         {
             var opts = new DecompressionParameters

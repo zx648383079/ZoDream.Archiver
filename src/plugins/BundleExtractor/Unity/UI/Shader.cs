@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -63,7 +58,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_DependenciesCount = reader.ReadInt32();
                 for (int i = 0; i < m_DependenciesCount; i++)
                 {
-                    new PPtr<Shader>(reader);
+                    _ = new PPtr<Shader>(reader);
                 }
 
                 if (version.GreaterThanOrEquals(2018))

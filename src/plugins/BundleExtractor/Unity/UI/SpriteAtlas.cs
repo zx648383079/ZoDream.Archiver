@@ -21,11 +21,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_PackedSprites.Add(new PPtr<Sprite>(reader));
             }
 
-            var m_PackedSpriteNamesToIndex = reader.ReadArray(r => r.ReadString());
+            var m_PackedSpriteNamesToIndex = reader.ReadArray(r => r.ReadAlignedString());
 
             var m_RenderDataMapSize = reader.ReadInt32();
 
-            m_RenderDataMap = new Dictionary<KeyValuePair<Guid, long>, SpriteAtlasData>();
+            m_RenderDataMap = [];
             for (int i = 0; i < m_RenderDataMapSize; i++)
             {
                 var first = new Guid(reader.ReadBytes(16));

@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
-using System.Security.Cryptography;
 
 namespace ZoDream.Shared.Encryption
 {
@@ -28,12 +23,22 @@ namespace ZoDream.Shared.Encryption
             throw new NotImplementedException();
         }
 
+        public byte[] Decrypt(byte[] input, int inputLength)
+        {
+            throw new NotImplementedException();
+        }
+
         public byte[] Encrypt(byte[] input)
         {
             throw new NotImplementedException();
         }
 
         public void Encrypt(Stream input, Stream output)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Encrypt(byte[] input, int inputLength)
         {
             throw new NotImplementedException();
         }

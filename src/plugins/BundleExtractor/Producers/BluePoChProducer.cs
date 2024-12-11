@@ -10,12 +10,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
-            return new BluePoChElementScanner(options.Package);
+            return new BluePoChElementScanner(options.Package ?? string.Empty);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
-            return new BluePoChElementScanner(options.Package);
+            return new BluePoChElementScanner(options.Package ?? string.Empty);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

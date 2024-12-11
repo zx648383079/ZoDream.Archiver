@@ -63,7 +63,10 @@ namespace ZoDream.Archiver.ViewModels
 
         public string FileName {
             get => _fileName;
-            set => Set(ref _fileName, value);
+            set {
+                Set(ref _fileName, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
 

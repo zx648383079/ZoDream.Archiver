@@ -4,7 +4,6 @@ using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity
 {

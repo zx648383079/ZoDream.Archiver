@@ -20,14 +20,20 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Password {
             get => _password;
-            set => Set(ref _password, value);
+            set {
+                Set(ref _password, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
         private string _dictFileName = string.Empty;
 
         public string DictFileName {
             get => _dictFileName;
-            set => Set(ref _dictFileName, value);
+            set {
+                Set(ref _dictFileName, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
         public bool IsValid => !string.IsNullOrWhiteSpace(Password) || !string.IsNullOrWhiteSpace(DictFileName);

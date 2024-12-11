@@ -37,21 +37,30 @@ namespace ZoDream.Archiver.ViewModels
 
         public string FileName {
             get => _fileName;
-            set => Set(ref _fileName, value);
+            set {
+                Set(ref _fileName, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
         private string _password = string.Empty;
 
         public string Password {
             get => _password;
-            set => Set(ref _password, value);
+            set {
+                Set(ref _password, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
         private string _dictFileName = string.Empty;
 
         public string DictFileName {
             get => _dictFileName;
-            set => Set(ref _dictFileName, value);
+            set {
+                Set(ref _dictFileName, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
 
         private bool _onlySelected;

@@ -48,7 +48,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var m_AudioChannelCount = reader.ReadArray(r => r.ReadUInt16());
             reader.AlignStream();
             var m_AudioSampleRate = reader.ReadArray(r => r.ReadUInt32());
-            var m_AudioLanguage = reader.ReadArray(r => r.ReadString());
+            var m_AudioLanguage = reader.ReadArray(r => r.ReadAlignedString());
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
                 var m_VideoShadersSize = reader.ReadInt32();

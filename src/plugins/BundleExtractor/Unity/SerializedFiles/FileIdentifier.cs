@@ -32,7 +32,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 Type = (AssetType)reader.ReadInt32();
             }
             PathNameOrigin = reader.ReadStringZeroTerm();
-            PathName = FilenameHelper.FixFileIdentifier(PathNameOrigin);
+            PathName = FileNameHelper.FixFileIdentifier(PathNameOrigin);
         }
 
         public string GetFilePath()

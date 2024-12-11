@@ -11,12 +11,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
-            return new MiHoYoElementScanner(options.Package);
+            return new MiHoYoElementScanner(options.Package ?? string.Empty);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
-            return new MiHoYoElementScanner(options.Package);
+            return new MiHoYoElementScanner(options.Package ?? string.Empty);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

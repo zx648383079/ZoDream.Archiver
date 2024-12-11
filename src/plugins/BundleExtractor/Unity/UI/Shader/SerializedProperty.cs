@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             m_Name = reader.ReadAlignedString();
             m_Description = reader.ReadAlignedString();
-            m_Attributes = reader.ReadArray(r => r.ReadString());
+            m_Attributes = reader.ReadArray(r => r.ReadAlignedString());
             m_Type = (SerializedPropertyType)reader.ReadInt32();
             m_Flags = (SerializedPropertyFlag)reader.ReadUInt32();
             m_DefValue = reader.ReadArray(4, (r, _) => r.ReadSingle());

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using ZoDream.BundleExtractor.Unity;
 using ZoDream.Shared.Drawing;
 
 namespace ZoDream.Tests
@@ -42,6 +43,12 @@ namespace ZoDream.Tests
             var data = ColorConverter.SplitByte([15, 6], 0, out var i, 2, 1);
             Assert.AreEqual(data, [3, 1]);
             Assert.AreEqual(i, 1);
+        }
+        [TestMethod]
+        public void TestCombine()
+        {
+            var res = FileNameHelper.Combine("D://hhh", "a.t");
+            Assert.IsTrue(res.IndexOf('#') > 0);
         }
     }
 }

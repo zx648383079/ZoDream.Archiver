@@ -24,7 +24,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_PropInfo = new SerializedProperties(reader);
 
             int numSubShaders = reader.ReadInt32();
-            m_SubShaders = new List<SerializedSubShader>();
+            m_SubShaders = [];
             for (int i = 0; i < numSubShaders; i++)
             {
                 m_SubShaders.Add(new SerializedSubShader(reader));
@@ -32,7 +32,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (version.GreaterThanOrEquals(2021, 2)) //2021.2 and up
             {
-                m_KeywordNames = reader.ReadArray(r => r.ReadString());
+                m_KeywordNames = reader.ReadArray(r => r.ReadAlignedString());
                 m_KeywordFlags = reader.ReadArray(r => r.ReadByte());
                 reader.AlignStream();
             }

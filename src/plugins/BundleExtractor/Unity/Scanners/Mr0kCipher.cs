@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Buffers;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 
@@ -30,6 +28,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public byte[] Decrypt(byte[] input)
         {
+            return Decrypt(input, input.Length);
+        }
+        public byte[] Decrypt(byte[] input, int inputLength)
+        {
             var key1 = new byte[0x10];
             var key2 = new byte[0x10];
             var key3 = new byte[0x10];
@@ -38,7 +40,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             Array.Copy(input, 0x74, key2, 0, 0x10);
             Array.Copy(input, 0x84, key3, 0, 0x10);
 
-            var encryptedBlockSize = Math.Min(0x10 * ((input.Length - 0x94) >> 7), BlockSize);
+            var encryptedBlockSize = Math.Min(0x10 * ((inputLength - 0x94) >> 7), BlockSize);
 
             if (InitVector is not null)
             {
@@ -70,7 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
             var seed1 = BinaryPrimitives.ReadUInt64LittleEndian(key2);
             var seed2 = BinaryPrimitives.ReadUInt64LittleEndian(key3);
-            var seed = seed2 ^ seed1 ^ (seed1 + (uint)input.Length - 20);
+            var seed = seed2 ^ seed1 ^ (seed1 + (uint)inputLength - 20);
 
             var encryptedBlock = input.Skip(0x94).Take(encryptedBlockSize).ToArray();
             var seedSpan = BitConverter.GetBytes(seed);
@@ -79,7 +81,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 encryptedBlock[i] ^= (byte)(seedSpan[i % seedSpan.Length] ^ BlockKey[i % BlockKey.Length]);
             }
 
-            var res = input[0x14..];
+            var res = input[0x14..(inputLength - 0x14)];
 
             if (PostKey is not null && PostKey.Length > 0)
             {
@@ -94,9 +96,20 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public void Decrypt(Stream input, Stream output)
         {
-            var buffer = input.ToArray();
-            var res = Decrypt(buffer);
-            output.Write(res);
+            var length = (int)(input.Length - input.Position);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                input.ReadExactly(buffer, 0, length);
+                var res = Decrypt(buffer, length);
+                output.Write(res);
+                res = null;
+                GC.Collect();
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
     }
 }

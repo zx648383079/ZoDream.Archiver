@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using ZoDream.BundleExtractor.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -11,7 +13,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Sprite : NamedObject, IFileWriter
+    internal sealed class Sprite(UIReader reader) : NamedObject(reader), IFileWriter
     {
         public Rectf m_Rect;
         public Vector2 m_Offset;
@@ -26,9 +28,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public SpriteRenderData m_RD;
         public List<Vector2[]> m_PhysicsShape;
 
-        public Sprite(UIReader reader) : base(reader)
+
+        public override void Read(IBundleBinaryReader reader)
         {
-            var version = reader.Version;
+            base.Read(reader);
+            var version = reader.Get<UnityVersion>();
             m_Rect = new Rectf(reader);
             m_Offset = reader.ReadVector2();
             if (version.GreaterThanOrEquals(4, 5)) //4.5 and up
@@ -55,7 +59,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var second = reader.ReadInt64();
                 m_RenderDataKey = new KeyValuePair<Guid, long>(first, second);
 
-                m_AtlasTags = reader.ReadArray(r => r.ReadString());
+                m_AtlasTags = reader.ReadArray(r => r.ReadAlignedString());
 
                 m_SpriteAtlas = new PPtr<SpriteAtlas>(reader);
             }
@@ -65,7 +69,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2017)) //2017 and up
             {
                 var m_PhysicsShapeSize = reader.ReadInt32();
-                m_PhysicsShape = new List<Vector2[]>();
+                m_PhysicsShape = [];
                 for (int i = 0; i < m_PhysicsShapeSize; i++)
                 {
                     m_PhysicsShape.Add(reader.ReadArray(_ => reader.ReadVector2()));

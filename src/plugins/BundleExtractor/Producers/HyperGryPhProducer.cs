@@ -11,12 +11,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
-            return new HyperGryPhElementScanner(options.Package);
+            return new HyperGryPhElementScanner(options.Package ?? string.Empty);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
-            return new HyperGryPhElementScanner(options.Package);
+            return new HyperGryPhElementScanner(options.Package ?? string.Empty);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

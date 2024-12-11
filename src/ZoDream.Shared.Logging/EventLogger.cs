@@ -41,7 +41,7 @@ namespace ZoDream.Shared.Logging
             {
                 OnLog?.Invoke(message, level);
             }
-            // Debug.WriteLine(message);
+            System.Diagnostics.Debug.WriteLine(message);
         }
 
         public void Progress(long current, long total)

@@ -39,10 +39,13 @@ namespace ZoDream.Shared.RustWrapper
                 Debug.WriteLine($"logger call: {progress}/{total}; {msg} ");
             }
         };
-
         public byte[] Encode(byte[] buffer)
         {
-            return Encryptor.Convert(buffer, (inputRef, outputRef) => {
+            return Encode(buffer, buffer.Length);
+        }
+        public byte[] Encode(byte[] input, int inputLength)
+        {
+            return Encryptor.Convert(input, inputLength, (inputRef, outputRef) => {
                 return NativeMethods.encode_painter(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }
@@ -56,7 +59,11 @@ namespace ZoDream.Shared.RustWrapper
 
         public byte[] Decode(byte[] buffer)
         {
-            return Encryptor.Convert(buffer, (inputRef, outputRef) => {
+            return Decode(buffer, buffer.Length);
+        }
+        public byte[] Decode(byte[] input, int inputLength)
+        {
+            return Encryptor.Convert(input, inputLength, (inputRef, outputRef) => {
                 return NativeMethods.decode_painter(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }

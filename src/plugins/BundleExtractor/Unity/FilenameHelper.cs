@@ -3,13 +3,87 @@ using System.IO;
 
 namespace ZoDream.BundleExtractor.Unity
 {
-    public static class FilenameHelper
+    public static class FileNameHelper
     {
+        /// <summary>
+        /// 创建新的路径
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string Create(string fullPath, string name)
+        {
+            var (path, entryName) = Split(fullPath);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = entryName;
+            }
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return path;
+            }
+            var folder = Path.GetDirectoryName(path);
+            return Path.Combine(folder!, name);
+        }
+        public static (string, string) Split(string fullPath)
+        {
+            var i = fullPath.LastIndexOf('#');
+            if (i >= 0)
+            {
+                return (fullPath[..i], fullPath[(i + 1)..]);
+            }
+            return (fullPath, string.Empty);
+        }
+
+        /// <summary>
+        /// 合成文件内部的子部分
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="entryName"></param>
+        /// <returns></returns>
+        public static string Combine(string fullPath, string entryName)
+        {
+            return $"{fullPath}#{entryName}";
+        }
+        /// <summary>
+        /// 根据
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="brotherName"></param>
+        /// <returns></returns>
+        public static string CombineBrother(string fullPath, string brotherName)
+        {
+            var i = fullPath.LastIndexOf('#');
+            string? folder;
+            if (i >= 0)
+            {
+                folder = Path.GetDirectoryName(fullPath[(i + 1)..]);
+            } else
+            {
+                folder = Path.GetDirectoryName(fullPath);
+            }
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                return brotherName;
+            }
+            return Path.Combine(folder, brotherName);
+        }
+
+        public static string GetFileName(string fullPath)
+        {
+            var i = fullPath.LastIndexOf('#');
+            if (i < 0)
+            {
+                return Path.GetFileName(fullPath);
+            }
+            return Path.GetFileName(fullPath[(i + 1)..]);
+        }
 
         public static string GetExtension(string fileName)
         {
+            var j = fileName.LastIndexOf('#');
             var i = fileName.LastIndexOf('.');
-            if (i < 0)
+            if (i < 0 || i <= j)
             {
                 return string.Empty;
             }
@@ -71,11 +145,11 @@ namespace ZoDream.BundleExtractor.Unity
         {
             if (dependency.StartsWith(LibraryFolder, StringComparison.Ordinal))
             {
-                return dependency.Substring(LibraryFolder.Length);
+                return dependency[LibraryFolder.Length..];
             }
             else if (dependency.StartsWith(ResourcesFolder, StringComparison.Ordinal))
             {
-                return dependency.Substring(ResourcesFolder.Length);
+                return dependency[ResourcesFolder.Length..];
             }
             return dependency;
         }
@@ -134,6 +208,8 @@ namespace ZoDream.BundleExtractor.Unity
                 or "UnityScript"
                 or "UnityScript - first pass";
         }
+
+       
 
         public const string LibraryFolder = "library/";
         public const string ResourcesFolder = "resources/";

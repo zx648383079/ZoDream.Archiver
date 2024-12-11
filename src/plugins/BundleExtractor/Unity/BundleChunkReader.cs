@@ -109,7 +109,7 @@ namespace ZoDream.BundleExtractor
                     }
                     try
                     {
-                        var exportPath = _fileItems.Create(obj.Name ?? asset.FullPath, folder);
+                        var exportPath = _fileItems.Create(FileNameHelper.Create(asset.FullPath, obj.Name), folder);
                         ExportConvertFile(obj, exportPath, mode);
                     }
                     catch (Exception e)
@@ -184,7 +184,8 @@ namespace ZoDream.BundleExtractor
         }
         private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
         {
-            using var reader = _scheme.Open(stream, fullName, Path.GetFileName(fullName), new ArchiveOptions()
+            var name = FileNameHelper.GetFileName(fullName);
+            using var reader = _scheme.Open(stream, fullName, name, new ArchiveOptions()
             {
                 LeaveStreamOpen = true
             });
@@ -195,7 +196,7 @@ namespace ZoDream.BundleExtractor
             }
             if (reader is null)
             {
-                _resourceItems.TryAdd(Path.GetFileName(fullName), stream.BaseStream);
+                _resourceItems.TryAdd(name, stream.BaseStream);
                 // stream.Dispose();
                 return;
             }
@@ -203,7 +204,7 @@ namespace ZoDream.BundleExtractor
             {
                 s.Container = this;
                 _assetItems.Add(s);
-                s.Dependencies.ForEach(i => AddDependency(i, Path.Combine(Path.GetDirectoryName(fullName), i)));
+                s.Dependencies.ForEach(i => AddDependency(i, FileNameHelper.CombineBrother(fullName, i)));
                 return;
             }
             var entries = reader.ReadEntry().ToArray();
@@ -216,7 +217,7 @@ namespace ZoDream.BundleExtractor
                 var ms = new MemoryStream();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-                LoadFile(ms, item.Name, token);
+                LoadFile(ms, FileNameHelper.Combine(fullName, item.Name), token);
             }
             stream.BaseStream.Dispose();
             stream.Dispose();
@@ -269,7 +270,5 @@ namespace ZoDream.BundleExtractor
             _importFileHash.Clear();
             _resourceFileHash.Clear();
         }
-
-     
     }
 }

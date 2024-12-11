@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
-using System.Linq;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.Shared.Compression.Lz4
 {
@@ -10,15 +9,19 @@ namespace ZoDream.Shared.Compression.Lz4
     {
         public byte[] Decompress(byte[] input)
         {
+            return Decompress(input, input.Length);
+        }
+        public byte[] Decompress(byte[] input, int inputLength)
+        {
             var output = new byte[unCompressedSize];
-            var outputPos = Decompress(input, output);
+            var outputPos = Decompress(input, inputLength, output, (int)unCompressedSize);
             return outputPos == output.Length ? output : output[..outputPos];
         }
 
-        public int Decompress(byte[] input, byte[] output)
+        public int Decompress(byte[] input, int inputLength, byte[] output, int outputLength)
         {
-            int inputPos = 0;
-            int outputPos = 0;
+            var inputPos = 0;
+            var outputPos = 0;
             do
             {
                 var (encCount, litCount) = GetLiteralToken(input, ref inputPos);
@@ -29,7 +32,7 @@ namespace ZoDream.Shared.Compression.Lz4
                 inputPos += litCount;
                 outputPos += litCount;
 
-                if (inputPos >= input.Length)
+                if (inputPos >= inputLength)
                 {
                     break;
                 }
@@ -43,7 +46,7 @@ namespace ZoDream.Shared.Compression.Lz4
 
                 if (encCount <= back)
                 {
-                    Array.Copy(input, encPos, output, outputPos, encCount);
+                    Array.Copy(output, encPos, output, outputPos, encCount);
                     outputPos += encCount;
                 }
                 else
@@ -53,14 +56,27 @@ namespace ZoDream.Shared.Compression.Lz4
                         output[outputPos++] = output[encPos++];
                     }
                 }
-            } while (inputPos < input.Length && outputPos < output.Length);
+            } while (inputPos < inputLength && outputPos < outputLength);
 
             return outputPos;
         }
 
         public void Decompress(Stream input, Stream output)
         {
-            output.Write(Decompress(input.ToArray()));
+            var length = (int)(input.Length - input.Position);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            var outputBuffer = ArrayPool<byte>.Shared.Rent((int)unCompressedSize);
+            try
+            {
+                input.ReadExactly(buffer, 0, length);
+                var res = Decompress(buffer, length, outputBuffer, (int)unCompressedSize);
+                output.Write(outputBuffer, 0, res);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(outputBuffer);
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
         protected virtual (int encCount, int litCount) GetLiteralToken(byte[] input, ref int inputPos) => ((input[inputPos] >> 0) & 0xf, (input[inputPos++] >> 4) & 0xf);

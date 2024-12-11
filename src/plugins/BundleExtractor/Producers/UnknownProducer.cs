@@ -20,7 +20,7 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityEngine.EngineName)
             {
-                return new OtherBundleElementScanner(options.Package);
+                return new OtherBundleElementScanner(options.Package ?? string.Empty);
             }
             return new BundleElementScanner();
         }
@@ -29,7 +29,7 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityEngine.EngineName)
             {
-                return new OtherBundleElementScanner(options.Package);
+                return new OtherBundleElementScanner(options.Package ?? string.Empty);
             }
             return new BundleStorage();
         }

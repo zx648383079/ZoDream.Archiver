@@ -3,7 +3,6 @@ use std::io::{Cursor, Read};
 
 use io::ByteReadExt;
 
-use crate::storage::lua::parse;
 
 mod encryption;
 mod compression;
@@ -22,6 +21,6 @@ fn main() {
     // let mut text = String::new();
     // let text = String::from_utf8_lossy(&buffer);
     // buffer.read_to_string(&mut text).unwrap();
-    let parsed = parse(&buffer);
+    // let parsed = parse(&buffer);
     println!("Hello, world!");
 }

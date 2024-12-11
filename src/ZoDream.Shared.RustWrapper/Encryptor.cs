@@ -36,8 +36,13 @@ namespace ZoDream.Shared.RustWrapper
 
         public byte[] Encrypt(byte[] buffer)
         {
-            return Convert(buffer, (inputRef, outputRef) => {
-                return NativeMethods.encrypt_encryptor(_instance, ref inputRef, 
+            return Encrypt(buffer, buffer.Length);
+        }
+
+        public byte[] Encrypt(byte[] input, int inputLength)
+        {
+            return Convert(input, inputLength, (inputRef, outputRef) => {
+                return NativeMethods.encrypt_encryptor(_instance, ref inputRef,
                     ref outputRef, ref _logger);
             });
         }
@@ -50,9 +55,13 @@ namespace ZoDream.Shared.RustWrapper
             });
         }
 
-        public byte[] Decrypt(byte[] buffer)
+        public byte[] Decrypt(byte[] input)
         {
-            return Convert(buffer, (inputRef, outputRef) => {
+            return Decrypt(input, input.Length);
+        }
+        public byte[] Decrypt(byte[] input, int inputLength)
+        {
+            return Convert(input, inputLength, (inputRef, outputRef) => {
                 return NativeMethods.decrypt_encryptor(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }
@@ -69,13 +78,13 @@ namespace ZoDream.Shared.RustWrapper
         }
 
 
-        public static byte[] Convert(byte[] buffer, Func<InputStreamRef, OutputStreamRef, long> cb)
+        public static byte[] Convert(byte[] buffer, int bufferLength, Func<InputStreamRef, OutputStreamRef, long> cb)
         {
             var i = 0;
             var inputRef = new InputStreamRef()
             {
                 read = (byte* ptr, uint count) => {
-                    var len = Math.Min(buffer.Length - i, (int)count);
+                    var len = Math.Min(bufferLength - i, (int)count);
                     if (len > 0)
                     {
                         Marshal.Copy(buffer, i, (nint)ptr, len);

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
@@ -170,6 +171,7 @@ namespace ZoDream.BundleExtractor
                             _ => new UIObject(reader),
                         };
                         if (reader.SerializedType.OldType is not null && 
+                            reader.SerializedType.OldType.Nodes.Count > 0 && 
                             res is IElementTypeLoader tl)
                         {
                             tl.Read(reader, reader.SerializedType.OldType);
@@ -181,10 +183,11 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
+                        var (fullPath, entryName) = FileNameHelper.Split(asset.FullPath);
                         var sb = new StringBuilder();
                         sb.AppendLine("Unable to load object")
-                            .AppendLine($"Assets {asset.FullPath}")
-                            .AppendLine($"Path {asset.FullPath}")
+                            .AppendLine($"Assets {entryName}")
+                            .AppendLine($"Path {fullPath}")
                             .AppendLine($"Type {obj.TypeID}")
                             .AppendLine($"PathID {obj.FileID}")
                             .Append(e);

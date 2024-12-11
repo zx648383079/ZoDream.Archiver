@@ -1,6 +1,6 @@
 use super::EndianType;
 
-struct BinaryReader 
+struct BinaryWriter
 {
     endian: EndianType,
 }

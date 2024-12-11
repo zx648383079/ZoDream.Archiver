@@ -79,7 +79,6 @@ pub enum CompressionID {
     Unknown,
     Lz4,
     Lzxd,
-    Lua,
 }
 
 #[derive_ReprC]
@@ -133,7 +132,7 @@ impl CompressorBox {
             CompressionID::Lzxd => {
                 Ok(0)
             },
-            CompressionID::Unknown | CompressionID::Lua => Ok(0)
+            CompressionID::Unknown => Ok(0)
         }
     }
     fn decompress<R, W>(&self, input: & mut R, output: & mut W) -> Result<usize>
@@ -145,10 +144,6 @@ impl CompressorBox {
                 instance.decompress(input, output)
             },
             CompressionID::Lzxd => {
-                let mut instance = LzxdCompressor::new();
-                instance.decompress(input, output)
-            },
-            CompressionID::Lua => {
                 let mut instance = LzxdCompressor::new();
                 instance.decompress(input, output)
             },

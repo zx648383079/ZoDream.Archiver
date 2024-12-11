@@ -25,10 +25,13 @@ namespace ZoDream.Shared.RustWrapper
                 Debug.WriteLine($"logger call: {progress}/{total}; {msg} ");
             }
         };
-
-        public byte[] Compress(byte[] buffer)
+        public byte[] Compress(byte[] input)
         {
-            return Encryptor.Convert(buffer, (inputRef, outputRef) => {
+            return Compress(input, input.Length);
+        }
+        public byte[] Compress(byte[] input, int inputLength)
+        {
+            return Encryptor.Convert(input, inputLength, (inputRef, outputRef) => {
                 return NativeMethods.compress_compressor(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }
@@ -40,9 +43,13 @@ namespace ZoDream.Shared.RustWrapper
             });
         }
 
-        public byte[] Decompress(byte[] buffer)
+        public byte[] Decompress(byte[] input)
         {
-            return Encryptor.Convert(buffer, (inputRef, outputRef) => {
+            return Decompress(input, input.Length);
+        }
+        public byte[] Decompress(byte[] input, int inputLength)
+        {
+            return Encryptor.Convert(input, inputLength, (inputRef, outputRef) => {
                 return NativeMethods.decompress_compressor(_instance, ref inputRef, ref outputRef, ref _logger);
             });
         }

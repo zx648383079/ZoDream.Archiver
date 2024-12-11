@@ -9,12 +9,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleStorage GetStorage(IBundleOptions options)
         {
-            return new Entertainment24ElementScanner(options.Package);
+            return new Entertainment24ElementScanner(options.Package ?? string.Empty);
         }
 
         public IBundleElementScanner GetScanner(IBundleOptions options)
         {
-            return new Entertainment24ElementScanner(options.Package);
+            return new Entertainment24ElementScanner(options.Package ?? string.Empty);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
