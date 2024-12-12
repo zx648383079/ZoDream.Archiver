@@ -5,6 +5,15 @@ namespace ZoDream.Shared.Bundle
 {
     public static class ByteExtension
     {
+        public static bool Equal(this byte[] buffer, byte[] value)
+        {
+            return buffer.Length == value.Length && StartsWith(buffer, value);
+        }
+
+        public static bool Equal(this byte[] buffer, string value)
+        {
+            return buffer.Length == value.Length && StartsWith(buffer, value);
+        }
         /// <summary>
         /// 匹配字节
         /// </summary>

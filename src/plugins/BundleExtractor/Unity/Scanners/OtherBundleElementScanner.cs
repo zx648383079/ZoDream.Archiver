@@ -7,22 +7,21 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
     internal partial class OtherBundleElementScanner(string package) : IBundleElementScanner, IBundleStorage
     {
 
-        public bool IsCounterSide => package.Contains("");
-        public bool IsSchoolGirlStrikers => package.Contains("");
-        public bool IsPartyAnimals => package.Contains("");
-        public bool IsMuvLuvDimensions => package.Contains("");
-        public bool IsJJKPhantomParade => package.Contains("");
-        public bool IsReverse1999 => package.Contains("");
-        public bool IsGirlsFrontline => package.Contains("");
-        public bool IsCodenameJump => package.Contains("");
-        public bool IsProjectSekai => package.Contains("");
-        public bool IsAliceGearAegis => package.Contains("");
-        public bool IsImaginaryFest => package.Contains("");
-        public bool IsDreamscapeAlbireo => package.Contains("");
-        public bool IsAnchorPanic => package.Contains("");
-        public bool IsHelixWaltz2 => package.Contains("");
-        public bool IsFantasyOfWind => package.Contains("");
-        public bool IsEnsembleStars => package.Contains("");
+        public bool IsCounterSide => package.Contains("cs");
+        public bool IsSchoolGirlStrikers => package.Contains("sgs");
+        public bool IsPartyAnimals => package.Contains("pa");
+        public bool IsMuvLuvDimensions => package.Contains("mld");
+        public bool IsJJKPhantomParade => package.Contains("jjkpp");
+        public bool IsGirlsFrontline => package.Contains("gf");
+        public bool IsCodenameJump => package.Contains("cj");
+        public bool IsProjectSekai => package.Contains("ps");
+        public bool IsAliceGearAegis => package.Contains("aga");
+        public bool IsImaginaryFest => package.Contains("if");
+        public bool IsDreamscapeAlbireo => package.Contains("da");
+        public bool IsAnchorPanic => package.Contains("ap");
+        public bool IsHelixWaltz2 => package.Contains("hw2");
+        public bool IsFantasyOfWind => package.Contains("fow");
+        public bool IsEnsembleStars => package.Contains("es");
         public bool IsFakeHeader => package.Contains("fake");
 
         public Stream Open(string fullPath)
