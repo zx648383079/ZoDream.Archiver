@@ -8,7 +8,7 @@ using ZoDream.Shared.Models;
 namespace ZoDream.BundleExtractor.Unity.UI
 {
 
-    internal sealed class AnimationClip(UIReader reader) : NamedObject(reader), IFileWriter
+    internal sealed class AnimationClip(UIReader reader) : NamedObject(reader), IFileExporter
     {
         public AnimationType m_AnimationType;
         public bool m_Legacy;

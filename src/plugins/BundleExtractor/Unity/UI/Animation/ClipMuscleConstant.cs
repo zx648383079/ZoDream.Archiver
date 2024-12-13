@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using YamlDotNet.Core;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class ClipMuscleConstant : IElementLoader, IYamlWriter
+    internal class ClipMuscleConstant : IElementLoader
     {
         public HumanPose m_DeltaPose;
         public XForm<Vector3> m_StartX;

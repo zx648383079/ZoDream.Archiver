@@ -4,7 +4,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class PackedQuatVector : IYamlWriter
+    internal class PackedQuatVector
     {
         public uint m_NumItems;
         public byte[] m_Data;
@@ -18,14 +18,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             reader.AlignStream();
         }
-
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(m_NumItems), m_NumItems);
-        //    node.Add(nameof(m_Data), m_Data.ExportYAML());
-        //    return node;
-        //}
 
         public Quaternion[] UnpackQuats()
         {

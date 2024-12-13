@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class PPtrKeyframe : IYamlWriter
+    internal class PPtrKeyframe
     {
         public float time;
         public PPtr<UIObject> value;
@@ -18,13 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             time = reader.ReadSingle();
             value = new PPtr<UIObject>(reader);
         }
-        //public YAMLNode ExportYAML(int[] version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(time), time);
-        //    node.Add(nameof(value), value.ExportYAML(version));
-        //    return node;
-        //}
+
     }
 
 }

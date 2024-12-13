@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class GameObject(UIReader reader) : EditorExtension(reader), IFileWriter
+    internal sealed class GameObject(UIReader reader) : EditorExtension(reader), IFileExporter
     {
         public List<PPtr<UIComponent>> m_Components;
         public string m_Name;
@@ -101,7 +102,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            // TODO
+            // TODO fbx
+            new FbxExporter(this, SkiaSharp.SKEncodedImageFormat.Bmp)
+                .SaveAs(fileName, mode);
         }
     }
 }

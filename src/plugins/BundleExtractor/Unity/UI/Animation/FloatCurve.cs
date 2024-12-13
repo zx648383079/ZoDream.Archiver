@@ -3,7 +3,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class FloatCurve : IYamlWriter
+    internal class FloatCurve
     {
         public AnimationCurve<float> curve;
         public string attribute;
@@ -36,21 +36,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 flags = reader.ReadInt32();
             }
         }
-
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    YAMLMappingNode node = new YAMLMappingNode();
-        //    node.Add(nameof(curve), curve.ExportYAML(version));
-        //    node.Add(nameof(attribute), attribute);
-        //    node.Add(nameof(path), path);
-        //    node.Add(nameof(classID), (int)classID);
-        //    if (version[0] >= 2)
-        //    {
-        //        node.Add(nameof(script), script.ExportYAML(version));
-        //    }
-        //    node.Add(nameof(flags), flags);
-        //    return node;
-        //}
 
         public override bool Equals(object obj)
         {

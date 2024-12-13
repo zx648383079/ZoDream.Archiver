@@ -8,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Shader(UIReader reader) : NamedObject(reader), IElementLoader, IFileWriter
+    internal class Shader(UIReader reader) : NamedObject(reader), IElementLoader, IFileExporter
     {
         public byte[] m_Script;
         //5.3 - 5.4

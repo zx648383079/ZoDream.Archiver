@@ -44,7 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
     }
 
     internal sealed class Texture2D(UIReader reader) : 
-        Texture(reader), IFileWriter, IElementTypeLoader
+        Texture(reader), IFileExporter, IElementTypeLoader
     {
         public int m_Width;
         public int m_Height;

@@ -1,9 +1,12 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class AABB : IYamlWriter
+    internal class AABB
     {
         public Vector3 m_Center;
         public Vector3 m_Extent;
@@ -14,13 +17,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Extent = reader.ReadVector3();
         }
 
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(m_Center), m_Center.ExportYAML(version));
-        //    node.Add(nameof(m_Extent), m_Extent.ExportYAML(version));
-        //    return node;
-        //}
     }
 
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class AnimationClipBindingConstant : IYamlWriter
+    internal class AnimationClipBindingConstant
     {
         public List<GenericBinding> genericBindings;
         public List<PPtr<UIObject>> pptrCurveMapping;
@@ -16,27 +16,19 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public AnimationClipBindingConstant(UIReader reader)
         {
             int numBindings = reader.ReadInt32();
-            genericBindings = new List<GenericBinding>();
+            genericBindings = [];
             for (int i = 0; i < numBindings; i++)
             {
                 genericBindings.Add(new GenericBinding(reader));
             }
 
             int numMappings = reader.ReadInt32();
-            pptrCurveMapping = new List<PPtr<UIObject>>();
+            pptrCurveMapping = [];
             for (int i = 0; i < numMappings; i++)
             {
                 pptrCurveMapping.Add(new PPtr<UIObject>(reader));
             }
         }
-
-        //public YAMLNode ExportYAML(int[] version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(genericBindings), genericBindings.ExportYAML(version));
-        //    node.Add(nameof(pptrCurveMapping), pptrCurveMapping.ExportYAML(version));
-        //    return node;
-        //}
 
         public GenericBinding FindBinding(int index)
         {

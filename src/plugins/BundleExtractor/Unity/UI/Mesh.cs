@@ -16,7 +16,7 @@ using ZoDream.Shared.Storage;
 namespace ZoDream.BundleExtractor.Unity.UI
 {
     
-    internal sealed class Mesh(UIReader reader) : NamedObject(reader), IElementLoader, IFileWriter
+    internal sealed class Mesh(UIReader reader) : NamedObject(reader), IElementLoader, IFileExporter
     {
         public bool m_Use16BitIndices = true;
         public List<SubMesh> m_SubMeshes;

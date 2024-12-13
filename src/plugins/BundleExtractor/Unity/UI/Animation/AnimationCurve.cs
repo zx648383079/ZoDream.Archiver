@@ -5,7 +5,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class AnimationCurve<T> : IYamlWriter
+    internal class AnimationCurve<T>
     {
         public List<Keyframe<T>> m_Curve;
         public int m_PreInfinity;
@@ -24,7 +24,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Get<UnityVersion>();
             int numCurves = reader.ReadInt32();
-            m_Curve = new List<Keyframe<T>>();
+            m_Curve = [];
             for (int i = 0; i < numCurves; i++)
             {
                 m_Curve.Add(new Keyframe<T>(reader, readerFunc));
@@ -38,19 +38,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
         }
 
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.AddSerializedVersion(ToSerializedVersion(version));
-        //    node.Add(nameof(m_Curve), m_Curve.ExportYAML(version));
-        //    node.Add(nameof(m_PreInfinity), m_PreInfinity);
-        //    node.Add(nameof(m_PostInfinity), m_PostInfinity);
-        //    if (version.GreaterThanOrEquals(5,3))//5.3 and up
-        //    {
-        //        node.Add(nameof(m_RotationOrder), m_RotationOrder);
-        //    }
-        //    return node;
-        //}
 
         private int ToSerializedVersion(int[] version)
         {

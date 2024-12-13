@@ -7,7 +7,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class TextAsset(UIReader reader) : NamedObject(reader), IFileWriter
+    internal sealed class TextAsset(UIReader reader) : NamedObject(reader), IFileExporter
     {
         public Stream Script;
         public override void Read(IBundleBinaryReader reader)

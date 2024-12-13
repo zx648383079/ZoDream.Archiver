@@ -3,7 +3,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class QuaternionCurve : IYamlWriter
+    internal class QuaternionCurve
     {
         public AnimationCurve<Vector4> curve;
         public string path;
@@ -20,13 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             path = reader.ReadAlignedString();
         }
 
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    YAMLMappingNode node = new YAMLMappingNode();
-        //    node.Add(nameof(curve), curve.ExportYAML(version));
-        //    node.Add(nameof(path), path);
-        //    return node;
-        //}
+
         public override bool Equals(object obj)
         {
             if (obj is QuaternionCurve quaternionCurve)

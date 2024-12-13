@@ -1,9 +1,10 @@
 ﻿using System.Numerics;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Vector3Curve : IYamlWriter
+    internal class Vector3Curve
     {
         public AnimationCurve<Vector3> curve;
         public string path;
@@ -19,14 +20,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             curve = new AnimationCurve<Vector3>(reader, reader.ReadVector3);
             path = reader.ReadAlignedString();
         }
-
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    YAMLMappingNode node = new YAMLMappingNode();
-        //    node.Add(nameof(curve), curve.ExportYAML(version));
-        //    node.Add(nameof(path), path);
-        //    return node;
-        //}
 
         public override bool Equals(object obj)
         {
@@ -46,6 +39,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             return hash;
         }
+
     }
 
 }

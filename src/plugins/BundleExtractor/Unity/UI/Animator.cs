@@ -5,7 +5,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Animator(UIReader reader) : UIBehavior(reader), IFileWriter
+    internal sealed class Animator(UIReader reader) : UIBehavior(reader), IFileExporter
     {
         public PPtr<Avatar> m_Avatar;
         public PPtr<RuntimeAnimatorController> m_Controller;

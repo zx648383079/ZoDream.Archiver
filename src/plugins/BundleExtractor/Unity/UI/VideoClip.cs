@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
     }
 
-    internal sealed class VideoClip(UIReader reader) : NamedObject(reader), IFileWriter
+    internal sealed class VideoClip(UIReader reader) : NamedObject(reader), IFileExporter
     {
         public Stream m_VideoData;
         public string m_OriginalPath;

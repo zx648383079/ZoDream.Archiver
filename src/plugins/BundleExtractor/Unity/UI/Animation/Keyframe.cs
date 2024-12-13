@@ -4,7 +4,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Keyframe<T> : IYamlWriter
+    internal class Keyframe<T>
     {
         public float time;
         public T value;
@@ -38,23 +38,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 outWeight = readerFunc();
             }
         }
-
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.AddSerializedVersion(ToSerializedVersion(version));
-        //    node.Add(nameof(time), time);
-        //    node.Add(nameof(value), value.ExportYAML(version));
-        //    node.Add(nameof(inSlope), inSlope.ExportYAML(version));
-        //    node.Add(nameof(outSlope), outSlope.ExportYAML(version));
-        //    if (version.GreaterThanOrEquals(2018)) //2018 and up
-        //    {
-        //        node.Add(nameof(weightedMode), weightedMode);
-        //        node.Add(nameof(inWeight), inWeight.ExportYAML(version));
-        //        node.Add(nameof(outWeight), outWeight.ExportYAML(version));
-        //    }
-        //    return node;
-        //}
 
         private int ToSerializedVersion(UnityVersion version)
         {

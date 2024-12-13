@@ -13,7 +13,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class Sprite(UIReader reader) : NamedObject(reader), IFileWriter
+    internal sealed class Sprite(UIReader reader) : NamedObject(reader), IFileExporter
     {
         public Rectf m_Rect;
         public Vector2 m_Offset;
@@ -129,7 +129,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     var rectBottom = (int)Math.Ceiling(textureRect.y + textureRect.height);
                     rectRight = Math.Min(rectRight, originalImage.Width);
                     rectBottom = Math.Min(rectBottom, originalImage.Height);
-                    var rect = new SKRectI(rectX, rectY, rectRight - rectX, rectBottom - rectY);
+                    var rect = new SKRectI(rectX, rectY, rectRight, rectBottom);
                     var spriteImage = originalImage.Clip(rect);
                     if (settingsRaw.packed == 1)
                     {

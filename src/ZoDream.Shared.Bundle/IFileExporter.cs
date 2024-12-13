@@ -1,8 +1,8 @@
 ﻿using ZoDream.Shared.Models;
 
-namespace ZoDream.BundleExtractor.Unity.UI
+namespace ZoDream.Shared.Bundle
 {
-    internal interface IFileWriter
+    public interface IFileExporter
     {
 
         public void SaveAs(string fileName, ArchiveExtractMode mode);

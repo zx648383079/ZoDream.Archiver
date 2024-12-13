@@ -4,7 +4,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class PackedFloatVector : IYamlWriter
+    internal class PackedFloatVector
     {
         public uint m_NumItems;
         public float m_Range;
@@ -25,17 +25,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_BitSize = reader.ReadByte();
             reader.AlignStream();
         }
-
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(m_NumItems), m_NumItems);
-        //    node.Add(nameof(m_Range), m_Range);
-        //    node.Add(nameof(m_Start), m_Start);
-        //    node.Add(nameof(m_Data), m_Data.ExportYAML());
-        //    node.Add(nameof(m_BitSize), m_BitSize);
-        //    return node;
-        //}
 
         public float[] UnpackFloats(int itemCountInChunk, int chunkStride, int start = 0, int numChunks = -1)
         {

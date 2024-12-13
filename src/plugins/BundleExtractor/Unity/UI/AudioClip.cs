@@ -8,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal sealed class AudioClip(UIReader reader) : NamedObject(reader), IFileWriter
+    internal sealed class AudioClip(UIReader reader) : NamedObject(reader), IFileExporter
     {
         public int m_Format;
         public FMODSoundType m_Type;

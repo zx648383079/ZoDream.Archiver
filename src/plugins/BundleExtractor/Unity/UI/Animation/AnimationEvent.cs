@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZoDream.BundleExtractor.Unity.UI
+﻿namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class AnimationEvent : IYamlWriter
+    internal class AnimationEvent
     {
         public float time;
         public string functionName;
@@ -32,17 +26,5 @@ namespace ZoDream.BundleExtractor.Unity.UI
             messageOptions = reader.ReadInt32();
         }
 
-        //public YAMLNode ExportYAML(int[] version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(time), time);
-        //    node.Add(nameof(functionName), functionName);
-        //    node.Add(nameof(data), data);
-        //    node.Add(nameof(objectReferenceParameter), objectReferenceParameter.ExportYAML(version));
-        //    node.Add(nameof(floatParameter), floatParameter);
-        //    node.Add(nameof(intParameter), intParameter);
-        //    node.Add(nameof(messageOptions), messageOptions);
-        //    return node;
-        //}
     }
 }

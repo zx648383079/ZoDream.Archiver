@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.BundleExtractor.Models;
+﻿using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class GenericBinding : IYamlWriter
+    internal class GenericBinding
     {
         public UnityVersion version;
         public uint path;
@@ -44,16 +39,5 @@ namespace ZoDream.BundleExtractor.Unity.UI
             reader.AlignStream();
         }
 
-        //public YAMLNode ExportYAML(int[] version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(path), path);
-        //    node.Add(nameof(attribute), attribute);
-        //    node.Add(nameof(script), script.ExportYAML(version));
-        //    node.Add("classID", ((int)typeID).ToString());
-        //    node.Add(nameof(customType), customType);
-        //    node.Add(nameof(isPPtrCurve), isPPtrCurve);
-        //    return node;
-        //}
     }
 }

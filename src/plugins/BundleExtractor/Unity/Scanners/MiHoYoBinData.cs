@@ -12,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         Bytes,
         JSON
     }
-    internal sealed class MiHoYoBinData(UIReader reader) : UIObject(reader), IFileWriter
+    internal sealed class MiHoYoBinData(UIReader reader) : UIObject(reader), IFileExporter
     {
         private static Regex ASCII = new("[^\u0020-\u007E]", RegexOptions.Compiled);
 

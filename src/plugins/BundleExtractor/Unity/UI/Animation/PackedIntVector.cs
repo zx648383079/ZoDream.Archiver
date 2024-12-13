@@ -3,7 +3,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class PackedIntVector : IYamlWriter
+    internal class PackedIntVector
     {
         public uint m_NumItems;
         public byte[] m_Data;
@@ -20,14 +20,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_BitSize = reader.ReadByte();
             reader.AlignStream();
         }
-        //public YAMLNode ExportYAML(UnityVersion version)
-        //{
-        //    var node = new YAMLMappingNode();
-        //    node.Add(nameof(m_NumItems), m_NumItems);
-        //    node.Add(nameof(m_Data), m_Data.ExportYAML());
-        //    node.Add(nameof(m_BitSize), m_BitSize);
-        //    return node;
-        //}
 
         public int[] UnpackInts()
         {
