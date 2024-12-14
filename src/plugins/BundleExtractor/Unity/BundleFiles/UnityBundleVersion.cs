@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Unity.BundleFiles
 {
-    public enum BundleVersion
+    public enum UnityBundleVersion
     {
         Unknown = 0,
 

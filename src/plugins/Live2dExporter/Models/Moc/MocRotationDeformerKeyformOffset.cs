@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -17,7 +18,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint IsReflectX { get; private set; }
         public uint IsReflectY { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             Opacities = reader.ReadUInt32();
             Angles = reader.ReadUInt32();
@@ -38,7 +39,7 @@ namespace ZoDream.Live2dExporter.Models
         public bool[] IsReflectX { get; private set; }
         public bool[] IsReflectY { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocRotationDeformerKeyFormOffsetPtr();
             ptr.Read(reader);
@@ -61,7 +62,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public int[] KeyFormMultiplyColorSourcesBeginIndices { get; private set; }
         public int[] KeyFormScreenColorSourcesBeginIndices { get; private set; }
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = reader.ReadUInt32();
             var ptr2 = reader.ReadUInt32();

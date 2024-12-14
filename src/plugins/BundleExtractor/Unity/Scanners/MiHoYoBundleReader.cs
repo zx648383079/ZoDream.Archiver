@@ -18,6 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         }
         public MiHoYoBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
+            _storageItems = new(reader.Get<IBundleCodec>());
             _reader = reader;
             _options = options;
             _basePosition = reader.BaseStream.Position;
@@ -30,7 +31,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private readonly long _basePosition;
         private readonly long _headerLength;
         private readonly MiHoYoBundleHeader _header = new();
-        private readonly SplitStreamCollection _storageItems = [];
+        private readonly SplitStreamCollection _storageItems;
 
         public void Dispose()
         {

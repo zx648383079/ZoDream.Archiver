@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -37,7 +38,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint DrawableMaskSourcesBeginIndices { get; private set; }
         public uint DrawableMaskSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             RuntimeSpace0 = reader.ReadUInt32();
             RuntimeSpace1 = reader.ReadUInt32();
@@ -80,7 +81,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] DrawableMaskSourcesBeginIndices { get; private set; }
         public int[] DrawableMaskSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocArtMeshOffsetPtr();
             ptr.Read(reader);
@@ -117,7 +118,7 @@ namespace ZoDream.Live2dExporter.Models
     internal class MocArtMeshOffsetV4_2
     {
         public int[] keyformColorSourcesBeginIndices { get; private set; }
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = reader.ReadUInt32();
             var pos = reader.BaseStream.Position;

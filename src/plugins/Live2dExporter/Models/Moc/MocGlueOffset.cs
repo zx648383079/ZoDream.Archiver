@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -20,7 +21,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint GlueInfoSourcesCounts { get; private set; }
 
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             RuntimeSpace0 = reader.ReadUInt32();
             Ids = reader.ReadUInt32();
@@ -45,7 +46,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] GlueInfoSourcesBeginIndices { get; private set; }
         public int[] GlueInfoSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocGlueOffsetPtr();
             ptr.Read(reader);

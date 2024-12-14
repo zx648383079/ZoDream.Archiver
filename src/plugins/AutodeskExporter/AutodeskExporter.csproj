@@ -14,7 +14,7 @@
 
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+	  <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
 	</ItemGroup>
 
 </Project>

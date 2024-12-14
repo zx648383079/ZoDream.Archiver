@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -6,7 +7,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public uint DrawOrders {  get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             DrawOrders = reader.ReadUInt32();
         }
@@ -15,7 +16,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public float[] DrawOrders { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocPartKeyFormOffsetPtr();
             ptr.Read(reader);

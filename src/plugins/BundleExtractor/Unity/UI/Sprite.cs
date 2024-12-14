@@ -123,6 +123,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                         var height = (int)(m_Texture2D.m_Height / downscaleMultiplier);
                         originalImage = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
                     }
+                    if (originalImage is null)
+                    {
+                        return null;
+                    }
                     var rectX = (int)Math.Floor(textureRect.x);
                     var rectY = (int)Math.Floor(textureRect.y);
                     var rectRight = (int)Math.Ceiling(textureRect.x + textureRect.width);
@@ -165,7 +169,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                             var matrix = Matrix3x2.CreateScale(m_Sprite.m_PixelsToUnits);
                             matrix *= Matrix3x2.CreateTranslation(m_Sprite.m_Rect.width * m_Sprite.m_Pivot.X - textureRectOffset.X, m_Sprite.m_Rect.height * m_Sprite.m_Pivot.Y - textureRectOffset.Y);
                             path.Transform(matrix.AsMatrix());
-                            return spriteImage.Clip(path);
+                            return spriteImage?.ClipAndFlip(path, false);
                         }
                         catch
                         {
@@ -174,7 +178,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
 
                     //Rectangle
-                    return spriteImage.Flip(false);
+                    return spriteImage?.Flip(false);
                 }
             }
 

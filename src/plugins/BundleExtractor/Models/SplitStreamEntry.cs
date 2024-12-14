@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Models
@@ -9,16 +10,16 @@ namespace ZoDream.BundleExtractor.Models
     public class SplitStreamEntry(long length, long compressedLength)
     {
         public SplitStreamEntry(long length, long compressedLength, 
-            CompressionType compression)
+            BundleCodecType compression)
             : this(length, compressedLength)
         {
-            CompressionType = compression;
+            CodecType = compression;
         }
         public long Length { get; private set; } = length;
 
         public long CompressedLength { get; private set; } = compressedLength;
 
-        public virtual CompressionType CompressionType { get; } = CompressionType.None;
+        public virtual BundleCodecType CodecType { get; } = BundleCodecType.Unknown;
     }
 
     public class MergeSplitStreamEntry(SplitStreamEntry entry)
@@ -36,14 +37,15 @@ namespace ZoDream.BundleExtractor.Models
 
         private Stream? _cacheSource;
         private SplitStreamEntry? _cacheEntry;
+        private readonly IBundleCodec _codec;
 
-        public SplitStreamCollection()
+        public SplitStreamCollection(IBundleCodec codec)
         {
-            
+            _codec = codec;
         }
-        public SplitStreamCollection(IEnumerable<SplitStreamEntry> collection) : base(collection)
+        public SplitStreamCollection(IBundleCodec codec, IEnumerable<SplitStreamEntry> collection) : base(collection)
         {
-
+            _codec = codec;
         }
 
         public IEnumerable<MergeSplitStreamEntry> GetRange(long offset, long length)
@@ -85,9 +87,10 @@ namespace ZoDream.BundleExtractor.Models
             {
                 return _cacheSource;
             }
-            var stream = BundleCodec.Decode(new PartialStream(input,
-                inputBasePos,
-                    entry.CompressedLength), entry.CompressionType,
+            var stream = _codec.Decode(new PartialStream(input,
+                    inputBasePos,
+                    entry.CompressedLength), entry.CodecType,
+                    entry.CompressedLength,
                     entry.Length);
             try
             {

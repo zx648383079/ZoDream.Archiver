@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -11,7 +12,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public int[] BlendShapeConstraintSourcesIndices { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = reader.ReadUInt32();
             var pos = reader.BaseStream.Position;

@@ -824,7 +824,7 @@ namespace ZoDream.BundleExtractor.Models
             if (string.IsNullOrEmpty(s))
             {
                 customEngine = null;
-                version = default(UnityVersion);
+                version = default;
                 return false;
             }
             var match = UnityVersionRegexes.China().Match(s);

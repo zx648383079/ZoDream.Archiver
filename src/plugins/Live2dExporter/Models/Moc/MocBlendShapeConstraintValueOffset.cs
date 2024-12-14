@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -12,7 +13,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint Keys {  get; private set; }
         public uint Weights {  get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             Keys = reader.ReadUInt32();
             Weights = reader.ReadUInt32();
@@ -23,7 +24,7 @@ namespace ZoDream.Live2dExporter.Models
         public float[] Keys { get; private set; }
         public float[] Weights { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocBlendShapeConstraintValueOffsetPtr();
             ptr.Read(reader);

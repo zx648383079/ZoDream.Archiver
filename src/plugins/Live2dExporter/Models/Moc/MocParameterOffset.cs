@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -24,7 +25,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint ParameterBindingSourcesBeginIndices { get; private set; }
         public uint ParameterBindingSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             RuntimeSpace0 = reader.ReadUInt32();
             Ids = reader.ReadUInt32();
@@ -48,7 +49,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] ParameterBindingSourcesBeginIndices { get; private set; }
         public int[] ParameterBindingSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocParameterOffsetPtr();
             ptr.Read(reader);
@@ -73,7 +74,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint BlendShapeParameterBindingSourcesBeginIndices { get; private set; }
         public uint BlendShapeParameterBindingSourcesCounts { get; private set; }
         
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             ParameterTypes = reader.ReadUInt32();
             BlendShapeParameterBindingSourcesBeginIndices = reader.ReadUInt32();
@@ -87,7 +88,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] BlendShapeParameterBindingSourcesBeginIndices { get; private set; }
         public int[] BlendShapeParameterBindingSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocParameterOffsetsV4_2Ptr();
             ptr.Read(reader);

@@ -170,5 +170,18 @@ namespace ZoDream.BundleExtractor.Unity
             }
             return data;
         }
+
+        public static BundleCodecType ToCodec(this UnityCompressionType type)
+        {
+            return type switch
+            {
+                UnityCompressionType.Lzma => BundleCodecType.Lzma,
+                UnityCompressionType.Lz4 => BundleCodecType.Lz4,
+                UnityCompressionType.Lz4HC => BundleCodecType.Lz4HC,
+                UnityCompressionType.Lzham => BundleCodecType.Lzham,
+                UnityCompressionType.Lz4Mr0k => BundleCodecType.Lz4Mr0k,
+                _ => BundleCodecType.Unknown
+            };
+        }
     }
 }

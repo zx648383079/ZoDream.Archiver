@@ -1,7 +1,7 @@
 ﻿using FFmpeg.AutoGen;
 using System;
-using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Buffers;
+using System.IO;
 
 namespace ZoDream.Shared.Media
 {
@@ -53,7 +53,27 @@ namespace ZoDream.Shared.Media
 
         public MediaFrame Decode(byte[] buffer)
         {
-            using var packet = new MediaPacket(buffer);
+            return Decode(buffer, buffer.Length);
+        }
+
+        public MediaFrame Decode(Stream input)
+        {
+            var length = (int)(input.Length - input.Position);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                input.ReadExactly(buffer, 0, length);
+                return Decode(buffer, length);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+        public MediaFrame Decode(byte[] input, int inputLength)
+        {
+            using var packet = new MediaPacket(input, inputLength);
             var frame = new MediaFrame();
             frame.Unref();
             int error;
@@ -78,6 +98,29 @@ namespace ZoDream.Shared.Media
             return packet.ToArray();
         }
 
+        public int Encode(MediaFrame frame, Stream output)
+        {
+            using var packet = new MediaPacket();
+            int error;
+            packet.Unref();
+            do
+            {
+                frame.Send(_pDecodecContext);
+                error = packet.Receive(_pDecodecContext);
+            } while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
+            var length = packet.Length;
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                packet.CopyTo(buffer);
+                output.Write(buffer, 0, length);
+                return length;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
 
         /// <summary>
         /// 释放

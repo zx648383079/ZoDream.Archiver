@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -11,7 +7,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public uint BindingSourcesIndices {  get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             BindingSourcesIndices = reader.ReadUInt32();
         }
@@ -20,7 +16,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public int[] BindingSourcesIndices { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocParameterBindingIndicesOffsetPtr();
             ptr.Read(reader);

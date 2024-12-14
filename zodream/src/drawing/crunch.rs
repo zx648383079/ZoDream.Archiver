@@ -27,7 +27,7 @@ impl PixelDecoder for CrunchDecoder
             decode_crunch(input, width as usize, height as usize, &mut buffer)?;
         }
         for i in buffer {
-            output.write_u32_be(i).unwrap();
+            output.write_u32_le(i).unwrap();
         }
         Ok(output.len())
     }

@@ -19,16 +19,23 @@ namespace ZoDream.Shared.Media
         }
 
         public MediaPacket(byte[] buffer)
+            : this(buffer, buffer.Length)
+        {
+        }
+
+        public MediaPacket(byte[] buffer, int length)
             : this()
         {
             fixed (byte* waitDecodeData = buffer)
             {
                 _pPacket->data = waitDecodeData;
-                _pPacket->size = buffer.Length;
+                _pPacket->size = length;
             }
         }
 
         private readonly AVPacket* _pPacket;
+
+        public int Length => _pPacket->size;
 
         public void Unref()
         {
@@ -45,10 +52,15 @@ namespace ZoDream.Shared.Media
             return ffmpeg.avcodec_receive_packet(pDecodecContext, _pPacket);
         }
 
+        public void CopyTo(byte[] buffer)
+        {
+            Marshal.Copy(new IntPtr(_pPacket->data), buffer, 0, _pPacket->size);
+        }
+
         public byte[] ToArray()
         {
-            var buffer = new byte[_pPacket->size];
-            Marshal.Copy(new IntPtr(_pPacket->data), buffer, 0, _pPacket->size);
+            var buffer = new byte[Length];
+            CopyTo(buffer);
             return buffer;
         }
 

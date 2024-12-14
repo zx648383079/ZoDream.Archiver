@@ -21,6 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         }
         public BlbBundleReader(IBundleBinaryReader reader, IArchiveOptions? options)
         {
+            _storageItems = new(reader.Get<IBundleCodec>());
             _reader = reader;
             _options = options;
             _basePosition = reader.BaseStream.Position;
@@ -33,7 +34,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private readonly long _basePosition;
         private readonly long _headerLength;
         private readonly BlbBundleHeader _header = new();
-        private readonly SplitStreamCollection _storageItems = [];
+        private readonly SplitStreamCollection _storageItems;
         private long _dataBeginPosition;
         public void Dispose()
         {
@@ -74,7 +75,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             _reader.BaseStream.Position += 4;
             var blobOffset = _reader.ReadInt32();
             var blobSize = _reader.ReadUInt32();
-            var compressionType = (CompressionType)_reader.ReadByte();
+            var compressionType = ((UnityCompressionType)_reader.ReadByte()).ToCodec();
             var uncompressedSize = (uint)1 << _reader.ReadByte();
             _reader.AlignStream();
 

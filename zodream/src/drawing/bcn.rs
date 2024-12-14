@@ -31,7 +31,7 @@ impl PixelDecoder for BcnDecoder
             _ => ()
         }
         for i in buffer {
-            output.write_u32_be(i).unwrap();
+            output.write_u32_le(i).unwrap();
         }
         Ok(output.len())
     }

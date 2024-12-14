@@ -23,7 +23,10 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             _options = options;
             _basePosition = reader.Position;
             _header.Read(reader);
+            var codec = reader.Get<IBundleCodec>();
+            codec.Initialize(reader);
             _headerLength = reader.Position - _basePosition;
+            _storageItems = new(codec);
         }
 
         private readonly IBundleBinaryReader _reader;
@@ -31,7 +34,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         private readonly long _basePosition;
         private readonly long _headerLength;
         private readonly FileStreamBundleHeader _header = new();
-        private SplitStreamCollection _storageItems = [];
+        private SplitStreamCollection _storageItems;
         private long _dataBeginPosition;
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
@@ -68,7 +71,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
-            if (_header.Version >= BundleVersion.BF_LargeFilesSupport)
+            if (_header.Version >= UnityBundleVersion.BF_LargeFilesSupport)
             {
                 _reader.AlignStream(16);
             }
@@ -77,14 +80,14 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
                 _reader.BaseStream.Seek(_basePosition + _header.Size - _header.CompressedBlocksInfoSize, SeekOrigin.Begin);
             }
 
-            var metaCompression = (CompressionType)(_header.Flags & BundleFlags.CompressionTypeMask);
-            using var reader = BundleCodec.Decode(_reader, metaCompression,
+            var metaCompression = (UnityCompressionType)(_header.Flags & BundleFlags.CompressionTypeMask);
+            using var reader = _reader.Get<IBundleCodec>().Decode(_reader, metaCompression.ToCodec(),
                 _header.CompressedBlocksInfoSize,
                 _header.UncompressedBlocksInfoSize);
             var metadataPosition = reader.BaseStream.Position;
             var uncompressedDataHash = reader.ReadBytes(16);
 
-            _storageItems = new SplitStreamCollection(reader.ReadArray(StorageEntry.Read));
+            _storageItems = new SplitStreamCollection(reader.Get<IBundleCodec>(), reader.ReadArray(StorageEntry.Read));
             var items = Array.Empty<FileStreamEntry>();
             if ((_header.Flags & BundleFlags.BlocksAndDirectoryInfoCombined) != 0)
             {
@@ -101,7 +104,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             if ((_header.Flags & BundleFlags.BlocksInfoAtTheEnd) != 0)
             {
                 _reader.BaseStream.Seek(_basePosition + _headerLength, SeekOrigin.Begin);
-                if (_header.Version >= BundleVersion.BF_LargeFilesSupport)
+                if (_header.Version >= UnityBundleVersion.BF_LargeFilesSupport)
                 {
                     _reader.AlignStream(16);
                 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -25,7 +26,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint Types { get; private set; }
         public uint SpecificSourcesIndices { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             RuntimeSpace0 = reader.ReadUInt32();
             Ids = reader.ReadUInt32();
@@ -49,7 +50,7 @@ namespace ZoDream.Live2dExporter.Models
         public MocDeformerType[] Types { get; private set; }
         public int[] SpecificSourcesIndices { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocDeformerOffsetPtr();
             ptr.Read(reader);

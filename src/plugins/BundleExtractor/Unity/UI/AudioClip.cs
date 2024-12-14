@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using FFmpeg.AutoGen;
+using System.IO;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
@@ -100,7 +101,20 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 return;
             }
             using var fs = File.Create(fileName);
-            m_AudioData.CopyTo(fs, Audio.Decode);
+            Audio.Decode(m_AudioData, m_CompressionFormat switch
+            {
+                AudioCompressionFormat.PCM => AVCodecID.AV_CODEC_ID_ADPCM_4XM,
+                AudioCompressionFormat.Vorbis => AVCodecID.AV_CODEC_ID_VORBIS,
+                AudioCompressionFormat.ADPCM => AVCodecID.AV_CODEC_ID_ADPCM_4XM,
+                AudioCompressionFormat.MP3 => AVCodecID.AV_CODEC_ID_MP3,
+                AudioCompressionFormat.PSMVAG => AVCodecID.AV_CODEC_ID_XMA2,
+                AudioCompressionFormat.HEVAG => AVCodecID.AV_CODEC_ID_XMA2,
+                AudioCompressionFormat.XMA => AVCodecID.AV_CODEC_ID_XMA2,
+                AudioCompressionFormat.AAC => AVCodecID.AV_CODEC_ID_AAC,
+                AudioCompressionFormat.GCADPCM => AVCodecID.AV_CODEC_ID_XMA2,
+                AudioCompressionFormat.ATRAC9 => AVCodecID.AV_CODEC_ID_XMA2,
+                _ => AVCodecID.AV_CODEC_ID_XMA2,
+            }, fs);
         }
     }
 

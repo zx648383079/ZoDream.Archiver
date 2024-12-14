@@ -93,7 +93,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             {
                 // read only last chunk
                 BundleScene chunkInfo = _header.Scenes[^1];
-                var stream = BundleCodec.Decode(input, Models.CompressionType.Lzma, chunkInfo.CompressedSize, chunkInfo.DecompressedSize);
+                var stream = _reader.Get<IBundleCodec>().Decode(input, BundleCodecType.Lzma, chunkInfo.CompressedSize, chunkInfo.DecompressedSize);
                 try
                 {
                     _ = stream.Position;

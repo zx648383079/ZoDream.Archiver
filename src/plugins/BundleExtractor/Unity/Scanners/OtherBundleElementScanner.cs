@@ -4,9 +4,9 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(string package) : IBundleElementScanner, IBundleStorage
+    internal partial class OtherBundleElementScanner(string package) : 
+        IBundleElementScanner, IBundleStorage, IBundleCodec
     {
-
         public bool IsCounterSide => package.Contains("cs");
         public bool IsSchoolGirlStrikers => package.Contains("sgs");
         public bool IsPartyAnimals => package.Contains("pa");
@@ -22,7 +22,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public bool IsHelixWaltz2 => package.Contains("hw2");
         public bool IsFantasyOfWind => package.Contains("fow");
         public bool IsEnsembleStars => package.Contains("es");
+        public bool IsAcmeis => package.Contains("my");
         public bool IsFakeHeader => package.Contains("fake");
+
+      
 
         public Stream Open(string fullPath)
         {

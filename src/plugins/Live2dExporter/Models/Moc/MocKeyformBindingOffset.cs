@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -12,7 +13,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint ParameterBindingIndexSourcesBeginIndices {  get; private set; }
         public uint ParameterBindingIndexSourcesCounts {  get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             ParameterBindingIndexSourcesBeginIndices = reader.ReadUInt32();
             ParameterBindingIndexSourcesCounts = reader.ReadUInt32();
@@ -23,7 +24,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] ParameterBindingIndexSourcesBeginIndices { get; private set; }
         public int[] ParameterBindingIndexSourcesCounts { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocKeyFormBindingOffsetPtr();
             ptr.Read(reader);

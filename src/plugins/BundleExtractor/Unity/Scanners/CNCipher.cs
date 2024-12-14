@@ -13,7 +13,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
     {
         public byte[] Index { get; set; } = new byte[0x10];
         public byte[] Sub { get; set; } = new byte[0x10];
-
+        /// <summary>
+        /// Convert.FromHexString("")
+        /// </summary>
         public byte[] Key { get; set; } = [];
     }
 

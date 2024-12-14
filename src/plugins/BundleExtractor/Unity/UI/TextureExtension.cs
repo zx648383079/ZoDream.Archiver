@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.RustWrapper;
@@ -205,6 +206,28 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 painter?.Dispose();
             }
+        }
+
+
+        public static SKImage? ClipAndFlip(this SKImage source, SKPath path, bool isHorizontal = true)
+        {
+            var rect = path.Bounds;
+            if (rect.IsEmpty || rect.Width < 1 || rect.Height < 1)
+            {
+                return null;
+            }
+            var cx = rect.Width / 2;
+            var cy = rect.Height / 2;
+            return SkiaExtension.MutateImage((int)rect.Width, (int)rect.Height, canvas => {
+                canvas.Translate(cx, cy);
+                canvas.Flip(isHorizontal);
+                canvas.Translate(-cx, -cy);
+                canvas.DrawImage(source, rect,
+                   SKRect.Create(0, 0, rect.Width, rect.Height));
+                path.Offset(-rect.Left, -rect.Top);
+                canvas.ClipPath(path, SKClipOperation.Difference);
+                canvas.Clear();
+            });
         }
     }
 }

@@ -50,6 +50,12 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return input;
         }
 
+
+        private Stream DecryptAcmeis(Stream input)
+        {
+            return ParseFakeHeader(input);
+        }
+
         private Stream DecryptAnchorPanic(Stream input, string fullPath)
         {
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)

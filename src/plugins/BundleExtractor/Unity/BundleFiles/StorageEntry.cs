@@ -1,7 +1,6 @@
 ﻿using System;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
 {
@@ -10,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
     {
         public StorageEntryFlags Flags { get; private set; }
 
-        public override CompressionType CompressionType => (CompressionType)(Flags & StorageEntryFlags.CompressionTypeMask);
+        public override BundleCodecType CodecType => ((UnityCompressionType)(Flags & StorageEntryFlags.CompressionTypeMask)).ToCodec();
 
         public static StorageEntry Read(IBundleBinaryReader reader)
         {

@@ -24,7 +24,7 @@ impl PixelDecoder for AstcDecoder
         let mut buffer = vec![0u32; len as usize];
         decode_astc(input, width as usize, height as usize, self.block_width, self.block_height, &mut buffer)?;
         for i in buffer {
-            output.write_u32_be(i).unwrap();
+            output.write_u32_le(i).unwrap();
         }
         Ok(output.len())
     }

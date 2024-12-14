@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -9,7 +10,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint DrawOrders { get; private set; }
         public uint KeyFormPositionSourcesBeginIndices { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             Opacities = reader.ReadUInt32();
             DrawOrders = reader.ReadUInt32();
@@ -24,7 +25,7 @@ namespace ZoDream.Live2dExporter.Models
         public int[] KeyFormPositionSourcesBeginIndices { get; set; }
         
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocArtMeshKeyFormOffsetPtr();
             ptr.Read(reader);
@@ -48,7 +49,7 @@ namespace ZoDream.Live2dExporter.Models
     {
         public int[] KeyFormMultiplyColorSourcesBeginIndices { get; private set; }
         public int[] KeyFormScreenColorSourcesBeginIndices { get; private set; }
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = reader.ReadUInt32();
             var ptr2 = reader.ReadUInt32();

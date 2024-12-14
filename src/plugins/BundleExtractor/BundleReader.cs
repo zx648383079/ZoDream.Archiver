@@ -51,8 +51,9 @@ namespace ZoDream.BundleExtractor
             }
             var instance = producer.GetScanner(options);
             scheme.Add<IBundleElementScanner>(instance);
-            scheme.Add<IBundleStorage>(instance is IBundleStorage storage ? 
-                storage : producer.GetStorage(options));
+            var storage = instance is IBundleStorage s ? s : producer.GetStorage(options);
+            scheme.Add<IBundleStorage>(storage);
+            scheme.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : new BundleCodec());
         }
 
         public void Dispose()

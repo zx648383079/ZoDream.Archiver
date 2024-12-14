@@ -1,11 +1,7 @@
-﻿using K4os.Compression.LZ4;
-using LzhamWrapper;
+﻿using LzhamWrapper;
 using LzhamWrapper.Enums;
-using System;
 using System.Buffers;
 using System.IO;
-using System.Linq;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Compression.Lz4;
@@ -14,30 +10,31 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor
 {
-    public static class BundleCodec
+    public class BundleCodec : IBundleCodec
     {
-
-        public static IBundleBinaryReader Decode(IBundleBinaryReader input, CompressionType type, long compressedSize, long uncompressedSize)
+        public void Initialize(IBundleBinaryReader input) { }
+        public IBundleBinaryReader Decode(IBundleBinaryReader input, BundleCodecType type, long compressedSize, long uncompressedSize)
         {
+
             return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input, false);
         }
 
-        public static Stream Decode(Stream input, CompressionType type, long compressedSize, long uncompressedSize)
+        public Stream Decode(Stream input, BundleCodecType type, long compressedSize, long uncompressedSize)
         {
             var ms = new PartialStream(input, compressedSize);
             return Decode(ms, type, uncompressedSize);
         }
-        public static Stream Decode(Stream input, CompressionType type, long uncompressedSize)
+
+        public static Stream Decode(Stream input, BundleCodecType type, long uncompressedSize)
         {
             switch (type)
             {
-                case CompressionType.Lzma:
+                case BundleCodecType.Lzma:
                     return LzmaCodec.Decode(input, uncompressedSize);
-
-                case CompressionType.Lz4:
-                case CompressionType.Lz4HC:
+                case BundleCodecType.Lz4:
+                case BundleCodecType.Lz4HC:
                     return DecodeLz4(input, (int)uncompressedSize);
-                case CompressionType.Lzham:
+                case BundleCodecType.Lzham:
                     return DecodeLzham(input);
                 default:
                     return input;

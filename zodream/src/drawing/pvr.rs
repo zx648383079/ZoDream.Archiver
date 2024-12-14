@@ -21,7 +21,7 @@ impl PixelDecoder for PvrDecoder
         let mut buffer = Vec::new();
         decode_pvrtc(input, width as usize, height as usize, &mut buffer, self.version == 2)?;
         for i in buffer {
-            output.write_u32_be(i)?;
+            output.write_u32_le(i)?;
         }
         Ok(output.len())
     }

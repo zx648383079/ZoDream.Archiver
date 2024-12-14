@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -19,11 +18,11 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public int UncompressedBlocksInfoSize { get; set; }
         public BundleFlags Flags { get; set; }
 
-        public CompressionType CompressionType
+        public UnityCompressionType CompressionType
         {
             get
             {
-                return (CompressionType)(Flags & BundleFlags.CompressionTypeMask);
+                return (UnityCompressionType)(Flags & BundleFlags.CompressionTypeMask);
             }
             set
             {

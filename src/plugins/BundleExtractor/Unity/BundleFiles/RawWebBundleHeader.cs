@@ -48,14 +48,14 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         /// <summary>
 		/// 5.2.0 and greater / Bundle Version 4 +
 		/// </summary>
-		public static bool HasHash(BundleVersion generation) => generation >= BundleVersion.BF_520a1;
+		public static bool HasHash(UnityBundleVersion generation) => generation >= UnityBundleVersion.BF_520a1;
         /// <summary>
         /// 2.6.0 and greater / Bundle Version 2 +
         /// </summary>
-        public static bool HasCompleteFileSize(BundleVersion generation) => generation >= BundleVersion.BF_260_340;
+        public static bool HasCompleteFileSize(UnityBundleVersion generation) => generation >= UnityBundleVersion.BF_260_340;
         /// <summary>
         /// 3.5.0 and greater / Bundle Version 3 +
         /// </summary>
-        public static bool HasUncompressedBlocksInfoSize(BundleVersion generation) => generation >= BundleVersion.BF_350_4x;
+        public static bool HasUncompressedBlocksInfoSize(UnityBundleVersion generation) => generation >= UnityBundleVersion.BF_350_4x;
     }
 }

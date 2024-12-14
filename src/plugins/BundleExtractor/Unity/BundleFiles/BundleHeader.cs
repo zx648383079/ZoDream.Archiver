@@ -6,7 +6,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
     public abstract class BundleHeader : IBundleHeader
     {
         protected abstract string MagicString { get; }
-        public BundleVersion Version { get; set; }
+        public UnityBundleVersion Version { get; set; }
         /// <summary>
         /// Generation version
         /// </summary>
@@ -19,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         {
             var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);
-            Version = (BundleVersion)reader.ReadInt32();
+            Version = (UnityBundleVersion)reader.ReadInt32();
             Debug.Assert(Version >= 0);
             UnityWebBundleVersion = reader.ReadStringZeroTerm();
             UnityWebMinimumRevision = reader.ReadStringZeroTerm();

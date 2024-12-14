@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         {
             var signature = reader.ReadStringZeroTerm();
             Debug.Assert(signature == MagicString);
-            Version = BundleVersion.BF_520_x;
+            Version = UnityBundleVersion.BF_520_x;
             UnityWebBundleVersion = "5.x.x";
             UnityWebMinimumRevision = "2017.4.30f1";
             var size = reader.ReadUInt32();

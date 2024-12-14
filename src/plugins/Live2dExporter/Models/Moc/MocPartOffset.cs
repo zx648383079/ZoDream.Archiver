@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -13,7 +14,7 @@ namespace ZoDream.Live2dExporter.Models
         public uint IsEnabled { get; private set; }
         public uint ParentPartIndices { get; private set; }
 
-        public void Read(BinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
         {
             RuntimeSpace0 = reader.ReadUInt32();
             Ids = reader.ReadUInt32();
@@ -35,7 +36,7 @@ namespace ZoDream.Live2dExporter.Models
         public bool[] IsEnabled { get; private set; }
         public int[] ParentPartIndices { get; private set; }
 
-        public void Read(BinaryReader reader, int count)
+        public void Read(IBundleBinaryReader reader, int count)
         {
             var ptr = new MocPartOffsetPtr();
             ptr.Read(reader);
