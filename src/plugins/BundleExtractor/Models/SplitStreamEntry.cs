@@ -89,7 +89,8 @@ namespace ZoDream.BundleExtractor.Models
             }
             var stream = _codec.Decode(new PartialStream(input,
                     inputBasePos,
-                    entry.CompressedLength), entry.CodecType,
+                    entry.CompressedLength), 
+                    entry.CodecType,
                     entry.CompressedLength,
                     entry.Length);
             try

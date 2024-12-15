@@ -184,6 +184,7 @@ namespace ZoDream.BundleExtractor
         }
         private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
         {
+            stream.Add(_service.Get<IBundleCodec>());
             var name = FileNameHelper.GetFileName(fullName);
             using var reader = _scheme.Open(stream, fullName, name, new ArchiveOptions()
             {

@@ -81,7 +81,8 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
             }
 
             var metaCompression = (UnityCompressionType)(_header.Flags & BundleFlags.CompressionTypeMask);
-            using var reader = _reader.Get<IBundleCodec>().Decode(_reader, metaCompression.ToCodec(),
+            using var reader = _reader.Get<IBundleCodec>().Decode(
+                _reader, metaCompression.ToCodec(),
                 _header.CompressedBlocksInfoSize,
                 _header.UncompressedBlocksInfoSize);
             var metadataPosition = reader.BaseStream.Position;

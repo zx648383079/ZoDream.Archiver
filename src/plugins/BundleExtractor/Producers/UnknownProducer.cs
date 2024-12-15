@@ -20,7 +20,10 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityEngine.EngineName)
             {
-                return new OtherBundleElementScanner(options.Package ?? string.Empty);
+                return new OtherBundleElementScanner(
+                    options.Package ?? string.Empty,
+                    options
+                );
             }
             return new BundleElementScanner();
         }
@@ -29,7 +32,10 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityEngine.EngineName)
             {
-                return new OtherBundleElementScanner(options.Package ?? string.Empty);
+                return new OtherBundleElementScanner(
+                    options.Package ?? string.Empty,
+                    options
+                 );
             }
             return new BundleStorage();
         }

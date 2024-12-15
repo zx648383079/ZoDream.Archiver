@@ -33,7 +33,11 @@ namespace ZoDream.BundleExtractor
                     return LzmaCodec.Decode(input, uncompressedSize);
                 case BundleCodecType.Lz4:
                 case BundleCodecType.Lz4HC:
-                    return DecodeLz4(input, (int)uncompressedSize);
+                case BundleCodecType.Lz4Inv:
+                case BundleCodecType.Lz4Lit4:
+                case BundleCodecType.Lz4Lit5:
+                case BundleCodecType.Lz4Mr0k:
+                    return DecodeLz4(input, type, (int)uncompressedSize);
                 case BundleCodecType.Lzham:
                     return DecodeLzham(input);
                 default:
@@ -41,7 +45,7 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        public static Stream DecodeLz4(Stream input, int uncompressedSize)
+        public static Stream DecodeLz4(Stream input, BundleCodecType codecType, int uncompressedSize)
         {
             var compressedLength = (int)(input.Length - input.Position);
             var compressedBytes = ArrayPool<byte>.Shared.Rent(compressedLength);
@@ -50,15 +54,18 @@ namespace ZoDream.BundleExtractor
                 input.ReadExactly(compressedBytes, 0, compressedLength);
                 var uncompressedBytes = new byte[uncompressedSize];
                 var bytesWritten = 0; //LZ4Codec.Decode(compressedBytes, 0, compressedLength, uncompressedBytes, 0, uncompressedSize);
+                var codec = codecType switch
+                {
+                    BundleCodecType.Lz4Inv => new Lz4InvDecompressor(uncompressedSize),
+                    BundleCodecType.Lz4Lit4 or BundleCodecType.Lz4Lit5 => new Lz4LitDecompressor(uncompressedSize),
+                    _ => new Lz4Decompressor(uncompressedSize)
+                };
+                
+                bytesWritten = codec.Decompress(compressedBytes, compressedLength,
+                        uncompressedBytes, uncompressedSize);
                 if (bytesWritten != uncompressedSize)
                 {
-                    bytesWritten = new Lz4Decompressor(uncompressedSize)
-                        .Decompress(compressedBytes, compressedLength,
-                        uncompressedBytes, uncompressedSize);
-                    if (bytesWritten != uncompressedSize)
-                    {
-                        throw new DecompressionFailedException($"lz4 wants: {uncompressedSize} not {bytesWritten}");
-                    }
+                    throw new DecompressionFailedException($"lz4 wants: {uncompressedSize} not {bytesWritten}");
                 }
                 return new MemoryStream(uncompressedBytes);
             }

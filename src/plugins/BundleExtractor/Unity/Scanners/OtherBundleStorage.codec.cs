@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using YamlDotNet.Core.Tokens;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -15,12 +13,12 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public void Initialize(IBundleBinaryReader input) 
         {
-            if (true)
+            if (!IsChina || string.IsNullOrWhiteSpace(options.Password))
             {
                 return;
             }
-            var key = Convert.FromHexString(input.Get<IBundleOptions>().Password);
-            if (false)
+            var key = Convert.FromHexString(options.Password);
+            if (IsGuiLongChao)
             {
                 _cipher = new UnityCNGuiLongChao(input)
                 {
@@ -36,20 +34,24 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         }
         public IBundleBinaryReader Decode(IBundleBinaryReader input, BundleCodecType codecType, long compressedSize, long uncompressedSize)
         {
-            var version = input.Get<UnityVersion>();
-            if (version.Type != UnityVersionType.China || _cipher is null)
-            {
-                return new BundleBinaryReader(Decode(input.BaseStream, codecType, compressedSize, uncompressedSize), input, false);
-            }
-            var ms = new MemoryStream();
-            _cipher.Decrypt(input.BaseStream, ms);
-            return new BundleBinaryReader(ms, input, false); ;
+            return new BundleBinaryReader(
+                BundleCodec.Decode(
+                    new PartialStream(input.BaseStream, compressedSize), 
+                    codecType, uncompressedSize), input, false);
         }
 
         public Stream Decode(Stream input, BundleCodecType codecType, long compressedSize, long uncompressedSize)
         {
-            return BundleCodec.Decode(new PartialStream(input, compressedSize), 
-                codecType, uncompressedSize);
+            if (_cipher is null)
+            {
+                return BundleCodec.Decode(
+                    new PartialStream(input, compressedSize), codecType, uncompressedSize);
+            } else
+            {
+                var ms = new MemoryStream();
+                _cipher.Decrypt(input, ms);
+                return ms;
+            }
         }
     }
 }

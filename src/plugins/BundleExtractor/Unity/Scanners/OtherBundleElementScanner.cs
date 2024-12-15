@@ -4,7 +4,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(string package) : 
+    internal partial class OtherBundleElementScanner(string package, IBundleOptions options) : 
         IBundleElementScanner, IBundleStorage, IBundleCodec
     {
         public bool IsCounterSide => package.Contains("cs");
@@ -25,7 +25,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public bool IsAcmeis => package.Contains("my");
         public bool IsFakeHeader => package.Contains("fake");
 
-      
+        public bool IsChina => package.Contains("cn");
+        public bool IsGuiLongChao => package.Contains("glc");
+
 
         public Stream Open(string fullPath)
         {
