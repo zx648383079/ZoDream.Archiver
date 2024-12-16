@@ -175,7 +175,8 @@ namespace ZoDream.Shared.Compression.Own
             if (!_header.Multiple)
             {
                 var fileName = ReadName();
-                yield return new ReadOnlyEntry(fileName, ReadLength());
+                var length = ReadLength();
+                yield return new ReadOnlyEntry(fileName, length, length, true, null);
                 yield break;
             }
             while (BaseStream.Position < BaseStream.Length)
@@ -183,7 +184,7 @@ namespace ZoDream.Shared.Compression.Own
                 var name = ReadName();
                 var length = ReadLength();
                 JumpPart(length);
-                yield return new ReadOnlyEntry(name, length);
+                yield return new ReadOnlyEntry(name, length, length, true, null);
             }
         }
 

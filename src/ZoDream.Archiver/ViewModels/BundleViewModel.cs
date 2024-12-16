@@ -90,7 +90,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             _options ??= _scheme.TryLoad(FileItems.Select(i => i.FullPath));
-            var dialog = new PropertyDialog();
+            var dialog = new BundlePropertyDialog();
             dialog.ViewModel.Load(_options);
             await _app.OpenDialogAsync(dialog);
         }

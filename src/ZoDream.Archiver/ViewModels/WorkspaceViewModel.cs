@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using ZoDream.Archiver.Dialogs;
-using ZoDream.Shared;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -32,6 +31,7 @@ namespace ZoDream.Archiver.ViewModels
             StopFilterCommand = new RelayCommand(TapStopFilter);
         }
 
+        private readonly AppViewModel _app;
         private IArchiveOptions? _options;
         private IStorageFile _storageFile;
         private IArchiveScheme? _scheme;
@@ -135,18 +135,25 @@ namespace ZoDream.Archiver.ViewModels
         {
 
         }
-        private void TapView(object? _)
+        private async void TapView(object? _)
         {
-
+            var dialog = new PropertyDialog();
+            await _app.OpenDialogAsync(dialog);
         }
-        private void TapInfo(object? _)
+        private async void TapInfo(object? _)
         {
-
+            var picker = new SettingDialog();
+            var res = await _app.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
+            await picker.ViewModel.SaveAsync();
         }
         private async void TapFind(object? _)
         {
             var picker = new SearchDialog();
-            var res = await App.ViewModel.OpenDialogAsync(picker);
+            var res = await _app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
             {
                 return;
@@ -218,15 +225,14 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            var app = App.ViewModel;
             using var fs = (await _storageFile.OpenReadAsync()).AsStreamForRead();
             ReadBegin:
             try
             {
                 if (!TryReadEntry(fs)) 
                 {
-                    await app.ConfirmAsync("不支持文件");
-                    app.NavigateBack();
+                    await _app.ConfirmAsync("不支持文件");
+                    _app.NavigateBack();
                 }
                 return;
             }
@@ -234,14 +240,14 @@ namespace ZoDream.Archiver.ViewModels
             {
                 if (!CompressScheme.IsCryptographicException(ex))
                 {
-                    await app.ConfirmAsync("文件解析失败");
-                    app.NavigateBack();
+                    await _app.ConfirmAsync("文件解析失败");
+                    _app.NavigateBack();
                     return;
                 }
             }
             if (!await OpenPasswordAsync())
             {
-                app.NavigateBack();
+                _app.NavigateBack();
                 return;
             }
             goto ReadBegin;
@@ -252,7 +258,7 @@ namespace ZoDream.Archiver.ViewModels
             IArchiveReader? reader;
             if (_scheme is null)
             {
-                reader = App.ViewModel.Plugin.TryGetReader(fs, _storageFile.Path, _options, out _scheme);
+                reader = _app.Plugin.TryGetReader(fs, _storageFile.Path, _options, out _scheme);
             } else
             {
                 reader = _scheme.Open(fs, _storageFile.Path, _storageFile.Name, _options);
@@ -269,7 +275,7 @@ namespace ZoDream.Archiver.ViewModels
         private async Task<bool> OpenPasswordAsync()
         {
             var picker = new PasswordDialog();
-            var res = await App.ViewModel.OpenDialogAsync(picker);
+            var res = await _app.OpenDialogAsync(picker);
             if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
             {
                 return false;

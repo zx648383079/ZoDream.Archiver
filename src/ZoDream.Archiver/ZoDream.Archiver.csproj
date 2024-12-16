@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Dialogs\BundleDialog.xaml" />
+    <None Remove="Dialogs\BundlePropertyDialog.xaml" />
     <None Remove="Dialogs\CompressDialog.xaml" />
     <None Remove="Dialogs\ConfirmDialog.xaml" />
     <None Remove="Dialogs\ExtractDialog.xaml" />
@@ -88,6 +89,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\BundlePropertyDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\PropertyDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
