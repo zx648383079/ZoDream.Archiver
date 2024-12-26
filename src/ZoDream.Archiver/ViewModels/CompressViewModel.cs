@@ -74,7 +74,7 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     continue;
                 }
-                foreach (var it in Directory.GetFiles(item, "*"))
+                foreach (var it in Directory.GetFiles(item, "*", SearchOption.AllDirectories))
                 {
                     AddFile(Path.GetRelativePath(item, it), it);
                 }
@@ -161,7 +161,7 @@ namespace ZoDream.Archiver.ViewModels
                             return;
                         }
                         writer.AddEntry(item.Name, item.FullPath);
-                        app.UpdateProgress(++i / FileItems.Count);
+                        app.UpdateProgress(++i / FileItems.Count, $"[{i}/{FileItems.Count}]{item.Name}...");
                     }
                 }
                 catch (Exception ex)

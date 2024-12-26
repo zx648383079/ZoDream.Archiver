@@ -15,27 +15,49 @@ namespace ZoDream.Shared.Compression.Own
         }
 
         private readonly Stream _reader;
+        private readonly byte[] _buffer = new byte[1024];
+        private long _bufferBegin;
+        private long _bufferSize;
+        private long _bufferOffset;
 
-        public void Seek(long len, SeekOrigin origin)
+        public long Position => _bufferBegin + _bufferOffset;
+
+        public void Seek(long offset, SeekOrigin origin)
         {
             var pos = origin switch
             {
-                SeekOrigin.Current => _reader.Position + len,
-                SeekOrigin.End => _reader.Length + len,
-                _ => len
+                SeekOrigin.Current => Position + offset,
+                SeekOrigin.End => _reader.Length + offset,
+                _ => offset
             };
-            _reader.Seek(pos % _reader.Length, SeekOrigin.Begin);
+            offset = pos - _bufferBegin;
+            if (offset >= 0 && offset < _bufferSize)
+            {
+                _bufferOffset = offset;
+                return;
+            }
+            offset = pos % _reader.Length;
+            _reader.Seek((long)offset, SeekOrigin.Begin);
+            _bufferBegin = offset;
+            _bufferSize = 0;
+            _bufferOffset = 0;
         }
 
         public byte ReadByte()
         {
-            var code = _reader.ReadByte();
-            if (code < 0)
+            if (_bufferSize <= _bufferOffset)
             {
-                _reader.Seek(0, SeekOrigin.Begin);
-                code = _reader.ReadByte();
+                _bufferBegin = _reader.Position;
+                _bufferSize = _reader.Read(_buffer, 0, _buffer.Length);
+                if (_bufferSize == 0)
+                {
+                    _reader.Seek(0, SeekOrigin.Begin);
+                    _bufferBegin = 0;
+                    _bufferSize = _reader.Read(_buffer, 0, _buffer.Length);
+                }
+                _bufferOffset = 0;
             }
-            return (byte)code;
+            return _buffer[_bufferOffset++];
         }
 
 

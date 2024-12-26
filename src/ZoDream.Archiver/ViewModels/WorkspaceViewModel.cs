@@ -31,7 +31,7 @@ namespace ZoDream.Archiver.ViewModels
             StopFilterCommand = new RelayCommand(TapStopFilter);
         }
 
-        private readonly AppViewModel _app;
+        private readonly AppViewModel _app = App.ViewModel;
         private IArchiveOptions? _options;
         private IStorageFile _storageFile;
         private IArchiveScheme? _scheme;
