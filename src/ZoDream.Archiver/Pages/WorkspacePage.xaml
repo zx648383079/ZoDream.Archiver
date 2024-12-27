@@ -29,7 +29,11 @@
             <AppBarButton
                 Command="{Binding SaveCommand}"
                 Icon="Save"
-                Label="Extract To" />
+                Label="Extract To">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="S"/>
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
             <AppBarButton
                 Command="{Binding ViewCommand}"
                 Icon="View"
@@ -37,12 +41,20 @@
             <AppBarButton
                 Command="{Binding DeleteCommand}"
                 Icon="Delete"
-                Label="Delete" />
+                Label="Delete">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Delete"/>
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
 
             <AppBarButton
                 Command="{Binding FindCommand}"
                 Icon="Find"
-                Label="Find" />
+                Label="Find">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Control" Key="F"/>
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
             <AppBarButton
                 Command="{Binding StopFilterCommand}"
                 Icon="Filter"

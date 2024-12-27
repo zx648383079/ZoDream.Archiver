@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using YamlDotNet.Serialization;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
@@ -24,7 +24,11 @@ namespace ZoDream.Archiver.ViewModels
         {
             AddCommand = new RelayCommand(TapAdd);
             AddFolderCommand = new RelayCommand(TapAddFolder);
-            DeleteCommand = new RelayCommand(TapDelete);
+            DeleteCommand = new StandardUICommand(StandardUICommandKind.Delete)
+            {
+               Command = new RelayCommand(TapDelete)
+            };
+            
             SaveCommand = new RelayCommand(TapSaveAs);
             ViewCommand = new RelayCommand(TapView);
             SettingCommand = new RelayCommand(TapSetting);

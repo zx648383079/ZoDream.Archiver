@@ -35,10 +35,12 @@
     <None Remove="Dialogs\SettingDialog.xaml" />
     <None Remove="Pages\BundlePage.xaml" />
     <None Remove="Pages\CompressPage.xaml" />
+    <None Remove="Pages\ExplorerPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
     <None Remove="Pages\WorkspacePage.xaml" />
     <None Remove="Themes\BaseStyle.xaml" />
     <None Remove="Themes\DarkTheme.xaml" />
+    <None Remove="Themes\EntryStyle.xaml" />
     <None Remove="Themes\Generic.xaml" />
     <None Remove="Themes\InputStyle.xaml" />
     <None Remove="Themes\LightTheme.xaml" />
@@ -89,6 +91,12 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Themes\EntryStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\ExplorerPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\BundlePropertyDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -120,6 +120,7 @@ namespace ZoDream.Archiver.ViewModels
                     Debug.WriteLine(ex.Message);
                 }
                 app.CloseProgress();
+                app.Success("解压已完成！");
             }, token);
         }
 

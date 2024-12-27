@@ -5,7 +5,7 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class EntryViewModel: BindableBase, IReadOnlyEntry
+    public class EntryViewModel: BindableBase, ISourceEntry
     {
         private string _name = string.Empty;
 
@@ -51,6 +51,19 @@ namespace ZoDream.Archiver.ViewModels
             : this(fullPath)
         {
             Name = name;
+        }
+
+        public EntryViewModel(IReadOnlyEntry entry)
+        {
+            Name = entry.Name;
+            Length = entry.Length;
+            CompressedLength = entry.CompressedLength;
+            IsEncrypted = entry.IsEncrypted;
+            CreatedTime = entry.CreatedTime;
+            if (entry is ISourceEntry e)
+            {
+                IsDirectory = e.IsDirectory;
+            }
         }
     }
 }

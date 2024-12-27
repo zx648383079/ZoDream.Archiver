@@ -40,15 +40,16 @@
             <AppBarButton
                 Command="{Binding SaveCommand}"
                 Icon="Save"
-                Label="Extract To" />
+                Label="Extract To">
+                <AppBarButton.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="S" Modifiers="Control" />
+                </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
             <AppBarButton
                 Command="{Binding ViewCommand}"
                 Icon="View"
                 Label="View" />
-            <AppBarButton
-                Command="{Binding DeleteCommand}"
-                Icon="Delete"
-                Label="Delete" />
+            <AppBarButton Command="{Binding DeleteCommand}" />
             <AppBarButton
                 Command="{Binding SettingCommand}"
                 Icon="Setting"
