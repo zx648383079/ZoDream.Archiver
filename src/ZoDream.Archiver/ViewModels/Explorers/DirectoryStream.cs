@@ -12,5 +12,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public ISourceEntry[] Items { get; private set; } = items;
 
+        public bool CanGoBack => Items.Where(i => i is TopDirectoryEntry).Any();
+
     }
 }

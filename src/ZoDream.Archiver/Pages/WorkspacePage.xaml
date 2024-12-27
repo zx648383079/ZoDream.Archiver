@@ -31,7 +31,7 @@
                 Icon="Save"
                 Label="Extract To">
                 <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Modifiers="Control" Key="S"/>
+                    <KeyboardAccelerator Key="S" Modifiers="Control" />
                 </AppBarButton.KeyboardAccelerators>
             </AppBarButton>
             <AppBarButton
@@ -43,7 +43,7 @@
                 Icon="Delete"
                 Label="Delete">
                 <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="Delete"/>
+                    <KeyboardAccelerator Key="Delete" />
                 </AppBarButton.KeyboardAccelerators>
             </AppBarButton>
 
@@ -52,7 +52,7 @@
                 Icon="Find"
                 Label="Find">
                 <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Modifiers="Control" Key="F"/>
+                    <KeyboardAccelerator Key="F" Modifiers="Control" />
                 </AppBarButton.KeyboardAccelerators>
             </AppBarButton>
             <AppBarButton

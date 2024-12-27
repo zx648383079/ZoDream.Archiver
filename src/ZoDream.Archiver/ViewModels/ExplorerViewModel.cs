@@ -1,11 +1,8 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
+﻿using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -44,9 +41,20 @@ namespace ZoDream.Archiver.ViewModels
         private readonly List<ISourceEntry> _routeItems = [];
         private readonly IEntryService _service = new EntryService(App.ViewModel.Logger);
         private readonly StorageExplorer _storage;
-        private ObservableCollection<EntryViewModel> _fileItems = [];
+        private IEntryExplorer? _explorer;
 
-        public ObservableCollection<EntryViewModel> FileItems {
+        public IEntryExplorer CurrentSource 
+        {
+            get => _explorer is null ? _storage : _explorer;
+            set {
+                _explorer?.Dispose();
+                _explorer = value;
+            }
+        }
+
+        private ObservableCollection<ISourceEntry> _fileItems = [];
+
+        public ObservableCollection<ISourceEntry> FileItems {
             get => _fileItems;
             set => Set(ref _fileItems, value);
         }
@@ -72,7 +80,14 @@ namespace ZoDream.Archiver.ViewModels
 
         private void TapBack(object? _)
         {
-
+            if (!CanGoBack)
+            {
+                return;
+            }
+            var last = _routeItems.Count - 1;
+            var item = _routeItems[last];
+            _routeItems.RemoveAt(last);
+            Open(item);
         }
 
         private async void TapAdd(object? _)
@@ -125,26 +140,62 @@ namespace ZoDream.Archiver.ViewModels
             Open(new DirectoryEntry(string.Empty));
         }
 
+        private void AddRoute(ISourceEntry entry)
+        {
+            if (_routeItems.Count > 0 && _routeItems.Last().FullPath == entry.FullPath)
+            {
+                return;
+            }
+            _routeItems.Add(entry);
+        }
+
         private void Open(ISourceEntry entry)
         {
-            var e = _storage.Open(entry);
+            var e = CurrentSource.Open(entry);
+            if (e is ArchiveEntryStream s)
+            {
+                CurrentSource = s.Archive;
+                Open(new DirectoryEntry(string.Empty));
+                return;
+            }
             if (e is DirectoryEntryStream items)
             {
                 FileItems.Clear();
-                foreach (var item in items.Items)
+                foreach (var item in items.Items.OrderByDescending(i => i.IsDirectory))
                 {
+                    if (item is TopDirectoryEntry)
+                    {
+                        AddRoute(item);
+                        // FileItems.Add(item);
+                        continue;
+                    }
                     FileItems.Add(new EntryViewModel(item));
                 }
+                if (!items.CanGoBack)
+                {
+                    _routeItems.Clear();
+                }
+                OnPropertyChanged(nameof(CanGoBack));
+                return;
+            }
+            
+        }
+
+        private void TapView(object? e)
+        {
+            if (e is ISourceEntry entry)
+            {
+                Open(entry);
+                return;
+            }
+            if (SelectedItem is not null)
+            {
+                Open(SelectedItem);
                 return;
             }
         }
 
-        private async void TapView(object? _)
-        {
-
-        }
-
-        private async void TapSaveAs(object? _)
+        private void TapSaveAs(object? _)
         {
 
         }

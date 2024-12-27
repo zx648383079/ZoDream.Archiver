@@ -63,6 +63,7 @@ namespace ZoDream.Archiver.ViewModels
             if (entry is ISourceEntry e)
             {
                 IsDirectory = e.IsDirectory;
+                FullPath = e.FullPath;
             }
         }
     }

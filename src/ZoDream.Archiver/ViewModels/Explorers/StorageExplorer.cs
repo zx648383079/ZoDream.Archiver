@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 
@@ -73,9 +74,14 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return OpenDirectory(entry.FullPath);
             }
-            //using var fs = File.OpenRead(entry.FullPath);
-            //var input = new CachedStream(fs, 256);
-            return new UnknownEntryStream();
+            var input = File.OpenRead(entry.FullPath);
+            // var input = new CachedStream(fs, 256);
+            var reader = App.ViewModel.Plugin.TryGetReader(input, entry.FullPath, null, out _);
+            if (reader is null)
+            {
+                return new UnknownEntryStream();
+            }
+            return new ArchiveEntryStream(new ArchiveExplorer(reader, service));
         }
 
         private DirectoryEntryStream OpenDirectory(string fileName)

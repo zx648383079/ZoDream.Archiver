@@ -45,8 +45,10 @@ namespace ZoDream.Archiver.ViewModels
                 if (childPath == entry.Name)
                 {
                     yield return new FileEntry(entry);
+                } else
+                {
+                    yield return new DirectoryEntry(childPath);
                 }
-                yield return new DirectoryEntry(childPath);
             }
         }
 
@@ -65,7 +67,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return string.Empty;
             }
-            var j = fileName.IndexOf('/', i);
+            var j = fileName.IndexOf('/', i + 1);
             if (j < 0)
             {
                 return fileName;

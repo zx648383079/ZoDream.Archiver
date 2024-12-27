@@ -40,7 +40,7 @@ namespace ZoDream.Shared.IO
                 if (_bufferSize == 0)
                 {
                     _bufferBegin = input.Position;
-                    _bufferSize = input.Read(buffer, 0, buffer.Length);
+                    _bufferSize = input.Read(_buffer, 0, _buffer.Length);
                     _bufferOffset = 0;
                 }
                 if (_bufferSize == 0)

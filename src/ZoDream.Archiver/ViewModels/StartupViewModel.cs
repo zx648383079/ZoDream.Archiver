@@ -17,6 +17,7 @@ namespace ZoDream.Archiver.ViewModels
             OpenCommand = new RelayCommand(TapOpen);
             OpenBundleCommand = new RelayCommand(TapOpenBundle);
             CreateCommand = new RelayCommand(TapCreate);
+            ExplorerCommand = new RelayCommand(TapExplorer);
             version = App.ViewModel.Version;
         }
 
@@ -29,8 +30,13 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand OpenCommand { get; private set; }
         public ICommand OpenBundleCommand { get; private set; }
-
+        public ICommand ExplorerCommand { get; private set; }
         public ICommand CreateCommand { get; private set; }
+
+        private void TapExplorer(object? _)
+        {
+            App.ViewModel.Navigate<ExplorerPage>();
+        }
 
         private async void TapOpen(object? _)
         {

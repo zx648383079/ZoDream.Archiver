@@ -28,7 +28,7 @@ namespace ZoDream.Shared.Compression
             var leaveStreamOpen = options?.LeaveStreamOpen ?? true;
             if (stream is not MultipartFileStream)
             {
-                stream = TrySubvolumeStream(filePath, stream);
+                stream = TrySubVolumeStream(filePath, stream);
                 leaveStreamOpen = leaveStreamOpen || stream is not MultipartFileStream;
             }
             if (options is null || options.LeaveStreamOpen != leaveStreamOpen)
@@ -55,7 +55,7 @@ namespace ZoDream.Shared.Compression
         {
             return ex is CryptographicException || ex is SharpCompress.Common.CryptographicException;
         }
-        public Stream TrySubvolumeStream(string fileName, Stream fileStream)
+        public Stream TrySubVolumeStream(string fileName, Stream fileStream)
         {
             var name = Path.GetFileName(fileName);
             var match = SubvolumeRegex().Match(name);

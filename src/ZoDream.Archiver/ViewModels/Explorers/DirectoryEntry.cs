@@ -49,7 +49,7 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         public FileEntry(IReadOnlyEntry entry)
-            : base(entry.Name, entry.CompressedLength, entry.Length, entry.IsEncrypted, entry.CreatedTime)
+            : base(Path.GetFileName(entry.Name), entry.CompressedLength, entry.Length, entry.IsEncrypted, entry.CreatedTime)
         {
             if (entry is ISourceEntry e)
             {
