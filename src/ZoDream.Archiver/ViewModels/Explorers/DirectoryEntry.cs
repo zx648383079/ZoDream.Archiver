@@ -7,6 +7,7 @@ namespace ZoDream.Archiver.ViewModels
 {
     public class DirectoryEntry : ISourceEntry
     {
+        public static readonly DirectoryEntry Empty = new(string.Empty);
         public bool IsDirectory => true;
 
         public string FullPath { get; private set; }

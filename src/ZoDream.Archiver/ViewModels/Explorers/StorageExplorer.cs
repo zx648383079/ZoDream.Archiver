@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -68,20 +70,38 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        public IEntryStream Open(ISourceEntry entry)
+        public async Task<IEntryStream> OpenAsync(ISourceEntry entry)
         {
             if (entry.IsDirectory)
             {
                 return OpenDirectory(entry.FullPath);
             }
             var input = File.OpenRead(entry.FullPath);
+            IArchiveOptions? options = null;
             // var input = new CachedStream(fs, 256);
-            var reader = App.ViewModel.Plugin.TryGetReader(input, entry.FullPath, null, out _);
-            if (reader is null)
+            ReadBegin:
+            try
             {
-                return new UnknownEntryStream();
+                var reader = App.ViewModel.Plugin.TryGetReader(input, entry.FullPath, options, out _);
+                if (reader is null)
+                {
+                    return UnknownEntryStream.Instance;
+                }
+                return new ArchiveEntryStream(new ArchiveExplorer(reader, service));
             }
-            return new ArchiveEntryStream(new ArchiveExplorer(reader, service));
+            catch (Exception ex)
+            {
+                if (!CompressScheme.IsCryptographicException(ex))
+                {
+                    return UnknownEntryStream.Instance;
+                }
+                options = await service.AskAsync<ArchiveOptions>();
+                if (options is null)
+                {
+                    return UnknownEntryStream.Instance;
+                }
+                goto ReadBegin;
+            }
         }
 
         private DirectoryEntryStream OpenDirectory(string fileName)

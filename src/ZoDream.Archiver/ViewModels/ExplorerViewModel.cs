@@ -105,7 +105,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            Open(new DirectoryEntry(string.Empty));
+            Open(DirectoryEntry.Empty);
         }
 
         private void TapDrag(IEnumerable<IStorageItem>? items)
@@ -119,7 +119,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            Open(new DirectoryEntry(string.Empty));
+            Open(DirectoryEntry.Empty);
         }
 
         private async void TapAddFolder(object? _)
@@ -137,7 +137,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            Open(new DirectoryEntry(string.Empty));
+            Open(DirectoryEntry.Empty);
         }
 
         private void AddRoute(ISourceEntry entry)
@@ -149,13 +149,13 @@ namespace ZoDream.Archiver.ViewModels
             _routeItems.Add(entry);
         }
 
-        private void Open(ISourceEntry entry)
+        private async void Open(ISourceEntry entry)
         {
-            var e = CurrentSource.Open(entry);
+            var e = await CurrentSource.OpenAsync(entry);
             if (e is ArchiveEntryStream s)
             {
                 CurrentSource = s.Archive;
-                Open(new DirectoryEntry(string.Empty));
+                Open(DirectoryEntry.Empty);
                 return;
             }
             if (e is DirectoryEntryStream items)

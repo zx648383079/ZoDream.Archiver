@@ -27,7 +27,7 @@ namespace ZoDream.Shared.Interfaces
         public bool TryGet<T>([NotNullWhen(true)] out T? instance);
         public bool TryGet<T>(string key, [NotNullWhen(true)] out T? instance);
 
-        public Task<T> AskAsync<T>();
+        public Task<T?> AskAsync<T>();
     }
 
     public interface IEntryExplorer: IDisposable
@@ -35,6 +35,6 @@ namespace ZoDream.Shared.Interfaces
 
         public bool CanGoBack { get; }
 
-        public IEntryStream Open(ISourceEntry entry);
+        public Task<IEntryStream> OpenAsync(ISourceEntry entry);
     }
 }

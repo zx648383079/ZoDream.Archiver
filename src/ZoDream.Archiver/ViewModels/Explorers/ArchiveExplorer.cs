@@ -1,21 +1,30 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ArchiveExplorer(IArchiveReader reader, IEntryService service) : IEntryExplorer
+    public class ArchiveExplorer(IArchiveReader reader, IReadOnlyEntry[] entries, IEntryService service) : IEntryExplorer
     {
-        public List<IReadOnlyEntry> Items { get; private set; } = reader.ReadEntry().ToList();
+
+        public ArchiveExplorer(IArchiveReader reader, IEntryService service)
+            : this (reader, reader.ReadEntry().ToArray(), service)
+        {
+            
+        }
+
+        public List<IReadOnlyEntry> Items { get; private set; } = entries.ToList();
         public bool CanGoBack { get; }
 
-        public IEntryStream Open(ISourceEntry entry)
+        public async Task<IEntryStream> OpenAsync(ISourceEntry entry)
         {
             if (entry.IsDirectory)
             {
                 return OpenDirectory(entry.FullPath);
             }
-            return new UnknownEntryStream();
+            return UnknownEntryStream.Instance;
         }
 
         private DirectoryEntryStream OpenDirectory(string fileName)

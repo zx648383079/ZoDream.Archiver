@@ -136,7 +136,7 @@ namespace ZoDream.Archiver.ViewModels
             return true;
         }
 
-        public async Task<T> AskAsync<T>()
+        public async Task<T?> AskAsync<T>()
         {
             var picker = new PasswordDialog();
             var model = picker.ViewModel;
