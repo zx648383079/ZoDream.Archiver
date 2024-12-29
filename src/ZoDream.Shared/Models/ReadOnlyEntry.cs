@@ -14,6 +14,7 @@ namespace ZoDream.Shared.Models
             :this (name)
         {
             Length = length;
+            CompressedLength = length;
         }
         public ReadOnlyEntry(
             string name, long length, long compressedLength, 

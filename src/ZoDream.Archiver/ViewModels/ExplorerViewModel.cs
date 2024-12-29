@@ -1,12 +1,17 @@
-﻿using Microsoft.UI.Xaml.Input;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -39,7 +44,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private readonly AppViewModel _app = App.ViewModel;
         private readonly List<ISourceEntry> _routeItems = [];
-        private readonly IEntryService _service = new EntryService(App.ViewModel.Logger);
+        private readonly IEntryService _service = new EntryService(App.ViewModel.Logger, new TemporaryStorage());
         private readonly StorageExplorer _storage;
         private IEntryExplorer? _explorer;
 
@@ -178,7 +183,15 @@ namespace ZoDream.Archiver.ViewModels
                 OnPropertyChanged(nameof(CanGoBack));
                 return;
             }
-            
+            if (e is MediaEntryStream media)
+            {
+                var file = await _service.Get<ITemporaryStorage>().CreateAsync(DateTime.Now.Ticks + media.Name);
+                using (var fs = await file.OpenWriteAsync())
+                {
+                    media.SaveAs(fs);
+                }
+                await file.LaunchAsync();
+            }
         }
 
         private void TapView(object? e)
@@ -195,9 +208,31 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private void TapSaveAs(object? _)
+        private async void TapSaveAs(object? _)
         {
-
+            if (FileItems.Count > 0)
+            {
+                return;
+            }
+            var app = App.ViewModel;
+            var picker = new ExtractDialog();
+            var model = picker.ViewModel;
+            model.IsSelected = SelectedItem is not null ? Visibility.Visible : Visibility.Collapsed;
+            var res = await app.OpenFormAsync(picker);
+            if (!res)
+            {
+                return;
+            }
+            var entryItems = SelectedItem is not null && model.OnlySelected ? [SelectedItem] : FileItems;
+            var token = app.ShowProgress("解压中...");
+            await Task.Factory.StartNew(() => {
+                foreach (var item in entryItems)
+                {
+                    CurrentSource.SaveAs(item, model.FileName, model.ExtractMode, token);
+                }
+                app.CloseProgress();
+                app.Success("解压已完成！");
+            }, token);
         }
 
         private void TapDelete(object? _)

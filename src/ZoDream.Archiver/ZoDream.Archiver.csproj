@@ -79,6 +79,8 @@
   <ItemGroup>
     <ProjectReference Include="..\plugins\BundleExtractor\BundleExtractor.csproj" />
     <ProjectReference Include="..\plugins\ChmExtractor\ChmExtractor.csproj" />
+    <ProjectReference Include="..\plugins\ElectronExtractor\ElectronExtractor.csproj" />
+    <ProjectReference Include="..\plugins\EpubExtractor\EpubExtractor.csproj" />
     <ProjectReference Include="..\plugins\WallpaperExtractor\WallpaperExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />

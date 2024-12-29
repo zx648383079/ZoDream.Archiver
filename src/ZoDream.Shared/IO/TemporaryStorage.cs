@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using ZoDream.Shared.Interfaces;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace ZoDream.Shared.IO
 {
@@ -16,22 +17,30 @@ namespace ZoDream.Shared.IO
 
         private readonly ConcurrentQueue<string> _fileItems = [];
 
-        public Stream Create()
+        public Task<IStorageFileEntry> CreateAsync()
         {
             var fullPath = Path.Combine(folder, Guid.NewGuid().ToString());
             _fileItems.Enqueue(fullPath);
-            return File.Create(fullPath, 1024, FileOptions.DeleteOnClose);
+            return Task.FromResult<IStorageFileEntry>(new StorageFileEntry(fullPath));
         }
 
-        public Stream Create(string guid)
+        public Task<IStorageFileEntry> CreateAsync(string guid)
         {
             var fullPath = Path.Combine(folder, SafePathRegex().Replace(guid, "_"));
             _fileItems.Enqueue(fullPath);
-            return File.Create(fullPath, 1024, FileOptions.DeleteOnClose);
+            return Task.FromResult<IStorageFileEntry>(new StorageFileEntry(fullPath));
         }
 
-        public void Clear()
+        public Task ClearAsync()
         {
+            while (_fileItems.TryDequeue(out var fileName))
+            {
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                }
+            }
+            return Task.CompletedTask;
         }
 
         public void Dispose()
@@ -47,7 +56,5 @@ namespace ZoDream.Shared.IO
 
         [GeneratedRegex(@"[\\/.:\<\>\(\)]")]
         private static partial Regex SafePathRegex();
-
-        
     }
 }

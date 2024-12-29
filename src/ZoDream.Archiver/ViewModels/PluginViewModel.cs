@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using ElectronExtractor;
+using System.IO;
 using ZoDream.ChmExtractor;
+using ZoDream.EpubExtractor;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.WallpaperExtractor;
@@ -12,6 +14,8 @@ namespace ZoDream.Archiver.ViewModels
         private readonly IArchiveScheme[] PluginItems = [
             new ChmScheme(),
             new PackageScheme(),
+            new EpubScheme(),
+            new ElectronScheme(),
             new CompressScheme(),
         ];
         

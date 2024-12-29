@@ -15,7 +15,8 @@ namespace ZoDream.Archiver.ViewModels
             ILogger logger,
             ITemporaryStorage storage)
         {
-            
+            Add(logger);
+            Add(storage);
         }
         public EntryService(ILogger logger)
             : this(logger, new TemporaryStorage())

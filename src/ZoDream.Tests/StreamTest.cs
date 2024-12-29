@@ -23,6 +23,16 @@ namespace ZoDream.Tests
             Assert.AreEqual(d, count);
         }
 
+        [TestMethod]
+        public void TestCached()
+        {
+            var str = "测试测hi克服asdasd的困难开发那是肯定asdasdas能进卡空间的asdasdasdasdasd妇女健asdasd康四点八九可能比较空洞看到你可能是看得见";
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(str));
+            var input = new CachedStream(ms, 16);
+            var data = input.ToArray();
+            Assert.AreEqual(Encoding.UTF8.GetString(data), str);
+        }
+
         //[TestMethod]
         public void TestFinder()
         {

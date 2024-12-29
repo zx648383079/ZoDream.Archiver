@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
@@ -70,6 +71,10 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
+    
+
+
+
         public async Task<IEntryStream> OpenAsync(ISourceEntry entry)
         {
             if (entry.IsDirectory)
@@ -102,6 +107,19 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 goto ReadBegin;
             }
+        }
+
+        public void SaveAs(ISourceEntry entry, Stream output)
+        {
+            using var fs = File.OpenRead(entry.FullPath);
+            fs.CopyTo(output);
+        }
+
+        public void SaveAs(ISourceEntry entry, string folder,
+            ArchiveExtractMode mode,
+            CancellationToken token = default)
+        {
+
         }
 
         private DirectoryEntryStream OpenDirectory(string fileName)

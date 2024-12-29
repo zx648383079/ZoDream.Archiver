@@ -1,13 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ImageEntryStream: IEntryStream
+
+    public abstract class MediaEntryStream(IEntryExplorer explorer, ISourceEntry entry) : IEntryStream
+    {
+
+        public string Name => entry.Name;
+
+        public void SaveAs(Stream input)
+        {
+            explorer.SaveAs(entry, input);
+        }
+    }
+
+    public class ImageEntryStream(IEntryExplorer explorer, ISourceEntry entry) : MediaEntryStream(explorer, entry)
     {
     }
 }

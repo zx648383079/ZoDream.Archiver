@@ -4,7 +4,6 @@ namespace ZoDream.Shared.Interfaces
 {
     public interface IArchiveScheme
     {
-        public bool IsReadable(Stream stream);
         public IArchiveReader? Open(Stream stream, 
             string filePath, 
             string fileName, IArchiveOptions? options = null);

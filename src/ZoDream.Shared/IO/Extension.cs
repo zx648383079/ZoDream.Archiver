@@ -25,6 +25,19 @@ namespace ZoDream.Shared.IO
             input.ReadExactly(buffer);
             return buffer;
         }
+        /// <summary>
+        /// 停用缓存功能
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Stream StopCache(this Stream input)
+        {
+            if (input is CachedStream e)
+            {
+                return e.BaseStream;
+            }
+            return input;
+        }
 
         public static byte[] ReadBytes(this Stream input, int length)
         {

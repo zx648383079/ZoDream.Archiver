@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using SharpCompress.Archives.Zip;
+using System.IO;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.EpubExtractor
@@ -12,12 +13,12 @@ namespace ZoDream.EpubExtractor
 
         public bool IsReadable(Stream stream)
         {
-            throw new System.NotImplementedException();
+            return ZipArchive.IsZipFile(stream);
         }
 
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            if (!IsReadable(stream))
+            if (!fileName.EndsWith(".epub") || !IsReadable(stream))
             {
                 return null;
             }

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-using ZoDream.Shared.Compression.Zip;
-using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.EpubExtractor
 {

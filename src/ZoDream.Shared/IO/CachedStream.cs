@@ -16,6 +16,21 @@ namespace ZoDream.Shared.IO
         private long _bufferSize;
         private long _bufferOffset;
 
+        /// <summary>
+        /// 返回正常流
+        /// </summary>
+        public Stream BaseStream 
+        { 
+           get 
+           {
+                // 应用位置，并返回流
+                input.Seek(Position, SeekOrigin.Begin);
+                _bufferBegin = Position;
+                _bufferSize = 0;
+                return input;
+           } 
+        }
+
         public override bool CanRead => true;
 
         public override bool CanSeek => true;
@@ -30,14 +45,12 @@ namespace ZoDream.Shared.IO
             set => Seek(value, SeekOrigin.Begin);
         }
 
-       
-
         public override int Read(byte[] buffer, int offset, int count)
         {
             var res = 0;
             while (res < count)
             {
-                if (_bufferSize == 0)
+                if (_bufferSize == 0 || _bufferOffset >= _bufferSize)
                 {
                     _bufferBegin = input.Position;
                     _bufferSize = input.Read(_buffer, 0, _buffer.Length);

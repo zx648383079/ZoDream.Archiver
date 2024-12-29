@@ -1,13 +1,8 @@
-﻿using Microsoft.UI.Xaml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -79,14 +74,14 @@ namespace ZoDream.Archiver.ViewModels
             }
             TemporaryFolder = folder.Path;
         }
-        private void TapClearTemporary(object? _)
+        private async void TapClearTemporary(object? _)
         {
             if (string.IsNullOrWhiteSpace(TemporaryFolder))
             {
                 return;
             }
-            var storage = new TemporaryStorage(TemporaryFolder);
-            storage.Clear();
+            var storage = new Shared.IO.TemporaryStorage(TemporaryFolder);
+            await storage.ClearAsync();
         }
 
         public async Task SaveAsync()

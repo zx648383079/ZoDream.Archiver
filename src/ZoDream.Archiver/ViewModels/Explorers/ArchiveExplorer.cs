@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -24,7 +29,71 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return OpenDirectory(entry.FullPath);
             }
+            var mime = MimeMapping.MimeUtility.GetMimeMapping(entry.Name);
+            if (mime.StartsWith("image/"))
+            {
+                return new ImageEntryStream(this, entry);
+            } else if (mime.StartsWith("audio/")) 
+            {
+                return new AudioEntryStream(this, entry);
+            }
+            else if (mime.StartsWith("video/"))
+            {
+                return new VideoEntryStream(this, entry);
+            }
+            else if (mime.StartsWith("text/"))
+            {
+                return new TextEntryStream(this, entry);
+            }
             return UnknownEntryStream.Instance;
+        }
+
+        public void SaveAs(ISourceEntry entry, Stream output)
+        {
+            if (TryGet(entry, out var file))
+            {
+                reader.ExtractTo(file, output);
+            }
+        }
+
+        public void SaveAs(ISourceEntry entry, string folder,
+           ArchiveExtractMode mode,
+           CancellationToken token = default)
+        {
+            foreach (var item in Items)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                if ((entry.IsDirectory && !IsChildPath(entry.FullPath, item.Name)) || (!entry.IsDirectory && entry.FullPath != item.Name))
+                {
+                    continue;
+                }
+                var fullPath = entry.IsDirectory ?
+                    Path.Combine(folder, entry.Name, item.Name[(entry.FullPath.Length + 1)..])
+                    : Path.Combine(folder, entry.Name);
+                if (!LocationStorage.TryCreate(fullPath, mode, out fullPath))
+                {
+                    continue;
+                }
+                using var fs = File.Create(fullPath);
+                reader.ExtractTo(item, fs);
+            }
+        }
+
+        private bool TryGet(ISourceEntry file, [NotNullWhen(true)] out IReadOnlyEntry? entry)
+        {
+            foreach (var item in Items)
+            {
+                if (item.Name == file.FullPath)
+                {
+                    entry = item;
+                    return true;
+                }
+            }
+            entry = null;
+            return false;
         }
 
         private DirectoryEntryStream OpenDirectory(string fileName)
@@ -59,6 +128,24 @@ namespace ZoDream.Archiver.ViewModels
                     yield return new DirectoryEntry(childPath);
                 }
             }
+        }
+
+        private bool IsChildPath(string folder, string fileName)
+        {
+            if (!string.IsNullOrEmpty(folder) && !fileName.StartsWith(folder))
+            {
+                return false;
+            }
+            var i = folder.Length;
+            if (i > 0 && fileName[i] != '/')
+            {
+                return false;
+            }
+            if (i == fileName.Length)
+            {
+                return false;
+            }
+            return true;
         }
 
         private string GetChildPath(string folder, string fileName)

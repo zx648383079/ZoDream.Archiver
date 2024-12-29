@@ -45,7 +45,10 @@ namespace ZoDream.EpubExtractor
 
         public void Dispose()
         {
-            _reader.Dispose();
+            if (options?.LeaveStreamOpen == false)
+            {
+                _reader.Dispose();
+            }
         }
     }
 }

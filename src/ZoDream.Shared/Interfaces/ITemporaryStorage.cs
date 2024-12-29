@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Interfaces
 {
@@ -9,12 +9,12 @@ namespace ZoDream.Shared.Interfaces
     public interface ITemporaryStorage: IDisposable
     {
 
-        public Stream Create();
-        public Stream Create(string guid);
+        public Task<IStorageFileEntry> CreateAsync();
+        public Task<IStorageFileEntry> CreateAsync(string guid);
 
         /// <summary>
         /// 清除所有缓存文件
         /// </summary>
-        public void Clear();
+        public Task ClearAsync();
     }
 }

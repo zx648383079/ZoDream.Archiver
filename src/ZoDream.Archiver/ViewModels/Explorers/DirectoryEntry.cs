@@ -55,6 +55,9 @@ namespace ZoDream.Archiver.ViewModels
             if (entry is ISourceEntry e)
             {
                 FullPath = e.FullPath;
+            } else
+            {
+                FullPath = entry.Name;
             }
         }
 

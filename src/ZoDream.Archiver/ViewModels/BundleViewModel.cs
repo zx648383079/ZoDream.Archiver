@@ -82,7 +82,7 @@ namespace ZoDream.Archiver.ViewModels
             var temporary = _app.Setting.Get<string>(SettingNames.TemporaryPath);
             if (!string.IsNullOrWhiteSpace(temporary))
             {
-                _scheme.Add<ITemporaryStorage>(new TemporaryStorage(temporary));
+                _scheme.Add<ITemporaryStorage>(new Shared.IO.TemporaryStorage(temporary));
             }
         }
 
