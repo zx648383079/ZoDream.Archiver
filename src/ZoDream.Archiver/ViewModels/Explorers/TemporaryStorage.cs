@@ -25,9 +25,12 @@ namespace ZoDream.Archiver.ViewModels
             return new StorageFileEntry(await folder.CreateFileAsync(guid));
         }
 
-        public Task ClearAsync()
+        public async Task ClearAsync()
         {
-            return Task.CompletedTask;
+            foreach (var item in await folder.GetItemsAsync())
+            {
+                await item.DeleteAsync();
+            }
         }
 
         public void Dispose()

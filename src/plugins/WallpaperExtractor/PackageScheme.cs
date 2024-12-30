@@ -33,27 +33,27 @@ namespace ZoDream.WallpaperExtractor
 
         private bool IsPackage(BinaryReader reader)
         {
-            var postion = reader.BaseStream.Position;
+            var position = reader.BaseStream.Position;
             try
             {
                 return reader.ReadNString().StartsWith("PKG");
             }
             finally
             {
-                reader.BaseStream.Seek(postion, SeekOrigin.Begin);
+                reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
         }
 
         private bool IsTex(BinaryReader reader)
         {
-            var postion = reader.BaseStream.Position;
+            var position = reader.BaseStream.Position;
             try
             {
                 return reader.ReadNZeroString(16) == "TEXV0005";
             }
             finally
             {
-                reader.BaseStream.Seek(postion, SeekOrigin.Begin);
+                reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
         }
     }

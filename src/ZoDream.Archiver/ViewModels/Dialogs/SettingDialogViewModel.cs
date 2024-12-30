@@ -76,12 +76,9 @@ namespace ZoDream.Archiver.ViewModels
         }
         private async void TapClearTemporary(object? _)
         {
-            if (string.IsNullOrWhiteSpace(TemporaryFolder))
-            {
-                return;
-            }
-            var storage = new Shared.IO.TemporaryStorage(TemporaryFolder);
+            ITemporaryStorage storage = string.IsNullOrWhiteSpace(TemporaryFolder) ? new TemporaryStorage() : new Shared.IO.TemporaryStorage(TemporaryFolder);
             await storage.ClearAsync();
+            App.ViewModel.Success("清除缓存完成");
         }
 
         public async Task SaveAsync()

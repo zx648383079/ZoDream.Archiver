@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using ZoDream.ChmExtractor.Lzx;
-using ZoDream.Shared.RustWrapper;
 
 namespace ZoDream.ChmExtractor
 {
