@@ -39,12 +39,13 @@ namespace ZoDream.Archiver.ViewModels
                 Command = new RelayCommand(TapBack)
             };
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
+            _service = _app.Service;
             _storage = new StorageExplorer(_service);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
         private readonly List<ISourceEntry> _routeItems = [];
-        private readonly IEntryService _service = new EntryService(App.ViewModel.Logger, new TemporaryStorage());
+        private readonly IEntryService _service;
         private readonly StorageExplorer _storage;
         private IEntryExplorer? _explorer;
 

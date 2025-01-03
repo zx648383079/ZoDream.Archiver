@@ -38,7 +38,7 @@ namespace ZoDream.BundleExtractor
 
         private void Initialize()
         {
-            var items = _loaderItems.Select(Get);
+            var items = _loaderItems.Select(Service.Get);
             _engineItems = items.Where(x => x is IBundleEngine).Select(x => (IBundleEngine)x).ToArray();
             _platformItems = items.Where(x => x is IBundlePlatform).Select(x => (IBundlePlatform)x).ToArray();
             _producerItems = items.Where(x => x is IBundleProducer).Select(x => (IBundleProducer)x).ToArray();

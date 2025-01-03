@@ -19,7 +19,7 @@ namespace ZoDream.BundleExtractor
 
         public UnityBundleChunkReader(
             IBundleChunk fileItems,
-            IBundleService service,
+            IEntryService service,
             IBundleOptions options)
         {
             _fileItems = fileItems;
@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor
 
         private readonly IBundleChunk _fileItems;
         private readonly IBundleOptions _options;
-        private readonly IBundleService _service;
+        private readonly IEntryService _service;
         private readonly UnityBundleScheme _scheme;
 
         private readonly List<ISerializedFile> _assetItems = [];

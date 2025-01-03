@@ -25,6 +25,7 @@ namespace ZoDream.Shared.Interfaces
         public void Add(string key, object? instance);
         public void AddIf<T>();
         public T Get<T>();
+        public object Get(Type type);
         public T Get<T>(string key);
 
         public bool TryGet<T>([NotNullWhen(true)] out T? instance);

@@ -32,7 +32,7 @@ namespace ZoDream.BundleExtractor
                 }
                 catch (Exception ex)
                 {
-                    scheme.Get<ILogger>().Error(ex.Message);
+                    scheme.Service.Get<ILogger>().Error(ex.Message);
                 }
             }
         }
@@ -45,15 +45,15 @@ namespace ZoDream.BundleExtractor
             var producer = scheme.Get<IBundleProducer>(options);
             if (producer is null)
             {
-                scheme.Add<IBundleElementScanner>(new BundleElementScanner());
-                scheme.Add<IBundleStorage>(new BundleStorage());
+                scheme.Service.Add<IBundleElementScanner>(new BundleElementScanner());
+                scheme.Service.Add<IBundleStorage>(new BundleStorage());
                 return;
             }
             var instance = producer.GetScanner(options);
-            scheme.Add<IBundleElementScanner>(instance);
+            scheme.Service.Add<IBundleElementScanner>(instance);
             var storage = instance is IBundleStorage s ? s : producer.GetStorage(options);
-            scheme.Add<IBundleStorage>(storage);
-            scheme.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : new BundleCodec());
+            scheme.Service.Add<IBundleStorage>(storage);
+            scheme.Service.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : new BundleCodec());
         }
 
         public void Dispose()

@@ -4,12 +4,13 @@ using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class BundleDialogViewModel: BindableBase, IFormValidator
+    public class BundleDialogViewModel: BindableBase, IFormValidator, IEntryConfiguration
     {
         public BundleDialogViewModel()
         {
@@ -197,6 +198,20 @@ namespace ZoDream.Archiver.ViewModels
             {
                 options.Entrance = Entrance;
             }
+        }
+
+        public void Load(IEntryService service, object options)
+        {
+            service.AddIf<BundleScheme>();
+            Load(service.Get<BundleScheme>(), options as IBundleOptions);
+        }
+
+        public void Unload(IEntryService service, object options)
+        {
+            if (options is IBundleOptions o)
+            {
+                Unload(o);
+            } 
         }
     }
 }

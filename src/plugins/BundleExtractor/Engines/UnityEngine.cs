@@ -6,10 +6,11 @@ using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class UnityEngine(IBundleService service) : IBundleEngine
+    public class UnityEngine(IEntryService service) : IBundleEngine
     {
         internal const string EngineName = "Unity";
         public string AliasName => EngineName;

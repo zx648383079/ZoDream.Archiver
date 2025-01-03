@@ -33,11 +33,13 @@ namespace ZoDream.Archiver.ViewModels
             ViewCommand = new RelayCommand(TapView);
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
-            _scheme = new(_app.Logger);
+            _service = _app.Service;
+            _scheme = new(_service);
             LoadSetting();
         }
 
         private readonly AppViewModel _app = App.ViewModel;
+        private readonly IEntryService _service;
         private readonly BundleScheme _scheme;
         private IBundleOptions? _options;
 
@@ -82,7 +84,7 @@ namespace ZoDream.Archiver.ViewModels
             var temporary = _app.Setting.Get<string>(SettingNames.TemporaryPath);
             if (!string.IsNullOrWhiteSpace(temporary))
             {
-                _scheme.Add<ITemporaryStorage>(new Shared.IO.TemporaryStorage(temporary));
+                _service.Add<ITemporaryStorage>(new Shared.IO.TemporaryStorage(temporary));
             }
         }
 

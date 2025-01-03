@@ -46,6 +46,15 @@ namespace ZoDream.Archiver.ViewModels
 
         public ISettingContainer Setting { get; private set; } = new SettingContainer();
 
+
+        public IEntryService Service 
+        {
+            get {
+                var temporary = Setting.Get<string>(SettingNames.TemporaryPath);
+                return new EntryService(Logger, string.IsNullOrWhiteSpace(temporary) ? new TemporaryStorage() : new Shared.IO.TemporaryStorage(temporary));
+            }
+        }
+
         public void Binding(Window window, Frame frame)
         {
             _baseWindow = window;

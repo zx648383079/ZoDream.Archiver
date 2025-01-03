@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using ZoDream.Archiver.Dialogs;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 
@@ -80,7 +82,7 @@ namespace ZoDream.Archiver.ViewModels
             return (T)Get(key, typeof(T));
         }
 
-        private object Get(Type type)
+        public object Get(Type type)
         {
             return Get(type.Name, type);
         }
@@ -137,29 +139,33 @@ namespace ZoDream.Archiver.ViewModels
             return true;
         }
 
+
+        private ContentDialog CreateDialog(Type type)
+        {
+            if (typeof(IBundleOptions).IsAssignableFrom(type))
+            {
+                return new BundleDialog();
+            }
+            return new PasswordDialog();
+        }
+
         public async Task<T?> AskAsync<T>()
         {
-            var picker = new PasswordDialog();
-            var model = picker.ViewModel;
+            var type = typeof(T);
+            if (!type.IsClass)
+            {
+                return default;
+            }
+            var picker = CreateDialog(type);
+            var model = picker.DataContext as IEntryConfiguration;
+            var instance = Activator.CreateInstance(type);
+            model!.Load(this, instance!);
             var res = await App.ViewModel.OpenFormAsync(picker);
             if (!res)
             {
                 return default;
             }
-            var type = typeof(T);
-            if (type == typeof(string))
-            {
-                return (T)(object)model.Password;
-            }
-            if (!type.IsClass)
-            {
-                return default;
-            }
-            var instance = Activator.CreateInstance(type);
-            var property = type.GetProperty(nameof(model.Password));
-            property?.SetValue(instance, model.Password);
-            property = type.GetProperty("Dictionary");
-            property?.SetValue(instance, model.DictFileName);
+            model.Unload(this, instance!);
             return (T)instance;
         }
 

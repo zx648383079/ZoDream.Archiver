@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class PasswordDialogViewModel: BindableBase, IFormValidator
+    public class PasswordDialogViewModel: BindableBase, IFormValidator, IEntryConfiguration
     {
         public PasswordDialogViewModel()
         {
@@ -51,6 +52,24 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             DictFileName = res.Path;
+        }
+
+        public void Load(IEntryService service, object options)
+        {
+            if (options is IArchiveOptions o)
+            {
+                Password = o.Password ?? string.Empty;
+                DictFileName = o.Dictionary ?? string.Empty;
+            }
+        }
+
+        public void Unload(IEntryService service, object options)
+        {
+            var type = options.GetType();
+            var property = type.GetProperty(nameof(Password));
+            property?.SetValue(options, Password);
+            property = type.GetProperty("Dictionary");
+            property?.SetValue(options, DictFileName);
         }
     }
 }
