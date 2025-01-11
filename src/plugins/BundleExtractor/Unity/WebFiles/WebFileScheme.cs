@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.WebFiles
@@ -27,6 +27,16 @@ namespace ZoDream.BundleExtractor.Unity.WebFiles
                 return null;
             }
             return reader;
+        }
+
+        public Task<IArchiveReader?> OpenAsync(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Open(stream, filePath, fileName, options));
+        }
+
+        public Task<IArchiveWriter> CreateAsync(Stream stream, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Create(stream, options));
         }
     }
 }

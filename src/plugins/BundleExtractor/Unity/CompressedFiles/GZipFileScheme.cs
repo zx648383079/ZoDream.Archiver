@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 {
@@ -46,6 +45,16 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             return new StreamArchiveReader(fileName,
                 new GZipStream(stream, CompressionMode.Decompress, options?.LeaveStreamOpen != false),
                 options);
+        }
+
+        public Task<IArchiveReader?> OpenAsync(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Open(stream, filePath, fileName, options));
+        }
+
+        public Task<IArchiveWriter> CreateAsync(Stream stream, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Create(stream, options));
         }
 
         public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)

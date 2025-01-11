@@ -13,7 +13,6 @@ namespace ZoDream.Archiver.ViewModels
 {
     public class StorageExplorer(IEntryService service): IEntryExplorer
     {
-
         public List<ISourceEntry> Items { get; private set; } = [];
 
         public bool CanGoBack { get; }
@@ -87,7 +86,7 @@ namespace ZoDream.Archiver.ViewModels
             ReadBegin:
             try
             {
-                var reader = App.ViewModel.Plugin.TryGetReader(input, entry.FullPath, options, out _);
+                var reader = await App.ViewModel.Plugin.GetReaderAsync(input, entry.FullPath, options);
                 if (reader is null)
                 {
                     return UnknownEntryStream.Instance;

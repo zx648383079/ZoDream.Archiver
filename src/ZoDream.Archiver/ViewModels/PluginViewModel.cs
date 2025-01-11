@@ -1,5 +1,6 @@
 ﻿using ElectronExtractor;
 using System.IO;
+using System.Threading.Tasks;
 using ZoDream.ChmExtractor;
 using ZoDream.EpubExtractor;
 using ZoDream.Shared.Compression;
@@ -36,6 +37,23 @@ namespace ZoDream.Archiver.ViewModels
                 }
             }
             scheme = null;
+            return null;
+        }
+
+        public async Task<IArchiveReader?> GetReaderAsync(Stream stream,
+            string filePath,
+            IArchiveOptions? options)
+        {
+            var fileName = Path.GetFileName(filePath);
+            foreach (var item in PluginItems)
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                var reader = await item.OpenAsync(stream, filePath, fileName, options);
+                if (reader is not null)
+                {
+                    return reader;
+                }
+            }
             return null;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -71,6 +72,18 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
         public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
         {
             return Open(reader.BaseStream, filePath, fileName, options);
+        }
+
+        public Task<IArchiveReader?> OpenAsync(Stream stream,
+          string filePath,
+          string fileName, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Open(stream, filePath, fileName, options));
+        }
+
+        public Task<IArchiveWriter> CreateAsync(Stream stream, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Create(stream, options));
         }
     }
 }

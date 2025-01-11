@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.ChmExtractor
@@ -27,6 +28,18 @@ namespace ZoDream.ChmExtractor
                 return null;
             }
             return new ChmReader(new BinaryReader(stream), options);
+        }
+
+        public Task<IArchiveReader?> OpenAsync(Stream stream,
+              string filePath,
+              string fileName, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Open(stream, filePath, fileName, options));
+        }
+
+        public Task<IArchiveWriter> CreateAsync(Stream stream, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Create(stream, options));
         }
     }
 }

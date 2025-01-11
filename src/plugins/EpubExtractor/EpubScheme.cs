@@ -1,5 +1,6 @@
 ﻿using SharpCompress.Archives.Zip;
 using System.IO;
+using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.EpubExtractor
@@ -23,6 +24,16 @@ namespace ZoDream.EpubExtractor
                 return null;
             }
             return new EpubReader(stream, options);
+        }
+
+        public Task<IArchiveReader?> OpenAsync(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Open(stream, filePath, fileName, options));
+        }
+
+        public Task<IArchiveWriter> CreateAsync(Stream stream, IArchiveOptions? options = null)
+        {
+            return Task.FromResult(Create(stream, options));
         }
     }
 }
