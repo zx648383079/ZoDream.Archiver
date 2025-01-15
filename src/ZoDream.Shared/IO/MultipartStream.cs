@@ -58,7 +58,7 @@ namespace ZoDream.Shared.IO
             set => Seek(value, SeekOrigin.Begin); 
         }
 
-        public void Add(long offset, long count, Stream input)
+        public void Write(long offset, long count, Stream input)
         {
             if (BaseStream.Length < offset)
             {
@@ -68,6 +68,11 @@ namespace ZoDream.Shared.IO
             input.Seek(0, SeekOrigin.Begin);
             input.CopyTo(BaseStream, count);
             _items.Add(new Tuple<long, long>(offset, count));
+        }
+
+        public void Write(Stream input)
+        {
+            Write(_maxLength == 0 ? BaseStream.Position : 0, input.Length, input);
         }
 
         public override void Flush()
