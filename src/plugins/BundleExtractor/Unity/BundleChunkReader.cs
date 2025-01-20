@@ -1,5 +1,4 @@
-﻿using SharpCompress;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -54,7 +53,13 @@ namespace ZoDream.BundleExtractor
             _assetIndexItems.TryAdd(fileName, i);
             return i;
         }
-
+        private void AddDependency(IEnumerable<string> fileItems, string entryPath)
+        {
+            foreach (var item in _fileItems)
+            {
+                AddDependency(Path.GetFileName(item), FileNameHelper.CombineBrother(entryPath, item));
+            }
+        }
         private void AddDependency(IEnumerable<string> fileItems)
         {
             foreach (var item in _fileItems)
@@ -205,7 +210,7 @@ namespace ZoDream.BundleExtractor
             {
                 s.Container = this;
                 _assetItems.Add(s);
-                s.Dependencies.ForEach(i => AddDependency(i, FileNameHelper.CombineBrother(fullName, i)));
+                AddDependency(s.Dependencies, fullName);
                 return;
             }
             var entries = reader.ReadEntry().ToArray();

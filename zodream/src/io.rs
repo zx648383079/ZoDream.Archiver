@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::io::{Read, Write};
 use super::error::Result;
 
