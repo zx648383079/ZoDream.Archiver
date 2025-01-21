@@ -4,6 +4,9 @@ using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.IO
 {
+    /// <summary>
+    /// 嵌套使用请手动更新源进度
+    /// </summary>
     public class PartialStream: Stream, IReadOnlyStream
     {
         /// <summary>
@@ -30,10 +33,12 @@ namespace ZoDream.Shared.IO
                 _current = _beginPosition = beginPosition;
                 return;
             }
+            _syncStream = ps;
             BaseStream = ps.BaseStream;
             _current = _beginPosition = beginPosition + ps._beginPosition;
         }
 
+        private readonly PartialStream? _syncStream;
         private readonly Stream BaseStream;
         private readonly bool _leaveStreamOpen = true;
         private readonly long _beginPosition;
@@ -66,12 +71,8 @@ namespace ZoDream.Shared.IO
                 return 0;
             }
             BaseStream.Skip(_current - BaseStream.Position);
-            //if (_current != BaseStream.Position)
-            //{
-            //    BaseStream.Seek(_current, SeekOrigin.Begin);
-            //}
             var res = BaseStream.Read(buffer, offset, len);
-            _current += res;
+            SyncPosition(_current + res);
             return res;
         }
 
@@ -85,8 +86,14 @@ namespace ZoDream.Shared.IO
                 SeekOrigin.End => _beginPosition + _byteLength + offset,
                 _ => _beginPosition + offset,
             };
-            _current = Math.Min(Math.Max(pos, min), max);
+            SyncPosition(Math.Min(Math.Max(pos, min), max));
             return _current - min;
+        }
+
+        private void SyncPosition(long current)
+        {
+            _current = current;
+            _syncStream?.SyncPosition(current);
         }
 
         public override void Flush()

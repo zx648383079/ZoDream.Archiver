@@ -10,8 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public MinMaxAABB(IBundleBinaryReader reader)
         {
-            m_Min = reader.ReadVector3();
-            m_Max = reader.ReadVector3();
+            m_Min = reader.ReadVector3Or4();
+            m_Max = reader.ReadVector3Or4();
         }
     }
 }

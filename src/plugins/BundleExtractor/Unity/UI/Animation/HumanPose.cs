@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Get<UnityVersion>();
             m_RootX = reader.ReadXForm();
-            m_LookAtPosition = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() :
+            m_LookAtPosition = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
                 UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
             m_LookAtWeight = reader.ReadVector4();
 

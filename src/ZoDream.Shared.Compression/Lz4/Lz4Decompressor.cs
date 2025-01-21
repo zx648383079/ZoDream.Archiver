@@ -43,7 +43,6 @@ namespace ZoDream.Shared.Compression.Lz4
                 encCount = GetLength(encCount, input, ref inputPos) + 4;
 
                 int encPos = outputPos - back;
-
                 if (encCount <= back)
                 {
                     Array.Copy(output, encPos, output, outputPos, encCount);

@@ -13,8 +13,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var version = reader.Get<UnityVersion>();
             if (version.GreaterThanOrEquals(5, 4))//5.4 and up
             {
-                m_Min = reader.ReadVector3();
-                m_Max = reader.ReadVector3();
+                m_Min = reader.ReadVector3Or4();
+                m_Max = reader.ReadVector3Or4();
             }
             else
             {

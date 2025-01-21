@@ -23,8 +23,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             vertexCount = reader.ReadUInt32();
             if (version.LessThan(4, 3)) //4.3 down
             {
-                var aabbMinDelta = reader.ReadVector3();
-                var aabbMaxDelta = reader.ReadVector3();
+                var aabbMinDelta = reader.ReadVector3Or4();
+                var aabbMaxDelta = reader.ReadVector3Or4();
             }
             hasNormals = reader.ReadBoolean();
             hasTangents = reader.ReadBoolean();

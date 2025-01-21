@@ -6,6 +6,7 @@ using System.Threading;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -87,7 +88,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
                 _header.UncompressedBlocksInfoSize);
             var metadataPosition = reader.BaseStream.Position;
             var uncompressedDataHash = reader.ReadBytes(16);
-
+            
             _storageItems = new SplitStreamCollection(reader.Get<IBundleCodec>(), reader.ReadArray(StorageEntry.Read));
             var items = Array.Empty<FileStreamEntry>();
             if ((_header.Flags & BundleFlags.BlocksAndDirectoryInfoCombined) != 0)

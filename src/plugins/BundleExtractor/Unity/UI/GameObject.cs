@@ -25,6 +25,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public override void Read(IBundleBinaryReader reader)
         {
+            ReadBase(reader, () => {});
+        }
+
+        public void ReadBase(IBundleBinaryReader reader, Action cb)
+        {
             base.Read(reader);
             var version = reader.Get<UnityVersion>();
             int m_Component_size = reader.ReadInt32();
@@ -39,6 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
 
             var m_Layer = reader.ReadInt32();
+            cb.Invoke();
             m_Name = reader.ReadAlignedString();
         }
 

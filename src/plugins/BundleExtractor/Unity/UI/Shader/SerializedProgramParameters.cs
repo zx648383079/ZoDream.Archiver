@@ -18,16 +18,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             int numVectorParams = reader.ReadInt32();
             m_VectorParams = [];
+            var scanner = reader.Get<IBundleElementScanner>();
             for (int i = 0; i < numVectorParams; i++)
             {
-                m_VectorParams.Add(new VectorParameter(reader));
+                m_VectorParams.Add(scanner.CreateElement<VectorParameter>(reader));
             }
 
             int numMatrixParams = reader.ReadInt32();
-            m_MatrixParams = new List<MatrixParameter>();
+            m_MatrixParams = [];
             for (int i = 0; i < numMatrixParams; i++)
             {
-                m_MatrixParams.Add(new MatrixParameter(reader));
+                m_MatrixParams.Add(scanner.CreateElement<MatrixParameter>(reader));
             }
 
             int numTextureParams = reader.ReadInt32();
@@ -48,7 +49,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_ConstantBuffers = [];
             for (int i = 0; i < numConstantBuffers; i++)
             {
-                m_ConstantBuffers.Add(new ConstantBuffer(reader));
+                var instance = new ConstantBuffer();
+                scanner.TryRead(reader, instance);
+                m_ConstantBuffers.Add(instance);
             }
 
             int numConstantBufferBindings = reader.ReadInt32();

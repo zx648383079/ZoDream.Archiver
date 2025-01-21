@@ -13,8 +13,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public AABB(IBundleBinaryReader reader)
         {
-            m_Center = reader.ReadVector3();
-            m_Extent = reader.ReadVector3();
+            m_Center = reader.ReadVector3Or4();
+            m_Extent = reader.ReadVector3Or4();
         }
 
     }

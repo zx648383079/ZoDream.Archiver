@@ -19,8 +19,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             base.Read(reader);
             m_LocalRotation = reader.ReadVector4();
-            m_LocalPosition = reader.ReadVector3();
-            m_LocalScale = reader.ReadVector3();
+            m_LocalPosition = reader.ReadVector3Or4();
+            m_LocalScale = reader.ReadVector3Or4();
 
             int m_ChildrenCount = reader.ReadInt32();
             m_Children = [];

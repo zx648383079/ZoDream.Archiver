@@ -625,7 +625,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 instance.m_MotionStartX = reader.ReadXForm();
                 instance.m_MotionStopX = reader.ReadXForm();
             }
-            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() : 
+            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : 
                 UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
             instance.m_Clip = new Clip();
             TryRead(reader, instance.m_Clip);

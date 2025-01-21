@@ -165,7 +165,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     instance.m_MotionStopX = reader.ReadXForm();
                 }
             }
-            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() : UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
+            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
             instance.m_Clip = new Clip();
             TryRead(reader, instance.m_Clip);
             instance.m_StartTime = reader.ReadSingle();
@@ -327,9 +327,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                             var blendShapeVertex = new BlendShapeVertex
                             {
                                 index = index,
-                                vertex = (flags & 4) != 0 ? reader.ReadVector3() : Vector3.Zero,
-                                normal = (flags & 2) != 0 ? reader.ReadVector3() : Vector3.Zero,
-                                tangent = (flags & 1) != 0 ? reader.ReadVector3() : Vector3.Zero,
+                                vertex = (flags & 4) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
+                                normal = (flags & 2) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
+                                tangent = (flags & 1) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
                             };
                             instance.vertices.Add(blendShapeVertex);
                         }

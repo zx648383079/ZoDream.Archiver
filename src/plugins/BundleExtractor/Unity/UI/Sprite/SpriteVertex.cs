@@ -13,7 +13,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         {
             var version = reader.Get<UnityVersion>();
 
-            pos = reader.ReadVector3();
+            pos = reader.ReadVector3Or4();
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and down
             {
                 uv = reader.ReadVector2();

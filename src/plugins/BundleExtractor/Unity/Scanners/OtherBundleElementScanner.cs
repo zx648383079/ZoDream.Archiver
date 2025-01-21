@@ -1,12 +1,14 @@
 ﻿using System.IO;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal partial class OtherBundleElementScanner(string package, IBundleOptions options) : 
-        IBundleElementScanner, IBundleStorage, IBundleCodec
+        IBundleElementScanner, IBundleStorage
     {
+
         public bool IsCounterSide => package.Contains("cs");
         public bool IsSchoolGirlStrikers => package.Contains("sgs");
         public bool IsPartyAnimals => package.Contains("pa");
@@ -24,9 +26,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public bool IsEnsembleStars => package.Contains("es");
         public bool IsAcmeis => package.Contains("my");
         public bool IsFakeHeader => package.Contains("fake");
-
-        public bool IsChina => package.Contains("cn");
-        public bool IsGuiLongChao => package.Contains("glc");
 
 
         public Stream Open(string fullPath)
@@ -50,6 +49,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {
+            if (reader.TryGet<UnityVersion>(out var version) && 
+                version.Type == UnityVersionType.China)
+            {
+                return new TuanJieElementScanner(package, options).TryRead(reader, instance);
+            }
             if (instance is IElementLoader l)
             {
                 l.Read(reader);

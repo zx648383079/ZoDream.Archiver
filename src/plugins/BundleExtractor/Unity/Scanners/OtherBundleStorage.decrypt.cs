@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return BinaryPrimitives.ReadInt64BigEndian(input.ReadBytes(8));
         }
 
-        private Stream ParseFakeHeader(Stream input)
+        public static Stream ParseFakeHeader(Stream input)
         {
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
             {

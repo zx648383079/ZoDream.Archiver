@@ -93,7 +93,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_MotionStartX = reader.ReadXForm();
                 m_MotionStopX = reader.ReadXForm();
             }
-            m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() : 
+            m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : 
                 UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
             m_Clip = new Clip();
             reader.Get<IBundleElementScanner>().TryRead(reader, m_Clip);

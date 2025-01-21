@@ -19,14 +19,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_VectorParams = [];
             for (int i = 0; i < numVectorParams; i++)
             {
-                m_VectorParams.Add(new VectorParameter(reader));
+                m_VectorParams.Add(reader.CreateElement<VectorParameter>());
             }
 
             int numMatrixParams = reader.ReadInt32();
             m_MatrixParams = [];
             for (int i = 0; i < numMatrixParams; i++)
             {
-                m_MatrixParams.Add(new MatrixParameter(reader));
+                m_MatrixParams.Add(reader.CreateElement<MatrixParameter>());
             }
         }
     }

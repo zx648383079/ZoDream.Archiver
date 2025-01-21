@@ -6,14 +6,14 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner
+    internal partial class TuanJieElementScanner
     {
 
         private IDecryptCipher? _cipher;
 
         public void Initialize(IBundleBinaryReader input) 
         {
-            if (!IsChina || string.IsNullOrWhiteSpace(options.Password))
+            if (string.IsNullOrWhiteSpace(options.Password))
             {
                 return;
             }

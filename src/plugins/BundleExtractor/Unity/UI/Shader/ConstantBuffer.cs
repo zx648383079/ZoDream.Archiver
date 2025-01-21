@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class ConstantBuffer
+    internal class ConstantBuffer : IElementLoader
     {
         public int m_NameIndex;
         public List<MatrixParameter> m_MatrixParams;
@@ -13,24 +14,34 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public int m_Size;
         public bool m_IsPartialCB;
 
-        public ConstantBuffer(IBundleBinaryReader reader)
+        public void Read(IBundleBinaryReader reader)
+        {
+            ReadBase(reader, () => { });
+        }
+
+        public void ReadBase(IBundleBinaryReader reader, Action cb)
         {
             var version = reader.Get<UnityVersion>();
 
             m_NameIndex = reader.ReadInt32();
 
             int numMatrixParams = reader.ReadInt32();
-            m_MatrixParams = new List<MatrixParameter>();
+            m_MatrixParams = [];
+            var scanner = reader.Get<IBundleElementScanner>();
             for (int i = 0; i < numMatrixParams; i++)
             {
-                m_MatrixParams.Add(new MatrixParameter(reader));
+                var instance = new MatrixParameter();
+                scanner.TryRead(reader, instance);
+                m_MatrixParams.Add(instance);
             }
 
             int numVectorParams = reader.ReadInt32();
             m_VectorParams = [];
             for (int i = 0; i < numVectorParams; i++)
             {
-                m_VectorParams.Add(new VectorParameter(reader));
+                var instance = new VectorParameter();
+                scanner.TryRead(reader, instance);
+                m_VectorParams.Add(instance);
             }
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
@@ -46,6 +57,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.GreaterThanOrEquals(2020, 3, 2, UnityVersionType.Final, 1) || //2020.3.2f1 and up
               version.GreaterThanOrEquals(2021, 1, 4, UnityVersionType.Final, 1)) //2021.1.4f1 and up
             {
+                cb.Invoke();
                 m_IsPartialCB = reader.ReadBoolean();
                 reader.AlignStream();
             }

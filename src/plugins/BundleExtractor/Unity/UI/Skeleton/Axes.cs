@@ -25,7 +25,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_PostQ = reader.ReadVector4();
             if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
             {
-                m_Sgn = reader.ReadVector3();
+                m_Sgn = reader.ReadVector3Or4();
             }
             else
             {

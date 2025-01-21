@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_WeightR = reader.ReadSingle();
             if (version.Major >= 5)//5.0 and up
             {
-                m_HintT = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3() :
+                m_HintT = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
                     UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
                 m_HintWeightT = reader.ReadSingle();
             }

@@ -119,6 +119,7 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
+                        Logger.Debug(asset.FullPath);
                         Logger.Error(e.Message);
                     }
                 }
@@ -166,6 +167,7 @@ namespace ZoDream.BundleExtractor
             }
             catch (Exception e)
             {
+                // Logger.Debug(fullName);
                 Logger.Error(e.Message);
             }
         }
@@ -184,6 +186,7 @@ namespace ZoDream.BundleExtractor
             }
             catch (Exception e)
             {
+                // Logger.Debug(fullName);
                 Logger.Error(e.Message);
             }
         }

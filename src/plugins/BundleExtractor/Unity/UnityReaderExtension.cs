@@ -70,12 +70,17 @@ namespace ZoDream.BundleExtractor.Unity
         {
             return new Vector2(reader.ReadSingle(), reader.ReadSingle());
         }
+
         public static Vector3 ReadVector3(this IBundleBinaryReader reader)
+        {
+            return new Vector3(reader.ReadSingle(),
+                    reader.ReadSingle(), reader.ReadSingle());
+        }
+        public static Vector3 ReadVector3Or4(this IBundleBinaryReader reader)
         {
             if (reader.Get<UnityVersion>().GreaterThanOrEquals(5, 4))
             {
-                return new Vector3(reader.ReadSingle(), 
-                    reader.ReadSingle(), reader.ReadSingle());
+                return ReadVector3(reader);
             }
             else
             {
@@ -88,9 +93,9 @@ namespace ZoDream.BundleExtractor.Unity
 
         public static XForm<Vector3> ReadXForm(this IBundleBinaryReader reader)
         {
-            var t = ReadVector3(reader);
+            var t = ReadVector3Or4(reader);
             var q = ReadVector4(reader);
-            var s = ReadVector3(reader);
+            var s = ReadVector3Or4(reader);
 
             return new XForm<Vector3>(t, q, s);
         }
@@ -113,7 +118,7 @@ namespace ZoDream.BundleExtractor.Unity
             var items = new Vector3[length];
             for (int i = 0; i < length; i++)
             {
-                items[i] = ReadVector3(reader);
+                items[i] = ReadVector3Or4(reader);
             }
             return items;
         }
@@ -169,6 +174,33 @@ namespace ZoDream.BundleExtractor.Unity
                 }
             }
             return data;
+        }
+        /// <summary>
+        /// 自动创建元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="scanner"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static T CreateElement<T>(this IBundleElementScanner scanner, IBundleBinaryReader reader)
+            where T : class, new()
+        {
+            var instance = new T();
+            scanner.TryRead(reader, instance);
+            return instance;
+        }
+
+        /// <summary>
+        /// 自动创建元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static T CreateElement<T>(this IBundleBinaryReader reader)
+            where T : class, new()
+        {
+            var scanner = reader.Get<IBundleElementScanner>();
+            return CreateElement<T>(scanner, reader);
         }
 
         public static BundleCodecType ToCodec(this UnityCompressionType type)

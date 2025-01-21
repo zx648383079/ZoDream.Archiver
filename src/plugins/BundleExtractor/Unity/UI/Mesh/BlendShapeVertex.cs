@@ -14,9 +14,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public BlendShapeVertex(IBundleBinaryReader reader)
         {
-            vertex = reader.ReadVector3();
-            normal = reader.ReadVector3();
-            tangent = reader.ReadVector3();
+            vertex = reader.ReadVector3Or4();
+            normal = reader.ReadVector3Or4();
+            tangent = reader.ReadVector3Or4();
             index = reader.ReadUInt32();
         }
     }

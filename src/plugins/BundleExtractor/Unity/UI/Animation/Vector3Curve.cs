@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public Vector3Curve(IBundleBinaryReader reader)
         {
-            curve = new AnimationCurve<Vector3>(reader, reader.ReadVector3);
+            curve = new AnimationCurve<Vector3>(reader, reader.ReadVector3Or4);
             path = reader.ReadAlignedString();
         }
 

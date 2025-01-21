@@ -39,6 +39,7 @@ namespace ZoDream.Shared.IO
             return input;
         }
 
+
         public static byte[] ReadBytes(this Stream input, int length)
         {
             if (input is null || length <= 0)

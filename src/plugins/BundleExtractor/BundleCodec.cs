@@ -27,22 +27,13 @@ namespace ZoDream.BundleExtractor
 
         public static Stream Decode(Stream input, BundleCodecType type, long uncompressedSize)
         {
-            switch (type)
+            return type switch
             {
-                case BundleCodecType.Lzma:
-                    return LzmaCodec.Decode(input, uncompressedSize);
-                case BundleCodecType.Lz4:
-                case BundleCodecType.Lz4HC:
-                case BundleCodecType.Lz4Inv:
-                case BundleCodecType.Lz4Lit4:
-                case BundleCodecType.Lz4Lit5:
-                case BundleCodecType.Lz4Mr0k:
-                    return DecodeLz4(input, type, (int)uncompressedSize);
-                case BundleCodecType.Lzham:
-                    return DecodeLzham(input);
-                default:
-                    return input;
-            }
+                BundleCodecType.Lzma => LzmaCodec.Decode(input, uncompressedSize),
+                BundleCodecType.Lz4 or BundleCodecType.Lz4HC or BundleCodecType.Lz4Inv or BundleCodecType.Lz4Lit4 or BundleCodecType.Lz4Lit5 or BundleCodecType.Lz4Mr0k => DecodeLz4(input, type, (int)uncompressedSize),
+                BundleCodecType.Lzham => DecodeLzham(input),
+                _ => input,
+            };
         }
 
         public static Stream DecodeLz4(Stream input, BundleCodecType codecType, int uncompressedSize)
