@@ -39,7 +39,7 @@ namespace ZoDream.Shared.IO
         }
 
         private readonly PartialStream? _syncStream;
-        private readonly Stream BaseStream;
+        public readonly Stream BaseStream;
         private readonly bool _leaveStreamOpen = true;
         private readonly long _beginPosition;
         private readonly long _byteLength;

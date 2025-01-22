@@ -13,6 +13,7 @@ namespace ZoDream.BundleExtractor.Unity
         // 摘要:
         //     c
         China = 2,
+        
         //
         // 摘要:
         //     f
@@ -21,10 +22,13 @@ namespace ZoDream.BundleExtractor.Unity
         // 摘要:
         //     p
         Patch = 4,
+
         //
         // 摘要:
         //     x
         Experimental = 5,
+        // t 团结引擎
+        TuanJie = 6,
         //
         // 摘要:
         //     The minimum valid value for this enumeration
@@ -32,7 +36,7 @@ namespace ZoDream.BundleExtractor.Unity
         //
         // 摘要:
         //     The maximum valid value for this enumeration
-        MaxValue = 5
+        MaxValue = 6
     }
     public static class UnityVersionTypeExtensions
     {
@@ -45,6 +49,7 @@ namespace ZoDream.BundleExtractor.Unity
                 UnityVersionType.China => 'c',
                 UnityVersionType.Final => 'f',
                 UnityVersionType.Patch => 'p',
+                UnityVersionType.TuanJie => 't',
                 UnityVersionType.Experimental => 'x',
                 _ => 'u',
             };
@@ -59,6 +64,7 @@ namespace ZoDream.BundleExtractor.Unity
                 'c' => UnityVersionType.China,
                 'f' => UnityVersionType.Final,
                 'p' => UnityVersionType.Patch,
+                't' => UnityVersionType.TuanJie,
                 'x' => UnityVersionType.Experimental,
                 _ => throw new ArgumentException($"There is no version type {c}", "c"),
             };

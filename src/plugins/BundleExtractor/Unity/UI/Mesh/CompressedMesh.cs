@@ -34,7 +34,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Weights = new PackedIntVector(reader);
             m_NormalSigns = new PackedIntVector(reader);
             m_TangentSigns = new PackedIntVector(reader);
-            if (version.LessThanOrEquals(5))
+            if (version.GreaterThanOrEquals(5))
             {
                 m_FloatColors = new PackedFloatVector(reader);
             }

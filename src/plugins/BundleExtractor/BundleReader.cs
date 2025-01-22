@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -19,6 +20,16 @@ namespace ZoDream.BundleExtractor
                 return;
             }
             TryLoad();
+            //Parallel.ForEach(
+            //    engine.EnumerateChunk(fileItems, options),
+            //    new ParallelOptions()
+            //    {
+            //        MaxDegreeOfParallelism = 3
+            //    }, items => {
+
+            //    });
+            var logger = scheme.Service.Get<ILogger>();
+            var temporary = scheme.Service.Get<ITemporaryStorage>();
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
@@ -32,8 +43,9 @@ namespace ZoDream.BundleExtractor
                 }
                 catch (Exception ex)
                 {
-                    scheme.Service.Get<ILogger>().Error(ex.Message);
+                    logger.Error(ex.Message);
                 }
+                temporary.Clear();
             }
         }
         /// <summary>
@@ -43,17 +55,18 @@ namespace ZoDream.BundleExtractor
         {
             // 从配置获取制作者
             var producer = scheme.Get<IBundleProducer>(options);
+            var service = scheme.Service;
             if (producer is null)
             {
-                scheme.Service.Add<IBundleElementScanner>(new BundleElementScanner());
-                scheme.Service.Add<IBundleStorage>(new BundleStorage());
+                service.Add<IBundleElementScanner>(service.Get<BundleElementScanner>());
+                service.Add<IBundleStorage>(service.Get<BundleStorage>());
                 return;
             }
             var instance = producer.GetScanner(options);
-            scheme.Service.Add<IBundleElementScanner>(instance);
+            service.Add<IBundleElementScanner>(instance);
             var storage = instance is IBundleStorage s ? s : producer.GetStorage(options);
-            scheme.Service.Add<IBundleStorage>(storage);
-            scheme.Service.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : new BundleCodec());
+            service.Add<IBundleStorage>(storage);
+            service.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : service.Get<BundleCodec>());
         }
 
         public void Dispose()

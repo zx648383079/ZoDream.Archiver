@@ -1,7 +1,6 @@
-use safer_ffi::libc::size_t;
 use texture2ddecoder::decode_astc;
 
-use super::{PixelDecoder, Result, super::io::ByteWriteExt};
+use super::{color::ColorWriteExt, PixelDecoder, Result};
 
 pub struct AstcDecoder
 {
@@ -24,7 +23,7 @@ impl PixelDecoder for AstcDecoder
         let mut buffer = vec![0u32; len as usize];
         decode_astc(input, width as usize, height as usize, self.block_width, self.block_height, &mut buffer)?;
         for i in buffer {
-            output.write_u32_le(i).unwrap();
+            output.write_bgra(i)?;
         }
         Ok(output.len())
     }

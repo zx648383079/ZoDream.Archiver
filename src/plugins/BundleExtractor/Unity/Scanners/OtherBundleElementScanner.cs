@@ -50,7 +50,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public bool TryRead(IBundleBinaryReader reader, object instance)
         {
             if (reader.TryGet<UnityVersion>(out var version) && 
-                version.Type == UnityVersionType.China)
+                version.Type == UnityVersionType.TuanJie)
             {
                 return new TuanJieElementScanner(package, options).TryRead(reader, instance);
             }

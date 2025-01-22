@@ -278,7 +278,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 if (m_VertexData.m_VertexCount > 0)
                 {
-                    m_VertexData.m_DataSize = new PartialStream(_reader.BaseStream, m_StreamData.offset, m_StreamData.size).ToArray();
+                    m_VertexData.m_DataSize = _reader.OpenResource(m_StreamData).ToArray();
                 }
             }
             if (version.GreaterThanOrEquals(3, 5)) //3.5 and up

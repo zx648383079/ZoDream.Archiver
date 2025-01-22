@@ -1,8 +1,6 @@
 use texture2ddecoder::{decode_atc_rgb4, decode_atc_rgba8};
 
-use crate::io::ByteWriteExt;
-
-use super::{PixelDecoder, Result};
+use super::{color::ColorWriteExt, PixelDecoder, Result};
 
 pub struct AtcDecoder
 {
@@ -28,7 +26,7 @@ impl PixelDecoder for AtcDecoder
             decode_atc_rgb4(input, width as usize, height as usize, &mut buffer)?;
         }
         for i in buffer {
-            output.write_u32_le(i).unwrap();
+            output.write_bgra(i)?;
         }
         Ok(output.len())
     }

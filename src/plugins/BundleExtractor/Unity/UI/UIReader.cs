@@ -50,21 +50,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public BuildTarget Platform => Source.Platform;
 
 
-        public Stream OpenResource(string fileName)
+        public Stream? OpenResource(string fileName)
         {
             return Source.Container!.OpenResource(fileName, Source);
         }
 
-        public Stream? OpenResource(StreamingInfo info)
+        public Stream OpenResource(StreamingInfo info)
         {
             if (string.IsNullOrWhiteSpace(info.path))
             {
-                return null;
+                return new EmptyStream();
             }
             var stream = OpenResource(info.path);
             if (stream is null)
             {
-                return null;
+                return new EmptyStream();
             }
             return new PartialStream(stream, info.offset, info.size);
         }

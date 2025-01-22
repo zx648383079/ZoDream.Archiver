@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
@@ -172,7 +173,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (image_data is null)
             {
                 return null;
-            }
+            }image_data.Position = 0;
             var data = TextureExtension.Decode(image_data.ToArray(), m_Width,
                 m_Height, m_TextureFormat, _reader.Version);
             return data?.ToImage();

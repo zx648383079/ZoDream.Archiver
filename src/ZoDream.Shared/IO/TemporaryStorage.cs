@@ -16,6 +16,7 @@ namespace ZoDream.Shared.IO
         }
 
         private readonly ConcurrentQueue<string> _fileItems = [];
+        private readonly ConcurrentQueue<IDisposable> _items = [];
 
         public Task<IStorageFileEntry> CreateAsync()
         {
@@ -43,8 +44,35 @@ namespace ZoDream.Shared.IO
             return Task.CompletedTask;
         }
 
+        #region Memory
+        public Stream Create()
+        {
+            var ms = new MemoryStream();
+            Add(ms);
+            return ms;
+        }
+
+        public void Add(IDisposable instance)
+        {
+            _items.Enqueue(instance);
+        }
+
+        public void Clear()
+        {
+            while (_items.TryDequeue(out var item))
+            {
+                item.Dispose();
+                if (item is PartialStream p)
+                {
+                    p.BaseStream.Dispose();
+                }
+            }
+        }
+        #endregion
+
         public void Dispose()
         {
+            Clear();
             while (_fileItems.TryDequeue(out var fileName))
             {
                 if (File.Exists(fileName))

@@ -833,9 +833,12 @@ namespace ZoDream.BundleExtractor.Models
                 int num = int.Parse(match.Groups[1].Value);
                 int num2 = int.Parse(match.Groups[2].Value);
                 int num3 = int.Parse(match.Groups[3].Value);
-                int num4 = int.Parse(match.Groups[4].Value);
-                customEngine = GetNullableString(match.Groups[5]);
-                version = new UnityVersion((ushort)num, (ushort)num2, (ushort)num3, UnityVersionType.China, (byte)num4);
+                int num4 = int.Parse(match.Groups[5].Value);
+                customEngine = GetNullableString(match.Groups[6]);
+                version = new UnityVersion((ushort)num, (ushort)num2, (ushort)num3,
+                    match.Groups[4].Value.Contains('t') ? 
+                    UnityVersionType.TuanJie : UnityVersionType.China, 
+                    (byte)num4);
                 return true;
             }
             match = UnityVersionRegexes.Normal().Match(s);
@@ -908,7 +911,7 @@ namespace ZoDream.BundleExtractor.Models
         [GeneratedRegex("([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.?([abcfpx])([0-9]+)((?:.|[\\r\\n])+)?")]
         public static partial Regex Normal();
 
-        [GeneratedRegex("([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.?f1c([0-9]+)((?:.|[\\r\\n])+)?")]
+        [GeneratedRegex("([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.?f1c|t)([0-9]+)((?:.|[\\r\\n])+)?")]
         public static partial Regex China();
     }
 }

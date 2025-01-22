@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{fmt::{self, Debug, Display}, result};
 
 use cipher::{InvalidLength, StreamCipherError};

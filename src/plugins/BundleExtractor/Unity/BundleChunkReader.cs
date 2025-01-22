@@ -9,6 +9,7 @@ using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -192,6 +193,7 @@ namespace ZoDream.BundleExtractor
         }
         private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
         {
+            _service.Get<ITemporaryStorage>().Add(stream.BaseStream);
             stream.Add(_service.Get<IBundleCodec>());
             var name = FileNameHelper.GetFileName(fullName);
             using var reader = _scheme.Open(stream, fullName, name, new ArchiveOptions()
@@ -223,7 +225,7 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                var ms = new MemoryStream();
+                var ms = _service.Get<ITemporaryStorage>().Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
                 LoadFile(ms, FileNameHelper.Combine(fullName, item.Name), token);
@@ -257,9 +259,10 @@ namespace ZoDream.BundleExtractor
                 }
                 stream = File.OpenRead(resourceFilePath);
                 _resourceItems.TryAdd(fileName, stream);
+                _service.Get<ITemporaryStorage>().Add(stream);
                 return stream;
             }
-            return null;
+            return new EmptyStream();
         }
 
 

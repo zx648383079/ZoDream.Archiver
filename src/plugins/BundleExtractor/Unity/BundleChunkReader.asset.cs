@@ -184,6 +184,7 @@ namespace ZoDream.BundleExtractor
                     catch (Exception e)
                     {
                         var (fullPath, entryName) = FileNameHelper.Split(asset.FullPath);
+#if DEBUG
                         var sb = new StringBuilder();
                         sb.AppendLine("Unable to load object")
                             .AppendLine($"Assets {entryName}")
@@ -192,6 +193,7 @@ namespace ZoDream.BundleExtractor
                             .AppendLine($"PathID {obj.FileID}")
                             .Append(e);
                         Debug.WriteLine(sb.ToString());
+#endif
                         //Logger.Error(sb.ToString());
                         //Logger.Error("Unable to load object");
                         Logger.Error(e.Message);

@@ -1,5 +1,6 @@
 ﻿using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Producers
 {

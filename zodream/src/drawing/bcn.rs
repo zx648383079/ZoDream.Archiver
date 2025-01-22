@@ -1,8 +1,6 @@
 use texture2ddecoder::{decode_bc1, decode_bc3, decode_bc4, decode_bc5, decode_bc6, decode_bc7};
 
-use crate::io::ByteWriteExt;
-
-use super::{PixelDecoder, Result};
+use super::{color::ColorWriteExt, PixelDecoder, Result};
 
 pub struct BcnDecoder
 {
@@ -31,7 +29,7 @@ impl PixelDecoder for BcnDecoder
             _ => ()
         }
         for i in buffer {
-            output.write_u32_le(i).unwrap();
+            output.write_bgra(i)?;
         }
         Ok(output.len())
     }

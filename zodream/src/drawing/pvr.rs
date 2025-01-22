@@ -1,6 +1,6 @@
 use texture2ddecoder::decode_pvrtc;
 
-use super::{PixelDecoder, Result, super::io::ByteWriteExt};
+use super::{color::ColorWriteExt, PixelDecoder, Result};
 
 pub struct PvrDecoder
 {
@@ -21,7 +21,7 @@ impl PixelDecoder for PvrDecoder
         let mut buffer = Vec::new();
         decode_pvrtc(input, width as usize, height as usize, &mut buffer, self.version == 2)?;
         for i in buffer {
-            output.write_u32_le(i)?;
+            output.write_bgra(i)?;
         }
         Ok(output.len())
     }

@@ -15,7 +15,6 @@ namespace ZoDream.BundleExtractor
         public void Initialize(IBundleBinaryReader input) { }
         public IBundleBinaryReader Decode(IBundleBinaryReader input, BundleCodecType type, long compressedSize, long uncompressedSize)
         {
-
             return new BundleBinaryReader(Decode(input.BaseStream, type, compressedSize, uncompressedSize), input, false);
         }
 
