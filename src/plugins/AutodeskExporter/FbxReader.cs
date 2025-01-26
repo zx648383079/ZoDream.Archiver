@@ -6,7 +6,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ZoDream.AutodeskExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;

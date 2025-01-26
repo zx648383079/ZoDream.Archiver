@@ -15,6 +15,5 @@
         public int Ax => extractor.Ax.Extract(code);
         public int Bx => extractor.Bx.Extract(code);
         public int sBx => extractor.sBx.Extract(code);
-
     }
 }

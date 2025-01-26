@@ -21,8 +21,7 @@ namespace ZoDream.Shared.RustWrapper
             if (libraryName == RustDllName)
             {
                 var path = "runtimes/";
-                var extension = "";
-
+                string? extension;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     path += "win-";
@@ -56,7 +55,11 @@ namespace ZoDream.Shared.RustWrapper
                 var entry = Path.Combine(AppContext.BaseDirectory, path, RustDllName + extension);
                 if (!File.Exists(entry))
                 {
+#if DEBUG
+                    entry = Path.Combine(AppContext.BaseDirectory, "../../../../zodream/target/debug", RustDllName + extension);
+#else
                     entry = Path.Combine(AppContext.BaseDirectory, RustDllName + extension);
+#endif
                 }
                 return NativeLibrary.Load(entry, assembly, searchPath);
             }

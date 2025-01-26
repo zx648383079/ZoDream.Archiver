@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using ZoDream.LuaDecompiler.Attributes;
 
 namespace ZoDream.LuaDecompiler.Models
 {
@@ -92,6 +94,18 @@ namespace ZoDream.LuaDecompiler.Models
                 default:
                     throw new ArgumentException();
             }
+        }
+
+        public static OperandAttribute? GetAttribute(Operand operand)
+        {
+            var type = operand.GetType();
+            var name = Enum.GetName(operand);
+            if (name is null)
+            {
+                return null;
+            }
+            var field = type.GetField(name);
+            return field?.GetCustomAttribute<OperandAttribute>();
         }
     }
 

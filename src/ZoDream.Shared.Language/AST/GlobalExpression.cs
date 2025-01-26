@@ -7,12 +7,16 @@ namespace ZoDream.Shared.Language.AST
 {
     public class GlobalExpression: Expression
     {
+
+        private int _index = 0;
+
+        public string TemporaryName => $"temp_{++_index}";
+
         public List<Expression> Expressions { get; private set; } = [];
 
         public List<ParameterExpression> Variables { get; private set; } = [];
 
         public List<FunctionExpression> Functions { get; private set; } = [];
-
 
         public void Add(Expression expression)
         {
@@ -79,6 +83,11 @@ namespace ZoDream.Shared.Language.AST
         public static SizeOfExpression SizeOf(Expression expression)
         {
             return new SizeOfExpression(expression);
+        }
+
+        public static IdentifierExpression Identifier(string name)
+        {
+            return new IdentifierExpression(name);
         }
 
         public static ReturnExpression Return(IEnumerable<Expression> values)
