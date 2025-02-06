@@ -33,7 +33,7 @@ namespace ZoDream.KhronosExporter.Models
 
         public Node[] Nodes {  get; set; }
 
-        public Sampler[] Samplers {  get; set; }
+        public TextureSampler[] Samplers {  get; set; }
 
         public float Scene {  get; set; }
 

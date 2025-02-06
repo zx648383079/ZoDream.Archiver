@@ -100,6 +100,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             {
                 return;
             }
+            m_AudioData.Position = 0;
             using var fs = File.Create(fileName);
             Audio.Decode(m_AudioData, m_CompressionFormat switch
             {

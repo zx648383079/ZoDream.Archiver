@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.UI.ApplicationSettings;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Media;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
@@ -38,9 +40,11 @@ namespace ZoDream.Archiver.ViewModels
             {
                 Command = new RelayCommand(TapBack)
             };
+            SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             _service = _app.Service;
             _storage = new StorageExplorer(_service);
+            LoadSetting();
         }
 
         private readonly AppViewModel _app = App.ViewModel;
@@ -83,6 +87,31 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand DragCommand { get; private set; }
         public ICommand ViewCommand { get; private set; }
         public ICommand BackCommand { get; private set; }
+
+        public ICommand SettingCommand { get; private set; }
+
+        private async void TapSetting(object? _)
+        {
+            var picker = new SettingDialog();
+            var res = await _app.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
+            await picker.ViewModel.SaveAsync();
+            LoadSetting();
+        }
+
+        private void LoadSetting()
+        {
+            var temporary = _app.Setting.Get<string>(SettingNames.TemporaryPath);
+            if (!string.IsNullOrWhiteSpace(temporary))
+            {
+                _service.Add<ITemporaryStorage>(new Shared.IO.TemporaryStorage(temporary));
+            }
+            FFmpegBinariesHelper.RegisterFFmpegBinaries(
+                _app.Setting.Get<string>(SettingNames.FFmpegPath));
+        }
 
         private void TapBack(object? _)
         {

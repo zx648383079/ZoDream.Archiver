@@ -14,6 +14,7 @@ using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Media;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -86,6 +87,8 @@ namespace ZoDream.Archiver.ViewModels
             {
                 _service.Add<ITemporaryStorage>(new Shared.IO.TemporaryStorage(temporary));
             }
+            FFmpegBinariesHelper.RegisterFFmpegBinaries(
+                _app.Setting.Get<string>(SettingNames.FFmpegPath));
         }
 
         private async void TapView(object? _)

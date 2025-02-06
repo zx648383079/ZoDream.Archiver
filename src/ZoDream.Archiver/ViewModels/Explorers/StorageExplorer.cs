@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Media;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver.ViewModels

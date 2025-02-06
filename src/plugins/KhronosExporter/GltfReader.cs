@@ -12,6 +12,7 @@ namespace ZoDream.KhronosExporter
             var root = doc.RootElement;
             var data = new ModelRoot();
 
+            return data;
         }
     }
 }

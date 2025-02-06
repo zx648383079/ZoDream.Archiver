@@ -7,7 +7,20 @@ namespace ZoDream.Shared.Media
 {
     public static class FFmpegBinariesHelper
     {
-        internal static void RegisterFFmpegBinaries()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="folder">bin 文件夹</param>
+        public static void RegisterFFmpegBinaries(string folder)
+        {
+            if (!string.IsNullOrWhiteSpace(folder))
+            {
+                ffmpeg.RootPath = folder;
+                return;
+            }
+            RegisterFFmpegBinaries();
+        }
+        public static void RegisterFFmpegBinaries()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -36,6 +49,7 @@ namespace ZoDream.Shared.Media
             {
                 throw new NotSupportedException(); // fell free add support for platform of your choose
             }
+            // ffmpeg.avdevice_register_all();
         }
 
         private static unsafe void RegisterFFmpegLogger()
