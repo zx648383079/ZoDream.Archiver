@@ -163,5 +163,37 @@ namespace ZoDream.Shared.IO
         {
             reader.ExtractToDirectory(folder, ArchiveExtractMode.Overwrite, progressFn, token);
         }
+
+        /// <summary>
+        /// 判断文件是否是以拓展名结束
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="extensionItems">拓展名包含 . 例如：.m.html</param>
+        /// <returns></returns>
+        public static bool HasExtension(this IReadOnlyEntry entry, params string[] extensionItems)
+        {
+            if (extensionItems.Length == 0)
+            {
+                return false;
+            }
+            var name = entry.Name;
+            if (entry is ISourceEntry s)
+            {
+                if (s.IsDirectory)
+                {
+                    return false;
+                }
+                name = s.FullPath;
+            }
+            foreach (var item in extensionItems)
+            {
+                if (!string.IsNullOrWhiteSpace(item) && 
+                    name.EndsWith(item, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

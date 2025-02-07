@@ -81,6 +81,10 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return OpenDirectory(entry.FullPath);
             }
+            //if (entry.HasExtension(".fsb", ".mp3"))
+            //{
+            //    Audio.Decode(entry.FullPath);
+            //}
             var input = File.OpenRead(entry.FullPath);
             IArchiveOptions? options = null;
             // var input = new CachedStream(fs, 256);

@@ -1,4 +1,5 @@
 ﻿using FFmpeg.AutoGen;
+using Fmod5Sharp;
 using System.IO;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
@@ -96,6 +97,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            m_AudioData.Position = 0;
+            if (FsbLoader.TryLoadFsbFromByteArray(m_AudioData.ToArray(), out var instance))
+            {
+                if (instance!.Samples[0].RebuildAsStandardFileFormat(out var buffer, out var ext) 
+                    && LocationStorage.TryCreate(fileName, $".{ext}", mode, out fileName))
+                {
+                    File.WriteAllBytes(fileName, buffer);
+                }
+                return;
+            }
             if (!LocationStorage.TryCreate(fileName, ".wav", mode, out fileName))
             {
                 return;

@@ -1,5 +1,8 @@
 ﻿using FFmpeg.AutoGen;
 using FFmpegSharp;
+using Microsoft.VisualBasic;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -10,7 +13,7 @@ namespace ZoDream.Shared.Media
 
         public static byte[] Decode(byte[] input)
         {
-            return Decode(input, AVCodecID.AV_CODEC_ID_FMVC, AVCodecID.AV_CODEC_ID_WAVARC);
+            return Decode(input, AVCodecID.AV_CODEC_ID_FMVC, AVCodecID.AV_CODEC_ID_FIRST_AUDIO);
         }
 
 
@@ -25,7 +28,7 @@ namespace ZoDream.Shared.Media
 
         public static int Decode(Stream input, AVCodecID inputCodecId, Stream output)
         {
-            return Decode(input, inputCodecId, output, AVCodecID.AV_CODEC_ID_WAVARC);
+            return Decode(input, inputCodecId, output, AVCodecID.AV_CODEC_ID_FIRST_AUDIO);
         }
 
         public static int Decode(Stream input, 
@@ -34,40 +37,59 @@ namespace ZoDream.Shared.Media
             AVCodecID outputCodecId)
         {
             // var inputCodec = MediaCodec.FindDecoder(inputCodecId);
-            using var reader = MediaDemuxer.Open(input);
-            using var writer = MediaMuxer.Create(output, OutputFormat.GetFormats().Where(i => i.AudioCodec == outputCodecId).First());
-            var audioIndex = reader.First(_ => _.CodecparRef.codec_type == AVMediaType.AVMEDIA_TYPE_AUDIO).Index;
-            var encoder = MediaEncoder.CreateAudioEncoder(
-                outputCodecId,
-                reader[audioIndex].CodecparRef.sample_rate,
-                reader[audioIndex].CodecparRef.ch_layout.nb_channels
-                );
-            // reader.FindBestStream(AVMediaType.AVMEDIA_TYPE_AUDIO, ref inputCodec)
-            writer.AddStream(
-                encoder
-            );
-            writer.WriteHeader();
-            var decoder = MediaDecoder.CreateDecoder(reader[audioIndex].CodecparRef);
-            var converter = new SampleConverter();
-            long pts = 0;
-            foreach (var packet in reader.ReadPackets())
+            using (var reader = MediaDemuxer.Open(input))
+            using (var writer = MediaMuxer.Create(output, OutputFormat.GetFormats().Where(i => i.AudioCodec == outputCodecId).First()))
             {
-                foreach (var srcFrame in decoder.DecodePacket(packet))
+                reader.DumpFormat();
+                var audioSrc = reader.FirstOrDefault(_ => _.CodecparRef.codec_type == AVMediaType.AVMEDIA_TYPE_AUDIO);
+                if (audioSrc is null) 
                 {
-                    foreach (var dstFrame in converter.Convert(srcFrame))
+                    return 0;
+                }
+                using (var decoder = MediaDecoder.CreateDecoder(audioSrc.CodecparRef))
+                //using (var encoder = MediaEncoder.CreateAudioEncoder(outputCodecId, audioSrc.CodecparRef.sample_rate, audioSrc.CodecparRef.ch_layout.nb_channels))
+                using (var encoder = MediaEncoder.CreateAudioEncoder(writer.Format, decoder.SampleRate, decoder.ChLayout, AVSampleFormat.AV_SAMPLE_FMT_FLT))
+                using (var cvt = SampleConverter.Create(decoder.ChLayout, decoder.SampleRate, AVSampleFormat.AV_SAMPLE_FMT_FLT, decoder.FrameSize))
+                using (var pkt = new MediaPacket())
+                using (var frame = new MediaFrame())
+                {
+                    writer.AddStream(encoder);
+                    writer.WriteHeader();
+                    foreach (var packet in reader.ReadPackets(pkt))
                     {
-                        pts += dstFrame.Const.nb_samples;
-                        dstFrame.Pts = pts; // audio's pts is total samples, pts can only increase.
-                        foreach (var outPacket in encoder.EncodeFrame(dstFrame))
+                        if (packet.StreamIndex == audioSrc.Index)
                         {
-                            writer.WritePacket(outPacket);
+                            foreach (var f in decoder.DecodePacket(packet, frame))
+                            {
+                                foreach (var o in cvt.Convert(f))
+                                {
+                                    // WriteAudioOut(o, audioOutput);
+                                    foreach (var outputPkt in encoder.EncodeFrame(o))
+                                    {
+                                        writer.WritePacket(outputPkt);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            writer.FlushCodecs([encoder]);
             return (int)output.Position;
         }
 
+
+        //public static int Decode(string fileName)
+        //{
+        //    using var fs = File.OpenRead(fileName);
+        //    using var output = File.OpenWrite(fileName + ".wav");
+        //    try
+        //    {
+        //        return Decode(fs, AVCodecID.AV_CODEC_ID_VORBIS, output, AVCodecID.AV_CODEC_ID_FIRST_AUDIO);
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        return -1;
+        //    }
+        //}
     }
 }
