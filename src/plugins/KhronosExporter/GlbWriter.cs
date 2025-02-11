@@ -59,7 +59,7 @@ namespace ZoDream.KhronosExporter
 
         private static int GetPaddingLength(long length)
         {
-            var padding = (int)(length & 3);
+            var padding = (int)(length & 4);
             return padding == 0 ? 0 : (4 - padding);
         } 
     }
