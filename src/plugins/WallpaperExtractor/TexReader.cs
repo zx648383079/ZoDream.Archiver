@@ -93,7 +93,7 @@ namespace ZoDream.WallpaperExtractor
                 var x = Math.Min(item.X, item.X + width);
                 var y = Math.Min(item.Y, item.Y + height);
                 var rotationAngle = -(Math.Atan2(Math.Sign(height), Math.Sign(width)) - Math.PI / 4);
-                gif.AddFrame(bitmap.Clip(
+                gif.AddFrame(bitmap.Subset(
                     SKRectI.Create((int)x, (int)y, (int)width, (int)height)
                     )?.Rotate((float)(rotationAngle * 180 / Math.PI)),
                     (int)Math.Round(item.FrameTime * 100));

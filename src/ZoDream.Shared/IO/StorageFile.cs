@@ -7,9 +7,9 @@ namespace ZoDream.Shared.IO
 {
     public class StorageFileEntry(string fileName) : IStorageFileEntry
     {
-        public string Name => System.IO.Path.GetFileName(fileName);
+        public string Name => Path.GetFileName(fileName);
 
-        public string Path => fileName;
+        public string FullPath => fileName;
 
         public Task<Stream> OpenReadAsync()
         {

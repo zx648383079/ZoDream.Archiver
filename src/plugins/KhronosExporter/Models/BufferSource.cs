@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.KhronosExporter.Models
 {
-    public class Buffer : LogicalChildOfRoot
+    public class BufferSource : LogicalChildOfRoot
     {
         public string Uri { get; set; }
 

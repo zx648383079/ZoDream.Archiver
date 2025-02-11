@@ -1,18 +1,29 @@
 ﻿using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using ZoDream.KhronosExporter.Models;
+using ZoDream.Shared.Collections;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.KhronosExporter
 {
-    public class GltfReader
+    public partial class GltfReader : IEntryReader<ModelRoot>
     {
+        public Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
+        {
+            throw new System.NotImplementedException();
+        }
         public ModelRoot? Read(Stream input)
         {
-            using var doc = JsonDocument.Parse(input);
-            var root = doc.RootElement;
-            var data = new ModelRoot();
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Converters =
+                {
 
-            return data;
+                }
+            };
+            return JsonSerializer.Deserialize<ModelRoot>(input, options);
         }
     }
 }

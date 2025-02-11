@@ -1,46 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ZoDream.KhronosExporter.Models
 {
     public class ModelRoot : ExtraProperties
     {
 
-        public string[] ExtensionsUsed { get; set; }
+        public IList<string> ExtensionsUsed { get; set; } = [];
 
-        public string[] ExtensionsRequired { get; set; }
+        public IList<string> ExtensionsRequired { get; set; } = [];
 
-        public Accessor[] Accessors {  get; set; }
+        public IList<Accessor> Accessors { get; set; } = [];
 
-        public Animation[] Animations { get; set; }
+        public IList<Animation> Animations { get; set; } = [];
 
-        public Asset Asset { get; set; }
+        public Asset? Asset { get; set; }
 
-        public Buffer[] Buffers { get; set; }
+        public IList<BufferSource> Buffers { get; set; } = [];
 
-        public BufferView[] BufferViews {  get; set; }
+        public IList<BufferView> BufferViews {  get; set; } = [];
 
-        public Camera[] Cameras {  get; set; }
+        public IList<Camera> Cameras {  get; set; } = [];
 
-        public Image[] Images {  get; set; }
+        public IList<Image> Images { get; set; } = [];
 
-        public Material[] Materials {  get; set; }
+        public IList<Material> Materials { get; set; } = [];
 
-        public Mesh[] Meshes {  get; set; }
+        public IList<Mesh> Meshes { get; set; } = [];
 
-        public Node[] Nodes {  get; set; }
+        public IList<Node> Nodes { get; set; } = [];
 
-        public TextureSampler[] Samplers {  get; set; }
+        public IList<TextureSampler> Samplers { get; set; } = [];
 
-        public float Scene {  get; set; }
+        public int Scene {  get; set; }
 
-        public Scene[] Scenes {  get; set; }
+        public IList<Scene> Scenes { get; set; } = [];
 
-        public Skin[] Skins {  get; set; }
+        public IList<Skin> Skins { get; set; } = [];
 
-        public Texture[] Textures {  get; set; }
+        public IList<Texture> Textures { get; set; } = [];
     }
 }

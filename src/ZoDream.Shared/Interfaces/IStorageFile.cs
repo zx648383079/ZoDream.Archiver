@@ -6,7 +6,7 @@ namespace ZoDream.Shared.Interfaces
     public interface IStorageFileEntry
     {
         public string Name { get; }
-        public string Path { get; }
+        public string FullPath { get; }
 
         public Task<Stream> OpenReadAsync();
         public Task<Stream> OpenWriteAsync();

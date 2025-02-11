@@ -21,7 +21,7 @@ namespace ZoDream.KhronosExporter
 
         private bool _removeDegenerateFaces = false;
 
-        public ObjModelRoot ReadObj(Stream input)
+        internal ObjModelRoot ReadObj(Stream input)
         {
             using var reader = new StreamReader(input);
             var model = new ObjModelRoot();

@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ZoDream.KhronosExporter.Models
 {
     public class Mesh : LogicalChildOfRoot
     {
-        public MeshPrimitive[] Primitives { get; set; }
+        public IList<MeshPrimitive> Primitives { get; set; } = [];
 
-        public float[] Weights { get; set; }
+        public IList<float> Weights { get; set; } = [];
 
     }
 }

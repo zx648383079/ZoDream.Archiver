@@ -185,10 +185,29 @@ namespace ZoDream.Shared.IO
                 }
                 name = s.FullPath;
             }
+            return HasExtension(name, extensionItems);
+        }
+        /// <summary>
+        /// 判断文件是否是以拓展名结束
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="extensionItems">拓展名包含 . 例如：.m.html</param>
+        /// <returns></returns>
+        public static bool HasExtension(this IStorageFileEntry entry, params string[] extensionItems)
+        {
+            return HasExtension(entry.FullPath, extensionItems);
+        }
+
+        public static bool HasExtension(string fileName, params string[] extensionItems)
+        {
+            if (extensionItems.Length == 0)
+            {
+                return false;
+            }
             foreach (var item in extensionItems)
             {
-                if (!string.IsNullOrWhiteSpace(item) && 
-                    name.EndsWith(item, StringComparison.CurrentCultureIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(item) &&
+                    fileName.EndsWith(item, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return true;
                 }

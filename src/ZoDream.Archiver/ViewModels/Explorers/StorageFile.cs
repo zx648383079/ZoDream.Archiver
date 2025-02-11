@@ -10,7 +10,7 @@ namespace ZoDream.Archiver.ViewModels
     {
         public string Name => file.Name;
 
-        public string Path => file.Path;
+        public string FullPath => file.Path;
 
         public async Task<Stream> OpenReadAsync()
         {

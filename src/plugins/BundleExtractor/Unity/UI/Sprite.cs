@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Collections;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -81,7 +82,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (!LocationStorage.TryCreate(fileName, ".png", mode, out fileName))
+            if (!LocationStorage.TryCreate(fileName, ".s.png", mode, out fileName))
             {
                 return;
             }
@@ -115,7 +116,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             var originalImage = m_Texture2D.ToImage();
             if (originalImage != null)
             {
-                using (originalImage)
+                // using (originalImage)
                 {
                     if (downscaleMultiplier > 0f && downscaleMultiplier != 1f)
                     {
@@ -134,7 +135,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     rectRight = Math.Min(rectRight, originalImage.Width);
                     rectBottom = Math.Min(rectBottom, originalImage.Height);
                     var rect = new SKRectI(rectX, rectY, rectRight, rectBottom);
-                    var spriteImage = originalImage.Clip(rect);
+                    var spriteImage = originalImage.Subset(rect);
                     if (settingsRaw.packed == 1)
                     {
                         //RotateAndFlip
@@ -162,12 +163,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
                         {
                             var triangles = GetTriangles(m_Sprite.m_RD);
                             var path = new SKPath();
-                            foreach (var item in triangles)
-                            {
-                                path.AddPoly(item);
-                            }
                             var matrix = Matrix3x2.CreateScale(m_Sprite.m_PixelsToUnits);
                             matrix *= Matrix3x2.CreateTranslation(m_Sprite.m_Rect.width * m_Sprite.m_Pivot.X - textureRectOffset.X, m_Sprite.m_Rect.height * m_Sprite.m_Pivot.Y - textureRectOffset.Y);
+                            foreach (var item in triangles)
+                            {
+                                path.AddPoly(item, true);
+                            }
                             path.Transform(matrix.AsMatrix());
                             return spriteImage?.ClipAndFlip(path, false);
                         }
@@ -197,8 +198,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     var first = m_RD.indices[i * 3];
                     var second = m_RD.indices[i * 3 + 1];
                     var third = m_RD.indices[i * 3 + 2];
-                    var triangle = new[] { vertices[first], vertices[second], vertices[third] };
-                    triangles[i] = triangle;
+                    triangles[i] = [vertices[first], vertices[second], vertices[third]];
                 }
                 return triangles;
             }
@@ -231,13 +231,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
                                 var first = indexReader.ReadUInt16() - subMesh.firstVertex;
                                 var second = indexReader.ReadUInt16() - subMesh.firstVertex;
                                 var third = indexReader.ReadUInt16() - subMesh.firstVertex;
-                                var triangle = new[] { vertices[first], vertices[second], vertices[third] };
-                                triangles.Add(triangle);
+                                triangles.Add([vertices[first], vertices[second], vertices[third]]);
                             }
                         }
                     }
                 }
-                return triangles.ToArray();
+                return [.. triangles];
             }
         }
         #endregion

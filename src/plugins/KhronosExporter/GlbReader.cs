@@ -1,20 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.KhronosExporter
 {
-    public class GlbReader
+    public class GlbReader : IEntryReader<ModelRoot>
     {
         public const uint GLTFHEADER = 0x46546C67;
         public const uint GLTFVERSION2 = 2;
         public const uint CHUNKJSON = 0x4E4F534A;
         public const uint CHUNKBIN = 0x004E4942;
-
+        public Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
+        {
+            throw new System.NotImplementedException();
+        }
         public ModelRoot? Read(Stream input)
         {
             var reader = new BundleBinaryReader(input, EndianType.LittleEndian);
@@ -42,5 +47,7 @@ namespace ZoDream.KhronosExporter
             }
             return new ModelRoot();
         }
+
+     
     }
 }
