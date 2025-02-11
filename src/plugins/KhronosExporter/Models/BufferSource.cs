@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZoDream.KhronosExporter.Models
+﻿namespace ZoDream.KhronosExporter.Models
 {
     public class BufferSource : LogicalChildOfRoot
     {
+        /// <summary>
+        /// 当为空是是自带的
+        /// </summary>
         public string Uri { get; set; }
 
         public int ByteLength { get; set; }

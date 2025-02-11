@@ -33,7 +33,7 @@ namespace ZoDream.KhronosExporter
             while (reader.Position - beginPosition < bodyLength)
             {
                 var chunkLength = reader.ReadUInt32();
-                Debug.Assert(chunkLength > 0 && chunkLength % 3 == 0);
+                Debug.Assert(chunkLength > 0 && chunkLength % 4 == 0);
                 var chunkId = reader.ReadUInt32();
                 chunkItems.TryAdd(chunkId, new PartialStream(
                     reader.BaseStream,

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ZoDream.KhronosExporter.Converters;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Collections;
 using ZoDream.Shared.Interfaces;
@@ -20,7 +21,7 @@ namespace ZoDream.KhronosExporter
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 Converters =
                 {
-
+                    new PropertyPathConverter()
                 }
             };
             return JsonSerializer.Deserialize<ModelRoot>(input, options);

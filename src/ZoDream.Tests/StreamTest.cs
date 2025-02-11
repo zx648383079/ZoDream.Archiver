@@ -47,8 +47,8 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestGltf()
         {
-            using var fs = File.OpenRead("D:\\Downloads\\SharpGLTF-master\\examples\\Example1.glb");
-            var res = new GltfReader().Read(fs);
+            using var fs = File.OpenRead("examples\\InfiniteSkinnedTentacle.glb");
+            var res = new GlbReader().Read(fs);
             Assert.IsTrue(res is not null);
         }
     }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZoDream.KhronosExporter.Models
+﻿namespace ZoDream.KhronosExporter.Models
 {
     public class BufferView : LogicalChildOfRoot
     {
+        /// <summary>
+        /// 指向 bufferSource
+        /// </summary>
         public int Buffer {  get; set; }
 
         public int ByteOffset { get; set; }
