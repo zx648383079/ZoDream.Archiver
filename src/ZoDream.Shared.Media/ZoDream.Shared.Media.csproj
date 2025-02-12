@@ -13,4 +13,8 @@
 	  <PackageReference Include="FFmpeg4Sharp" Version="7.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
+	</ItemGroup>
+
 </Project>
