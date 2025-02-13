@@ -47,7 +47,7 @@ namespace ZoDream.Shared.Media
             }
             else
             {
-                throw new NotSupportedException(); // fell free add support for platform of your choose
+                throw new NotSupportedException("ffmpeg not found"); // fell free add support for platform of your choose
             }
             // ffmpeg.avdevice_register_all();
         }

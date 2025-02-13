@@ -12,7 +12,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="FMOD\" />
+	  <Folder Include="FMOD\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+    <ProjectReference Include="..\..\ZoDream.Shared\ZoDream.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="arm64\fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="x64\fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="x86\fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

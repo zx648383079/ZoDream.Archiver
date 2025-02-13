@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 

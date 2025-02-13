@@ -1,7 +1,7 @@
-﻿using FFmpeg.AutoGen;
-using Fmod5Sharp;
-using System.IO;
+﻿using System.IO;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Unity.Exporters;
+using ZoDream.FModExporter;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Media;
@@ -34,6 +34,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public long m_Offset; //ulong
         public long m_Size; //ulong
         public Stream m_AudioData;
+
+        public bool IsOldVersion => reader.Version.LessThan(5);
 
         public override void Read(IBundleBinaryReader reader)
         {
@@ -97,36 +99,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            m_AudioData.Position = 0;
-            if (FsbLoader.TryLoadFsbFromByteArray(m_AudioData.ToArray(), out var instance))
-            {
-                if (instance!.Samples[0].RebuildAsStandardFileFormat(out var buffer, out var ext) 
-                    && LocationStorage.TryCreate(fileName, $".{ext}", mode, out fileName))
-                {
-                    File.WriteAllBytes(fileName, buffer);
-                }
-                return;
-            }
-            if (!LocationStorage.TryCreate(fileName, ".wav", mode, out fileName))
-            {
-                return;
-            }
-            m_AudioData.Position = 0;
-            using var fs = File.Create(fileName);
-            Audio.Decode(m_AudioData, m_CompressionFormat switch
-            {
-                AudioCompressionFormat.PCM => AVCodecID.AV_CODEC_ID_ADPCM_4XM,
-                AudioCompressionFormat.Vorbis => AVCodecID.AV_CODEC_ID_VORBIS,
-                AudioCompressionFormat.ADPCM => AVCodecID.AV_CODEC_ID_ADPCM_4XM,
-                AudioCompressionFormat.MP3 => AVCodecID.AV_CODEC_ID_MP3,
-                AudioCompressionFormat.PSMVAG => AVCodecID.AV_CODEC_ID_XMA2,
-                AudioCompressionFormat.HEVAG => AVCodecID.AV_CODEC_ID_XMA2,
-                AudioCompressionFormat.XMA => AVCodecID.AV_CODEC_ID_XMA2,
-                AudioCompressionFormat.AAC => AVCodecID.AV_CODEC_ID_AAC,
-                AudioCompressionFormat.GCADPCM => AVCodecID.AV_CODEC_ID_XMA2,
-                AudioCompressionFormat.ATRAC9 => AVCodecID.AV_CODEC_ID_XMA2,
-                _ => AVCodecID.AV_CODEC_ID_XMA2,
-            }, fs);
+            new FsbExporter(this).SaveAs(fileName, mode);
         }
     }
 

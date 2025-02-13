@@ -24,10 +24,6 @@ namespace ZoDream.BundleExtractor
                     }
                     if (obj is GameObject m_GameObject)
                     {
-                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                        //{
-                        //    Logger.Verbose($"GameObject with {m_GameObject.m_PathID} in file {m_GameObject.assetsFile.fileName} has {m_GameObject.m_Components.Count} components, Attempting to fetch them...");
-                        //}
                         foreach (var pPtr in m_GameObject.m_Components)
                         {
                             if (pPtr.TryGet(out var m_Component))
@@ -35,45 +31,20 @@ namespace ZoDream.BundleExtractor
                                 switch (m_Component)
                                 {
                                     case Transform m_Transform:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched Transform component with {m_Transform.m_PathID} in file {m_Transform.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
                                         m_GameObject.m_Transform = m_Transform;
                                         break;
                                     case MeshRenderer m_MeshRenderer:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched MeshRenderer component with {m_MeshRenderer.m_PathID} in file {m_MeshRenderer.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
                                         m_GameObject.m_MeshRenderer = m_MeshRenderer;
                                         break;
-                                    case MeshFilter m_MeshFilter:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched MeshFilter component with {m_MeshFilter.m_PathID} in file {m_MeshFilter.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
-                                        m_GameObject.m_MeshFilter = m_MeshFilter;
+                                    case MeshFilter m_MeshFilter:m_GameObject.m_MeshFilter = m_MeshFilter;
                                         break;
                                     case SkinnedMeshRenderer m_SkinnedMeshRenderer:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched SkinnedMeshRenderer component with {m_SkinnedMeshRenderer.m_PathID} in file {m_SkinnedMeshRenderer.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
                                         m_GameObject.m_SkinnedMeshRenderer = m_SkinnedMeshRenderer;
                                         break;
                                     case Animator m_Animator:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched Animator component with {m_Animator.m_PathID} in file {m_Animator.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
                                         m_GameObject.m_Animator = m_Animator;
                                         break;
                                     case Animation m_Animation:
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched Animation component with {m_Animation.m_PathID} in file {m_Animation.assetsFile.fileName}, assigning to GameObject components...");
-                                        //}
                                         m_GameObject.m_Animation = m_Animation;
                                         break;
                                 }

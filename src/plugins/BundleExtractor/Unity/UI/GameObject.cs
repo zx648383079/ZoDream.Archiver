@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -109,8 +108,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             // TODO fbx
-            new FbxExporter(this, SkiaSharp.SKEncodedImageFormat.Bmp)
-                .SaveAs(fileName, mode);
         }
     }
 }

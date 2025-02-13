@@ -25,6 +25,7 @@
 		  <Private>false</Private>
 		  <ExcludeAssets>runtime</ExcludeAssets>
 	  </ProjectReference>
+	  <ProjectReference Include="..\FModExporter\FModExporter.csproj" />
 	  <ProjectReference Include="..\LuaDecompiler\LuaDecompiler.csproj" />
   </ItemGroup>
 
@@ -33,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fmod5Sharp" Version="3.0.1" />
     <PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
     <PackageReference Include="LzhamWrapper" Version="0.0.1" />
     <PackageReference Include="Mono.Cecil" Version="0.11.6" />

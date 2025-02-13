@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZoDream.FModExporter;
 using ZoDream.Shared.Media;
 
 namespace ZoDream.Tests
@@ -11,15 +12,16 @@ namespace ZoDream.Tests
     [TestClass]
     public class MediaTest
     {
-        // [TestMethod]
+         //[TestMethod]
         public void TestFMOD()
         {
-            var fileName = "1.fsb";
-            FFmpegBinariesHelper.RegisterFFmpegBinaries();
-            //AVFormatContext* ifmt_ctx = ffmpeg.avformat_alloc_context();
-            //var res = ffmpeg.avformat_open_input(&ifmt_ctx, fileName, null, null);
-            //ffmpeg.avformat_close_input(&ifmt_ctx);
-            // Assert.AreEqual(res, 0);
+            var fileName = "";
+            using var fs = File.OpenRead(fileName);
+            //using var os = File.OpenWrite(fileName + ".wav");
+            new FModExporter.RiffReader(fs, null)
+                .ExtractToDirectory("D:\\Desktop\\h", Shared.Models.ArchiveExtractMode.Overwrite);
+            
+            Assert.IsTrue(true);
         }
     }
 }

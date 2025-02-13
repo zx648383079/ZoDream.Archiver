@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ZoDream.BundleExtractor.Models;
+using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -95,12 +96,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (!LocationStorage.TryCreate(fileName, ".shader", mode, out fileName))
-            {
-                return;
-            }
-            //File.WriteAllText(fileName, );
             // TODO
+            new ShaderExporter(this).SaveAs(fileName, mode);
         }
     }
 }

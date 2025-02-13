@@ -104,27 +104,7 @@ namespace ZoDream.BundleExtractor
             Logger.Info("Process assets...");
             ProcessAssets(token);
             Logger.Info("Export assets...");
-            foreach (var asset in _assetItems)
-            {
-                foreach (var obj in asset.Children)
-                {
-                    if (token.IsCancellationRequested)
-                    {
-                        Logger.Info("Exporting assets has been cancelled !!");
-                        return;
-                    }
-                    try
-                    {
-                        var exportPath = _fileItems.Create(FileNameHelper.Create(asset.FullPath, obj.Name), folder);
-                        ExportConvertFile(obj, exportPath, mode);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Debug(asset.FullPath);
-                        Logger.Error(e.Message);
-                    }
-                }
-            }
+            ExportAssets(folder, mode, token);
         }
 
         private bool IsExcludeFile(string fileName)

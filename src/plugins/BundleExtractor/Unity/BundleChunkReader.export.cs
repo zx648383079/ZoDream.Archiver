@@ -1,5 +1,11 @@
-﻿using ZoDream.BundleExtractor.Unity.Scanners;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Exporters;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -8,6 +14,75 @@ namespace ZoDream.BundleExtractor
 {
     internal partial class UnityBundleChunkReader
     {
+
+        private readonly Dictionary<Type, Type> _exportItems = new() 
+        {
+            {typeof(TextAsset), typeof(LuaExporter)},
+            {typeof(AudioClip), typeof(FsbExporter)},
+            {typeof(Shader), typeof(ShaderExporter) },
+            {typeof(GameObject), typeof(GltfExporter)},
+            {typeof(Mesh), typeof(GltfExporter)},
+            {typeof(Animator), typeof(GltfExporter)},
+            {typeof(AnimationClip), typeof(GltfExporter)},
+        };
+
+        internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
+        {
+            var batchItems = new Dictionary<Type, IMultipartExporter>();
+            foreach (var asset in _assetItems)
+            {
+                foreach (var obj in asset.Children)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        Logger.Info("Exporting assets has been cancelled !!");
+                        return;
+                    }
+                    try
+                    {
+                        var exportPath = _fileItems.Create(FileNameHelper.Create(asset.FullPath, obj.Name), folder);
+                        if (_exportItems.TryGetValue(obj.GetType(), out var targetType))
+                        {
+                            if (batchItems.TryGetValue(targetType, out var instance))
+                            {
+                                targetType.GetMethod("Append",
+                                    [obj.GetType()])?.Invoke(instance, [obj]);
+                            }
+                            var target = targetType.GetConstructor([obj.GetType()])?.Invoke([obj]);
+                            target ??= targetType.GetConstructor([])?.Invoke([]);
+                            if (target is IMultipartExporter m)
+                            {
+                                targetType.GetMethod("Append",
+                                    [obj.GetType()])?.Invoke(m, [obj]);
+                                batchItems.Add(targetType, m);
+                                continue;
+                            }
+                            else if (target is IFileExporter f)
+                            {
+                                f.SaveAs(exportPath, mode);
+                                continue;
+                            }
+                        }
+                        ExportConvertFile(obj, exportPath, mode);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Debug(asset.FullPath);
+                        Logger.Error(e.Message);
+                    }
+                }
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                foreach (var batch in batchItems)
+                {
+                    batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, batch.Value.FileName), folder), mode);
+                }
+                batchItems.Clear();
+            }
+        }
+
         internal bool ExportRawFile(UIObject item, string exportPath, ArchiveExtractMode mode)
         {
             return false;
