@@ -275,8 +275,7 @@ namespace ZoDream.KhronosExporter
         {
             var ps = AddVertexAttributes(model, objModel, bufferState, mesh);
 
-            var meshIndex = model.Meshes.Count;
-            model.Meshes.Add(new()
+            var meshIndex = model.Meshes.AddWithIndex(new()
             {
                 Name = mesh.Id,
                 Primitives = ps
@@ -297,10 +296,14 @@ namespace ZoDream.KhronosExporter
                 var f = new ObjFace(matName);
 
                 foreach (var ff in fg)
+                {
                     f.Triangles.AddRange(ff.Triangles);
+                }
 
                 if (f.Triangles.Count > 0)
+                {
                     faces.Add(f);
+                }
 
             }
 
