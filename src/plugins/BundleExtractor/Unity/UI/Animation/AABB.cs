@@ -1,7 +1,4 @@
-﻿using System;
-using System.Numerics;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization;
+﻿using System.Numerics;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI

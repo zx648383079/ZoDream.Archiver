@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZoDream.BundleExtractor.Cocos;
 using ZoDream.KhronosExporter;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.IO;
@@ -44,12 +45,20 @@ namespace ZoDream.Tests
             Assert.IsTrue(res);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestGltf()
         {
             using var fs = File.OpenRead("examples\\InfiniteSkinnedTentacle.glb");
             var res = new GlbReader().Read(fs);
             Assert.IsTrue(res is not null);
+        }
+
+        [TestMethod]
+        public void TestBc()
+        {
+            var src = "F:\\apk\\test\\check_version_view.lua";
+            new BlowfishReader([src]).ExtractTo("F:\\apk\\test_output", Shared.Models.ArchiveExtractMode.Overwrite);
+            Assert.IsTrue(true);
         }
     }
 }

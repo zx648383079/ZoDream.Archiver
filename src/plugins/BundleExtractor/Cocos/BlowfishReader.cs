@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -51,8 +50,8 @@ namespace ZoDream.BundleExtractor.Cocos
             input.Seek(-8, SeekOrigin.End);
             input.ReadExactly(buffer, 0, 8);
             //input.Seek(0, SeekOrigin.Begin);
-            var res = SignatureEq(CONST_IMG, buffer) || SignatureEq(CONST_LUA, buffer);
-            extension = res ? Encoding.ASCII.GetString(buffer, 5, 3).ToLower() : string.Empty;
+            var res = buffer.StartsWith(CONST_IMG) || buffer.StartsWith(CONST_LUA);
+            extension = res ? "." + Encoding.ASCII.GetString(buffer, 5, 3).ToLower() : string.Empty;
             return res;
         }
 
@@ -67,11 +66,11 @@ namespace ZoDream.BundleExtractor.Cocos
             input.Seek(-8, SeekOrigin.End);
             input.ReadExactly(buffer, 0, 8);
             var format = FileFormat.None;
-            if (SignatureEq(CONST_IMG, buffer))
+            if (buffer.StartsWith(CONST_IMG))
             {
                 format = FileFormat.IMAGE;
             }
-            else if (SignatureEq(CONST_LUA, buffer))
+            else if (buffer.StartsWith(CONST_LUA))
             {
                 format = FileFormat.LUA; 
             }
@@ -82,9 +81,9 @@ namespace ZoDream.BundleExtractor.Cocos
                 return;
             }
             var key = TryGetKey(buffer);
-            if (string.IsNullOrWhiteSpace(key))
+            if (key.Length == 0)
             {
-                // 不能加密
+                // 不能解密
                 return;
             }
             var length = input.Length - 8;
@@ -97,33 +96,13 @@ namespace ZoDream.BundleExtractor.Cocos
             }
         }
 
-        private string TryGetKey(byte[] buffer)
+        private byte[] TryGetKey(byte[] buffer)
         {
-            if (buffer[2] == 'o' && buffer[3] == 'i')
+            if (true || (buffer[2] == 'o' && buffer[3] == 'i'))
             {
-                return "fd1c1b2f34a0d1d246be3ba9bc5af022e83375f315a0216085d3013a";
+                return Encoding.ASCII.GetBytes("fd1c1b2f34a0d1d246be3ba9bc5af022e83375f315a0216085d3013a");
             }
-            if (buffer[2] == 'r' && buffer[3] == 'c')
-            {
-
-            }
-            return string.Empty;
-        }
-
-        private static bool SignatureEq(int[] signature, byte[] data)
-        {
-            if (signature.Length > data.Length)
-            {
-                return false;
-            }
-            for (var i = 0; i < signature.Length; i++)
-            {
-                if (signature[i] >= 0 && signature[i] != data[i])
-                {
-                    return false;
-                }
-            }
-            return true;
+            return [];
         }
 
         public void Dispose()

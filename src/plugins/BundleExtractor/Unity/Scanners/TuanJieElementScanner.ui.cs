@@ -8,6 +8,41 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal partial class TuanJieElementScanner
     {
+
+        private void CreateInstance(IBundleBinaryReader reader, ClipMuscleConstant instance)
+        {
+            var version = reader.Get<UnityVersion>();
+            instance.m_DeltaPose = new HumanPose(reader);
+            instance.m_StartX = reader.ReadXForm();
+            if (version.GreaterThanOrEquals(5, 5))//5.5 and up
+            {
+                instance.m_StopX = reader.ReadXForm();
+            }
+            instance.m_LeftFootStartX = reader.ReadXForm();
+            instance.m_RightFootStartX = reader.ReadXForm();
+            if (version.LessThan(5))//5.0 down
+            {
+                instance.m_MotionStartX = reader.ReadXForm();
+                instance.m_MotionStopX = reader.ReadXForm();
+            }
+            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
+                UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
+            instance.m_Clip = new Clip();
+            TryRead(reader, instance.m_Clip);
+            instance.m_StartTime = reader.ReadSingle();
+            instance.m_StopTime = reader.ReadSingle();
+            instance.m_OrientationOffsetY = reader.ReadSingle();
+            instance.m_Level = reader.ReadSingle();
+            instance.m_CycleOffset = reader.ReadSingle();
+            instance.m_AverageAngularSpeed = reader.ReadSingle();
+
+            // 1.4.2
+            reader.AlignStream();
+
+            instance.m_IndexArray = reader.ReadArray(r => r.ReadInt32());
+            instance.ReadBase(reader);
+        }
+
         private void CreateInstance(IBundleBinaryReader reader,
             AnimationClip instance)
         {

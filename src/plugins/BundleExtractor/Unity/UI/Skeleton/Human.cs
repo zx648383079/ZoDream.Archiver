@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
@@ -45,7 +41,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.LessThan(2018, 2)) //2018.2 down
             {
                 int numHandles = reader.ReadInt32();
-                m_Handles = new List<Handle>();
+                m_Handles = [];
                 for (int i = 0; i < numHandles; i++)
                 {
                     m_Handles.Add(new Handle(reader));

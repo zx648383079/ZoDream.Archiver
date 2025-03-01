@@ -47,7 +47,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_Name = reader.ReadAlignedString();
         }
 
-        public bool HasModel() => HasMesh(m_Transform, new List<bool>());
+        public bool HasModel() => HasMesh(m_Transform, []);
         private static bool HasMesh(Transform m_Transform, List<bool> meshes)
         {
             try

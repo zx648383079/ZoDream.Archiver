@@ -20,5 +20,19 @@ namespace ZoDream.Shared.Numerics
                 _ => 0
             };
         }
+
+        public static float[] AsArray(this Vector2 data)
+        {
+            return [data.X, data.Y];
+        }
+        public static float[] AsArray(this Vector3 data)
+        {
+            return [data.X, data.Y, data.Z];
+        }
+
+        public static float[] AsArray(this Vector4 data)
+        {
+            return [data.X, data.Y, data.Z, data.W];
+        }
     }
 }

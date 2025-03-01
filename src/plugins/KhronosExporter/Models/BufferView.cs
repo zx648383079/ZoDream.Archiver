@@ -1,11 +1,15 @@
-﻿namespace ZoDream.KhronosExporter.Models
+﻿using System.Text.Json.Serialization;
+using ZoDream.KhronosExporter.Converters;
+
+namespace ZoDream.KhronosExporter.Models
 {
     public class BufferView : LogicalChildOfRoot
     {
         /// <summary>
         /// 指向 bufferSource
         /// </summary>
-        public int Buffer {  get; set; }
+        [JsonConverter(typeof(IndexConverter))]
+        public int Buffer { get; set; } = -1;
 
         public int ByteOffset { get; set; }
 

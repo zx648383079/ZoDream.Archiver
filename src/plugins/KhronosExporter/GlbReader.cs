@@ -41,11 +41,16 @@ namespace ZoDream.KhronosExporter
                 ));
                 reader.BaseStream.Seek(chunkLength, SeekOrigin.Current);
             }
+            var res = new ModelSource();
+            if (chunkItems.TryGetValue(CHUNKBIN, out var bin))
+            {
+                res.ResourceItems.Add(string.Empty, bin);
+            }
             if (chunkItems.TryGetValue(CHUNKJSON, out var stream))
             {
-                return new GltfReader().Read(stream);
+                // new GltfReader().Read(res, stream);
             }
-            return new ModelRoot();
+            return res;
         }
 
      

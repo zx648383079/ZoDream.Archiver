@@ -20,6 +20,14 @@ namespace ZoDream.Shared.RustWrapper
             Marshal.FreeCoTaskMem(ptr);
         }
 
+        public Encryptor(EncryptionID encryption, byte[] key)
+        {
+            fixed(byte* ptr = key)
+            {
+                _instance = NativeMethods.find_encryptor(encryption, ptr);
+            }
+        }
+
         private readonly EncryptorRef* _instance;
         private LoggerRef _logger = new()
         {

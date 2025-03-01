@@ -38,5 +38,29 @@
             N = n;
             T = t;
         }
+
+        public override string ToString()
+        {
+            return N > 0 ? T > 0 ? $"{V}/{T}/{N}" : $"{V}//{N}" : T > 0 ? $"{V}/{T}" : $"{V}";
+        }
+
+        public bool Equals(ObjFaceVertex other)
+        {
+            return V == other.V && T == other.T && N == other.N;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || obj is not ObjFaceVertex o)
+            {
+                return false;
+            }
+            return Equals(o);
+        }
+
+        public override int GetHashCode()
+        {
+            return V ^ T ^ N;
+        }
     }
 }

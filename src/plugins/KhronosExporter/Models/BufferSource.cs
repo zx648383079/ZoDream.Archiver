@@ -3,7 +3,7 @@
     public class BufferSource : LogicalChildOfRoot
     {
         /// <summary>
-        /// 当为空是是自带的
+        /// 当为空是是自带的 data:application/gltf-buffer;base64,
         /// </summary>
         public string Uri { get; set; }
 

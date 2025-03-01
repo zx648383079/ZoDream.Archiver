@@ -2,6 +2,11 @@
 
 namespace ZoDream.KhronosExporter.Models
 {
+    /// <summary>
+    /// Scene -> Nodes -> Meshes 
+    /// Mesh -> Primitive -> Attributes -> Accessors -> BufferViews -> Buffers
+    /// Material -> Texture -> Image
+    /// </summary>
     public class ModelRoot : ExtraProperties
     {
 

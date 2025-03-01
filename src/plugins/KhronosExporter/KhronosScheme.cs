@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZoDream.KhronosExporter
 {

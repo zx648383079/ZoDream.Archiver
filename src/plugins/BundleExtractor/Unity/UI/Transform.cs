@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI

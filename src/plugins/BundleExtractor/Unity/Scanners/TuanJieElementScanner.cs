@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
@@ -37,6 +36,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             if (instance is Mesh m)
             {
                 CreateInstance(reader, m);
+                return true;
+            }
+            if (instance is ClipMuscleConstant cc)
+            {
+                CreateInstance(reader, cc);
                 return true;
             }
             if (instance is ConstantBuffer cb)

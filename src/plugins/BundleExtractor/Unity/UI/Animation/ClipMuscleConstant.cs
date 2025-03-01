@@ -37,7 +37,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public bool m_KeepOriginalPositionXZ;
         public bool m_HeightFromFeet;
        
-        public ClipMuscleConstant() { }
 
         public void ReadBase(IBundleBinaryReader reader)
         {

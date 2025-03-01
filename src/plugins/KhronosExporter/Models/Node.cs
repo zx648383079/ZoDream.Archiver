@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ZoDream.KhronosExporter.Models
 {
@@ -10,8 +6,14 @@ namespace ZoDream.KhronosExporter.Models
     {
         public int Camera {  get; set; }
 
-        public int[] Children { get; set; }
+        /// <summary>
+        /// Nodes
+        /// </summary>
+        public IList<int> Children { get; set; } = [];
 
+        /// <summary>
+        /// Skin
+        /// </summary>
         public int Skin { get; set; }
 
         public float[] Matrix { get; set; }

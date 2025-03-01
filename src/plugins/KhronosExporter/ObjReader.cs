@@ -18,26 +18,23 @@ namespace ZoDream.KhronosExporter
             throw new System.NotImplementedException();
         }
 
-        public ModelRoot? Read(Stream input, string outputFileName)
+        public ModelSource? Read(Stream input, string outputFileName)
         {
             var data = ReadObj(input);
-            var res = new ModelRoot();
-            using (var bufferState = new BufferState(res, outputFileName, RequiresUint32Indices(data)))
+            var res = new ModelSource(outputFileName, RequiresUint32Indices(data));
+            res.Scenes.Add(new());
+            res.Materials.AddRange(data.Materials.Select(x => ConvertMaterial(x, t => GetTextureIndex(res, t))));
+            var meshes = data.Geometries.ToArray();
+            var meshesLength = meshes.Length;
+            for (var i = 0; i < meshesLength; i++)
             {
-                res.Scenes.Add(new());
-                res.Materials.AddRange(data.Materials.Select(x => ConvertMaterial(x, t => GetTextureIndex(res, t))));
-                var meshes = data.Geometries.ToArray();
-                var meshesLength = meshes.Length;
-                for (var i = 0; i < meshesLength; i++)
+                var mesh = meshes[i];
+                if (mesh.Faces.Count == 0)
                 {
-                    var mesh = meshes[i];
-                    if (mesh.Faces.Count == 0)
-                    {
-                        continue;
-                    }
-                    var meshIndex = AddMesh(res, data, bufferState, mesh);
-                    AddNode(res, mesh.Id, meshIndex, -1);
+                    continue;
                 }
+                var meshIndex = AddMesh(res, data, mesh);
+                AddNode(res, mesh.Id, meshIndex, -1);
             }
 
             if (res.Images.Count > 0)
@@ -271,9 +268,9 @@ namespace ZoDream.KhronosExporter
 
         #region Meshes
 
-        private static int AddMesh(ModelRoot model, ObjModelRoot objModel, BufferState bufferState, ObjGeometry mesh)
+        private static int AddMesh(ModelSource model, ObjModelRoot objModel, ObjGeometry mesh)
         {
-            var ps = AddVertexAttributes(model, objModel, bufferState, mesh);
+            var ps = AddVertexAttributes(model, objModel, mesh);
 
             var meshIndex = model.Meshes.AddWithIndex(new()
             {
@@ -283,9 +280,8 @@ namespace ZoDream.KhronosExporter
             return meshIndex;
         }
 
-        private static List<MeshPrimitive> AddVertexAttributes(ModelRoot model,
+        private static List<MeshPrimitive> AddVertexAttributes(ModelSource model,
                                                     ObjModelRoot objModel,
-                                                    BufferState bufferState,
                                                     ObjGeometry mesh)
         {
             var facesGroup = mesh.Faces.GroupBy(c => c.MatName);
@@ -332,21 +328,21 @@ namespace ZoDream.KhronosExporter
                 var faceVertexCount = 0;
 
                 var atts = new Dictionary<string, int>();
-                var indicesAccessorIndex = bufferState.MakeIndicesAccessor(faceName + "_indices");
-                var accessorIndex = bufferState.MakePositionAccessor(faceName + "_positions");
+                var indicesAccessorIndex = model.CreateIndicesAccessor(faceName + "_indices");
+                var accessorIndex = model.CreatePositionAccessor(faceName + "_positions");
                 atts.Add("POSITION", accessorIndex);
-
+                var normalsAccessorIndex = -1;
                 if (hasNormals)
                 {
-                    var normalsAccessorIndex = bufferState.MakeNormalAccessors(faceName + "_normals");
+                    normalsAccessorIndex = model.CreateNormalAccessor(faceName + "_normals");
                     atts.Add("NORMAL", normalsAccessorIndex);
                 }
-
+                var uvAccessorIndex = -1;
                 if (materialHasTexture)
                 {
                     if (hasUvs)
                     {
-                        var uvAccessorIndex = bufferState.MakeUvAccessor(faceName + "_texcoords");
+                        uvAccessorIndex = model.CreateUvAccessor(faceName + "_texcoords");
                         atts.Add("TEXCOORD_0", uvAccessorIndex);
                     }
                     else
@@ -406,18 +402,18 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v1Str, faceVertexCount++);
 
-                        bufferState.AddPosition(v1);
+                        model.AddAccessorBuffer(accessorIndex, v1);
 
                         if (triangle.V1.N > 0) // hasNormals
                         {
-                            bufferState.AddNormal(n1);
+                            model.AddAccessorBuffer(normalsAccessorIndex, n1);
                         }
                         if (materialHasTexture)
                         {
                             if (triangle.V1.T > 0) // hasUvs
                             {
                                 var uv = new Vector2(t1.X, 1 - t1.Y);
-                                bufferState.AddUv(uv);
+                                model.AddAccessorBuffer(uvAccessorIndex, uv);
                             }
                         }
                     }
@@ -427,17 +423,17 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v2Str, faceVertexCount++);
 
-                        bufferState.AddPosition(v2);
+                        model.AddAccessorBuffer(accessorIndex, v2);
                         if (triangle.V2.N > 0) // hasNormals
                         {
-                            bufferState.AddNormal(n2);
+                            model.AddAccessorBuffer(normalsAccessorIndex, n2);
                         }
                         if (materialHasTexture)
                         {
                             if (triangle.V2.T > 0) // hasUvs
                             {
                                 var uv = new Vector2(t2.X, 1 - t2.Y);
-                                bufferState.AddUv(uv);
+                                model.AddAccessorBuffer(uvAccessorIndex, uv);
                             }
                         }
                     }
@@ -447,17 +443,17 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v3Str, faceVertexCount++);
 
-                        bufferState.AddPosition(v3);
+                        model.AddAccessorBuffer(accessorIndex, v3);
                         if (triangle.V3.N > 0) // hasNormals
                         {
-                            bufferState.AddNormal(n3);
+                            model.AddAccessorBuffer(normalsAccessorIndex, n3);
                         }
                         if (materialHasTexture)
                         {
                             if (triangle.V3.T > 0) // hasUvs
                             {
                                 var uv = new Vector2(t3.X, 1 - t3.Y);
-                                bufferState.AddUv(uv);
+                                model.AddAccessorBuffer(uvAccessorIndex, uv);
                             }
                         }
                     }
@@ -484,7 +480,7 @@ namespace ZoDream.KhronosExporter
 
                 foreach (var i in iList)
                 {
-                    bufferState.AddIndex(i);
+                    model.AddAccessorBuffer(indicesAccessorIndex, i);
                 }
 
                 ps.Add(new()
