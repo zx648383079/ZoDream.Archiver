@@ -1,9 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 
 namespace ZoDream.Shared.Bundle
 {
     public interface IBundleSource: IEnumerable<string>
     {
+        /// <summary>
+        /// 获取文件的数量，必须先调用 Analyze 方法
+        /// </summary>
+        public int Count { get; }
+        /// <summary>
+        /// 重新计算文件的数量
+        /// </summary>
+        /// <returns></returns>
+        public int Analyze(CancellationToken token = default);
+
         public IEnumerable<string> GetFiles(params string[] searchPatternItems);
         public IEnumerable<string> GetDirectories(params string[] searchPatternItems);
         /// <summary>

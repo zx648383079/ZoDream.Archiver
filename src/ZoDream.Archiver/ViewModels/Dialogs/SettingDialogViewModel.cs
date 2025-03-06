@@ -45,6 +45,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapOpen(object? _)
         {
             var picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
             App.ViewModel.InitializePicker(picker);
             picker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
             var folder = await picker.PickSingleFolderAsync();
@@ -65,6 +66,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapOpenTemporary(object? _)
         {
             var picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
             App.ViewModel.InitializePicker(picker);
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             var folder = await picker.PickSingleFolderAsync();

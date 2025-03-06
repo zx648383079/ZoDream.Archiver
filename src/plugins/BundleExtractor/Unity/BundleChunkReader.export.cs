@@ -48,20 +48,22 @@ namespace ZoDream.BundleExtractor
                                 targetType.GetMethod("Append",
                                     [obj.GetType()])?.Invoke(instance, [obj]);
                             }
-                            var target = targetType.GetConstructor([obj.GetType()])?.Invoke([obj]);
-                            target ??= targetType.GetConstructor([])?.Invoke([]);
-                            if (target is IMultipartExporter m)
+                            else
                             {
-                                targetType.GetMethod("Append",
-                                    [obj.GetType()])?.Invoke(m, [obj]);
-                                batchItems.Add(targetType, m);
-                                continue;
+                                var target = targetType.GetConstructor([obj.GetType()])?.Invoke([obj]);
+                                target ??= targetType.GetConstructor([])?.Invoke([]);
+                                if (target is IMultipartExporter m)
+                                {
+                                    targetType.GetMethod("Append",
+                                        [obj.GetType()])?.Invoke(m, [obj]);
+                                    batchItems.TryAdd(targetType, m);
+                                }
+                                else if (target is IFileExporter f)
+                                {
+                                    f.SaveAs(exportPath, mode);
+                                }
                             }
-                            else if (target is IFileExporter f)
-                            {
-                                f.SaveAs(exportPath, mode);
-                                continue;
-                            }
+                            continue;
                         }
                         ExportConvertFile(obj, exportPath, mode);
                     }

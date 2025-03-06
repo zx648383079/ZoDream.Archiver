@@ -160,6 +160,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapAddFolder(object? _)
         {
             var picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
             _app.InitializePicker(picker);
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             var folder = await picker.PickSingleFolderAsync();
@@ -173,7 +174,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapSaveAs(object? _)
         {
             var fileItems = FileItems.Select(i => i.FullPath).ToArray();
-            if (!fileItems.Any())
+            if (fileItems.Length == 0)
             {
                 await _app.ConfirmAsync("请选择文件");
                 return;
@@ -190,18 +191,6 @@ namespace ZoDream.Archiver.ViewModels
             _options ??= new BundleOptions();
             model.Unload(_options);
             var token = _app.ShowProgress("解压中...");
-            _ = Task.Factory.StartNew(() => {
-                var progress = 0D;
-                while (!token.IsCancellationRequested)
-                {
-                    Thread.Sleep(500);
-                    if (progress < .95)
-                    {
-                        progress += .001;
-                    }
-                    _app.UpdateProgress(progress);
-                }
-            }, token);
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();
                 watch.Start();

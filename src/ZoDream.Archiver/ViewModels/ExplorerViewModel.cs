@@ -160,6 +160,7 @@ namespace ZoDream.Archiver.ViewModels
         private async void TapAddFolder(object? _)
         {
             var picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
             _app.InitializePicker(picker);
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             var folder = await picker.PickSingleFolderAsync();

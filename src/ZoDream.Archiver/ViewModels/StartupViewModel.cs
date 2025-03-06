@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Pages;
+using ZoDream.Shared.Drawing.PVRTC;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -58,6 +59,7 @@ namespace ZoDream.Archiver.ViewModels
         private void TapOpenFolder(object? _)
         {
             //var picker = new FolderPicker();
+            //picker.FileTypeFilter.Add("*");
             //App.ViewModel.InitializePicker(picker);
             //picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             //var folder = await picker.PickSingleFolderAsync();

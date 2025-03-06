@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -30,6 +29,10 @@ namespace ZoDream.BundleExtractor
             //    });
             var logger = scheme.Service.Get<ILogger>();
             var temporary = scheme.Service.Get<ITemporaryStorage>();
+            logger.Info("Analyzing ...");
+            fileItems.Analyze(token);
+            logger.Info($"Found {fileItems.Count} files.");
+            var progress = 0;
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
@@ -46,6 +49,8 @@ namespace ZoDream.BundleExtractor
                     logger.Error(ex.Message);
                 }
                 temporary.Clear();
+                progress += items.Index;
+                logger.Progress(progress, fileItems.Count);
             }
         }
         /// <summary>

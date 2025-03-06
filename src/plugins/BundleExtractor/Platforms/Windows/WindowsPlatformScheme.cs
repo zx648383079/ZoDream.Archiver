@@ -15,6 +15,10 @@ namespace ZoDream.BundleExtractor.Platforms
             {
                 options.Platform = PlatformName;
                 options.Entrance = Path.GetDirectoryName(item);
+                if (string.IsNullOrWhiteSpace(options.DisplayName) && !string.IsNullOrWhiteSpace(options.Entrance))
+                {
+                    options.DisplayName = Path.GetFileName(options.Entrance);
+                }
                 return true;
             }
             return false;

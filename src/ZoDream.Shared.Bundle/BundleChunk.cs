@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Enumeration;
+using System.Linq;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -21,22 +24,29 @@ namespace ZoDream.Shared.Bundle
             if (!File.Exists(fileName))
             {
                 Root = fileName;
+                _countLazy = new Lazy<int>(() => BundleSource.FileCount([Root], globPattern));
                 return;
             }
             Root = Path.GetDirectoryName(fileName)!;
             _fileItems = [fileName];
+            _countLazy = new Lazy<int>(_fileItems.Count);
         }
 
         public BundleChunk(string baseFolder, IEnumerable<string> items)
         {
             Root = baseFolder;
             _fileItems = items;
+            _countLazy = new Lazy<int>(_fileItems.Count);
         }
 
         private readonly IEnumerable<string>? _fileItems;
         private readonly string _globPattern = "*.*";
         public string Root { get; private set; }
 
+        private readonly Lazy<int> _countLazy;
+        public int Count => _countLazy.Value;
+
+        public int Index { get; private set; }
 
         public string Create(string sourcePath, string outputFolder)
         {
@@ -53,27 +63,47 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerator<string> GetEnumerator()
         {
+            Index = 0;
             if (_fileItems is not null)
             {
                 foreach (var item in _fileItems)
                 {
+                    Index++;
                     yield return item;
                 }
                 yield break;
             }
-            foreach (var item in Directory.GetFiles(Root, _globPattern, SearchOption.AllDirectories))
+            var options = new EnumerationOptions()
             {
+                RecurseSubdirectories = true,
+                MatchType = MatchType.Win32,
+                AttributesToSkip = FileAttributes.None,
+                IgnoreInaccessible = false
+            };
+            var res = new FileSystemEnumerable<string>(Root, delegate (ref FileSystemEntry entry)
+            {
+                return entry.ToSpecifiedFullPath();
+            }, options)
+            {
+                ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
+                {
+                    if (entry.IsDirectory)
+                    {
+                        return false;
+                    }
+                    return BundleSource.IsMatch(entry.FileName, _globPattern);
+                }
+            };
+            foreach (var item in res)
+            {
+                Index++;
                 yield return item;
             }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            if (_fileItems is not null)
-            {
-                return _fileItems.GetEnumerator();
-            }
-            return Directory.GetFiles(Root, _globPattern, SearchOption.AllDirectories).GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

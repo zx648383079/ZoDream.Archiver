@@ -4,11 +4,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
+using System.Threading;
 
 namespace ZoDream.Shared.Bundle
 {
     public class BundleSource(IEnumerable<string> fileItems) : IBundleSource
     {
+        /// <summary>
+        /// 获取文件的数量，必须先调用 Analyze 方法
+        /// </summary>
+        public int Count { get; private set; }
+
+        /// <summary>
+        /// 重新计算文件的数量
+        /// </summary>
+        /// <returns></returns>
+        public int Analyze(CancellationToken token = default)
+        {
+            return Count = FileCount(fileItems, token);
+        }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
@@ -136,7 +150,7 @@ namespace ZoDream.Shared.Bundle
             return fileItems.GetEnumerator();
         }
 
-        private static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
+        internal static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
         {
             if (patternItems.Length == 0)
             {
@@ -150,6 +164,64 @@ namespace ZoDream.Shared.Bundle
                 }
             }
             return false;
+        }
+
+        internal static bool IsMatch(ReadOnlySpan<char> name, string pattern)
+        {
+            return string.IsNullOrEmpty(pattern) || FileSystemName.MatchesSimpleExpression(pattern, name, true);
+        }
+
+        /// <summary>
+        /// 获取所有文件的数量
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static int FileCount(IEnumerable<string> items, CancellationToken token = default)
+        {
+            return FileCount(items, string.Empty, token);
+        }
+        public static int FileCount(IEnumerable<string> items, string pattern, CancellationToken token = default)
+        {
+            var options = new EnumerationOptions()
+            {
+                RecurseSubdirectories = true,
+                MatchType = MatchType.Win32,
+                AttributesToSkip = FileAttributes.None,
+                IgnoreInaccessible = false
+            };
+            var count = 0;
+            foreach (var item in items)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                if (File.Exists(item))
+                {
+                    count++;
+                    continue;
+                }
+                var res = new FileSystemEnumerable<byte>(item, delegate (ref FileSystemEntry entry)
+                {
+                    return 1;
+                }, options)
+                {
+                    ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
+                    {
+                        return !entry.IsDirectory && IsMatch(entry.FileName, pattern);
+                    }
+                };
+                foreach (var _ in res)
+                {
+                    count++;
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                }
+            }
+            return count;
         }
     }
 
