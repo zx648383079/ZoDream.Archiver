@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Buffers;
+using System.IO;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
@@ -16,7 +17,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            new LuaExporter(this).SaveAs(fileName, mode);
+            new RawExporter(this).SaveAs(fileName, mode);
         }
     }
 }

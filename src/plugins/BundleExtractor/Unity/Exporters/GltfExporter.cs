@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.KhronosExporter;
 using ZoDream.KhronosExporter.Models;
-using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Collections;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -30,7 +25,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private readonly ModelSource _root;
 
-        public bool IsEmpty => true;
+        public bool IsEmpty => _root.Nodes.Count == 0;
 
         public string FileName => string.Empty;
 
@@ -227,7 +222,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (!LocationStorage.TryCreate(fileName, ".glb", mode, out fileName))
+            if (IsEmpty || !LocationStorage.TryCreate(fileName, ".glb", mode, out fileName))
             {
                 return;
             }

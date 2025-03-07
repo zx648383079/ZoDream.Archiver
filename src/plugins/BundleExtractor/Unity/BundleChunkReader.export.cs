@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor
 
         private readonly Dictionary<Type, Type> _exportItems = new() 
         {
-            {typeof(TextAsset), typeof(LuaExporter)},
+            {typeof(TextAsset), typeof(RawExporter)},
             {typeof(AudioClip), typeof(FsbExporter)},
             {typeof(Shader), typeof(ShaderExporter) },
             {typeof(GameObject), typeof(GltfExporter)},
