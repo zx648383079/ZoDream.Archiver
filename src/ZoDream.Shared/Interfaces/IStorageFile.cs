@@ -10,6 +10,12 @@ namespace ZoDream.Shared.Interfaces
 
         public Task<Stream> OpenReadAsync();
         public Task<Stream> OpenWriteAsync();
+        /// <summary>
+        /// 创建同级文件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Task<Stream> CreateBrotherAsync(string name);
 
         public Task LaunchAsync();
     }

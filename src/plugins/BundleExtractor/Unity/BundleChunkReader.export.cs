@@ -80,6 +80,7 @@ namespace ZoDream.BundleExtractor
                 foreach (var batch in batchItems)
                 {
                     batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, batch.Value.FileName), folder), mode);
+                    batch.Value.Dispose();
                 }
                 batchItems.Clear();
             }

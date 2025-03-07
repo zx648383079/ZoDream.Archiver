@@ -22,6 +22,13 @@ namespace ZoDream.Archiver.ViewModels
             return await file.OpenStreamForWriteAsync();
         }
 
+        public async Task<Stream> CreateBrotherAsync(string name)
+        {
+            var parent = await file.GetParentAsync();
+            var temp = await parent.CreateFileAsync(name);
+            return await temp.OpenStreamForWriteAsync();
+        }
+
         public async Task LaunchAsync()
         {
             _ = await Windows.System.Launcher.LaunchFileAsync(file);

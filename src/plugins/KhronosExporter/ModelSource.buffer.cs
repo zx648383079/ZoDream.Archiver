@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Collections;
 
@@ -9,8 +11,8 @@ namespace ZoDream.KhronosExporter
 {
     public partial class ModelSource
     {
-
-        private Dictionary<int, Stream> _bufferViewCacheItems = [];
+        [JsonIgnore]
+        private readonly Dictionary<int, Stream> _bufferViewCacheItems = [];
 
         [JsonIgnore]
         private readonly Dictionary<string, int> _bufferViewMaps = [];
@@ -91,22 +93,39 @@ namespace ZoDream.KhronosExporter
             stream.Position = buffer.ByteLength;
             FlushBuffer(0, stream);
         }
-        private Stream GetStream(BufferSource buffer)
+        public Stream GetStream(BufferSource buffer)
         {
             var name = string.IsNullOrWhiteSpace(buffer.Uri) || string.IsNullOrEmpty(FileName) ? string.Empty : buffer.Uri;
+            if (buffer.Uri.StartsWith("data:"))
+            {
+                name = $"@@b_{buffer.Name}";
+            }
             if (ResourceItems.TryGetValue(name, out var stream))
             {
                 return stream;
             }
-            if (string.IsNullOrEmpty(name))
-            {
-                stream = new MemoryStream();
-            } else
-            {
-                stream = File.Open(Path.Combine(Path.GetDirectoryName(FileName), name), FileMode.OpenOrCreate);
-            }
+            stream = OpenStream(buffer.Uri);
+            stream ??= new MemoryStream();
             ResourceItems.Add(name, stream);
             return stream;
+        }
+
+
+        public Stream? OpenStream(string uri)
+        {
+            if (string.IsNullOrEmpty(FileName))
+            {
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(uri))
+            {
+                return ResourceItems.TryGetValue(string.Empty, out var stream) ? stream : null;
+            }
+            if (TryDecodeBase64String(uri, out var buffer))
+            {
+                return new MemoryStream(buffer, true);
+            }
+            return File.Open(Path.Combine(Path.GetDirectoryName(FileName), uri), FileMode.OpenOrCreate);
         }
         public BinaryWriter OpenWrite(BufferSource buffer)
         {
@@ -135,6 +154,22 @@ namespace ZoDream.KhronosExporter
             return Buffers.AddWithIndex(buffer);
         }
 
+        internal static bool TryDecodeBase64String(string uri, [NotNullWhen(true)] out byte[]? buffer)
+        {
+            if (!uri.StartsWith("data:"))
+            {
+                buffer = null;
+                return false;
+            }
+            var i = uri.IndexOf(";base64,");
+            if (i < 0)
+            {
+                buffer = null;
+                return false;
+            }
+            buffer = Convert.FromBase64String(uri[(i + 8)..]);
+            return true;
+        }
     }
 
 }

@@ -75,6 +75,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             return m_Type;
         }
+
+        public void Dispose()
+        {
+        }
     }
 
     public enum CubismMonoBehaviorType

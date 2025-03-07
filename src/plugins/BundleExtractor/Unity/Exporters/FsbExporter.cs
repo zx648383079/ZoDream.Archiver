@@ -128,5 +128,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
             }
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

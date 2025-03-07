@@ -17,14 +17,19 @@ namespace ZoDream.KhronosExporter
         public string FileName { get; set; } = fileName;
 
         [JsonIgnore]
-        public Dictionary<string, Stream> ResourceItems = [];
-        public void Dispose()
+        public Dictionary<string, Stream> ResourceItems { get; private set; } = [];
+
+        public void ResourceClear()
         {
             foreach (var item in ResourceItems)
             {
                 item.Value.Dispose();
             }
             ResourceItems.Clear();
+        }
+        public void Dispose()
+        {
+            ResourceClear();
         }
     }
 

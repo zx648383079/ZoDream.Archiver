@@ -20,5 +20,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             //File.WriteAllText(fileName, );
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

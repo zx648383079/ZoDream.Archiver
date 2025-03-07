@@ -35,5 +35,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             using var fs = File.Create(fileName);
             decompressor.Create(fs, res);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

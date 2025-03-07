@@ -234,5 +234,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             using var fs = File.OpenWrite(fileName);
             new GlbWriter().Write(_root, fs);
         }
+
+        public void Dispose()
+        {
+            _root.Dispose();
+        }
     }
 }
