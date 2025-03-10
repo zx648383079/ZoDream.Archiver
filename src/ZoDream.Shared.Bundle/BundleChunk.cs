@@ -24,27 +24,37 @@ namespace ZoDream.Shared.Bundle
             if (!File.Exists(fileName))
             {
                 Root = fileName;
-                _countLazy = new Lazy<int>(() => BundleSource.FileCount([Root], globPattern));
                 return;
             }
             Root = Path.GetDirectoryName(fileName)!;
             _fileItems = [fileName];
-            _countLazy = new Lazy<int>(_fileItems.Count);
+            _count = _fileItems.Count();
         }
 
         public BundleChunk(string baseFolder, IEnumerable<string> items)
         {
             Root = baseFolder;
             _fileItems = items;
-            _countLazy = new Lazy<int>(_fileItems.Count);
+            _count = _fileItems.Count();
         }
 
         private readonly IEnumerable<string>? _fileItems;
         private readonly string _globPattern = "*.*";
         public string Root { get; private set; }
 
-        private readonly Lazy<int> _countLazy;
-        public int Count => _countLazy.Value;
+        private int _count = -1;
+        public int Count 
+        { 
+            get {
+                if (_count >= 0)
+                {
+                    return _count;
+                }
+                _count = 0;
+                _count = BundleSource.FileCount([Root], _globPattern);
+                return _count;
+            }
+        }
 
         public int Index { get; private set; }
 
@@ -98,6 +108,10 @@ namespace ZoDream.Shared.Bundle
             {
                 Index++;
                 yield return item;
+            }
+            if (Index > _count)
+            {
+                _count = Index;
             }
         }
 

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
@@ -190,7 +189,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             _options ??= new BundleOptions();
             model.Unload(_options);
-            var token = _app.ShowProgress("解压中...");
+            var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();
                 watch.Start();

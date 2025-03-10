@@ -11,10 +11,10 @@ namespace ZoDream.Archiver.ViewModels
         private ProgressDialog? _progress;
         private CancellationTokenSource? _progressToken;
 
-        public CancellationToken ShowProgress(string title = "压缩中...")
+        public CancellationToken OpenProgress(string title = "压缩中...")
         {
             _progressToken = new CancellationTokenSource();
-            _ = CreateProgress(title);
+            _ = CreateProgressAsync(title);
             return _progressToken.Token;
         }
 
@@ -33,7 +33,7 @@ namespace ZoDream.Archiver.ViewModels
             });
         }
 
-        private async Task CreateProgress(string title)
+        private async Task CreateProgressAsync(string title)
         {
             _progress = new ProgressDialog
             {

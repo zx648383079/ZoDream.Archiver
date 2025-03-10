@@ -137,7 +137,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             var model = picker.ViewModel;
-            var token = app.ShowProgress();
+            var token = app.OpenProgress();
             await Task.Factory.StartNew(() => {
                 using var writer = model.Create();
                 if (writer is null)

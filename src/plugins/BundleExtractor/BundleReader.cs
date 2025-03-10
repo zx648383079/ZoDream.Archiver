@@ -33,6 +33,7 @@ namespace ZoDream.BundleExtractor
             fileItems.Analyze(token);
             logger.Info($"Found {fileItems.Count} files.");
             var progress = 0;
+            logger.Progress(progress, fileItems.Count);
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)

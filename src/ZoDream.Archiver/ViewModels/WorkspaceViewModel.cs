@@ -99,7 +99,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 _options = new ArchiveOptions(model.Password, model.DictFileName);
             }
-            var token = app.ShowProgress("解压中...");
+            var token = app.OpenProgress("解压中...");
             await Task.Factory.StartNew(async () => {
                 using var fs = (await _storageFile.OpenReadAsync()).AsStreamForRead();
                 using var reader = _scheme?.Open(fs, _storageFile.Path, _storageFile.Name, 

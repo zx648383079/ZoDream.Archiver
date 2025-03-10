@@ -8,7 +8,7 @@ namespace ZoDream.SpineExporter
     {
 
 
-        public string Serialize(IEnumerable<SkeletonRoot> data, string fileName)
+        public string Serialize(SkeletonRoot data, string fileName)
         {
             throw new NotImplementedException();
         }

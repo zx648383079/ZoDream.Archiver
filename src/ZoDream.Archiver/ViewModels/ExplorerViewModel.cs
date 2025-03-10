@@ -255,7 +255,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             var entryItems = SelectedItem is not null && model.OnlySelected ? [SelectedItem] : FileItems;
-            var token = app.ShowProgress("解压中...");
+            var token = app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 foreach (var item in entryItems)
                 {

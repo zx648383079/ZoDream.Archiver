@@ -117,10 +117,7 @@ namespace ZoDream.KhronosExporter
             */
             if (data.Buffers.Count == 0)
             {
-                data.Buffers.Add(new()
-                {
-                    Name = "bin"
-                });
+                data.Buffers.Add(new());
             }
             data.Buffers[0].ByteLength = (int)bin.Position;
             data.ResourceItems.TryAdd(string.Empty, bin);

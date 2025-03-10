@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ZoDream.KhronosExporter.Converters;
 using ZoDream.KhronosExporter.Models;
@@ -10,6 +10,16 @@ namespace ZoDream.KhronosExporter
 {
     public class GltfWriter : IEntryWriter<ModelRoot>
     {
+        private static readonly JsonSerializerOptions _options = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            Converters =
+                {
+                new PropertyPathConverter()
+                }
+            //WriteIndented = true,
+        };
         public async Task WriteAsync(IStorageFileEntry entry, ModelRoot data)
         {
             if (data is ModelSource s)
@@ -39,16 +49,19 @@ namespace ZoDream.KhronosExporter
         /// <param name="output"></param>
         public void Write(ModelRoot model, Stream output)
         {
-            var options = new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters =
+            model.Asset ??= new()
                 {
-                    new PropertyPathConverter()
+                    Generator = "Khronos glTF",
+                    Version = "2.0"
+                };
+            for (int i = model.Scenes.Count - 1; i > 0; i--)
+            {
+                if (model.Scenes[i].Nodes.Count == 0)
+                {
+                    model.Scenes.RemoveAt(i);
                 }
-                //WriteIndented = true,
-            };
-            JsonSerializer.Serialize(output, model, options);
+            }
+            JsonSerializer.Serialize(output, model, _options);
         }
 
     }

@@ -15,6 +15,7 @@ namespace ZoDream.Archiver.ViewModels
                 logger.OnLog += Logger_OnLog;
                 logger.OnProgress += Logger_OnProgress;
             }
+            StartTick();
         }
 
         private void Logger_OnProgress(long current, long total, string message)
@@ -22,7 +23,11 @@ namespace ZoDream.Archiver.ViewModels
             _messageRefreshToken.Cancel();
             _app.DispatcherQueue.TryEnqueue(() => {
                 Message = message;
-                Progress = total > 0 ? (current * 100 / total) : 0;
+                if (current > 0 || total > 0)
+                {
+                    ProgressUnknow = false;
+                }
+                Progress = total > 0 ? ((double)current * 100 / total) : 0;
             });
         }
 
@@ -58,6 +63,7 @@ namespace ZoDream.Archiver.ViewModels
         private readonly AppViewModel _app = App.ViewModel;
         private readonly DateTime _beginTime = DateTime.Now;
         private CancellationTokenSource _messageRefreshToken = new();
+        private CancellationTokenSource _timeToken = new();
         private string _lastInfoMessage = string.Empty;
 
         private int _elapsedTime;
@@ -89,11 +95,10 @@ namespace ZoDream.Archiver.ViewModels
         public double Progress {
             get => _progress;
             set {
-                Set(ref _progress, value);
-                if (value > 0)
+                if (Set(ref _progress, value) && (value > 0 || !ProgressUnknow))
                 {
                     ProgressUnknow = false;
-                    Computed();
+                    Computed(true);
                 }
             }
         }
@@ -104,22 +109,44 @@ namespace ZoDream.Archiver.ViewModels
             get => _message;
             set {
                 Set(ref _message, value);
-                if (Progress > 0)
-                {
-                    Computed();
-                }
             }
         }
 
-        private void Computed()
+        /// <summary>
+        /// 只有进度更新了才更新剩余时间
+        /// </summary>
+        /// <param name="fromProgress"></param>
+        private void Computed(bool fromProgress = false)
         {
+            var diff = DateTime.Now - _beginTime;
+            var lastDiff = ElapsedTime;
+            ElapsedTime = (int)diff.TotalSeconds;
             if (ProgressUnknow)
             {
                 return;
             }
-            var diff = DateTime.Now - _beginTime;
-            ElapsedTime = (int)diff.TotalSeconds;
-            TimeLeft = (int)(diff.TotalSeconds * 100 / Progress - diff.TotalSeconds);
+            if (fromProgress)
+            {
+                TimeLeft = Progress > 0 ? (int)(diff.TotalSeconds * 100 / Progress - diff.TotalSeconds) : 0;
+            } 
+            else if (TimeLeft > 0)
+            {
+                TimeLeft -= Math.Max(ElapsedTime - lastDiff, 0);
+            }
+        }
+
+        private void StartTick()
+        {
+            var token = _timeToken.Token;
+            Task.Factory.StartNew(() => {
+                while (!token.IsCancellationRequested)
+                {
+                    Thread.Sleep(1000);
+                    _app.DispatcherQueue.TryEnqueue(() => {
+                        Computed();
+                    });
+                }
+            }, token);
         }
 
         public void Dispose()
@@ -129,6 +156,7 @@ namespace ZoDream.Archiver.ViewModels
                 logger.OnLog -= Logger_OnLog;
                 logger.OnProgress -= Logger_OnProgress;
             }
+            _timeToken.Cancel();
         }
     }
 }

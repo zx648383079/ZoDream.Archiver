@@ -2,6 +2,7 @@
 {
     public class Asset : ExtraProperties
     {
+        
         public string Copyright {  get; set; }
 
         public string Generator { get; set; }

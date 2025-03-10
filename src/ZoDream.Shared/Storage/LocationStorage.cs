@@ -93,6 +93,13 @@ namespace ZoDream.Shared.Storage
             return content;
         }
 
+        public static async Task<string> ReadAsync(Stream input)
+        {
+            using var reader = new StreamReader(input, TxtEncoder.GetEncoding(input));
+            var content = await reader.ReadToEndAsync();
+            return content;
+        }
+
         public static StreamReader Reader(string file)
         {
             var fs = new FileStream(file, FileMode.Open);

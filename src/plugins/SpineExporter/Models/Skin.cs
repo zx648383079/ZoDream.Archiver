@@ -36,5 +36,19 @@ namespace ZoDream.SpineExporter.Models
         {
             return $"{slotIndex}-{name}";
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is AttachmentKeyTuple a)
+            {
+                return a.SlotIndex == SlotIndex && a.Name == Name;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return SlotIndex;
+        }
     }
 }

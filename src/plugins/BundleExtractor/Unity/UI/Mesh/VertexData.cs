@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
@@ -63,8 +60,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         private void GetStreams(UnityVersion version)
         {
-            var streamCount = m_Channels.Max(x => x.stream) + 1;
             m_Streams = [];
+            if (m_Channels.Count == 0)
+            {
+                return;
+            }
+            var streamCount = m_Channels.Max(x => x.stream) + 1;
             uint offset = 0;
             for (int s = 0; s < streamCount; s++)
             {
