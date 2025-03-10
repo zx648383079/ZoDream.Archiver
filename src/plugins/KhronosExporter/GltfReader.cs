@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ZoDream.KhronosExporter.Converters;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Interfaces;
 
@@ -9,21 +8,18 @@ namespace ZoDream.KhronosExporter
 {
     public partial class GltfReader : IEntryReader<ModelRoot>
     {
-        public Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
+        public async Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
         {
-            throw new System.NotImplementedException();
-        }
-        public ModelRoot? Read(Stream input)
-        {
-            var options = new JsonSerializerOptions()
+            var res = Read(await entry.OpenReadAsync());
+            if (res is not null)
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters =
-                {
-                    new PropertyPathConverter()
-                }
-            };
-            return JsonSerializer.Deserialize<ModelRoot>(input, options);
+                res.FileName = entry.FullPath;
+            }
+            return res;
+        }
+        public ModelSource? Read(Stream input)
+        {
+            return JsonSerializer.Deserialize<ModelSource>(input, GltfWriter.Options);
         }
     }
 }

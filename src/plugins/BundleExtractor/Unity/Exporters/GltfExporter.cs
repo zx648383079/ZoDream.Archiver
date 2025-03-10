@@ -21,6 +21,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _root = new();
             _root.Scenes.Add(new());
+            _root.Materials.Add(new()
+            {
+                Name = "Material",
+                AlphaMode = AlphaMode.OPAQUE,
+                DoubleSided = true,
+                PbrMetallicRoughness = new()
+                {
+                    RoughnessFactor = .5f,
+                    BaseColorFactor = [0.8f, .8f, .8f, 1f]
+                }
+            });
         }
 
         private readonly ModelSource _root;
@@ -87,11 +98,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private int AddNode(UnityMesh mesh, int sceneIndex, int parentIndex)
         {
-            var ps = new MeshPrimitive()
+            var ps = new MeshPrimitive
             {
-                Mode = PrimitiveType.TRIANGLES
+                Mode = PrimitiveType.TRIANGLES,
+                Indices = _root.CreateIndicesAccessor(mesh.m_Name + "_indices")
             };
-            ps.Indices = _root.CreateIndicesAccessor(mesh.m_Name + "_indices");
             _root.AddAccessorBuffer(ps.Indices, mesh.m_Indices.ToArray());
             if (mesh.m_VertexCount > 0)
             {
@@ -129,7 +140,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             });
             if (parentIndex >= 0)
             {
-                _root.Nodes[parentIndex].Children.Add(nodeIndex);
+                (_root.Nodes[parentIndex].Children ??= []).Add(nodeIndex);
             }
             _root.Scenes[sceneIndex].Nodes.Add(nodeIndex);
             return nodeIndex;
@@ -169,11 +180,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private int AddNode(Skeleton mesh, int index, int sceneIndex, int parentIndex)
         {
-            var ps = new MeshPrimitive()
+            var ps = new MeshPrimitive
             {
-                Mode = PrimitiveType.POINTS
+                Mode = PrimitiveType.POINTS,
+                Indices = _root.CreateIndicesAccessor("skeleton_indices")
             };
-            ps.Indices = _root.CreateIndicesAccessor("skeleton_indices");
             _root.AddAccessorBuffer(ps.Indices, 0);
             var axes = mesh.m_AxesArray[mesh.m_Node[index].m_AxesId];
             if (axes is not null)
@@ -199,7 +210,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             });
             if (parentIndex >= 0)
             {
-                _root.Nodes[parentIndex].Children.Add(nodeIndex);
+                (_root.Nodes[parentIndex].Children ??= []).Add(nodeIndex);
             }
             _root.Scenes[sceneIndex].Nodes.Add(nodeIndex);
             return nodeIndex;

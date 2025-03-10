@@ -105,6 +105,23 @@ namespace ZoDream.Shared.IO
             ArrayPool<byte>.Shared.Return(buffer);
             return len;
         }
+
+        /// <summary>
+        /// 从指定位置复制指定长度的内容
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <param name="inputPosition"></param>
+        /// <param name="length"></param>
+        /// <returns>实际复制的长度</returns>
+        public static long CopyTo(this Stream input, Stream output, long inputPosition, long length)
+        {
+            var old = input.Position;
+            input.Position = inputPosition;
+            var len = CopyTo(input, output, length);
+            input.Position = old;
+            return len;
+        }
         /// <summary>
         /// 读取并进行转换保存
         /// </summary>

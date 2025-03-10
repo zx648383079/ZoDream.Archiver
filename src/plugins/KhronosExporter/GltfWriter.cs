@@ -10,20 +10,22 @@ namespace ZoDream.KhronosExporter
 {
     public class GltfWriter : IEntryWriter<ModelRoot>
     {
-        private static readonly JsonSerializerOptions _options = new()
+        internal static readonly JsonSerializerOptions Options = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters =
                 {
-                new PropertyPathConverter()
-                }
+                    new PropertyPathConverter()
+                },
             //WriteIndented = true,
         };
+
         public async Task WriteAsync(IStorageFileEntry entry, ModelRoot data)
         {
             if (data is ModelSource s)
             {
+                s.FlushBuffer();
                 foreach (var item in s.Buffers)
                 {
                     if (!string.IsNullOrWhiteSpace(item.Uri))
@@ -61,7 +63,7 @@ namespace ZoDream.KhronosExporter
                     model.Scenes.RemoveAt(i);
                 }
             }
-            JsonSerializer.Serialize(output, model, _options);
+            JsonSerializer.Serialize(output, model, Options);
         }
 
     }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Collections;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.KhronosExporter
 {
@@ -73,8 +73,11 @@ namespace ZoDream.KhronosExporter
             {
                 var view = BufferViews[item.Key];
                 view.Buffer = bufferIndex;
-                view.ByteOffset = (int)output.Position;
-                item.Value.CopyTo(output);
+
+                var pos = (int)output.Position;
+                item.Value.CopyTo(output, view.ByteOffset, view.ByteLength);
+                view.ByteOffset = pos;
+                item.Value.Dispose();
             }
             output.Flush();
             buffer.ByteLength = (int)output.Length;
@@ -96,7 +99,7 @@ namespace ZoDream.KhronosExporter
         public Stream GetStream(BufferSource buffer)
         {
             var name = string.IsNullOrWhiteSpace(buffer.Uri) || string.IsNullOrEmpty(FileName) ? string.Empty : buffer.Uri;
-            if (buffer.Uri.StartsWith("data:"))
+            if (!string.IsNullOrEmpty(buffer.Uri) && buffer.Uri.StartsWith("data:"))
             {
                 name = $"@@b_{buffer.Name}";
             }
@@ -105,7 +108,11 @@ namespace ZoDream.KhronosExporter
                 return stream;
             }
             stream = OpenStream(buffer.Uri);
-            stream ??= new MemoryStream();
+            if (stream is null)
+            {
+                stream = new MemoryStream();
+                buffer.Uri = null;
+            }
             ResourceItems.Add(name, stream);
             return stream;
         }

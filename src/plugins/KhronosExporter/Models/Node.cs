@@ -4,21 +4,21 @@ namespace ZoDream.KhronosExporter.Models
 {
     public class Node : LogicalChildOfRoot
     {
-        public int Camera { get; set; } = -1;
+        public int? Camera { get; set; }
 
         /// <summary>
         /// Nodes
         /// </summary>
-        public IList<int> Children { get; set; } = [];
+        public IList<int>? Children { get; set; }
 
         /// <summary>
         /// Skin
         /// </summary>
-        public int Skin { get; set; } = -1;
+        public int? Skin { get; set; }
 
         public float[] Matrix { get; set; }
 
-        public int Mesh { get; set; } = -1;
+        public int? Mesh { get; set; }
 
         public float[] Rotation { get; set; }
 

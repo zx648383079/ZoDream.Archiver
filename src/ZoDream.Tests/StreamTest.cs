@@ -45,11 +45,17 @@ namespace ZoDream.Tests
             Assert.IsTrue(res);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void TestGltf()
         {
-            using var fs = File.OpenRead("examples\\InfiniteSkinnedTentacle.glb");
+            var fileName = "F:\\Desktop\\good.glb";
+            using var fs = File.OpenRead(fileName);
             var res = new GlbReader().Read(fs);
+            if (res is not null)
+            {
+                res.FileName = fileName;
+                var items = res.Accessors.Select(res.ReadAccessorBuffer).ToArray();
+            }
             Assert.IsTrue(res is not null);
         }
 

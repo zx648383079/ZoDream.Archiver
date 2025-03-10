@@ -1,7 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using ZoDream.KhronosExporter.Converters;
-
-namespace ZoDream.KhronosExporter.Models
+﻿namespace ZoDream.KhronosExporter.Models
 {
     public class Image : LogicalChildOfRoot
     {
@@ -12,8 +9,7 @@ namespace ZoDream.KhronosExporter.Models
 
         public string MimeType { get; set; }
 
-        [JsonConverter(typeof(IndexConverter))]
-        public int BufferView { get; set; } = -1;
+        public int? BufferView { get; set; }
 
     }
 }

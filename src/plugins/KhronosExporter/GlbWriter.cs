@@ -42,6 +42,7 @@ namespace ZoDream.KhronosExporter
         }
         public void Write(ModelSource data, Stream output)
         {
+            data.FlushBuffer();
             if (!data.ResourceItems.TryGetValue(string.Empty, out var bin))
             {
                 bin = new MemoryStream();
@@ -64,8 +65,7 @@ namespace ZoDream.KhronosExporter
                 {
                     maps.Add(i, bin.Position);
                     var src = data.GetStream(item);
-                    src.Position = 0;
-                    src.CopyTo(bin, (long)item.ByteLength);
+                    src.CopyTo(bin, 0, item.ByteLength);
                 }
                 data.Buffers.RemoveAt(i);
             }
@@ -121,7 +121,6 @@ namespace ZoDream.KhronosExporter
             }
             data.Buffers[0].ByteLength = (int)bin.Position;
             data.ResourceItems.TryAdd(string.Empty, bin);
-
 
             var writer = new EndianWriter(output, EndianType.LittleEndian);
             writer.Write(GlbReader.GLTFHEADER);
@@ -202,7 +201,7 @@ namespace ZoDream.KhronosExporter
 
         private static int GetPaddingLength(long length)
         {
-            var padding = (int)(length & 4);
+            var padding = (int)(length % 4);
             return padding == 0 ? 0 : (4 - padding);
         } 
     }

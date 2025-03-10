@@ -72,6 +72,7 @@
 
             <TextBox
                 Header="Package Name"
+                InputScope="Url"
                 PlaceholderText="cn.zodream.xx"
                 Text="{Binding ApplicationId, Mode=TwoWay}" />
             <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />

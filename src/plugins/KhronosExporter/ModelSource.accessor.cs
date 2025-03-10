@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Numerics;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using ZoDream.KhronosExporter.Models;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Collections;
+using ZoDream.Shared.Numerics;
+using Matrix4x4 = ZoDream.Shared.Numerics.Matrix4x4;
 
 namespace ZoDream.KhronosExporter
 {
@@ -217,8 +217,8 @@ namespace ZoDream.KhronosExporter
                     }
                 }
             }
-            var count = vectorCount * step;
-            var len = 4 * count;
+            var count = vectorCount;
+            var len = 4 * count * step;
             UpdateBufferLength(bufferViewIndex, len);
             accessor.Count += count;
             return index;
@@ -229,7 +229,7 @@ namespace ZoDream.KhronosExporter
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Indices", () => new BufferView()
             {
                 //ByteStride = u32IndicesEnabled ? 8 : 4,
-                Buffer = TryCreateBuffer("Indexes"),
+                // Buffer = TryCreateBuffer("Indexes"),
                 Target = BufferMode.ELEMENT_ARRAY_BUFFER,
             });
             return AddAccessor(new Accessor
@@ -265,6 +265,42 @@ namespace ZoDream.KhronosExporter
             var index = Accessors.AddWithIndex(accessor);
             _accessorTypeMaps.Add(index, type);
             return index;
+        }
+
+        public object? ReadAccessorBuffer(Accessor accessor)
+        {
+            var bufferView = BufferViews[accessor.BufferView];
+            var stream = GetStream(accessor.BufferView);
+            stream.Position = bufferView.ByteOffset + accessor.ByteOffset;
+            var reader = new BundleBinaryReader(stream);
+            return accessor.Type switch
+            {
+                "SCALAR" => accessor.ComponentType switch
+                {
+                    EncodingType.BYTE or EncodingType.UNSIGNED_BYTE => reader.ReadBytes(accessor.Count),
+                    EncodingType.SHORT => reader.ReadArray(accessor.Count, (r, _) => r.ReadInt16()),
+                    EncodingType.UNSIGNED_SHORT => reader.ReadArray(accessor.Count, (r, _) => r.ReadUInt16()),
+                    EncodingType.UNSIGNED_INT => reader.ReadArray(accessor.Count, (r, _) => r.ReadInt32()),
+                    EncodingType.FLOAT => reader.ReadArray(accessor.Count, (r, _) => r.ReadSingle()),
+                    _ => null,
+                },
+                "VEC2" => reader.ReadArray(accessor.Count, (r, _) => new Vector2(r.ReadSingle(), r.ReadSingle())),
+                "VEC3" => reader.ReadArray(accessor.Count, (r, _) => new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle())),
+                "VEC4" => reader.ReadArray(accessor.Count, (r, _) => new Vector4(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle())),
+                "MAT2" => reader.ReadArray(accessor.Count, (r, _) => new Matrix2x2(
+                    r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle())),
+                "MAT3" => reader.ReadArray(accessor.Count, (r, _) => new Matrix3x3(
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle())),
+                "MAT4" => reader.ReadArray(accessor.Count, (r, _) => new Matrix4x4(
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle(),
+                    r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle())),
+                _ => null,
+            };
         }
     }
 

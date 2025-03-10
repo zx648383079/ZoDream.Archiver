@@ -16,11 +16,16 @@ namespace ZoDream.KhronosExporter
         public const uint GLTFVERSION2 = 2;
         public const uint CHUNKJSON = 0x4E4F534A;
         public const uint CHUNKBIN = 0x004E4942;
-        public Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
+        public async Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
         {
-            throw new System.NotImplementedException();
+            var res = Read(await entry.OpenReadAsync());
+            if (res is not null)
+            {
+                res.FileName = entry.FullPath;
+            }
+            return res;
         }
-        public ModelRoot? Read(Stream input)
+        public ModelSource? Read(Stream input)
         {
             var reader = new BundleBinaryReader(input, EndianType.LittleEndian);
             var beginPosition = reader.Position;
@@ -41,14 +46,14 @@ namespace ZoDream.KhronosExporter
                 ));
                 reader.BaseStream.Seek(chunkLength, SeekOrigin.Current);
             }
-            var res = new ModelSource();
-            if (chunkItems.TryGetValue(CHUNKBIN, out var bin))
+            if (!chunkItems.TryGetValue(CHUNKJSON, out var stream))
+            {
+                return null;
+            }
+            var res = new GltfReader().Read(stream);
+            if (res is not null && chunkItems.TryGetValue(CHUNKBIN, out var bin))
             {
                 res.ResourceItems.Add(string.Empty, bin);
-            }
-            if (chunkItems.TryGetValue(CHUNKJSON, out var stream))
-            {
-                // new GltfReader().Read(res, stream);
             }
             return res;
         }
