@@ -13,6 +13,7 @@ namespace ZoDream.BundleExtractor
     {
         private void ProcessAssets(CancellationToken token)
         {
+            var builder = _service.Get<IDependencyBuilder>();
             foreach (var assetsFile in _assetItems)
             {
                 foreach (var obj in assetsFile.Children)
@@ -22,10 +23,12 @@ namespace ZoDream.BundleExtractor
                         Logger.Info("Processing assets has been cancelled !!");
                         return;
                     }
+                    builder?.AddEntry(assetsFile.FullPath, obj.FileID);
                     if (obj is GameObject m_GameObject)
                     {
                         foreach (var pPtr in m_GameObject.m_Components)
                         {
+                            builder?.AddDependencyEntry(assetsFile.FullPath, obj.FileID, pPtr.m_PathID);
                             if (pPtr.TryGet(out var m_Component))
                             {
                                 switch (m_Component)
@@ -51,37 +54,21 @@ namespace ZoDream.BundleExtractor
                             }
                         }
                     }
-                    else if (obj is SpriteAtlas m_SpriteAtlas)
+                    else if (obj is SpriteAtlas m_SpriteAtlas && m_SpriteAtlas.m_RenderDataMap.Count > 0)
                     {
-                        if (m_SpriteAtlas.m_RenderDataMap.Count > 0)
+                        foreach (var m_PackedSprite in m_SpriteAtlas.m_PackedSprites)
                         {
-                            //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                            //{
-                            //    Logger.Verbose($"SpriteAtlas with {m_SpriteAtlas.m_PathID} in file {m_SpriteAtlas.assetsFile.fileName} has {m_SpriteAtlas.m_PackedSprites.Count} packed sprites, Attempting to fetch them...");
-                            //}
-                            foreach (var m_PackedSprite in m_SpriteAtlas.m_PackedSprites)
+                            if (m_PackedSprite.TryGet(out var m_Sprite))
                             {
-                                if (m_PackedSprite.TryGet(out var m_Sprite))
+                                if (m_Sprite.m_SpriteAtlas.IsNull)
                                 {
-                                    if (m_Sprite.m_SpriteAtlas.IsNull)
-                                    {
-                                        //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                        //{
-                                        //    Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName}, assigning to parent SpriteAtlas...");
-                                        //}
-                                        m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
-                                    }
-                                    else
-                                    {
-                                        if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.m_IsVariant)
-                                        {
-                                            //if (Logger.Flags.HasFlag(LoggerEvent.Verbose))
-                                            //{
-                                            //    Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName} has a variant of the original SpriteAtlas, disposing of the variant and assigning to the parent SpriteAtlas...");
-                                            //}
-                                            m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
-                                        }
-                                    }
+                                    m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
+                                    builder?.AddDependency(m_Sprite.AssetFile.FullPath, m_SpriteAtlas.AssetFile.FullPath);
+                                }
+                                else if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.m_IsVariant)
+                                {
+                                    m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
+                                    builder?.AddDependency(m_Sprite.AssetFile.FullPath, m_SpriteAtlas.AssetFile.FullPath);
                                 }
                             }
                         }

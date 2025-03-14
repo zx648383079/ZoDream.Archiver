@@ -145,7 +145,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     if (version.LessThan(2018, 2)) //2018.2 down
                     {
                         var skinNum = reader.ReadInt32();
-                        m_Skin = new List<BoneWeights4>();
+                        m_Skin = [];
                         for (int s = 0; s < skinNum; s++)
                         {
                             m_Skin.Add(new BoneWeights4(reader));
@@ -307,7 +307,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 if (m_Channel.dimension > 0)
                 {
                     var m_Stream = m_VertexData.m_Streams[m_Channel.stream];
-                    var channelMask = new BitArray(new[] { (int)m_Stream.channelMask });
+                    var channelMask = new BitArray([(int)m_Stream.channelMask]);
                     if (channelMask.Get(chn))
                     {
                         if (_reader.Version.LessThan(2018) && chn == 2 && m_Channel.format == 2) //kShaderChannelColor && kChannelFormatColor
@@ -722,7 +722,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         private void InitMSkin()
         {
-            m_Skin = new List<BoneWeights4>();
+            m_Skin = [];
             for (int i = 0; i < m_VertexCount; i++)
             {
                 m_Skin.Add(new BoneWeights4());

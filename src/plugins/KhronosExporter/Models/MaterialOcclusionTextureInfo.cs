@@ -1,11 +1,8 @@
 ﻿namespace ZoDream.KhronosExporter.Models
 {
-    public class MaterialOcclusionTextureInfo : ExtraProperties
+    public class MaterialOcclusionTextureInfo : TextureInfo
     {
-        public int? Index { get; set; }
 
-        public int? TexCoord { get; set; }
-
-        public float Strength { get; set; }
+        public float Strength { get; set; } = 1f;
     }
 }

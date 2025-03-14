@@ -3,15 +3,15 @@
     internal class ObjFaceVertex
     {
         /// <summary>
-        /// vertex coordinates index
+        /// vertex coordinates index, 从 1 开始
         /// </summary>
         public int V;
         /// <summary>
-        /// vertex texture coordinates index
+        /// vertex texture coordinates index, 从 1 开始
         /// </summary>
         public int T;
         /// <summary>
-        /// vertex normal index
+        /// vertex normal index, 从 1 开始
         /// </summary>
         public int N;
 

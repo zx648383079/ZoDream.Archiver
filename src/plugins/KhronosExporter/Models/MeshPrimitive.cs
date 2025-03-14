@@ -15,10 +15,10 @@ namespace ZoDream.KhronosExporter.Models
         public Dictionary<string, int> Attributes { get; set; } = [];
         public int Indices { get; set; }
 
-        public int Material {  get; set; }
+        public int? Material {  get; set; }
 
         public PrimitiveType Mode { get; set; } = PrimitiveType.TRIANGLES;
 
-        public IList<Dictionary<string, int>> Targets { get; set; } = [];
+        public IList<Dictionary<string, int>>? Targets { get; set; }
     }
 }

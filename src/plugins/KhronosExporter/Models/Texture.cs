@@ -1,15 +1,16 @@
-﻿using System.Text.Json.Serialization;
-using ZoDream.KhronosExporter.Converters;
-
-namespace ZoDream.KhronosExporter.Models
+﻿namespace ZoDream.KhronosExporter.Models
 {
     public class Texture : LogicalChildOfRoot
     {
-        [JsonConverter(typeof(IndexConverter))]
-        public int Sampler { get; set; } = -1;
+        /// <summary>
+        /// 指向 TextureSampler
+        /// </summary>
+        public int? Sampler { get; set; }
 
-        [JsonConverter(typeof(IndexConverter))]
-        public int Source { get; set; } = -1;
+        /// <summary>
+        /// 指向 image
+        /// </summary>
+        public int? Source { get; set; }
 
     }
 }

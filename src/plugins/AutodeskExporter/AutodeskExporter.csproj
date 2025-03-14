@@ -10,11 +10,22 @@
 		<BaseOutputPath>..\..\bin</BaseOutputPath>
 		<RootNamespace>ZoDream.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<AssemblyName>ZoDream.$(MSBuildProjectName)</AssemblyName>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Update="arm64\libfbxsdk.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="x64\libfbxsdk.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

@@ -13,9 +13,14 @@ namespace ZoDream.KhronosExporter
 {
     public partial class ObjReader : IEntryReader<ModelRoot>
     {
-        public Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
+        public async Task<ModelRoot?> ReadAsync(IStorageFileEntry entry)
         {
-            throw new System.NotImplementedException();
+            var res = Read(await entry.OpenReadAsync(), entry.FullPath);
+            if (res is not null)
+            {
+                res.FileName = entry.FullPath;
+            }
+            return res;
         }
 
         public ModelSource? Read(Stream input, string outputFileName)
@@ -55,7 +60,7 @@ namespace ZoDream.KhronosExporter
             return objModel.Vertices.Count > 65534 || objModel.Uvs.Count > 65534 || objModel.Geometries.Any(g => g.Faces.Count > 65534);
         }
 
-        private static bool CheckWindingCorrect(Vector3 a, Vector3 b, Vector3 c, Vector3 normal)
+        public static bool CheckWindingCorrect(Vector3 a, Vector3 b, Vector3 c, Vector3 normal)
         {
             var ba = new Vector3(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
             var ca = new Vector3(c.X - a.X, c.Y - a.Y, c.Z - a.Z);
@@ -329,8 +334,8 @@ namespace ZoDream.KhronosExporter
 
                 var atts = new Dictionary<string, int>();
                 var indicesAccessorIndex = model.CreateIndicesAccessor(faceName + "_indices");
-                var accessorIndex = model.CreatePositionAccessor(faceName + "_positions");
-                atts.Add("POSITION", accessorIndex);
+                var positionAccessorIndex = model.CreatePositionAccessor(faceName + "_positions");
+                atts.Add("POSITION", positionAccessorIndex);
                 var normalsAccessorIndex = -1;
                 if (hasNormals)
                 {
@@ -402,7 +407,7 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v1Str, faceVertexCount++);
 
-                        model.AddAccessorBuffer(accessorIndex, v1);
+                        model.AddAccessorBuffer(positionAccessorIndex, v1);
 
                         if (triangle.V1.N > 0) // hasNormals
                         {
@@ -423,7 +428,7 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v2Str, faceVertexCount++);
 
-                        model.AddAccessorBuffer(accessorIndex, v2);
+                        model.AddAccessorBuffer(positionAccessorIndex, v2);
                         if (triangle.V2.N > 0) // hasNormals
                         {
                             model.AddAccessorBuffer(normalsAccessorIndex, n2);
@@ -443,7 +448,7 @@ namespace ZoDream.KhronosExporter
                     {
                         faceVertexCache.Add(v3Str, faceVertexCount++);
 
-                        model.AddAccessorBuffer(accessorIndex, v3);
+                        model.AddAccessorBuffer(positionAccessorIndex, v3);
                         if (triangle.V3.N > 0) // hasNormals
                         {
                             model.AddAccessorBuffer(normalsAccessorIndex, n3);

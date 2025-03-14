@@ -6,7 +6,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 {
     internal class Transform(UIReader reader) : UIComponent(reader)
     {
-        public Vector4 m_LocalRotation;
+        public Quaternion m_LocalRotation;
         public Vector3 m_LocalPosition;
         public Vector3 m_LocalScale;
         public List<PPtr<Transform>> m_Children;
@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
         public override void Read(IBundleBinaryReader reader)
         {
             base.Read(reader);
-            m_LocalRotation = reader.ReadVector4();
+            m_LocalRotation = reader.ReadQuaternion();
             m_LocalPosition = reader.ReadVector3Or4();
             m_LocalScale = reader.ReadVector3Or4();
 

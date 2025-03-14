@@ -7,8 +7,10 @@
         public int ByteOffset { get; set; }
 
         public int ByteLength { get; set; }
-
-        public int ByteStride { get; set; }
+        /// <summary>
+        /// 只有 vec 可以定义这个
+        /// </summary>
+        public int? ByteStride { get; set; }
 
         public BufferMode Target { get; set; }
 

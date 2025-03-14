@@ -23,7 +23,10 @@ namespace ZoDream.BundleExtractor.Engines
         {
             return fileItems.EnumerateChunk(100);
         }
-
+        public IDependencyBuilder GetBuilder(IBundleOptions options)
+        {
+            return new DependencyBuilder();
+        }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
             service.AddIf<UnityBundleScheme>();

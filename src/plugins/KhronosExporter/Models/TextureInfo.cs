@@ -2,9 +2,13 @@
 {
     public class TextureInfo : ExtraProperties
     {
-
-        public int Index { get; set; }
-
-        public int TexCoord { get; set; }
+        /// <summary>
+        /// 指向 textures[]
+        /// </summary>
+        public int? Index { get; set; }
+        /// <summary>
+        /// 指向 mesh->Primitive->Attributes->TEXCOORD_{int}
+        /// </summary>
+        public int? TexCoord { get; set; }
     }
 }

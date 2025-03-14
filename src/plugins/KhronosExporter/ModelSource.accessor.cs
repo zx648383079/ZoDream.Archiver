@@ -16,7 +16,7 @@ namespace ZoDream.KhronosExporter
         [JsonIgnore]
         private readonly Dictionary<int, AccessorType> _accessorTypeMaps = [];
 
-        public void AddAccessorBuffer(int accessorIndex,params int[] value)
+        public void AddAccessorBuffer(int accessorIndex, params int[] value)
         {
             if (u32IndicesEnabled)
             {
@@ -228,7 +228,7 @@ namespace ZoDream.KhronosExporter
         {
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Indices", () => new BufferView()
             {
-                //ByteStride = u32IndicesEnabled ? 8 : 4,
+                // ByteStride = u32IndicesEnabled ? 4 : 2,
                 // Buffer = TryCreateBuffer("Indexes"),
                 Target = BufferMode.ELEMENT_ARRAY_BUFFER,
             });

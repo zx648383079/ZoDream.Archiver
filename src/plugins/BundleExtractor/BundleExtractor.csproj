@@ -26,6 +26,7 @@
 		  <Private>false</Private>
 		  <ExcludeAssets>runtime</ExcludeAssets>
 	  </ProjectReference>
+	  <ProjectReference Include="..\AutodeskExporter\AutodeskExporter.csproj" />
 	  <ProjectReference Include="..\FModExporter\FModExporter.csproj" />
 	  <ProjectReference Include="..\KhronosExporter\KhronosExporter.csproj" />
 	  <ProjectReference Include="..\LuaDecompiler\LuaDecompiler.csproj" />

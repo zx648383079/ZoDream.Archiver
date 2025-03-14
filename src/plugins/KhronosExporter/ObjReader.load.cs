@@ -42,7 +42,7 @@ namespace ZoDream.KhronosExporter
                 }
                 if (StartWith(line, TagMtlLib))
                 {
-                    model.MatFilename = line.Substring(6).Trim();
+                    model.MatFilename = line[6..].Trim();
                 }
                 else if (StartWith(line, TagVertex))
                 {
@@ -56,7 +56,7 @@ namespace ZoDream.KhronosExporter
                 }
                 else if (StartWith(line, TagVectorNormal))
                 {
-                    var vnStr = line.Substring(3).Trim();
+                    var vnStr = line[3..].Trim();
                     var strs = SplitLine(vnStr);
                     var vn = new Vector3(
                         float.Parse(strs[0], NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat),
@@ -90,7 +90,10 @@ namespace ZoDream.KhronosExporter
                     var fStr = line[2..].Trim();
                     currentFace = new ObjFace(currentMaterialName);
                     var strs = SplitLine(fStr);
-                    if (strs.Length < 3) continue; // ignore face that has less than 3 vertices
+                    if (strs.Length < 3)
+                    {
+                        continue; // ignore face that has less than 3 vertices
+                    }
                     if (strs.Length == 3)
                     {
                         var v1 = GetVertex(strs[0]);
@@ -172,7 +175,9 @@ namespace ZoDream.KhronosExporter
                                 };
                             sideLengths.Sort();
                             if (!(sideLengths[0] + sideLengths[1] <= sideLengths[2]))
+                            {
                                 notDegradedTriangles.Add(triangle);
+                            }
                         }
                         face.Triangles = notDegradedTriangles;
                     }

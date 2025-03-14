@@ -34,6 +34,7 @@ namespace ZoDream.KhronosExporter
             var version = reader.ReadUInt32();
             Debug.Assert(version == GLTFVERSION2);
             var bodyLength = reader.ReadUInt32();
+            Debug.Assert(bodyLength == input.Length - beginPosition);
             var chunkItems = new Dictionary<uint, Stream>();
             while (reader.Position - beginPosition < bodyLength)
             {

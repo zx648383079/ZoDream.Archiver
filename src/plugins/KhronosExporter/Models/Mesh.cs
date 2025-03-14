@@ -6,7 +6,7 @@ namespace ZoDream.KhronosExporter.Models
     {
         public IList<MeshPrimitive> Primitives { get; set; } = [];
 
-        public IList<float> Weights { get; set; } = [];
+        public IList<float>? Weights { get; set; }
 
     }
 }

@@ -10,7 +10,10 @@ namespace ZoDream.BundleExtractor.Engines
         {
             return fileItems.EnumerateChunk(500);
         }
-
+        public IDependencyBuilder GetBuilder(IBundleOptions options)
+        {
+            return new DependencyBuilder();
+        }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
             return null;

@@ -22,24 +22,24 @@ namespace ZoDream.KhronosExporter.Models
 
         public IList<Accessor> Accessors { get; set; } = [];
 
-        public IList<Animation> Animations { get; set; } = [];
+        public IList<Animation>? Animations { get; set; }
 
 
-        public IList<Camera> Cameras {  get; set; } = [];
+        public IList<Camera>? Cameras {  get; set; }
 
 
-        public IList<Material> Materials { get; set; } = [];
+        public IList<Material>? Materials { get; set; }
 
 
 
-        public IList<TextureSampler> Samplers { get; set; } = [];
+        public IList<TextureSampler>? Samplers { get; set; }
 
-        public IList<Skin> Skins { get; set; } = [];
+        public IList<Skin>? Skins { get; set; }
 
-        public IList<Texture> Textures { get; set; } = [];
+        public IList<Texture>? Textures { get; set; }
 
 
-        public IList<Image> Images { get; set; } = [];
+        public IList<Image>? Images { get; set; }
         public IList<BufferView> BufferViews { get; set; } = [];
         public IList<BufferSource> Buffers { get; set; } = [];
 

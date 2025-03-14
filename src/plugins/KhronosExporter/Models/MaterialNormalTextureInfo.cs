@@ -1,11 +1,7 @@
 ﻿namespace ZoDream.KhronosExporter.Models
 {
-    public class MaterialNormalTextureInfo : ExtraProperties
+    public class MaterialNormalTextureInfo : TextureInfo
     {
-        public int? Index { get; set; }
-
-        public int? TexCoord { get; set; }
-
-        public float Scale { get; set; }
+        public float Scale { get; set; } = 1f;
     }
 }

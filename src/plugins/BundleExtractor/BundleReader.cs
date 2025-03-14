@@ -28,12 +28,19 @@ namespace ZoDream.BundleExtractor
 
             //    });
             var logger = scheme.Service.Get<ILogger>();
-            var temporary = scheme.Service.Get<ITemporaryStorage>();
+            
             logger.Info("Analyzing ...");
             fileItems.Analyze(token);
             logger.Info($"Found {fileItems.Count} files.");
             var progress = 0;
             logger.Progress(progress, fileItems.Count);
+            if (fileItems.Count == 0)
+            {
+                return;
+            }
+            var builder = engine.GetBuilder(options);
+            scheme.Service.Add(builder);
+            var temporary = scheme.Service.Get<ITemporaryStorage>();
             foreach (var items in engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
@@ -50,9 +57,11 @@ namespace ZoDream.BundleExtractor
                     logger.Error(ex.Message);
                 }
                 temporary.Clear();
+                builder?.Flush();
                 progress += items.Index;
                 logger.Progress(progress, fileItems.Count);
             }
+            builder?.Dispose();
         }
         /// <summary>
         /// 局部配置初始化

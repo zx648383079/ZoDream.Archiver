@@ -30,7 +30,7 @@ namespace ZoDream.Shared.IO
             try
             {
                 Marshal.Copy(buffer, 0, handle, size);
-                return (T)Marshal.PtrToStructure(handle, typeof(T));
+                return Marshal.PtrToStructure<T>(handle);
             }
             finally
             {

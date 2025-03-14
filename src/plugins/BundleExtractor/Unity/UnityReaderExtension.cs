@@ -66,6 +66,12 @@ namespace ZoDream.BundleExtractor.Unity
                 reader.ReadSingle(), reader.ReadSingle());
         }
 
+        public static Quaternion ReadQuaternion(this IBundleBinaryReader reader)
+        {
+            return new Quaternion(reader.ReadSingle(), reader.ReadSingle(),
+                reader.ReadSingle(), reader.ReadSingle());
+        }
+
         public static Vector2 ReadVector2(this IBundleBinaryReader reader)
         {
             return new Vector2(reader.ReadSingle(), reader.ReadSingle());
@@ -94,7 +100,7 @@ namespace ZoDream.BundleExtractor.Unity
         public static XForm<Vector3> ReadXForm(this IBundleBinaryReader reader)
         {
             var t = ReadVector3Or4(reader);
-            var q = ReadVector4(reader);
+            var q = ReadQuaternion(reader);
             var s = ReadVector3Or4(reader);
 
             return new XForm<Vector3>(t, q, s);
@@ -103,7 +109,7 @@ namespace ZoDream.BundleExtractor.Unity
         public static XForm<Vector4> ReadXForm4(this IBundleBinaryReader reader)
         {
             var t = ReadVector4(reader);
-            var q = ReadVector4(reader);
+            var q = ReadQuaternion(reader);
             var s = ReadVector4(reader);
 
             return new XForm<Vector4>(t, q, s);

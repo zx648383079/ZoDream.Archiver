@@ -27,7 +27,6 @@ namespace ZoDream.FModExporter
                     VERSION.dll + ".dll");
                 return NativeLibrary.Load(entry, assembly, searchPath);
             }
-
             return IntPtr.Zero;
         }
 

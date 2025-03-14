@@ -144,8 +144,7 @@ namespace ZoDream.KhronosExporter
             writer.Write(GlbReader.CHUNKBIN);
             var binPos = output.Position;
             // 写入
-            bin.Position = 0;
-            bin.CopyTo(output);
+            bin.CopyTo(output, 0, data.Buffers[0].ByteLength);
 
             pos = output.Position;
             var binPadding = GetPaddingLength(pos - binPos);

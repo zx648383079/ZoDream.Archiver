@@ -1,6 +1,5 @@
 ﻿using System;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
