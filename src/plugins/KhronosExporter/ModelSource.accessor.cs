@@ -1,29 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text.Json.Serialization;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Collections;
 using ZoDream.Shared.Numerics;
-using Matrix4x4 = ZoDream.Shared.Numerics.Matrix4x4;
+using Matrix4x4 = System.Numerics.Matrix4x4;
 
 namespace ZoDream.KhronosExporter
 {
     public partial class ModelSource
     {
-        [JsonIgnore]
-        private readonly Dictionary<int, AccessorType> _accessorTypeMaps = [];
-
         public void AddAccessorBuffer(int accessorIndex, params int[] value)
         {
-            if (u32IndicesEnabled)
+            if (Accessors[accessorIndex].ComponentType == EncodingType.UNSIGNED_INT)
             {
                 AddAccessorBuffer(accessorIndex, value.Select(i => (uint)i).ToArray());
             } else
             {
                 AddAccessorBuffer(accessorIndex, value.Select(i => (ushort)i).ToArray());
+            }
+        }
+
+        public void AddAccessorBuffer(int accessorIndex, params byte[] value)
+        {
+            if (value.Length == 0)
+            {
+                return;
+            }
+            var accessor = Accessors[accessorIndex];
+            var writer = OpenWrite(accessor.BufferView);
+            foreach (var item in value)
+            {
+                writer.Write(item);
+            }
+            var len = sizeof(byte) * value.Length;
+            UpdateBufferLength(accessor.BufferView, len);
+            accessor.Count += value.Length;
+            if (accessor.Min is not null && accessor.Max is not null)
+            {
+                accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
+                accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
             }
         }
         public void AddAccessorBuffer(int accessorIndex, params uint[] value)
@@ -38,11 +54,14 @@ namespace ZoDream.KhronosExporter
             {
                 writer.Write(item);
             }
-            var len = 4 * value.Length;
+            var len = sizeof(uint) * value.Length;
             UpdateBufferLength(accessor.BufferView, len);
             accessor.Count += value.Length;
-            accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
-            accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
+            if (accessor.Min is not null && accessor.Max is not null)
+            {
+                accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
+                accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
+            }
         }
 
         public void AddAccessorBuffer(int accessorIndex, params ushort[] value)
@@ -57,11 +76,36 @@ namespace ZoDream.KhronosExporter
             {
                 writer.Write(item);
             }
-            var len = 2 * value.Length;
+            var len = sizeof(ushort) * value.Length;
             UpdateBufferLength(accessor.BufferView, len);
             accessor.Count += value.Length;
-            accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
-            accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
+            if (accessor.Min is not null && accessor.Max is not null)
+            {
+                accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
+                accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
+            }
+        }
+
+        public void AddAccessorBuffer(int accessorIndex, params float[] value)
+        {
+            if (value.Length == 0)
+            {
+                return;
+            }
+            var accessor = Accessors[accessorIndex];
+            var writer = OpenWrite(accessor.BufferView);
+            foreach (var item in value)
+            {
+                writer.Write(item);
+            }
+            var len = sizeof(float) * value.Length;
+            UpdateBufferLength(accessor.BufferView, len);
+            accessor.Count += value.Length;
+            if (accessor.Min is not null && accessor.Max is not null)
+            {
+                accessor.Min[0] = Math.Min(accessor.Min[0], value.Min());
+                accessor.Max[0] = Math.Max(accessor.Max[0], value.Max());
+            }
         }
 
         public void AddAccessorBuffer(int accessorIndex, params Vector3[] value)
@@ -81,7 +125,7 @@ namespace ZoDream.KhronosExporter
             var len = 12 * value.Length;
             UpdateBufferLength(accessor.BufferView, len);
             accessor.Count += value.Length;
-            if (_accessorTypeMaps.TryGetValue(accessorIndex, out var type) && type == AccessorType.Position)
+            if (accessor.Min is not null && accessor.Max is not null)
             {
                 accessor.Min[0] = Math.Min(accessor.Min[0], value.Select(i => i.X).Min());
                 accessor.Min[1] = Math.Min(accessor.Min[1], value.Select(i => i.Y).Min());
@@ -110,71 +154,76 @@ namespace ZoDream.KhronosExporter
             UpdateBufferLength(accessor.BufferView, len);
         }
 
-        public int CreateNormalAccessor(string name)
-        {
-            var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Normals", () => new BufferView()
-            {
-                ByteStride = 12,
-            });
-            return AddAccessor(new Accessor
-            {
-                Name = name,
-                Type = "VEC3",
-                ComponentType = EncodingType.FLOAT,
-                BufferView = bufferViewIndex,
-                ByteOffset = bufferOffset
-            }, AccessorType.Normal);
-        }
 
-        public void AddNormalAccessorBuffer(int accessorIndex, params Vector3[] value)
-        {
-            AddAccessorBuffer(accessorIndex, value);
-        }
 
-        public int CreatePositionAccessor(string name)
+        /// <summary>
+        /// 通过这中方法创建的必须单独一个 bufferView
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public int CreateAccessor<T>(string name, bool hasMinMax = true)
         {
-            var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Positions", () => new BufferView()
+            var sourceType = typeof(T);
+            var type = "SCALAR";
+            var componentType = EncodingType.FLOAT;
+            int? byteStride = null;
+            if (sourceType == typeof(byte))
             {
-                ByteStride = 12,
+                componentType = EncodingType.BYTE;
+            }
+            else if (sourceType == typeof(short)) 
+            {
+                componentType = EncodingType.SHORT;
+            }
+            else if (sourceType == typeof(ushort))
+            {
+                componentType = EncodingType.UNSIGNED_SHORT;
+            }
+            else if (sourceType == typeof(uint))
+            {
+                componentType = EncodingType.UNSIGNED_INT;
+            }
+            else if (sourceType == typeof(Vector2))
+            {
+                byteStride = sizeof(float) * 2;
+                type = "VEC2";
+            }
+            else if (sourceType == typeof(Vector3))
+            {
+                byteStride = sizeof(float) * 3;
+                type = "VEC3";
+            }
+            else if (sourceType == typeof(Vector4))
+            {
+                byteStride = sizeof(float) * 4;
+                type = "VEC4";
+            } else
+            {
+                throw new NotSupportedException(sourceType.Name);
+            }
+            var (bufferViewIndex, bufferOffset) = TryCreateBufferView($"{name}_value", () => new BufferView()
+            {
+                ByteStride = byteStride,
                 Target = BufferMode.ARRAY_BUFFER
             });
-            return AddAccessor(new Accessor
+            var instance = new Accessor
             {
                 Name = name,
-                Min = [float.MaxValue, float.MaxValue, float.MaxValue],   // any number must be smaller
-                Max = [float.MinValue, float.MinValue, float.MinValue],   // any number must be bigger
-                Type = "VEC3",
-                ComponentType = EncodingType.FLOAT,
+                Type = type,
+                ComponentType = componentType,
                 BufferView = bufferViewIndex,
                 ByteOffset = bufferOffset
-            }, AccessorType.Position);
-        }
-
-        public void AddPositionAccessorBuffer(int accessorIndex, params Vector3[] value)
-        {
-            AddAccessorBuffer(accessorIndex, value);
-        }
-
-        public int CreateUvAccessor(string name)
-        {
-            var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Uvs", () => new BufferView()
+            };
+            if (hasMinMax && type.StartsWith("VEC"))
             {
-                ByteStride = 8,
-            });
-            return AddAccessor(new Accessor
-            {
-                Name = name,
-                Type = "VEC2",
-                ComponentType = EncodingType.FLOAT,
-                BufferView = bufferViewIndex,
-                ByteOffset = bufferOffset
-            }, AccessorType.Uv);
+                var len = (int)byteStride! / 4;
+                instance.Max = [.. Enumerable.Repeat(float.MinValue, len)];
+                instance.Min = [.. Enumerable.Repeat(float.MaxValue, len)];
+            }
+            return Add(instance);
         }
 
-        public void AddPositionAccessorBuffer(int accessorIndex, params Vector2[] value)
-        {
-            AddAccessorBuffer(accessorIndex, value);
-        }
 
         public int CreateVectorAccessor(string name, float[] values, int vectorCount)
         {
@@ -198,7 +247,7 @@ namespace ZoDream.KhronosExporter
                 BufferView = bufferViewIndex,
                 ByteOffset = bufferOffset
             };
-            var index = AddAccessor(accessor, AccessorType.Uv);
+            var index = Add(accessor);
             var writer = OpenWrite(bufferViewIndex);
             for (int i = 0; i < vectorCount; i++)
             {
@@ -224,6 +273,65 @@ namespace ZoDream.KhronosExporter
             return index;
         }
 
+        public int CreateAccessor(string name, float[] items)
+        {
+            var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Float_", () => new BufferView()
+            {
+                Target = BufferMode.ARRAY_BUFFER
+            });
+            var accessor = new Accessor
+            {
+                Name = name,
+                Type = "SCALAR",
+                ComponentType = EncodingType.FLOAT,
+                BufferView = bufferViewIndex,
+                ByteOffset = bufferOffset
+            };
+            var index = Add(accessor);
+            var writer = OpenWrite(bufferViewIndex);
+            foreach (var item in items)
+            {
+                writer.Write(item);
+            }
+            var count = items.Length;
+            var len = 4 * count;
+            UpdateBufferLength(bufferViewIndex, len);
+            accessor.Count += count;
+            return index;
+   
+        }
+        public int CreateAccessor(string name, Matrix4x4[] items)
+        {
+            var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Mat4", () => new BufferView()
+            {
+                Target = BufferMode.ARRAY_BUFFER
+            });
+            var accessor = new Accessor
+            {
+                Name = name,
+                Type = "MAT4",
+                ComponentType = EncodingType.FLOAT,
+                BufferView = bufferViewIndex,
+                ByteOffset = bufferOffset
+            };
+            var index = Add(accessor);
+            var writer = OpenWrite(bufferViewIndex);
+            foreach (var item in items)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    for (int column = 0; column < 4; column++)
+                    {
+                        writer.Write(item[row, column]);
+                    }
+                }
+            }
+            var count = items.Length;
+            var len = 4 * 16 * count;
+            UpdateBufferLength(bufferViewIndex, len);
+            accessor.Count += count;
+            return index;
+        }
         public int CreateIndicesAccessor(string name)
         {
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Indices", () => new BufferView()
@@ -232,7 +340,7 @@ namespace ZoDream.KhronosExporter
                 // Buffer = TryCreateBuffer("Indexes"),
                 Target = BufferMode.ELEMENT_ARRAY_BUFFER,
             });
-            return AddAccessor(new Accessor
+            return Add(new Accessor
             {
                 Name = name,
                 Type = "SCALAR",
@@ -241,31 +349,9 @@ namespace ZoDream.KhronosExporter
                 Max = [0f],
                 BufferView = bufferViewIndex,
                 ByteOffset = bufferOffset
-            }, AccessorType.Indices);
+            });
         }
 
-        public void AddIndicesAccessorBuffer(int accessorIndex, params int[] value)
-        {
-            AddAccessorBuffer(accessorIndex, value);
-        }
-        public int CreateAccessor(string name, AccessorType type)
-        {
-            return type switch
-            {
-                AccessorType.Normal => CreateNormalAccessor(name),
-                AccessorType.Position => CreatePositionAccessor(name),
-                AccessorType.Uv => CreateUvAccessor(name),
-                AccessorType.Indices => CreateIndicesAccessor(name),
-                _ => -1
-            };
-        }
-
-        private int AddAccessor(Accessor accessor, AccessorType type)
-        {
-            var index = Accessors.AddWithIndex(accessor);
-            _accessorTypeMaps.Add(index, type);
-            return index;
-        }
 
         public object? ReadAccessorBuffer(Accessor accessor)
         {
@@ -304,11 +390,4 @@ namespace ZoDream.KhronosExporter
         }
     }
 
-    public enum AccessorType
-    {
-        Normal,
-        Position,
-        Uv,
-        Indices
-    }
 }

@@ -334,12 +334,12 @@ namespace ZoDream.KhronosExporter
 
                 var atts = new Dictionary<string, int>();
                 var indicesAccessorIndex = model.CreateIndicesAccessor(faceName + "_indices");
-                var positionAccessorIndex = model.CreatePositionAccessor(faceName + "_positions");
+                var positionAccessorIndex = model.CreateAccessor<Vector3>(faceName + "_positions");
                 atts.Add("POSITION", positionAccessorIndex);
                 var normalsAccessorIndex = -1;
                 if (hasNormals)
                 {
-                    normalsAccessorIndex = model.CreateNormalAccessor(faceName + "_normals");
+                    normalsAccessorIndex = model.CreateAccessor<Vector3>(faceName + "_normals", true);
                     atts.Add("NORMAL", normalsAccessorIndex);
                 }
                 var uvAccessorIndex = -1;
@@ -347,7 +347,7 @@ namespace ZoDream.KhronosExporter
                 {
                     if (hasUvs)
                     {
-                        uvAccessorIndex = model.CreateUvAccessor(faceName + "_texcoords");
+                        uvAccessorIndex = model.CreateAccessor<Vector2>(faceName + "_texcoords", true);
                         atts.Add("TEXCOORD_0", uvAccessorIndex);
                     }
                     else

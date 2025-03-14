@@ -241,7 +241,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             foreach (var pptr in trans.m_Children)
             {
                 if (pptr.TryGet(out var child))
+                {
                     ConvertTransforms(child, frame);
+                }
             }
         }
 
@@ -249,7 +251,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             var mesh = GetMesh(meshR);
             if (mesh == null)
+            {
                 return;
+            }
             var iMesh = new FbxImportedMesh();
             meshR.m_GameObject.TryGet(out var m_GameObject2);
             iMesh.Path = GetTransformPath(m_GameObject2.m_Transform);
@@ -770,7 +774,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 iAnim.Name = name;
                 iAnim.SampleRate = animationClip.m_SampleRate;
-                iAnim.TrackList = new List<FbxImportedAnimationKeyframedTrack>();
+                iAnim.TrackList = [];
                 AnimationList.Add(iAnim);
                 if (animationClip.m_Legacy)
                 {
@@ -1002,7 +1006,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var bytes = Encoding.UTF8.GetBytes(name);
             bonePathHash[Crc32.Compute(bytes)] = name;
             int index;
-            while ((index = name.IndexOf("/", StringComparison.Ordinal)) >= 0)
+            while ((index = name.IndexOf('/')) >= 0)
             {
                 name = name.Substring(index + 1);
                 bytes = Encoding.UTF8.GetBytes(name);
