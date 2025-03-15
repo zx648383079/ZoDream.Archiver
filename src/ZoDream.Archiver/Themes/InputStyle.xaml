@@ -9,6 +9,7 @@
     <Thickness x:Key="TextBoxTopHeaderMargin">0,12,0,2</Thickness>
     <Thickness x:Key="ComboBoxTopHeaderMargin">0,12,0,2</Thickness>
     <Thickness x:Key="PasswordBoxTopHeaderMargin">0,12,0,2</Thickness>
+    <Thickness x:Key="ToggleSwitchTopHeaderMargin">0,12,0,0</Thickness>
 
     <Style x:Name="HeaderIcon" TargetType="FontIcon">
         <Setter Property="HorizontalAlignment" Value="Center" />

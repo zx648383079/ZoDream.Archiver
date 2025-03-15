@@ -472,6 +472,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private int AddNode(UnityMesh mesh, int sceneIndex, int parentIndex, 
             UIRenderer? meshR = null)
         {
+            if (_nodeItems.TryGetValue(mesh.m_Name, out var cacheIndex))
+            {
+                if (parentIndex >= 0)
+                {
+                    (_root.Nodes[parentIndex].Children ??= []).Add(cacheIndex);
+                }
+                return cacheIndex;
+            }
             #region 转换 Mesh
             var psItems = new List<MeshPrimitive>();
             var hasUv = mesh.m_UV0 is not null && mesh.m_UV0.Length > 0;
@@ -503,7 +511,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                 var positionItems = new List<float>();
                 var normalItems = new List<float>();
-                var uvItems = new List<float>[8];
+                var uvItems = CreateArray(8);
                 var indicesItems = new List<int>();
                 var faceVertexCache = new Dictionary<int, int>();
                 var faceVertexCount = 0;
@@ -753,6 +761,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             var pbr = new MaterialPBRSpecularGlossiness();
             res.AddExtension(MaterialPBRSpecularGlossiness.ExtensionName, pbr);
+            _root.AddExtensionUsed(MaterialPBRSpecularGlossiness.ExtensionName);
             foreach (var col in mat.m_SavedProperties.m_Colors)
             {
                 switch (col.Key)
@@ -765,7 +774,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         res.AlphaMode = AlphaMode.MASK;
                         break;
                     case "_EmissionColor":
-                        res.EmissiveFactor = col.Value.AsArray();
+                        res.EmissiveFactor = [col.Value.X, col.Value.Y, col.Value.Z];
                         break;
                     case "_SpecularColor":
                         pbr.SpecularFactor = [col.Value.X, col.Value.Y, col.Value.Z];
@@ -814,6 +823,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
+                    _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 else if (texEnv.Key == "_BumpMap")
                 {
@@ -827,6 +837,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
+                    _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 else if (texEnv.Key.Contains("Specular"))
                 {
@@ -838,7 +849,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
-
+                    _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 else if (texEnv.Key.Contains("Normal"))
                 {
@@ -850,6 +861,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
+                    _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 
             }
@@ -880,11 +892,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(UnityMesh mesh)
         {
-            if (string.IsNullOrEmpty(FileName))
+            if (_nodeItems.ContainsKey(mesh.m_Name))
             {
-                FileName = mesh.m_Name;
+                return;
             }
-            AddNode(mesh, _root.Scene, -1);
+            //if (string.IsNullOrEmpty(FileName))
+            //{
+            //    FileName = mesh.m_Name;
+            //}
+            //AddNode(mesh, _root.Scene, -1);
         }
 
         public void Append(Animator animator)
@@ -1225,7 +1241,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 if (!cachedData.TryGetValue(bPath, out var track))
                 {
-                    track = new List<float>[10];
+                    track = CreateArray(10);
                     cachedData.Add(bPath, track);
                 }
                 // channelName;
@@ -1238,7 +1254,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 var path = GetPathFromHash(binding.path);
                 if (!cachedData.TryGetValue(path, out var track))
                 {
-                    track = new List<float>[10];
+                    track = CreateArray(10);
                     cachedData.Add(path, track);
                 }
 
@@ -1291,6 +1307,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 curveIndex++;
             }
+        }
+
+
+        private static List<float>[] CreateArray(int length)
+        {
+            var res = new List<float>[length];
+            for (int i = 0; i < length; i++) 
+            {
+                res[i] = [];
+            }
+            return res;
         }
 
         private string? GetChannelNameFromHash(uint attribute)
@@ -1357,15 +1384,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return;
             }
             AddAnimation();
-
-
-            using var fs = File.Create(fileName);
-            new GlbWriter().Write(_root, fs);
             var folder = Path.GetDirectoryName(fileName);
             foreach (var item in _attachItems)
             {
                 item.Value.SaveAs(Path.Combine(folder, item.Key), mode);
             }
+            _root.FileName = fileName;
+            using var fs = File.Create(fileName);
+            new GlbWriter().Write(_root, fs);
+            
         }
 
         public void Dispose()

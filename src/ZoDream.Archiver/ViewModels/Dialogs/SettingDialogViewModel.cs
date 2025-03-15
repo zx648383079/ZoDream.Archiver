@@ -18,6 +18,7 @@ namespace ZoDream.Archiver.ViewModels
             _setting = App.ViewModel.Setting;
             FFmpegBin = _setting.Get<string>(SettingNames.FFmpegPath);
             TemporaryFolder = _setting.Get<string>(SettingNames.TemporaryPath);
+            Format3D = _setting.Get<bool>(SettingNames.Format3D);
         }
 
         private readonly ISettingContainer _setting;
@@ -35,6 +36,13 @@ namespace ZoDream.Archiver.ViewModels
         public string TemporaryFolder {
             get => _temporaryFolder;
             set => Set(ref _temporaryFolder, value);
+        }
+
+        private bool _3DFormat;
+
+        public bool Format3D {
+            get => _3DFormat;
+            set => Set(ref _3DFormat, value);
         }
 
 
@@ -87,6 +95,7 @@ namespace ZoDream.Archiver.ViewModels
         {
             _setting.Set(SettingNames.FFmpegPath, FFmpegBin);
             _setting.Set(SettingNames.TemporaryPath, TemporaryFolder);
+            _setting.Set(SettingNames.Format3D, Format3D);
             await _setting.SaveAsync();
         }
     }

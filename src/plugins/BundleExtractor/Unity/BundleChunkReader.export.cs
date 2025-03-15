@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
@@ -26,6 +27,20 @@ namespace ZoDream.BundleExtractor
             {typeof(AnimationClip), typeof(GltfExporter)},
         };
 
+        private bool TryGetExporterType(UIObject obj, [NotNullWhen(true)] out Type? exporterType)
+        {
+            if (_options is IBundleExtractOptions o)
+            {
+                if (o.ModelFormat.Equals("fbx", StringComparison.OrdinalIgnoreCase) 
+                    && obj is GameObject or Mesh or Animator or AnimationClip)
+                {
+                    exporterType = typeof(FbxExporter);
+                    return true;
+                }
+            }
+            return _exportItems.TryGetValue(obj.GetType(), out exporterType);
+        }
+
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             var batchItems = new Dictionary<Type, IMultipartExporter>();
@@ -41,7 +56,7 @@ namespace ZoDream.BundleExtractor
                     try
                     {
                         var exportPath = _fileItems.Create(FileNameHelper.Create(asset.FullPath, obj.Name), folder);
-                        if (_exportItems.TryGetValue(obj.GetType(), out var targetType))
+                        if (TryGetExporterType(obj, out var targetType))
                         {
                             if (batchItems.TryGetValue(targetType, out var instance))
                             {

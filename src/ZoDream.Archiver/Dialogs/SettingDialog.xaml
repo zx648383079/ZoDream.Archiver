@@ -50,5 +50,10 @@
                 Content="&#xED62;"
                 Style="{StaticResource IconBtn}" />
         </Grid>
+        <ToggleSwitch
+            Header="3D格式"
+            IsOn="{Binding Format3D, Mode=TwoWay}"
+            OffContent="GLB"
+            OnContent="FBX" />
     </StackPanel>
 </ContentDialog>

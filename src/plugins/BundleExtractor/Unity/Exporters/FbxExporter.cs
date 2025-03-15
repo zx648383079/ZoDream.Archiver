@@ -24,13 +24,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public List<FbxImportedKeyframedAnimation> AnimationList { get; protected set; } = [];
         public List<FbxImportedMorph> MorphList { get; protected set; } = [];
 
-        private Avatar avatar;
-        private HashSet<AnimationClip> animationClipHashSet = [];
-        private Dictionary<AnimationClip, string> boundAnimationPathDic = [];
-        private Dictionary<uint, string> bonePathHash = [];
-        private Dictionary<Texture2D, string> textureNameDictionary = [];
-        private Dictionary<Transform, FbxImportedFrame> transformDictionary = [];
-        Dictionary<uint, string> morphChannelNames = [];
+        private Avatar _avatar;
+        private HashSet<AnimationClip> _animationClipHashSet = [];
+        private Dictionary<AnimationClip, string> _boundAnimationPathDic = [];
+        private Dictionary<uint, string> _bonePathHash = [];
+        private Dictionary<Texture2D, string> _textureNameDictionary = [];
+        private Dictionary<Transform, FbxImportedFrame> _transformDictionary = [];
+        Dictionary<uint, string> _morphChannelNames = [];
         public bool IsEmpty => MeshList.Count == 0;
         public string FileName => string.Empty;
         public void Append(GameObject obj)
@@ -58,7 +58,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(AnimationClip animator)
         {
-            animationClipHashSet.Add(animator);
+            _animationClipHashSet.Add(animator);
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
@@ -86,7 +86,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private void InitWithAnimator(Animator m_Animator)
         {
             if (m_Animator.m_Avatar.TryGet(out var m_Avatar))
-                avatar = m_Avatar;
+                _avatar = m_Avatar;
 
             m_Animator.m_GameObject.TryGet(out var m_GameObject);
             InitWithGameObject(m_GameObject, m_Animator.m_HasTransformHierarchy);
@@ -151,11 +151,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     if (animation.TryGet(out var animationClip))
                     {
-                        if (!boundAnimationPathDic.ContainsKey(animationClip))
+                        if (!_boundAnimationPathDic.ContainsKey(animationClip))
                         {
-                            boundAnimationPathDic.Add(animationClip, GetTransformPath(m_Transform));
+                            _boundAnimationPathDic.Add(animationClip, GetTransformPath(m_Transform));
                         }
-                        animationClipHashSet.Add(animationClip);
+                        _animationClipHashSet.Add(animationClip);
                     }
                 }
             }
@@ -183,7 +183,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                                 {
                                     if (pptr.TryGet(out var m_AnimationClip))
                                     {
-                                        animationClipHashSet.Add(m_AnimationClip);
+                                        _animationClipHashSet.Add(m_AnimationClip);
                                     }
                                 }
                             }
@@ -196,7 +196,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {
                                 if (pptr.TryGet(out var m_AnimationClip))
                                 {
-                                    animationClipHashSet.Add(m_AnimationClip);
+                                    _animationClipHashSet.Add(m_AnimationClip);
                                 }
                             }
                             break;
@@ -207,8 +207,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private FbxImportedFrame ConvertTransform(Transform trans)
         {
-            var frame = new FbxImportedFrame(trans.m_Children.Count);
-            transformDictionary.Add(trans, frame);
+            if (_transformDictionary.TryGetValue(trans, out var frame))
+            {
+                return frame;
+            }
+            frame = new FbxImportedFrame(trans.m_Children.Count);
+            _transformDictionary.Add(trans, frame);
             trans.m_GameObject.TryGet(out var m_GameObject);
             frame.Name = m_GameObject.m_Name;
             SetFrame(frame, trans.m_LocalPosition, trans.m_LocalRotation, trans.m_LocalScale);
@@ -501,7 +505,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                         var blendShapeName = "blendShape." + shapeChannel.name;
                         var bytes = Encoding.UTF8.GetBytes(blendShapeName);
-                        morphChannelNames[Crc32.Compute(bytes)] = blendShapeName;
+                        _morphChannelNames[Crc32.Compute(bytes)] = blendShapeName;
 
                         channel.Name = shapeChannel.name.Split('.').Last();
                         channel.KeyframeList = new List<FbxImportedMorphKeyframe>(shapeChannel.frameCount);
@@ -589,7 +593,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string GetTransformPath(Transform transform)
         {
-            if (transformDictionary.TryGetValue(transform, out var frame))
+            if (_transformDictionary.TryGetValue(transform, out var frame))
             {
                 return frame.Path;
             }
@@ -598,7 +602,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string FixBonePath(AnimationClip m_AnimationClip, string path)
         {
-            if (boundAnimationPathDic.TryGetValue(m_AnimationClip, out var basePath))
+            if (_boundAnimationPathDic.TryGetValue(m_AnimationClip, out var basePath))
             {
                 path = basePath + "/" + path;
             }
@@ -702,7 +706,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     texture.Dest = dest;
 
                     var ext = $".png";
-                    if (textureNameDictionary.TryGetValue(m_Texture2D, out var textureName))
+                    if (_textureNameDictionary.TryGetValue(m_Texture2D, out var textureName))
                     {
                         texture.Name = textureName;
                     }
@@ -714,7 +718,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             if (FbxImportedHelpers.FindTexture(name, TextureList) == null)
                             {
                                 texture.Name = name;
-                                textureNameDictionary.Add(m_Texture2D, name);
+                                _textureNameDictionary.Add(m_Texture2D, name);
                                 break;
                             }
                         }
@@ -722,7 +726,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     else
                     {
                         texture.Name = m_Texture2D.m_Name + ext;
-                        textureNameDictionary.Add(m_Texture2D, texture.Name);
+                        _textureNameDictionary.Add(m_Texture2D, texture.Name);
                     }
 
                     texture.Offset = texEnv.Value.m_Offset;
@@ -759,7 +763,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void ConvertAnimations()
         {
-            foreach (var animationClip in animationClipHashSet)
+            foreach (var animationClip in _animationClipHashSet)
             {
                 var iAnim = new FbxImportedKeyframedAnimation();
                 var name = animationClip.m_Name;
@@ -991,10 +995,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string GetPathFromHash(uint hash)
         {
-            bonePathHash.TryGetValue(hash, out var boneName);
+            _bonePathHash.TryGetValue(hash, out var boneName);
             if (string.IsNullOrEmpty(boneName))
             {
-                boneName = avatar?.FindBonePath(hash);
+                boneName = _avatar?.FindBonePath(hash);
             }
             if (string.IsNullOrEmpty(boneName))
             {
@@ -1007,13 +1011,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             var name = GetTransformPathByFather(m_Transform);
             var bytes = Encoding.UTF8.GetBytes(name);
-            bonePathHash[Crc32.Compute(bytes)] = name;
+            _bonePathHash[Crc32.Compute(bytes)] = name;
             int index;
             while ((index = name.IndexOf('/')) >= 0)
             {
                 name = name[(index + 1)..];
                 bytes = Encoding.UTF8.GetBytes(name);
-                bonePathHash[Crc32.Compute(bytes)] = name;
+                _bonePathHash[Crc32.Compute(bytes)] = name;
             }
             foreach (var pptr in m_Transform.m_Children)
             {
@@ -1027,13 +1031,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void DeoptimizeTransformHierarchy()
         {
-            if (avatar == null)
+            if (_avatar == null)
                 throw new Exception("Transform hierarchy has been optimized, but can't find Avatar to deoptimize.");
             // 1. Figure out the skeletonPaths from the unstripped avatar
             var skeletonPaths = new List<string>();
-            foreach (var id in avatar.m_Avatar.m_AvatarSkeleton.m_ID)
+            foreach (var id in _avatar.m_Avatar.m_AvatarSkeleton.m_ID)
             {
-                var path = avatar.FindBonePath(id);
+                var path = _avatar.FindBonePath(id);
                 skeletonPaths.Add(path);
             }
             // 2. Restore the original transform hierarchy
@@ -1055,7 +1059,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     var parentFramePath = path.Substring(0, path.LastIndexOf('/'));
                     parentFrame = RootFrame.FindRelativeFrameWithPath(parentFramePath);
                 }
-                var skeletonPose = avatar.m_Avatar.m_DefaultPose;
+                var skeletonPose = _avatar.m_Avatar.m_DefaultPose;
                 var xform = skeletonPose.m_X[i];
                 var frame = RootFrame.FindChild(transformName);
                 if (frame != null)
@@ -1087,7 +1091,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string? GetChannelNameFromHash(uint attribute)
         {
-            if (morphChannelNames.TryGetValue(attribute, out var name))
+            if (_morphChannelNames.TryGetValue(attribute, out var name))
             {
                 return name;
             }

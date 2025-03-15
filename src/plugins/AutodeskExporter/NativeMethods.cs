@@ -18,7 +18,17 @@ namespace ZoDream.AutodeskExporter
         {
             if (libraryName == DllName)
             {
-                var entry = Path.Combine(AppContext.BaseDirectory,
+                return NativeLibrary.Load(DllFullPath, assembly, searchPath);
+            }
+            return IntPtr.Zero;
+        }
+
+        internal static void Ready() 
+        {
+            
+        }
+
+        internal static string DllFullPath => Path.Combine(AppContext.BaseDirectory,
                     RuntimeInformation.ProcessArchitecture switch
                     {
                         Architecture.X64 or Architecture.Arm64 =>
@@ -26,9 +36,5 @@ namespace ZoDream.AutodeskExporter
                         _ => throw new NotImplementedException(),
                     },
                     DllName + ".dll");
-                return NativeLibrary.Load(entry, assembly, searchPath);
-            }
-            return IntPtr.Zero;
-        }
     }
 }

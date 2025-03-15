@@ -1,5 +1,6 @@
 ﻿namespace ZoDream.KhronosExporter.Models
 {
+    
     public enum PropertyPath
     {
         Translation,

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -16,7 +17,13 @@ namespace ZoDream.KhronosExporter
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters =
                 {
-                    new PropertyPathConverter()
+                    new EnumNameConverter<PropertyPath>(),
+                    new EnumNameConverter<AnimationInterpolationMode>(),
+                    new VectorConverter<Vector2>(),
+                    new VectorConverter<Vector3>(),
+                    new VectorConverter<Vector4>(),
+                    new VectorConverter<Quaternion>(),
+                    new VectorConverter<Matrix4x4>(),
                 },
             //WriteIndented = true,
         };

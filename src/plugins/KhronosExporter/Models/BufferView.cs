@@ -12,7 +12,7 @@
         /// </summary>
         public int? ByteStride { get; set; }
 
-        public BufferMode Target { get; set; }
+        public BufferMode Target { get; set; } = BufferMode.ARRAY_BUFFER;
 
     }
 }

@@ -1,9 +1,10 @@
-﻿using ZoDream.Shared.Interfaces;
+﻿using System;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Bundle
 {
-    public class BundleOptions: ArchiveOptions, IBundleOptions
+    public partial class BundleOptions: ArchiveOptions, IBundleOptions
     {
         /// <summary>
         /// 开发工具/游戏引擎
@@ -57,6 +58,11 @@ namespace ZoDream.Shared.Bundle
             Version = o.Version;
             Entrance = o.Entrance;
             DisplayName = o.DisplayName;
+        }
+
+        public void Load(IBundleOptions? bundleOptions)
+        {
+            throw new NotImplementedException();
         }
     }
 }

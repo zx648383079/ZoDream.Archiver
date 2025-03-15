@@ -77,44 +77,46 @@ namespace ZoDream.KhronosExporter
                 }
             }
             // 更新图片
-            /*
-            foreach (var item in data.Images)
+            if (data.Images is not null)
             {
-                if (string.IsNullOrWhiteSpace(item.Uri))
+                foreach (var item in data.Images)
                 {
-                    continue;
-                }
-                if (ModelSource.TryDecodeBase64String(item.Uri, out var buffer))
-                {
-                    item.BufferView = data.BufferViews.AddWithIndex(new()
+                    if (string.IsNullOrWhiteSpace(item.Uri))
                     {
-                        Name = item.Name,
-                        ByteOffset = (int)bin.Position,
-                        ByteLength = buffer.Length,
-                        Buffer = 0
-                    });
-                    bin.Write(buffer, 0, buffer.Length);
-                    item.Uri = string.Empty;
-                }
-                else
-                {
-                    using var src = data.OpenStream(item.Uri);
-                    if (src is not null)
+                        continue;
+                    }
+                    if (ModelSource.TryDecodeBase64String(item.Uri, out var buffer))
                     {
-                        item.BufferView = data.BufferViews.AddWithIndex(new()
+                        item.BufferView = data.Add(new BufferView()
                         {
                             Name = item.Name,
                             ByteOffset = (int)bin.Position,
-                            ByteLength = (int)src.Length,
+                            ByteLength = buffer.Length,
                             Buffer = 0
                         });
-                        src.Position = 0;
-                        src.CopyTo(bin);
-                        item.Uri = string.Empty;
+                        bin.Write(buffer, 0, buffer.Length);
+                        item.Uri = null;
+                    }
+                    else
+                    {
+                        using var src = data.OpenStream(item.Uri);
+                        if (src is not null)
+                        {
+                            item.BufferView = data.Add(new BufferView()
+                            {
+                                Name = item.Name,
+                                ByteOffset = (int)bin.Position,
+                                ByteLength = (int)src.Length,
+                                Buffer = 0,
+                            });
+                            src.Position = 0;
+                            src.CopyTo(bin);
+                            item.Uri = null;
+                        }
                     }
                 }
             }
-            */
+            
             if (data.Buffers.Count == 0)
             {
                 data.Buffers.Add(new());

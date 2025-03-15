@@ -34,6 +34,7 @@ namespace ZoDream.AutodeskExporter
 
         public FbxManager()
         {
+            NativeMethods.Ready();
             pHandle = CreateInternal();
         }
 

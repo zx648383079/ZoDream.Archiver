@@ -1,4 +1,6 @@
-﻿namespace ZoDream.KhronosExporter.Models
+﻿using System.Text.Json.Serialization;
+
+namespace ZoDream.KhronosExporter.Models
 {
     public enum AnimationInterpolationMode
     {

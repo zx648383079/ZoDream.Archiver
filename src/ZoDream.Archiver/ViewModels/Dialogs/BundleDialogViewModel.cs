@@ -76,7 +76,10 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _entrance, value);
         }
 
-        public ArchiveExtractMode ExtractMode => (ArchiveExtractMode)(TypeIndex + 1);
+        public ArchiveExtractMode ExtractMode {
+            get => (ArchiveExtractMode)(TypeIndex + 1);
+            set => TypeIndex = (int)value - 1;
+        }
 
         private string _fileName = string.Empty;
 
@@ -172,6 +175,11 @@ namespace ZoDream.Archiver.ViewModels
                 EngineIndex = IndexOf(EngineItems, options.Engine);
                 Entrance = options.Entrance ?? string.Empty;
             }
+            if (options is IArchiveExtractOptions o)
+            {
+                FileName = o.OutputFolder;
+                ExtractMode = o.FileMode;
+            }
         }
 
         /// <summary>
@@ -183,6 +191,8 @@ namespace ZoDream.Archiver.ViewModels
             if (options is BundleOptions o)
             {
                 o.Password = Password;
+                o.OutputFolder = FileName;
+                o.FileMode = ExtractMode;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))
             {

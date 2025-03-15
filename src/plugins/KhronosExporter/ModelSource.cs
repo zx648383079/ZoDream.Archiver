@@ -26,9 +26,23 @@ namespace ZoDream.KhronosExporter
         public Dictionary<string, Stream> ResourceItems { get; private set; } = [];
 
         #region 添加方法
+
+        public void AddExtensionUsed(string extension)
+        {
+            var items = ExtensionsUsed ??= [];
+            if (!items.Contains(extension))
+            {
+                items.Add(extension);
+            }
+        }
         public int Add(Material data)
         {
             return (Materials ??= []).AddWithIndex(data);
+        }
+
+        public int Add(BufferView data)
+        {
+            return BufferViews.AddWithIndex(data);
         }
 
         public int Add(Image data)
@@ -96,6 +110,8 @@ namespace ZoDream.KhronosExporter
         {
             ResourceClear();
         }
+
+      
     }
 
 }

@@ -41,7 +41,7 @@ namespace ZoDream.Archiver.ViewModels
         private readonly AppViewModel _app = App.ViewModel;
         private readonly IEntryService _service;
         private readonly BundleScheme _scheme;
-        private IBundleOptions? _options;
+        private readonly BundleOptions _options = new();
 
         private ObservableCollection<EntryViewModel> _fileItems = [];
 
@@ -88,6 +88,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             FFmpegBinariesHelper.RegisterFFmpegBinaries(
                 _app.Setting.Get<string>(SettingNames.FFmpegPath));
+            _options.ModelFormat = _app.Setting.Get<bool>(SettingNames.Format3D) ? "fbx" : "glb";
         }
 
         private async void TapView(object? _)
@@ -97,7 +98,7 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
-            _options ??= _scheme.TryLoad(FileItems.Select(i => i.FullPath));
+            _options.Load(_scheme.TryLoad(FileItems.Select(i => i.FullPath)));
             var dialog = new BundlePropertyDialog();
             dialog.ViewModel.Load(_options);
             await _app.OpenDialogAsync(dialog);
@@ -187,7 +188,6 @@ namespace ZoDream.Archiver.ViewModels
                 // _app.Warning("已取消操作！");
                 return;
             }
-            _options ??= new BundleOptions();
             model.Unload(_options);
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
@@ -209,7 +209,6 @@ namespace ZoDream.Archiver.ViewModels
                 _app.CloseProgress();
                 _app.Success("已完成操作！");
             }, token);
-            
         }
 
         private void TapDelete(object? _)

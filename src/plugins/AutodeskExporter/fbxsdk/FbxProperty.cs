@@ -89,7 +89,7 @@ namespace ZoDream.AutodeskExporter
             return *((double*)&ptr);
         }
         public static unsafe T GetEnum<T>(IntPtr inHandle)
-            where T : struct
+            where T : struct, Enum
         {
             EFbxType type = EFbxType.eFbxEnum;
             IntPtr ptr = IntPtr.Zero;

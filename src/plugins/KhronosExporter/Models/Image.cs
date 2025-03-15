@@ -5,7 +5,7 @@
         /// <summary>
         /// data:image/png;base64,
         /// </summary>
-        public string Uri { get; set; }
+        public string? Uri { get; set; }
 
         public string MimeType { get; set; }
 
