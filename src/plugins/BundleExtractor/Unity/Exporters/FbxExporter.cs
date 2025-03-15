@@ -31,19 +31,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private Dictionary<Texture2D, string> textureNameDictionary = [];
         private Dictionary<Transform, FbxImportedFrame> transformDictionary = [];
         Dictionary<uint, string> morphChannelNames = [];
-        public bool IsEmpty => true;
+        public bool IsEmpty => MeshList.Count == 0;
         public string FileName => string.Empty;
         public void Append(GameObject obj)
         {
             if (obj.m_Animator != null)
             {
                 InitWithAnimator(obj.m_Animator);
+                CollectAnimationClip(obj.m_Animator);
             }
             else
             {
                 InitWithGameObject(obj);
             }
-            ConvertAnimations();
         }
 
         public void Append(Mesh mesh)
@@ -53,7 +53,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public void Append(Animator animator)
         {
             InitWithAnimator(animator);
-            ConvertAnimations();
+            CollectAnimationClip(animator);
         }
 
         public void Append(AnimationClip animator)
@@ -67,6 +67,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
+            ConvertAnimations();
             var folder = Path.GetDirectoryName(fileName);
             var currentDir = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(folder);
@@ -162,7 +163,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             foreach (var pptr in m_Transform.m_Children)
             {
                 if (pptr.TryGet(out var child))
+                {
                     ConvertMeshRenderer(child);
+                }
             }
         }
 
@@ -608,7 +611,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return frame?.Path;
         }
 
-        private static string GetTransformPathByFather(Transform transform)
+        internal static string GetTransformPathByFather(Transform transform)
         {
             transform.m_GameObject.TryGet(out var m_GameObject);
             if (transform.m_Father.TryGet(out var father))
@@ -1008,14 +1011,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             int index;
             while ((index = name.IndexOf('/')) >= 0)
             {
-                name = name.Substring(index + 1);
+                name = name[(index + 1)..];
                 bytes = Encoding.UTF8.GetBytes(name);
                 bonePathHash[Crc32.Compute(bytes)] = name;
             }
             foreach (var pptr in m_Transform.m_Children)
             {
                 if (pptr.TryGet(out var child))
+                {
                     CreateBonePathHash(child);
+                }
             }
         }
 
