@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -36,18 +37,20 @@ namespace ZoDream.AutodeskExporter
                     Array.Copy(val, 0, buffer, (i * 4 + j) * 8, val.Length);
                 }
             }
-            Marshal.Copy(pHandle, buffer, 0, buffer.Length);
+            Marshal.Copy(Handle, buffer, 0, buffer.Length);
         }
 
         internal FbxAMatrix Inverse()
         {
-            var ptr = InverseInternal(pHandle);
+            var ptr = InverseInternal(Handle);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxAMatrix(ptr);
         }
 
         public static FbxAMatrix operator *(FbxAMatrix a, FbxAMatrix b)
         {
-            var ptr = MultiplyInternal(a.pHandle, b.pHandle);
+            var ptr = MultiplyInternal(a.Handle, b.Handle);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxAMatrix(ptr);
         }
     }

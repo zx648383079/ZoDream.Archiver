@@ -21,7 +21,7 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementArray? DirectArray {
             get {
-                IntPtr Ptr = GetDirectArrayInternal(pHandle);
+                IntPtr Ptr = GetDirectArrayInternal(Handle);
                 if (Ptr == IntPtr.Zero)
                 {
                     return null;
@@ -32,7 +32,7 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementArray? IndexArray {
             get {
-                IntPtr Ptr = GetIndexArrayInternal(pHandle);
+                IntPtr Ptr = GetIndexArrayInternal(Handle);
                 if (Ptr == IntPtr.Zero)
                 {
                     return null;

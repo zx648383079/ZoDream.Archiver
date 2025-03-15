@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -62,12 +63,12 @@ namespace ZoDream.AutodeskExporter
         private static extern nint CreateElementUVInternal(nint pHandle, [MarshalAs(UnmanagedType.LPStr)] string pUVSetName, FbxLayerElement.EType pTypeIdentifier);
 
 
-        public int ControlPointsCount => GetControlsPointsCount(pHandle);
-        public int ElementNormalCount => GetElementNormalCountInternal(pHandle);
-        public int ElementTangentCount => GetElementTangentCountInternal(pHandle);
-        public int ElementBinormalCount => GetElementBinormalCountInternal(pHandle);
-        public int ElementUVCount => GetElementUVCountInternal(pHandle, FbxLayerElement.EType.eUnknown);
-        public int ElementVertexColorCount => GetElementVertexColorCountInternal(pHandle);
+        public int ControlPointsCount => GetControlsPointsCount(Handle);
+        public int ElementNormalCount => GetElementNormalCountInternal(Handle);
+        public int ElementTangentCount => GetElementTangentCountInternal(Handle);
+        public int ElementBinormalCount => GetElementBinormalCountInternal(Handle);
+        public int ElementUVCount => GetElementUVCountInternal(Handle, FbxLayerElement.EType.eUnknown);
+        public int ElementVertexColorCount => GetElementVertexColorCountInternal(Handle);
 
         public FbxGeometryBase() { }
         public FbxGeometryBase(IntPtr InHandle)
@@ -77,56 +78,56 @@ namespace ZoDream.AutodeskExporter
 
         public void InitControlPoints(int pCount)
         {
-            InitControlPointsInternal(pHandle, pCount);
+            InitControlPointsInternal(Handle, pCount);
         }
 
         internal void SetControlPointAt(Vector4 pCtrlPoint, int pIndex)
         {
             IntPtr ptr = FbxDouble4.Construct(pCtrlPoint);
-            SetControlPointAtInternal(pHandle, ptr, pIndex);
+            SetControlPointAtInternal(Handle, ptr, pIndex);
             FbxUtils.FbxFree(ptr);
 
         }
 
         internal void InitNormals(FbxGeometryBase pSrc)
         {
-            InitNormalsInternal(pHandle, pSrc.pHandle);
+            InitNormalsInternal(Handle, pSrc.Handle);
         }
 
         internal void SetControlPointNormalAt(Vector4 pNormal, int pIndex)
         {
             IntPtr ptr = FbxDouble4.Construct(pNormal);
-            SetControlPointNormalAtInternal(pHandle, ptr, pIndex);
+            SetControlPointNormalAtInternal(Handle, ptr, pIndex);
             FbxUtils.FbxFree(ptr);
         }
 
         public FbxArray<Vector4> GetControlPoints()
         {
-            IntPtr Ptr = GetControlPointsInternal(pHandle, IntPtr.Zero);
+            IntPtr Ptr = GetControlPointsInternal(Handle, IntPtr.Zero);
             return new FbxArray<Vector4>(Ptr);
         }
 
         public FbxLayerElementTangent? GetElementTangent(int index)
         {
-            IntPtr ptr = GetElementTangentInternal(pHandle, index);
+            IntPtr ptr = GetElementTangentInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxLayerElementTangent(ptr);
         }
 
         public FbxLayerElementBinormal? GetElementBinormal(int index)
         {
-            IntPtr ptr = GetElementBinormalInternal(pHandle, index);
+            IntPtr ptr = GetElementBinormalInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxLayerElementBinormal(ptr);
         }
 
         public FbxLayerElementNormal? GetElementNormal(int index)
         {
-            IntPtr ptr = GetElementNormalInternal(pHandle, index);
+            IntPtr ptr = GetElementNormalInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxLayerElementNormal(ptr);
         }
 
         public FbxLayerElementUV? GetElementUV(int index, FbxLayerElement.EType type)
         {
-            IntPtr ptr = GetElementUVInternal(pHandle, index, type);
+            IntPtr ptr = GetElementUVInternal(Handle, index, type);
             return ptr == IntPtr.Zero ? null : new FbxLayerElementUV(ptr);
         }
 
@@ -145,7 +146,7 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementVertexColor? GetElementVertexColor(int index)
         {
-            IntPtr ptr = GetElementVertexColorInternal(pHandle, index);
+            IntPtr ptr = GetElementVertexColorInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxLayerElementVertexColor(ptr);
         }
 
@@ -164,7 +165,8 @@ namespace ZoDream.AutodeskExporter
 
         internal FbxLayerElementMaterial CreateElementMaterial()
         {
-            var ptr = CreateElementMaterialInternal(pHandle);
+            var ptr = CreateElementMaterialInternal(Handle);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxLayerElementMaterial(ptr);
         }
 
@@ -172,7 +174,8 @@ namespace ZoDream.AutodeskExporter
 
         internal FbxLayerElementVertexColor CreateElementVertexColor()
         {
-            var ptr = CreateElementVertexColorInternal(pHandle);
+            var ptr = CreateElementVertexColorInternal(Handle);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxLayerElementVertexColor(ptr);
         }
 
@@ -180,13 +183,15 @@ namespace ZoDream.AutodeskExporter
 
         internal FbxLayerElementTangent CreateElementTangent()
         {
-            var ptr = CreateElementTangentInternal(pHandle);
+            var ptr = CreateElementTangentInternal(Handle);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxLayerElementTangent(ptr);
         }
 
         internal FbxLayerElementUV CreateElementUV(string pUVSetName, FbxLayerElement.EType pTypeIdentifier)
         {
-            var ptr = CreateElementUVInternal(pHandle, pUVSetName, pTypeIdentifier);
+            var ptr = CreateElementUVInternal(Handle, pUVSetName, pTypeIdentifier);
+            Debug.Assert(ptr != IntPtr.Zero);
             return new FbxLayerElementUV(ptr);
         }
     }

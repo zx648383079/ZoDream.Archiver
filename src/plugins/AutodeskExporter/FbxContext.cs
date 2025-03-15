@@ -128,7 +128,7 @@ namespace ZoDream.AutodeskExporter
             {
                 return null;
             }
-            if (_framePaths.Length == 0 || _framePaths.Last() != path)
+            if (_framePaths.Length != 0 && !_framePaths.Contains(path))
             {
                 return null;
             }

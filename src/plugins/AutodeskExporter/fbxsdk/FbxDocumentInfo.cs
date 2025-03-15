@@ -22,16 +22,16 @@ namespace ZoDream.AutodeskExporter
         public FbxDocumentInfo(IntPtr handle)
             : base(handle)
         {
-            _mOriginal_ApplicationVendor = pHandle + 0xA8;
-            _mOriginal_ApplicationName = pHandle + 0xB8;
-            _mOriginal_ApplicationVersion = pHandle + 0xC8;
+            _mOriginal_ApplicationVendor = GetPropertyPtr(0xA8);
+            _mOriginal_ApplicationName = GetPropertyPtr(0xB8);
+            _mOriginal_ApplicationVersion = GetPropertyPtr(0xC8);
 
-            _mLastSaved_ApplicationVendor = pHandle + 0x108;
-            _mLastSaved_ApplicationName = pHandle + 0x118;
-            _mLastSaved_ApplicationVersion = pHandle + 0x128;
+            _mLastSaved_ApplicationVendor = GetPropertyPtr(0x108);
+            _mLastSaved_ApplicationName = GetPropertyPtr(0x118);
+            _mLastSaved_ApplicationVersion = GetPropertyPtr(0x128);
 
-            _mTitle = pHandle + 0x158;
-            _mSubject = pHandle + 0x160;
+            _mTitle = GetPropertyPtr(0x158);
+            _mSubject = GetPropertyPtr(0x160);
         }
 
         public FbxDocumentInfo(FbxManager Manager, string Name)

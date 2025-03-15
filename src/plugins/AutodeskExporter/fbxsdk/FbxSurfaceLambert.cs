@@ -31,12 +31,12 @@ namespace ZoDream.AutodeskExporter
         public FbxSurfaceLambert(IntPtr handle)
             : base(handle)
         {
-            _diffuse = handle + 0xd8;
-            _ambient = handle + 0xb8;
-            _emissive = handle + 0x98;
-            _transparencyFactor = handle + 0x138;
-            _normalMap = handle + 0xF8;
-            _bump = handle + 0x108;
+            _diffuse = GetPropertyPtr(0xd8);
+            _ambient = GetPropertyPtr(0xb8);
+            _emissive = GetPropertyPtr(0x98);
+            _transparencyFactor = GetPropertyPtr(0x138);
+            _normalMap = GetPropertyPtr(0xF8);
+            _bump = GetPropertyPtr(0x108);
         }
 
         internal void BumpConnectSrcObject(FbxFileTexture pTexture)

@@ -18,10 +18,10 @@ namespace ZoDream.AutodeskExporter
         private static extern int AddInternal(IntPtr pHandle, IntPtr pNode, IntPtr pMatrix, bool pLocalMatrix, bool pMultipleBindPose);
 
         public bool IsBindPose {
-            get { unsafe { return *((char*)mType) == 'b'; } }
-            set => SetIsBindPoseInternal(pHandle, value);
+            get { unsafe { return *((char*)_isBindPose) == 'b'; } }
+            set => SetIsBindPoseInternal(Handle, value);
         }
-        private IntPtr mType;
+        private IntPtr _isBindPose;
 
         public FbxPose(FbxManager manager, string name)
             : this(CreateFromManager(manager.Handle, name))
@@ -31,7 +31,7 @@ namespace ZoDream.AutodeskExporter
         public FbxPose(IntPtr InHandle)
             : base(InHandle)
         {
-            mType = pHandle + 0x78;
+            _isBindPose = GetPropertyPtr(0x78);
         }
 
         public FbxPose(FbxObject obj, string name)
@@ -41,7 +41,7 @@ namespace ZoDream.AutodeskExporter
 
         public int Add(FbxNode node, FbxMatrix matrix, bool localMatrix = false, bool multipleBindPose = false)
         {
-            return AddInternal(pHandle, node.Handle, matrix.Handle, localMatrix, multipleBindPose);
+            return AddInternal(Handle, node.Handle, matrix.Handle, localMatrix, multipleBindPose);
         }
     }
 

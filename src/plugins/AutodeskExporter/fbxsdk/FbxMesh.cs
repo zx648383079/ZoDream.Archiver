@@ -57,8 +57,8 @@ namespace ZoDream.AutodeskExporter
         private static extern void EndGetMeshEdgeIndexForPolygonInternal(IntPtr handle);
 
 
-        public int PolygonCount => GetPolygonCountInternal(pHandle);
-        public int MeshEdgeCount => GetMeshEdgeCountInternal(pHandle);
+        public int PolygonCount => GetPolygonCountInternal(Handle);
+        public int MeshEdgeCount => GetMeshEdgeCountInternal(Handle);
 
         public FbxMesh(FbxManager mgr, string name)
             : base(CreateFromManager(mgr.Handle, name))
@@ -82,67 +82,67 @@ namespace ZoDream.AutodeskExporter
 
         public void BeginPolygon(int materialIndex = -1)
         {
-            BeginPolygonInternal(pHandle, materialIndex, -1, -1, true);
+            BeginPolygonInternal(Handle, materialIndex, -1, -1, true);
         }
 
         public void AddPolygon(int index)
         {
-            AddPolygonInternal(pHandle, index, -1);
+            AddPolygonInternal(Handle, index, -1);
         }
 
         public void EndPolygon()
         {
-            EndPolygonInternal(pHandle);
+            EndPolygonInternal(Handle);
         }
 
         public int GetPolygonSize(int index)
         {
-            return GetPolygonSizeInternal(pHandle, index);
+            return GetPolygonSizeInternal(Handle, index);
         }
 
         public int GetPolygonIndex(int index, int position)
         {
-            return GetPolygonIndexInternal(pHandle, index, position);
+            return GetPolygonIndexInternal(Handle, index, position);
         }
 
         public bool IsTriangleMesh()
         {
-            return IsTriangleMeshInternal(pHandle);
+            return IsTriangleMeshInternal(Handle);
         }
 
         public int RemoveBadPolygons()
         {
-            return RemoveBadPolygonsInternal(pHandle);
+            return RemoveBadPolygonsInternal(Handle);
         }
 
         public void BuildMeshEdgeArray()
         {
-            BuildMeshEdgeArrayInternal(pHandle);
+            BuildMeshEdgeArrayInternal(Handle);
         }
 
         public void BeginGetMeshEdgeVertices()
         {
-            BeginGetMeshEdgeVerticesInternal(pHandle);
+            BeginGetMeshEdgeVerticesInternal(Handle);
         }
 
         public void EndGetMeshEdgeVertices()
         {
-            EndGetMeshEdgeVerticesInternal(pHandle);
+            EndGetMeshEdgeVerticesInternal(Handle);
         }
 
         public void GetMeshEdgeVertices(int pEdgeIndex, ref int pStartVertexIndex, ref int pEndVertexIndex)
         {
-            GetMeshEdgeVerticesInternal(pHandle, pEdgeIndex, ref pStartVertexIndex, ref pEndVertexIndex);
+            GetMeshEdgeVerticesInternal(Handle, pEdgeIndex, ref pStartVertexIndex, ref pEndVertexIndex);
         }
 
         public void BeginGetMeshEdgeIndexForPolygon()
         {
-            BeginGetMeshEdgeIndexForPolygonInternal(pHandle);
+            BeginGetMeshEdgeIndexForPolygonInternal(Handle);
         }
 
         public void EndGetMeshEdgeIndexForPolygon()
         {
-            EndGetMeshEdgeIndexForPolygonInternal(pHandle);
+            EndGetMeshEdgeIndexForPolygonInternal(Handle);
         }
 
 

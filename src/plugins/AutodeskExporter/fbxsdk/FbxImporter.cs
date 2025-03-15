@@ -21,28 +21,28 @@ namespace ZoDream.AutodeskExporter
         private static extern bool ImportInternal(IntPtr handle, IntPtr pDocument, bool pNonBlocking);
 
         public FbxImporter(FbxManager Manager, string Name)
+            : base(CreateFromManager(Manager.Handle, Name))
         {
-            pHandle = CreateFromManager(Manager.Handle, Name);
         }
 
         public bool Initialize(string filename, int fileFormat = -1, FbxIOSettings? ioSettings = null)
         {
-            return InitializeInternal(pHandle, filename, fileFormat, ioSettings is null ? IntPtr.Zero : ioSettings.Handle);
+            return InitializeInternal(Handle, filename, fileFormat, ioSettings is null ? IntPtr.Zero : ioSettings.Handle);
         }
 
         public void GetFileVersion(out int major, out int minor, out int revision)
         {
-            GetFileVersionInternal(pHandle, out major, out minor, out revision);
+            GetFileVersionInternal(Handle, out major, out minor, out revision);
         }
 
         public bool IsFBX()
         {
-            return IsFBXInternal(pHandle);
+            return IsFBXInternal(Handle);
         }
 
         public bool Import(FbxDocument document, bool nonBlocking = false)
         {
-            return ImportInternal(pHandle, document.Handle, nonBlocking);
+            return ImportInternal(Handle, document.Handle, nonBlocking);
         }
     }
 

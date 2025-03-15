@@ -20,12 +20,12 @@ namespace ZoDream.AutodeskExporter
         public void SetSystemUnit(FbxSystemUnit pOther)
         {
             IntPtr Ptr = pOther.Handle;
-            SetSystemUnitInternal(pHandle, Ptr);
+            SetSystemUnitInternal(Handle, Ptr);
         }
 
         public void SetTimeMode(EMode mode)
         {
-            SetTimeModeInternal(pHandle, mode);
+            SetTimeModeInternal(Handle, mode);
         }
     }
 

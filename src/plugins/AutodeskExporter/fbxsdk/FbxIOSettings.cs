@@ -46,18 +46,18 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxIOSettings(FbxManager Manager, string Name)
+            : base(CreateInternal(Manager.Handle, Name))
         {
-            pHandle = CreateInternal(Manager.Handle, Name);
         }
 
         public void SetBoolProp(string pName, bool pValue)
         {
-            SetBoolPropInternal(pHandle, pName, pValue);
+            SetBoolPropInternal(Handle, pName, pValue);
         }
 
         public bool GetBoolProp(string pName)
         {
-            return GetBoolPropInternal(pHandle, pName);
+            return GetBoolPropInternal(Handle, pName);
         }
     }
 

@@ -26,14 +26,14 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementArray? DirectArray {
             get {
-                IntPtr Ptr = GetDirectArrayInternal(pHandle);
+                IntPtr Ptr = GetDirectArrayInternal(Handle);
                 return Ptr == IntPtr.Zero ? null : new FbxLayerElementArray(Ptr);
             }
         }
 
         public FbxLayerElementArray? IndexArray {
             get {
-                IntPtr Ptr = GetIndexArrayInternal(pHandle);
+                IntPtr Ptr = GetIndexArrayInternal(Handle);
                 return Ptr == IntPtr.Zero ? null : new FbxLayerElementArray(Ptr);
             }
         }

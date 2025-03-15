@@ -19,13 +19,13 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayer? GetLayer(int pIndex)
         {
-            IntPtr Ptr = GetLayerInternal(pHandle, pIndex);
+            IntPtr Ptr = GetLayerInternal(Handle, pIndex);
             return Ptr == IntPtr.Zero ? null : new FbxLayer(Ptr);
         }
 
         public int CreateLayer()
         {
-            return CreateLayerInternal(pHandle);
+            return CreateLayerInternal(Handle);
         }
     }
 

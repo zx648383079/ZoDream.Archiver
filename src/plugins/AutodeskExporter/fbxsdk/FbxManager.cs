@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
-    internal class FbxManager : FbxNative, IDisposable
+    internal class FbxManager : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxManager@fbxsdk@@SAPEAV12@XZ")]
         private static extern IntPtr CreateInternal();
@@ -34,48 +34,35 @@ namespace ZoDream.AutodeskExporter
 
         public FbxManager()
         {
+            _leaveFree = true;
             NativeMethods.Ready();
-            pHandle = CreateInternal();
+            Handle = CreateInternal();
         }
 
-        ~FbxManager()
-        {
-            Dispose(false);
-        }
 
-        public FbxIOPluginRegistry IOPluginRegistry => new FbxIOPluginRegistry(GetIOPluginRegistryInternal(pHandle));
+        public FbxIOPluginRegistry IOPluginRegistry => new FbxIOPluginRegistry(GetIOPluginRegistryInternal(Handle));
 
         public void SetIOSettings(FbxIOSettings settings)
         {
-            SetIOSettingsInternal(pHandle, settings.Handle);
+            SetIOSettingsInternal(Handle, settings.Handle);
         }
 
         public FbxIOSettings GetIOSettings()
         {
-            return new FbxIOSettings(GetIOSettingsInternal(pHandle));
+            return new FbxIOSettings(GetIOSettingsInternal(Handle));
         }
 
         public string GetVersion(bool pFull = true)
         {
-            IntPtr StrPtr = GetVersionInternal(pHandle, pFull);
+            IntPtr StrPtr = GetVersionInternal(Handle, pFull);
             return FbxUtils.IntPtrToString(StrPtr);
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
 
-        protected virtual void Dispose(bool bDisposing)
+        protected override void Dispose(bool bDisposing)
         {
-            if (pHandle != IntPtr.Zero)
-            {
-                DestroyInternal(pHandle);
-                pHandle = IntPtr.Zero;
-            }
-
-            if (bDisposing)
-                GC.SuppressFinalize(this);
+            DestroyInternal(Handle);
+            base.Dispose(bDisposing);
         }
     }
 

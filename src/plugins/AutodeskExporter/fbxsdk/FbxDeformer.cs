@@ -22,12 +22,12 @@ namespace ZoDream.AutodeskExporter
         private delegate EDeformerType GetDeformerTypeDelegate(IntPtr handle);
         private GetDeformerTypeDelegate GetDeformerTypeInternal;
 
-        public EDeformerType DeformerType => GetDeformerTypeInternal(pHandle);
+        public EDeformerType DeformerType => GetDeformerTypeInternal(Handle);
 
         public FbxDeformer(IntPtr InHandle)
             : base(InHandle)
         {
-            GetDeformerTypeInternal = Marshal.GetDelegateForFunctionPointer<GetDeformerTypeDelegate>(Marshal.ReadIntPtr(vTable + 0xB8));
+            GetDeformerTypeInternal = Marshal.GetDelegateForFunctionPointer<GetDeformerTypeDelegate>(GetPropertyPtr(0xB8));
         }
 
         public FbxDeformer(FbxManager manager, string name)

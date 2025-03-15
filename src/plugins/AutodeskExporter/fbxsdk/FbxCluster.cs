@@ -48,8 +48,8 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetTransformMatrix@FbxCluster@fbxsdk@@QEAAXAEBVFbxAMatrix@2@@Z")]
         private static extern void SetTransformMatrixInternal(nint handle);
 
-        public int ControlPointIndicesCount => GetControlPointIndicesCountInternal(pHandle);
-        public ELinkMode LinkMode { get => GetLinkModeInternal(pHandle); set => SetLinkModeInternal(pHandle, value); }
+        public int ControlPointIndicesCount => GetControlPointIndicesCountInternal(Handle);
+        public ELinkMode LinkMode { get => GetLinkModeInternal(Handle); set => SetLinkModeInternal(Handle, value); }
 
         public FbxCluster(IntPtr InHandle)
             : base(InHandle)
@@ -68,33 +68,33 @@ namespace ZoDream.AutodeskExporter
 
         public void SetLink(FbxNode node)
         {
-            SetLinkInternal(pHandle, node.Handle);
+            SetLinkInternal(Handle, node.Handle);
         }
 
         public FbxNode GetLink()
         {
-            IntPtr ptr = GetLinkInternal(pHandle);
+            IntPtr ptr = GetLinkInternal(Handle);
             return new FbxNode(ptr);
         }
 
         public void SetLinkMode(ELinkMode mode)
         {
-            SetLinkModeInternal(pHandle, mode);
+            SetLinkModeInternal(Handle, mode);
         }
 
         public void AddControlPointIndex(int index, double weight)
         {
-            AddControlPointIndexInternal(pHandle, index, weight);
+            AddControlPointIndexInternal(Handle, index, weight);
         }
 
         public void SetTransformLinkMatrix(FbxAMatrix matrix)
         {
-            SetTransformLinkMatrixInternal(pHandle, matrix.Handle);
+            SetTransformLinkMatrixInternal(Handle, matrix.Handle);
         }
 
         public int[]? GetControlPointIndices()
         {
-            IntPtr ptr = GetControlPointIndicesInternal(pHandle);
+            IntPtr ptr = GetControlPointIndicesInternal(Handle);
             if (ptr == IntPtr.Zero)
             {
                 return null;
@@ -108,7 +108,7 @@ namespace ZoDream.AutodeskExporter
 
         public double[]? GetControlPointWeights()
         {
-            IntPtr ptr = GetControlPointWeightsInternal(pHandle);
+            IntPtr ptr = GetControlPointWeightsInternal(Handle);
             if (ptr == IntPtr.Zero)
             {
                 return null;

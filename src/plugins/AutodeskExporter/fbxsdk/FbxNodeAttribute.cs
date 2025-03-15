@@ -45,8 +45,8 @@ namespace ZoDream.AutodeskExporter
         private readonly nint _color;
 
         public EType AttributeType => GetAttributeTypeInternal is not null ?
-            GetAttributeTypeInternal(pHandle) : EType.eUnknown;
-        public int NodeCount => GetNodeCountInternal(pHandle);
+            GetAttributeTypeInternal(Handle) : EType.eUnknown;
+        public int NodeCount => GetNodeCountInternal(Handle);
 
         public Vector4 Color {
             get {
@@ -59,16 +59,17 @@ namespace ZoDream.AutodeskExporter
         public FbxNodeAttribute(IntPtr InHandle)
             : base(InHandle)
         {
-            GetAttributeTypeInternal = Marshal.GetDelegateForFunctionPointer<GetAttributeTypeDelegate>(Marshal.ReadIntPtr(vTable + 0xB8));
-            _color = pHandle + 0x78;
+            GetAttributeTypeInternal = Marshal.GetDelegateForFunctionPointer<GetAttributeTypeDelegate>(GetPropertyPtr(0xB8));
+            _color = GetPropertyPtr(0x78);
         }
 
         public FbxNode? GetNode(int index)
         {
             if (index >= NodeCount)
+            {
                 return null;
-
-            IntPtr ptr = GetNodeInternal(pHandle, index);
+            }
+            var ptr = GetNodeInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
         }
     }

@@ -53,21 +53,20 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetReferenceMode@FbxLayerElement@fbxsdk@@QEBA?AW4EReferenceMode@12@XZ")]
         private static extern EReferenceMode GetReferenceModeInternal(IntPtr handle);
 
-        public EMappingMode MappingMode { get => GetMappingModeInternal(pHandle); set => SetMappingModeInternal(pHandle, value); }
-        public EReferenceMode ReferenceMode { get => GetReferenceModeInternal(pHandle); set => SetReferenceModeInternal(pHandle, value); }
-        public string Name { get => FbxString.Get(mName); set => mName = FbxString.Construct(value); }
+        public EMappingMode MappingMode { get => GetMappingModeInternal(Handle); set => SetMappingModeInternal(Handle, value); }
+        public EReferenceMode ReferenceMode { get => GetReferenceModeInternal(Handle); set => SetReferenceModeInternal(Handle, value); }
+        public string Name { get => FbxString.Get(_name); set => _name = FbxString.Construct(value); }
 
-        private IntPtr mName;
+        private IntPtr _name;
 
         private FbxLayerElement()
         {
         }
 
         public FbxLayerElement(IntPtr handle)
-            : this()
+            : base(handle)
         {
-            pHandle = handle;
-            mName = pHandle + 0x10;
+            _name = GetPropertyPtr(0x10);
         }
     }
 

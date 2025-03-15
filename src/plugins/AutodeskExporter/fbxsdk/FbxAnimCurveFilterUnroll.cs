@@ -16,20 +16,20 @@ namespace ZoDream.AutodeskExporter
         private static extern void ApplyInternal(nint pHandle, nint dataPtr, int count);
         internal void Reset()
         {
-            ResetInternal(pHandle);
+            ResetInternal(Handle);
         }
 
 
         internal void SetQualityTolerance(float filterPrecision)
         {
-            SetQualityToleranceInternal(pHandle, filterPrecision);
+            SetQualityToleranceInternal(Handle, filterPrecision);
         }
 
 
         internal void Apply(FbxAnimCurve[] items)
         {
             var ptr = IntPtr.Zero;
-            ApplyInternal(pHandle, ptr, items.Length);
+            ApplyInternal(Handle, ptr, items.Length);
         }
 
 

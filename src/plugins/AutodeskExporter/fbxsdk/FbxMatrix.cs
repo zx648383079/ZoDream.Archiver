@@ -18,19 +18,19 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxMatrix(FbxAMatrix affineMatrix)
+            : base(FbxUtils.FbxMalloc(0x80))
         {
-            pHandle = FbxUtils.FbxMalloc(0x80);
-            ConvertFromAffineInternal(pHandle, affineMatrix.Handle);
-            bNeedsFreeing = true;
+            ConvertFromAffineInternal(Handle, affineMatrix.Handle);
+            _leaveFree = true;
         }
 
         public Matrix4x4 ToMatrix()
         {
             return new Matrix4x4(
-                (float)GetInternal(pHandle, 0, 0), (float)GetInternal(pHandle, 0, 1), (float)GetInternal(pHandle, 0, 2), (float)GetInternal(pHandle, 0, 3),
-                (float)GetInternal(pHandle, 1, 0), (float)GetInternal(pHandle, 1, 1), (float)GetInternal(pHandle, 1, 2), (float)GetInternal(pHandle, 1, 3),
-                (float)GetInternal(pHandle, 2, 0), (float)GetInternal(pHandle, 2, 1), (float)GetInternal(pHandle, 2, 2), (float)GetInternal(pHandle, 2, 3),
-                (float)GetInternal(pHandle, 3, 0), (float)GetInternal(pHandle, 3, 1), (float)GetInternal(pHandle, 3, 2), (float)GetInternal(pHandle, 3, 3)
+                (float)GetInternal(Handle, 0, 0), (float)GetInternal(Handle, 0, 1), (float)GetInternal(Handle, 0, 2), (float)GetInternal(Handle, 0, 3),
+                (float)GetInternal(Handle, 1, 0), (float)GetInternal(Handle, 1, 1), (float)GetInternal(Handle, 1, 2), (float)GetInternal(Handle, 1, 3),
+                (float)GetInternal(Handle, 2, 0), (float)GetInternal(Handle, 2, 1), (float)GetInternal(Handle, 2, 2), (float)GetInternal(Handle, 2, 3),
+                (float)GetInternal(Handle, 3, 0), (float)GetInternal(Handle, 3, 1), (float)GetInternal(Handle, 3, 2), (float)GetInternal(Handle, 3, 3)
                 );
         }
     }

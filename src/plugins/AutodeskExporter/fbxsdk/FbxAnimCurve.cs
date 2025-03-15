@@ -100,32 +100,32 @@ namespace ZoDream.AutodeskExporter
 
         internal void KeyModifyBegin()
         {
-            KeyModifyBeginInternal(pHandle);
+            KeyModifyBeginInternal(Handle);
         }
 
         internal void KeySet(int pKeyIndex, FbxTime lTime, float pValue)
         {
-            KeySetInternal(pHandle, lTime.Handle, pValue);
+            KeySetInternal(Handle, lTime.Handle, pValue);
         }
 
         internal int KeyAdd(FbxTime lTime)
         {
-            return KeyAddInternal(pHandle, lTime.Handle);
+            return KeyAddInternal(Handle, lTime.Handle);
         }
 
         internal void KeyModifyEnd()
         {
-            KeyModifyEndInternal(pHandle);
+            KeyModifyEndInternal(Handle);
         }
 
         internal void KeySetValue(int pKeyIndex, float value)
         {
-            KeySetValueInternal(pHandle, pKeyIndex, value);
+            KeySetValueInternal(Handle, pKeyIndex, value);
         }
 
         internal void KeySetInterpolation(int pKeyIndex, EInterpolationType interpolationType)
         {
-            KeySetInterpolationInternal(pHandle, pKeyIndex, interpolationType);
+            KeySetInterpolationInternal(Handle, pKeyIndex, interpolationType);
         }
 
         public FbxAnimCurve(IntPtr InHandle)

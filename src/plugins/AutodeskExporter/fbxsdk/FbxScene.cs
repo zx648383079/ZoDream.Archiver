@@ -26,35 +26,35 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddPose@FbxScene@fbxsdk@@QEAA_NPEAVFbxPose@2@@Z")]
         private static extern bool AddPoseInternal(IntPtr pHandle, IntPtr pPose);
 
-        public FbxGlobalSettings GlobalSettings => new FbxGlobalSettings(GetGlobalSettingsInternal(pHandle));
-        public FbxNode RootNode => new FbxNode(GetRootNodeInternal(pHandle));
+        public FbxGlobalSettings GlobalSettings => new FbxGlobalSettings(GetGlobalSettingsInternal(Handle));
+        public FbxNode RootNode => new FbxNode(GetRootNodeInternal(Handle));
 
         public FbxDocumentInfo? SceneInfo {
             get {
-                IntPtr p = GetSceneInfoInternal(pHandle);
-                return (p != IntPtr.Zero) ? new FbxDocumentInfo(GetSceneInfoInternal(pHandle)) : null;
+                IntPtr p = GetSceneInfoInternal(Handle);
+                return (p != IntPtr.Zero) ? new FbxDocumentInfo(p) : null;
             }
             set {
                 if (value is not null)
                 {
-                    SetSceneInfoInternal(pHandle, value.Handle);
+                    SetSceneInfoInternal(Handle, value.Handle);
                 }
             }
         }
 
         public FbxScene(FbxManager Manager, string Name)
+            : base(CreateFromManager(Manager.Handle, Name))
         {
-            pHandle = CreateFromManager(Manager.Handle, Name);
         }
 
         public FbxScene(FbxObject Object, string Name)
+            : base(CreateFromObject(Object.Handle, Name))
         {
-            pHandle = CreateFromObject(Object.Handle, Name);
         }
 
         public bool AddPose(FbxPose pose)
         {
-            return AddPoseInternal(pHandle, pose.Handle);
+            return AddPoseInternal(Handle, pose.Handle);
         }
     }
 }

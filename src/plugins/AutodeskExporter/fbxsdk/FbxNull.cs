@@ -31,8 +31,8 @@ namespace ZoDream.AutodeskExporter
         public FbxNull(IntPtr InHandle)
             : base(InHandle)
         {
-            _size = pHandle + 0x88;
-            _look = pHandle + 0x98;
+            _size = GetPropertyPtr(0x88);
+            _look = GetPropertyPtr(0x98);
         }
 
         public FbxNull(FbxObject Object, string pName)

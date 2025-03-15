@@ -16,8 +16,8 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxSubDeformer(FbxManager manager, string name)
+            : base(CreateFromManager(manager.Handle, name))
         {
-            pHandle = CreateFromManager(manager.Handle, name);
         }
 
         public FbxSubDeformer(IntPtr InHandle)
@@ -26,8 +26,8 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxSubDeformer(FbxObject obj, string name)
+            : base(CreateFromObject(obj.Handle, name))
         {
-            pHandle = CreateFromObject(obj.Handle, name);
         }
     }
 

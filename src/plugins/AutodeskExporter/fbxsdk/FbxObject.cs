@@ -31,33 +31,22 @@ namespace ZoDream.AutodeskExporter
             set => SetNameInternal(Handle, value);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool bDisposing)
         {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool bDisposing)
-        {
-            if (pHandle != IntPtr.Zero)
-            {
-                DestroyInternal(pHandle, false);
-                pHandle = IntPtr.Zero;
-            }
-
-            if (bDisposing)
-                GC.SuppressFinalize(this);
+            DestroyInternal(Handle, false);
+            base.Dispose(bDisposing);
         }
 
         public override int GetHashCode()
         {
-            return pHandle.GetHashCode();
+            return Handle.GetHashCode();
         }
 
         public override bool Equals(object? obj)
         {
             if (obj is FbxObject b)
             {
-                return pHandle == b.Handle;
+                return Handle == b.Handle;
             }
             return false;
         }
@@ -70,7 +59,9 @@ namespace ZoDream.AutodeskExporter
         public static bool operator !=(FbxObject a, FbxObject b)
         {
             if (ReferenceEquals(a, null))
+            {
                 return !ReferenceEquals(b, null);
+            }
 
             return !a.Equals(b);
         }

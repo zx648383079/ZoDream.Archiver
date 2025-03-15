@@ -22,11 +22,11 @@ namespace ZoDream.AutodeskExporter
         internal static extern nint AddInternal(nint pHandle, nint data);
     }
 
-    internal class FbxArray<T> : FbxNative, IDisposable
+    internal class FbxArray<T> : FbxNative
     {
 
         public FbxArray(int capacity)
-            : base(FbxArray.ConstructInternal(capacity))
+            : this(FbxArray.ConstructInternal(capacity))
         {
 
         }
@@ -34,6 +34,7 @@ namespace ZoDream.AutodeskExporter
         public FbxArray(IntPtr InHandle)
             : base(InHandle)
         {
+            _leaveFree = true;
         }
 
         public T this[int index] {
@@ -45,13 +46,13 @@ namespace ZoDream.AutodeskExporter
         {
             if (value is FbxObject obj)
             {
-                FbxArray.SetAtInternal(pHandle, index, obj.Handle);
+                FbxArray.SetAtInternal(Handle, index, obj.Handle);
                 return;
             }
             if (value is Vector4 vec)
             {
                 var ptr = FbxDouble4.Construct(vec);
-                FbxArray.SetAtInternal(pHandle, index, ptr);
+                FbxArray.SetAtInternal(Handle, index, ptr);
                 FbxUtils.FbxFree(ptr);
                 return;
             }
@@ -62,13 +63,13 @@ namespace ZoDream.AutodeskExporter
         {
             if (value is FbxObject obj)
             {
-                FbxArray.AddInternal(pHandle, obj.Handle);
+                FbxArray.AddInternal(Handle, obj.Handle);
                 return;
             }
             if (value is Vector4 vec)
             {
                 var ptr = FbxDouble4.Construct(vec);
-                FbxArray.AddInternal(pHandle, ptr);
+                FbxArray.AddInternal(Handle, ptr);
                 FbxUtils.FbxFree(ptr);
                 return;
             }
@@ -77,7 +78,7 @@ namespace ZoDream.AutodeskExporter
 
         internal T? GetAt(int index)
         {
-            var ptr = FbxArray.GetAtInternal(pHandle, index);
+            var ptr = FbxArray.GetAtInternal(Handle, index);
             if (ptr == IntPtr.Zero)
             {
                 return default;
@@ -94,10 +95,6 @@ namespace ZoDream.AutodeskExporter
             return default;
         }
 
-        public void Dispose()
-        {
-            FbxUtils.FbxFree(pHandle);
-        }
     }
 
 }

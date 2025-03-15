@@ -18,25 +18,25 @@ namespace ZoDream.AutodeskExporter
         private static extern bool SetFileExportVersionInternal(IntPtr InHandle, IntPtr pVersion, int pRenamingMode);
 
         public FbxExporter(FbxManager Manager, string Name)
+            : base(CreateFromManager(Manager.Handle, Name))
         {
-            pHandle = CreateFromManager(Manager.Handle, Name);
         }
 
         public bool Initialize(string pFileName, int pFileFormat = -1, FbxIOSettings? pIOSettings = null)
         {
             IntPtr Ptr = pIOSettings is not null ? pIOSettings.Handle : IntPtr.Zero;
-            return InitializeInternal(pHandle, pFileName, pFileFormat, Ptr);
+            return InitializeInternal(Handle, pFileName, pFileFormat, Ptr);
         }
 
         public bool Export(FbxDocument pDocument, bool pNonBlocking = false)
         {
-            return ExportInternal(pHandle, pDocument.Handle, pNonBlocking);
+            return ExportInternal(Handle, pDocument.Handle, pNonBlocking);
         }
 
         public bool SetFileExportVersion(string pVersion)
         {
             IntPtr Ptr = FbxString.Construct(pVersion);
-            return SetFileExportVersionInternal(pHandle, Ptr, 0);
+            return SetFileExportVersionInternal(Handle, Ptr, 0);
         }
     }
 

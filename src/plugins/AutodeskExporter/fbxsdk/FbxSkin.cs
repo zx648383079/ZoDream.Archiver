@@ -21,7 +21,7 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCluster@FbxSkin@fbxsdk@@QEAAPEAVFbxCluster@2@H@Z")]
         private static extern IntPtr GetClusterInternal(IntPtr pHandle, int pIndex);
 
-        public int ClusterCount => GetClusterCountInternal(pHandle);
+        public int ClusterCount => GetClusterCountInternal(Handle);
 
         public IEnumerable<FbxCluster> Clusters {
             get {
@@ -58,12 +58,12 @@ namespace ZoDream.AutodeskExporter
 
         public bool AddCluster(FbxCluster cluster)
         {
-            return AddClusterInternal(pHandle, cluster.Handle);
+            return AddClusterInternal(Handle, cluster.Handle);
         }
 
         public FbxCluster? GetCluster(int index)
         {
-            IntPtr ptr = GetClusterInternal(pHandle, index);
+            IntPtr ptr = GetClusterInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxCluster(ptr);
         }
     }

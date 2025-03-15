@@ -11,10 +11,10 @@ namespace ZoDream.AutodeskExporter
         private static extern void ConstructInternal(IntPtr inHandle, long pTime);
 
         public FbxTime(long time)
+            : base(FbxUtils.FbxMalloc(8))
         {
-            pHandle = FbxUtils.FbxMalloc(8);
-            ConstructInternal(pHandle, time);
-            bNeedsFreeing = true;
+            ConstructInternal(Handle, time);
+            _leaveFree = true;
         }
 
         public FbxTime(float time)

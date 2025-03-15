@@ -19,12 +19,12 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public int WriterFormatCount => GetWriterFormatCountInternal(pHandle);
-        public bool WriterIsFBX(int pFileFormat) { return WriterIsFBXInternal(pHandle, pFileFormat); }
+        public int WriterFormatCount => GetWriterFormatCountInternal(Handle);
+        public bool WriterIsFBX(int pFileFormat) { return WriterIsFBXInternal(Handle, pFileFormat); }
 
         public string GetWriterFormatDescription(int pFileFormat)
         {
-            IntPtr Ptr = GetWriterFormatDescriptionInternal(pHandle, pFileFormat);
+            IntPtr Ptr = GetWriterFormatDescriptionInternal(Handle, pFileFormat);
             if (Ptr == IntPtr.Zero)
                 return "";
 

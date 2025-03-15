@@ -30,32 +30,32 @@ namespace ZoDream.AutodeskExporter
 
         public void SetNormals(FbxLayerElementNormal pNormals)
         {
-            SetNormalsInternal(pHandle, pNormals.Handle);
+            SetNormalsInternal(Handle, pNormals.Handle);
         }
 
         public void SetTangents(FbxLayerElementTangent pTangents)
         {
-            SetTangentsInternal(pHandle, pTangents.Handle);
+            SetTangentsInternal(Handle, pTangents.Handle);
         }
 
         public void SetBinormals(FbxLayerElementBinormal pBinormals)
         {
-            SetBinormalsInternal(pHandle, pBinormals.Handle);
+            SetBinormalsInternal(Handle, pBinormals.Handle);
         }
 
         public void SetUVs(FbxLayerElementUV pUVs)
         {
-            SetUVsInternal(pHandle, pUVs.Handle, FbxLayerElement.EType.eTextureDiffuse);
+            SetUVsInternal(Handle, pUVs.Handle, FbxLayerElement.EType.eTextureDiffuse);
         }
 
         public void SetVertexColors(FbxLayerElementVertexColor pVertexColors)
         {
-            SetVertexColorsInternal(pHandle, pVertexColors.Handle);
+            SetVertexColorsInternal(Handle, pVertexColors.Handle);
         }
 
         public void SetUserData(FbxLayerElementUserData pUserData)
         {
-            SetUserDataInternal(pHandle, pUserData.Handle);
+            SetUserDataInternal(Handle, pUserData.Handle);
         }
     }
 

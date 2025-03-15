@@ -15,7 +15,6 @@ namespace ZoDream.AutodeskExporter
         {
             IntPtr Ptr = FbxUtils.FbxMalloc(8);
             ConstructInternal(Ptr, InitialValue);
-
             return Ptr;
         }
 

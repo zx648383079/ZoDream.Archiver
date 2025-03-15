@@ -13,7 +13,7 @@ namespace ZoDream.AutodeskExporter
 
         internal void AddTargetShape(FbxShape lShape, double weight)
         {
-            AddTargetShapeInternal(pHandle, lShape.Handle, weight);
+            AddTargetShapeInternal(Handle, lShape.Handle, weight);
         }
 
         

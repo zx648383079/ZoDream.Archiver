@@ -35,18 +35,17 @@ namespace ZoDream.AutodeskExporter
         public FbxSkeleton(IntPtr InHandle)
             : base(InHandle)
         {
-            _size = pHandle + 0x88;
+            _size = GetPropertyPtr(0x88);
         }
 
         public FbxSkeleton(FbxObject Object, string pName)
+            : this(CreateFromObject(Object.Handle, pName))
         {
-            pHandle = CreateFromObject(Object.Handle, pName);
-            _size = pHandle + 0x88;
         }
 
         public void SetSkeletonType(EType skeletonType)
         {
-            SetSkeletonTypeInternal(pHandle, skeletonType);
+            SetSkeletonTypeInternal(Handle, skeletonType);
         }
     }
 

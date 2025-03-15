@@ -124,37 +124,37 @@ namespace ZoDream.AutodeskExporter
 
         internal void SetSwapUV(bool pSwapUV)
         {
-            SetSwapUVInternal(pHandle, pSwapUV);
+            SetSwapUVInternal(Handle, pSwapUV);
         }
 
 
         internal void SetTranslation(double pU, double pV)
         {
-            SetTranslationInternal(pHandle, pU, pV);
+            SetTranslationInternal(Handle, pU, pV);
         }
 
 
         internal void SetRotation(double pU, double pV, double pW = 0.0)
         {
-            SetRotationInternal(pHandle, pU, pV, pW);
+            SetRotationInternal(Handle, pU, pV, pW);
         }
 
 
         internal void SetScale(double pU, double pV)
         {
-            SetScaleInternal(pHandle, pU, pV);
+            SetScaleInternal(Handle, pU, pV);
         }
 
 
         internal void SetTextureUse(ETextureUse pTextureUse)
         {
-            SetTextureUseInternal(pHandle, pTextureUse);
+            SetTextureUseInternal(Handle, pTextureUse);
         }
 
 
         internal void SetMappingType(EMappingType pMappingType)
         {
-            SetMappingTypeInternal(pHandle, pMappingType);
+            SetMappingTypeInternal(Handle, pMappingType);
         }
     }
 }

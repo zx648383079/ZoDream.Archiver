@@ -34,13 +34,13 @@ namespace ZoDream.AutodeskExporter
 
         internal void SetFileName(string name)
         {
-            SetFileNameInternal(pHandle, name);
+            SetFileNameInternal(Handle, name);
         }
 
         
         internal void SetMaterialUse(EMaterialUse pMaterialUse)
         {
-            SetMaterialUseInternal(pHandle, pMaterialUse);
+            SetMaterialUseInternal(Handle, pMaterialUse);
         }
 
     

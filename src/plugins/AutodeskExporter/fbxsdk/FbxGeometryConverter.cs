@@ -15,21 +15,20 @@ namespace ZoDream.AutodeskExporter
         private static extern bool ComputeEdgeSmoothingFromNormalsInternal(IntPtr handle, IntPtr mesh);
 
         public FbxGeometryConverter(FbxManager mgr)
+            : base(FbxUtils.FbxMalloc(16))
         {
-            pHandle = FbxUtils.FbxMalloc(16);
-            CreateFromManager(pHandle, mgr.Handle);
+            CreateFromManager(Handle, mgr.Handle);
         }
 
         public bool ComputeEdgeSmoothingFromNormals(FbxMesh pMesh)
         {
-            return ComputeEdgeSmoothingFromNormalsInternal(pHandle, pMesh.Handle);
+            return ComputeEdgeSmoothingFromNormalsInternal(Handle, pMesh.Handle);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            DisposeInternal(pHandle);
-            FbxUtils.FbxFree(pHandle);
-            pHandle = IntPtr.Zero;
+            DisposeInternal(Handle);
+            base.Dispose(disposing);
         }
     }
 

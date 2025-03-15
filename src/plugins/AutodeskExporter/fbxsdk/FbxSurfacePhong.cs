@@ -25,9 +25,9 @@ namespace ZoDream.AutodeskExporter
         public FbxSurfacePhong(IntPtr handle)
             : base(handle)
         {
-            _specular = handle + 0x188;
-            _reflection = handle + 0x1B8;
-            _shininess = handle + 0x1A8;
+            _specular = GetPropertyPtr(0x188);
+            _reflection = GetPropertyPtr(0x1B8);
+            _shininess = GetPropertyPtr(0x1A8);
         }
 
         internal void SpecularConnectSrcObject(FbxFileTexture pTexture)

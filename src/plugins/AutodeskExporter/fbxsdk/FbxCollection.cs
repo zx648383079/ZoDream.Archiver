@@ -16,7 +16,7 @@ namespace ZoDream.AutodeskExporter
 
         internal void AddMember(FbxObject obj)
         {
-            AddMemberInternal(pHandle, obj.Handle);
+            AddMemberInternal(Handle, obj.Handle);
         }
     }
 }

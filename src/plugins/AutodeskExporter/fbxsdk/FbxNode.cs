@@ -75,8 +75,8 @@ namespace ZoDream.AutodeskExporter
         public Vector3 LclRotation { get => FbxProperty.GetDouble3(_lclRotation); set => FbxProperty.Set(_lclRotation, value); }
         public Vector3 LclScaling { get => FbxProperty.GetDouble3(_lclScaling); set => FbxProperty.Set(_lclScaling, value); }
         public double Visibility { get => FbxProperty.GetDouble(_visibility); set => FbxProperty.Set(_visibility, value); }
-        public int ChildCount => GetChildCountInternal(pHandle, false);
-        public int NodeAttributeCount => GetNodeAttributeCountInternal(pHandle);
+        public int ChildCount => GetChildCountInternal(Handle, false);
+        public int NodeAttributeCount => GetNodeAttributeCountInternal(Handle);
 
         public IEnumerable<FbxNode> Children {
             get {
@@ -92,37 +92,27 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxNode(FbxManager Manager, string pName)
+            : this(CreateFromManager(Manager.Handle, pName))
         {
-            pHandle = CreateFromManager(Manager.Handle, pName);
-
-            _lclTranslation = pHandle + 0x78;
-            _lclRotation = pHandle + 0x88;
-            _lclScaling = pHandle + 0x98;
-            _visibility = pHandle + 0xA8;
         }
 
         public FbxNode(IntPtr InHandle)
             : base(InHandle)
         {
-            _lclTranslation = pHandle + 0x78;
-            _lclRotation = pHandle + 0x88;
-            _lclScaling = pHandle + 0x98;
-            _visibility = pHandle + 0xA8;
+            _lclTranslation = GetPropertyPtr(0x78);
+            _lclRotation = GetPropertyPtr(0x88);
+            _lclScaling = GetPropertyPtr(0x98);
+            _visibility = GetPropertyPtr(0xA8);
         }
 
         public FbxNode(FbxObject Object, string pName)
+            : this(CreateFromObject(Object.Handle, pName))
         {
-            pHandle = CreateFromObject(Object.Handle, pName);
-
-            _lclTranslation = pHandle + 0x78;
-            _lclRotation = pHandle + 0x88;
-            _lclScaling = pHandle + 0x98;
-            _visibility = pHandle + 0xA8;
         }
 
         public FbxNodeAttribute? SetNodeAttribute(FbxNodeAttribute pNodeAttribute)
         {
-            IntPtr Ptr = SetNodeAttributeInternal(pHandle, pNodeAttribute.Handle);
+            IntPtr Ptr = SetNodeAttributeInternal(Handle, pNodeAttribute.Handle);
             return Ptr == IntPtr.Zero ? null : new FbxNodeAttribute(Ptr);
         }
 
@@ -130,7 +120,7 @@ namespace ZoDream.AutodeskExporter
         {
             for (int i = 0; i < NodeAttributeCount; i++)
             {
-                IntPtr ptr = GetNodeAttributeByIndexInternal(pHandle, i);
+                IntPtr ptr = GetNodeAttributeByIndexInternal(Handle, i);
                 if (ptr != IntPtr.Zero)
                 {
                     var attr = new FbxNodeAttribute(ptr);
@@ -145,7 +135,7 @@ namespace ZoDream.AutodeskExporter
 
         public bool AddChild(FbxNode pNode)
         {
-            return AddChildInternal(pHandle, pNode.Handle);
+            return AddChildInternal(Handle, pNode.Handle);
         }
 
         public FbxAMatrix EvaluateGlobalTransform(FbxTime? time = null, EPivotSet pivotSet = EPivotSet.eSourcePivot, bool applyTarget = false, bool forceEval = false)
@@ -155,32 +145,32 @@ namespace ZoDream.AutodeskExporter
                 time = FbxTime.FBXSDK_TIME_INFINITE;
             }
 
-            IntPtr ptr = EvaluateGlobalTransformInternal(pHandle, time.Handle, pivotSet, applyTarget, forceEval);
+            IntPtr ptr = EvaluateGlobalTransformInternal(Handle, time.Handle, pivotSet, applyTarget, forceEval);
             return new FbxAMatrix(ptr);
         }
 
         public FbxNode? GetParent()
         {
-            IntPtr ptr = GetParentInternal(pHandle);
+            IntPtr ptr = GetParentInternal(Handle);
             return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
         }
 
         public FbxNode? GetChild(int index)
         {
-            IntPtr ptr = GetChildInternal(pHandle, index);
+            IntPtr ptr = GetChildInternal(Handle, index);
             return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
         }
 
         public void SetPreferedAngle(Vector4 pPreferedAngle)
         {
             IntPtr ptr = FbxDouble4.Construct(pPreferedAngle);
-            SetPreferedAngleInternal(pHandle, ptr);
+            SetPreferedAngleInternal(Handle, ptr);
             FbxUtils.FbxFree(ptr);
         }
 
         internal FbxMesh GetMesh()
         {
-            var ptr = GetMeshInternal(pHandle);
+            var ptr = GetMeshInternal(Handle);
             return new FbxMesh(ptr);
         }
 
@@ -203,12 +193,12 @@ namespace ZoDream.AutodeskExporter
 
         internal void SetShadingMode(EShadingMode pShadingMode)
         {
-            SetShadingModeInternal(pHandle, pShadingMode);
+            SetShadingModeInternal(Handle, pShadingMode);
         }
 
         internal int AddMaterial(FbxSurfacePhong pMat)
         {
-            return AddMaterialInternal(pHandle, pMat.Handle);
+            return AddMaterialInternal(Handle, pMat.Handle);
         }
 
     }

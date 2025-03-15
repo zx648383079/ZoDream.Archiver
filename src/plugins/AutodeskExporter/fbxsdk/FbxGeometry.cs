@@ -24,25 +24,25 @@ namespace ZoDream.AutodeskExporter
 
         internal FbxAnimCurve GetShapeChannel(int pBlendShapeIndex, int pBlendShapeChannelIndex, FbxAnimLayer pLayer, bool pCreateAsNeeded = false)
         {
-            var ptr = GetShapeChannelInternal(pHandle, pBlendShapeIndex, pBlendShapeChannelIndex, pLayer.Handle, pCreateAsNeeded);
+            var ptr = GetShapeChannelInternal(Handle, pBlendShapeIndex, pBlendShapeChannelIndex, pLayer.Handle, pCreateAsNeeded);
             return new FbxAnimCurve(ptr);
         }
 
 
         public int AddDeformer(FbxDeformer deformer)
         {
-            return AddDeformerInternal(pHandle, deformer.Handle);
+            return AddDeformerInternal(Handle, deformer.Handle);
         }
 
         public int GetDeformerCount(FbxDeformer.EDeformerType type)
         {
-            return GetDeformerCountInternal(pHandle, type);
+            return GetDeformerCountInternal(Handle, type);
         }
 
         public T? GetDeformer<T>(int index, FbxDeformer.EDeformerType type)
             where T : FbxDeformer
         {
-            IntPtr ptr = GetDeformerInternal(pHandle, index, type, IntPtr.Zero);
+            IntPtr ptr = GetDeformerInternal(Handle, index, type, IntPtr.Zero);
             return ptr == IntPtr.Zero ? null : (T)Activator.CreateInstance(typeof(T), ptr);
         }
     }

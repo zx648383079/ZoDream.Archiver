@@ -22,7 +22,7 @@ namespace ZoDream.AutodeskExporter
         public FbxSurfaceMaterial(IntPtr handle)
             : base(handle)
         {
-            _shadingModel = handle + 0x78;
+            _shadingModel = GetPropertyPtr(0x78);
         }
     }
 

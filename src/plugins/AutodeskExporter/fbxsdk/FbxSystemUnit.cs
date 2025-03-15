@@ -28,7 +28,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public double ScaleFactor => GetScaleFactorInternal(pHandle);
+        public double ScaleFactor => GetScaleFactorInternal(Handle);
 
         public static FbxSystemUnit Millimeters => GetStaticValue("?mm@FbxSystemUnit@fbxsdk@@2V12@B", ref mMillimeters);
         public static FbxSystemUnit Centimeters => GetStaticValue("?cm@FbxSystemUnit@fbxsdk@@2V12@B", ref mCentimeters);

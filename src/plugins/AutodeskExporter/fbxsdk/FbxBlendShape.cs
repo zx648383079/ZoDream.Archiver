@@ -19,7 +19,7 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetBlendShapeChannel@FbxBlendShape@fbxsdk@@QEAAPEAVFbxBlendShapeChannel@2@H@Z")]
         private static extern nint GetBlendShapeChannelInternal(nint pHandle, int channelIndex);
         
-        public int BlendShapeChannelCount => GetBlendShapeChannelCountInternal(pHandle);
+        public int BlendShapeChannelCount => GetBlendShapeChannelCountInternal(Handle);
 
 
         public FbxBlendShape(IntPtr InHandle)
@@ -32,13 +32,13 @@ namespace ZoDream.AutodeskExporter
         }
         internal void AddBlendShapeChannel(FbxBlendShapeChannel channel)
         {
-            AddBlendShapeChannelInternal(pHandle, channel.Handle);
+            AddBlendShapeChannelInternal(Handle, channel.Handle);
         }
 
 
         internal FbxBlendShapeChannel GetBlendShapeChannel(int channelIndex)
         {
-            var ptr = GetBlendShapeChannelInternal(pHandle, channelIndex);
+            var ptr = GetBlendShapeChannelInternal(Handle, channelIndex);
             return new FbxBlendShapeChannel(ptr);
         }
     }
