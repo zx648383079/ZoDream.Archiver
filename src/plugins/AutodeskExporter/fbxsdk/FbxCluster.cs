@@ -13,37 +13,37 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxCluster@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxCluster@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetLink@FbxCluster@fbxsdk@@QEAAXPEBVFbxNode@2@@Z")]
-        private static extern void SetLinkInternal(IntPtr pHandle, IntPtr pNode);
+        private static extern void SetLinkInternal(nint pHandle, nint pNode);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetLinkMode@FbxCluster@fbxsdk@@QEBA?AW4ELinkMode@12@XZ")]
-        private static extern ELinkMode GetLinkModeInternal(IntPtr handle);
+        private static extern ELinkMode GetLinkModeInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetLinkMode@FbxCluster@fbxsdk@@QEAAXW4ELinkMode@12@@Z")]
-        private static extern void SetLinkModeInternal(IntPtr pHandle, ELinkMode pMode);
+        private static extern void SetLinkModeInternal(nint pHandle, ELinkMode pMode);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddControlPointIndex@FbxCluster@fbxsdk@@QEAAXHN@Z")]
-        private static extern void AddControlPointIndexInternal(IntPtr pHandle, int pIndex, double pWeight);
+        private static extern void AddControlPointIndexInternal(nint pHandle, int pIndex, double pWeight);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetControlPointIndicesCount@FbxCluster@fbxsdk@@QEBAHXZ")]
-        private static extern int GetControlPointIndicesCountInternal(IntPtr handle);
+        private static extern int GetControlPointIndicesCountInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetControlPointIndices@FbxCluster@fbxsdk@@QEBAPEAHXZ")]
-        private static extern IntPtr GetControlPointIndicesInternal(IntPtr handle);
+        private static extern nint GetControlPointIndicesInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetControlPointWeights@FbxCluster@fbxsdk@@QEBAPEANXZ")]
-        private static extern IntPtr GetControlPointWeightsInternal(IntPtr handle);
+        private static extern nint GetControlPointWeightsInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetTransformLinkMatrix@FbxCluster@fbxsdk@@QEAAXAEBVFbxAMatrix@2@@Z")]
-        private static extern void SetTransformLinkMatrixInternal(IntPtr pHandle, IntPtr pMatrix);
+        private static extern void SetTransformLinkMatrixInternal(nint pHandle, nint pMatrix);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetLink@FbxCluster@fbxsdk@@QEAAPEAVFbxNode@2@XZ")]
-        private static extern IntPtr GetLinkInternal(IntPtr pHandle);
+        private static extern nint GetLinkInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetTransformMatrix@FbxCluster@fbxsdk@@QEAAXAEBVFbxAMatrix@2@@Z")]
         private static extern void SetTransformMatrixInternal(nint handle);
@@ -51,7 +51,7 @@ namespace ZoDream.AutodeskExporter
         public int ControlPointIndicesCount => GetControlPointIndicesCountInternal(Handle);
         public ELinkMode LinkMode { get => GetLinkModeInternal(Handle); set => SetLinkModeInternal(Handle, value); }
 
-        public FbxCluster(IntPtr InHandle)
+        public FbxCluster(nint InHandle)
             : base(InHandle)
         {
         }
@@ -73,7 +73,7 @@ namespace ZoDream.AutodeskExporter
 
         public FbxNode GetLink()
         {
-            IntPtr ptr = GetLinkInternal(Handle);
+            nint ptr = GetLinkInternal(Handle);
             return new FbxNode(ptr);
         }
 
@@ -94,8 +94,8 @@ namespace ZoDream.AutodeskExporter
 
         public int[]? GetControlPointIndices()
         {
-            IntPtr ptr = GetControlPointIndicesInternal(Handle);
-            if (ptr == IntPtr.Zero)
+            nint ptr = GetControlPointIndicesInternal(Handle);
+            if (ptr == nint.Zero)
             {
                 return null;
             }
@@ -108,8 +108,8 @@ namespace ZoDream.AutodeskExporter
 
         public double[]? GetControlPointWeights()
         {
-            IntPtr ptr = GetControlPointWeightsInternal(Handle);
-            if (ptr == IntPtr.Zero)
+            nint ptr = GetControlPointWeightsInternal(Handle);
+            if (ptr == nint.Zero)
             {
                 return null;
             }

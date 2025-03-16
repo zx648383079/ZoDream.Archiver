@@ -12,10 +12,10 @@ namespace ZoDream.AutodeskExporter
     internal static partial class NativeMethods
     {
         [DllImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true)]
-        internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+        internal static extern nint GetProcAddress(nint hModule, string procName);
         [DllImport("kernel32.dll", EntryPoint = "LoadLibrary", SetLastError = true)]
-        internal static extern IntPtr LoadLibrary(string lpszLib);
+        internal static extern nint LoadLibrary(string lpszLib);
         [DllImport("kernel32.dll", EntryPoint = "FreeLibrary", SetLastError = true)]
-        internal static extern IntPtr FreeLibrary(IntPtr hModule);
+        internal static extern nint FreeLibrary(nint hModule);
     }
 }

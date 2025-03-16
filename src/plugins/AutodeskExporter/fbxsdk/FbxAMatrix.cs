@@ -22,7 +22,7 @@ namespace ZoDream.AutodeskExporter
         /// </summary>
         const ulong SizeOfThis = 0x80;
 
-        public FbxAMatrix(IntPtr ptr)
+        public FbxAMatrix(nint ptr)
             : base(ptr)
         {
         }
@@ -52,14 +52,14 @@ namespace ZoDream.AutodeskExporter
         internal FbxAMatrix Inverse()
         {
             var ptr = InverseInternal(Handle);
-            Debug.Assert(ptr != IntPtr.Zero);
+            Debug.Assert(ptr != nint.Zero);
             return new FbxAMatrix(ptr);
         }
 
         public static FbxAMatrix operator *(FbxAMatrix a, FbxAMatrix b)
         {
             var ptr = MultiplyInternal(a.Handle, b.Handle);
-            Debug.Assert(ptr != IntPtr.Zero);
+            Debug.Assert(ptr != nint.Zero);
             return new FbxAMatrix(ptr);
         }
     }

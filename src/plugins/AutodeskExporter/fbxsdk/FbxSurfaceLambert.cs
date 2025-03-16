@@ -7,7 +7,7 @@ namespace ZoDream.AutodeskExporter
     internal class FbxSurfaceLambert : FbxSurfaceMaterial
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSurfaceLambert@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
 
         private readonly nint _diffuse;
@@ -28,7 +28,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxSurfaceLambert(IntPtr handle)
+        public FbxSurfaceLambert(nint handle)
             : base(handle)
         {
             _diffuse = GetPropertyPtr(0xd8);

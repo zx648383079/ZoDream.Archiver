@@ -6,19 +6,19 @@ namespace ZoDream.AutodeskExporter
 {
     internal class FbxNative : IDisposable
     {
-        private nint _handle = IntPtr.Zero;
+        private nint _handle = nint.Zero;
         /// <summary>
         /// 是否需要自动执行销毁
         /// </summary>
         protected bool _leaveFree;
         private bool _disposedValue;
 
-        public IntPtr Handle { get => _handle; protected set => _handle = value; }
+        public nint Handle { get => _handle; protected set => _handle = value; }
         public FbxNative() { }
-        public FbxNative(IntPtr InHandle)
+        public FbxNative(nint InHandle)
         {
             _handle = InHandle;
-            Debug.Assert(Handle != IntPtr.Zero);
+            Debug.Assert(Handle != nint.Zero);
         }
 
 

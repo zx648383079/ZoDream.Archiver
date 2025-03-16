@@ -12,10 +12,10 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxNull@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxNull@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         private readonly nint _size;
         private readonly nint _look;
@@ -28,7 +28,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxNull(IntPtr InHandle)
+        public FbxNull(nint InHandle)
             : base(InHandle)
         {
             _size = GetPropertyPtr(0x88);

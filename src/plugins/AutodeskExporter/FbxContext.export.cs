@@ -23,7 +23,9 @@ namespace ZoDream.AutodeskExporter
             }
         }
 
-        public void ExportAll(bool blendShape, bool animation, bool eulerFilter, float filterPrecision)
+        public void ExportAll(bool blendShape, bool animation, 
+            bool eulerFilter, 
+            float filterPrecision)
         {
             var meshFrames = new List<FbxImportedFrame>();
 
@@ -35,6 +37,7 @@ namespace ZoDream.AutodeskExporter
 
                 PrepareMaterials();
 
+                // TODO some bugs
                 ExportMeshFrames(imported.RootFrame, meshFrames);
             }
             else

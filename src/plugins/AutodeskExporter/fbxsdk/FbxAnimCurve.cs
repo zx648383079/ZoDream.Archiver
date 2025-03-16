@@ -77,25 +77,25 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxAnimCurve@fbxsdk@@SAPEAV12@PEAVFbxScene@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         
 
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeyModifyBegin@FbxAnimCurveKFCurve@fbxsdk@@UEAAXXZ")]
-        private static extern void KeyModifyBeginInternal(IntPtr pObject);
+        private static extern void KeyModifyBeginInternal(nint pObject);
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeySet@FbxAnimCurveKFCurve@fbxsdk@@UEAAXHVFbxTime@2@MW4EInterpolationType@FbxAnimCurveDef@2@W4ETangentMode@52@MMW4EWeightedMode@52@MMMM@Z")]
-        private static extern void KeySetInternal(IntPtr pObject, nint lTime, float pValue);
+        private static extern void KeySetInternal(nint pObject, nint lTime, float pValue);
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeyAdd@FbxAnimCurveKFCurve@fbxsdk@@UEAAHVFbxTime@2@PEAH@Z")]
-        private static extern int KeyAddInternal(IntPtr pObject, nint lTime);
+        private static extern int KeyAddInternal(nint pObject, nint lTime);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeyModifyEnd@FbxAnimCurveKFCurve@fbxsdk@@UEAAXXZ")]
-        private static extern void KeyModifyEndInternal(IntPtr pObject);
+        private static extern void KeyModifyEndInternal(nint pObject);
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeySetValue@FbxAnimCurveKFCurve@fbxsdk@@UEAAXHM@Z")]
-        private static extern void KeySetValueInternal(IntPtr pObject, int pKeyIndex, float value);
+        private static extern void KeySetValueInternal(nint pObject, int pKeyIndex, float value);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?KeySetInterpolation@FbxAnimCurveKFCurve@fbxsdk@@UEAAXHW4EInterpolationType@FbxAnimCurveDef@2@@Z")]
-        private static extern void KeySetInterpolationInternal(IntPtr pObject, int pKeyIndex, EInterpolationType interpolationType);
+        private static extern void KeySetInterpolationInternal(nint pObject, int pKeyIndex, EInterpolationType interpolationType);
       
 
         internal void KeyModifyBegin()
@@ -128,7 +128,7 @@ namespace ZoDream.AutodeskExporter
             KeySetInterpolationInternal(Handle, pKeyIndex, interpolationType);
         }
 
-        public FbxAnimCurve(IntPtr InHandle)
+        public FbxAnimCurve(nint InHandle)
             : base(InHandle)
         {
         }

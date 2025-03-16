@@ -14,13 +14,13 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSkeleton@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSkeleton@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetSkeletonType@FbxSkeleton@fbxsdk@@QEAAXW4EType@12@@Z")]
-        private static extern void SetSkeletonTypeInternal(IntPtr inHandle, EType pSkeletonType);
+        private static extern void SetSkeletonTypeInternal(nint inHandle, EType pSkeletonType);
 
         private readonly nint _size;
 
@@ -32,7 +32,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxSkeleton(IntPtr InHandle)
+        public FbxSkeleton(nint InHandle)
             : base(InHandle)
         {
             _size = GetPropertyPtr(0x88);

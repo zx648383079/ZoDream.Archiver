@@ -7,16 +7,16 @@ namespace ZoDream.AutodeskExporter
     internal class FbxDouble4
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxVectorTemplate4@N@fbxsdk@@QEAA@NNNN@Z")]
-        private static extern void ConstructInternal(IntPtr handle, double pValue1, double pValue2, double pValue3, double pValue4);
+        private static extern void ConstructInternal(nint handle, double pValue1, double pValue2, double pValue3, double pValue4);
 
-        public static IntPtr Construct(Vector4 value)
+        public static nint Construct(Vector4 value)
         {
-            IntPtr ptr = FbxUtils.FbxMalloc(8 * 4);
+            nint ptr = FbxUtils.FbxMalloc(8 * 4);
             ConstructInternal(ptr, value.X, value.Y, value.Z, value.W);
             return ptr;
         }
 
-        public static unsafe Vector4 Get(IntPtr inHandle)
+        public static unsafe Vector4 Get(nint inHandle)
         {
             float x = (float)*((double*)(inHandle.ToInt64()));
             float y = (float)*((double*)(inHandle.ToInt64() + 8));

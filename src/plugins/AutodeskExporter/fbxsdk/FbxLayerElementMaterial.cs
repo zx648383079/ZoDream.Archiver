@@ -4,7 +4,7 @@ namespace ZoDream.AutodeskExporter
 {
     internal class FbxLayerElementMaterial : FbxLayerElement
     {
-        public FbxLayerElementMaterial(IntPtr handle)
+        public FbxLayerElementMaterial(nint handle)
             : base(handle)
         {
         }

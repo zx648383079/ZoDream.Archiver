@@ -6,8 +6,8 @@ namespace ZoDream.AutodeskExporter
     internal class FbxAnimLayer : FbxCollection
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxAnimLayer@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
-        public FbxAnimLayer(IntPtr InHandle)
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        public FbxAnimLayer(nint InHandle)
             : base(InHandle)
         {
         }

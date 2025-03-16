@@ -10,17 +10,17 @@ namespace ZoDream.AutodeskExporter
         private static extern void ConstructInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxMatrix@fbxsdk@@QEAA@AEBVFbxAMatrix@1@@Z")]
-        private static extern void ConstructFromAffineInternal(IntPtr pHandle, IntPtr pMatrix);
+        private static extern void ConstructFromAffineInternal(nint pHandle, nint pMatrix);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Get@FbxMatrix@fbxsdk@@QEBANHH@Z")]
-        private static extern double GetInternal(IntPtr pHandle, int row, int column);
+        private static extern double GetInternal(nint pHandle, int row, int column);
 
         /// <summary>
         /// 占用的空间，使用 c++ 调用 sizeof(FbxMatrix)
         /// </summary>
         const ulong SizeOfThis = 0x80;
 
-        public FbxMatrix(IntPtr ptr)
+        public FbxMatrix(nint ptr)
             : base(ptr)
         {
         }

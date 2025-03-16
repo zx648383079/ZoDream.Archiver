@@ -6,15 +6,15 @@ namespace ZoDream.AutodeskExporter
     internal class FbxStatus : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetErrorString@FbxStatus@fbxsdk@@QEBAPEBDXZ")]
-        private static extern IntPtr GetErrorStringInternal(IntPtr handle);
+        private static extern nint GetErrorStringInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCode@FbxStatus@fbxsdk@@QEBA?AW4EStatusCode@12@XZ")]
-        private static extern EStatusCode GetCodeInternal(IntPtr handle);
+        private static extern EStatusCode GetCodeInternal(nint handle);
 
         public string ErrorString => FbxUtils.IntPtrToString(GetErrorStringInternal(Handle));
         public EStatusCode Code => GetCodeInternal(Handle);
 
-        public FbxStatus(IntPtr handle)
+        public FbxStatus(nint handle)
             : base(handle)
         {
         }

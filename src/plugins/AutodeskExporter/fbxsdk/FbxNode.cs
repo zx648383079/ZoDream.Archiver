@@ -24,39 +24,39 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxNode@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxNode@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetNodeAttribute@FbxNode@fbxsdk@@QEAAPEAVFbxNodeAttribute@2@PEAV32@@Z")]
-        private static extern IntPtr SetNodeAttributeInternal(IntPtr InHandle, IntPtr pNodeAttribute);
+        private static extern nint SetNodeAttributeInternal(nint InHandle, nint pNodeAttribute);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddChild@FbxNode@fbxsdk@@QEAA_NPEAV12@@Z")]
-        private static extern bool AddChildInternal(IntPtr InHandle, IntPtr pNode);
+        private static extern bool AddChildInternal(nint InHandle, nint pNode);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetNodeAttribute@FbxNode@fbxsdk@@QEAAPEAVFbxNodeAttribute@2@XZ")]
-        private static extern IntPtr GetNodeAttributeInternal(IntPtr inHandle);
+        private static extern nint GetNodeAttributeInternal(nint inHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetNodeAttributeCount@FbxNode@fbxsdk@@QEBAHXZ")]
-        private static extern int GetNodeAttributeCountInternal(IntPtr handle);
+        private static extern int GetNodeAttributeCountInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetNodeAttributeByIndex@FbxNode@fbxsdk@@QEAAPEAVFbxNodeAttribute@2@H@Z")]
-        private static extern IntPtr GetNodeAttributeByIndexInternal(IntPtr handle, int pIndex);
+        private static extern nint GetNodeAttributeByIndexInternal(nint handle, int pIndex);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?EvaluateGlobalTransform@FbxNode@fbxsdk@@QEAAAEAVFbxAMatrix@2@VFbxTime@2@W4EPivotSet@12@_N2@Z")]
-        private static extern IntPtr EvaluateGlobalTransformInternal(IntPtr inHandle, IntPtr pTime, EPivotSet pPivotSet, bool pApplyTarget, bool pForceEval);
+        private static extern nint EvaluateGlobalTransformInternal(nint inHandle, nint pTime, EPivotSet pPivotSet, bool pApplyTarget, bool pForceEval);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetParent@FbxNode@fbxsdk@@QEAAPEAV12@XZ")]
-        private static extern IntPtr GetParentInternal(IntPtr pHandle);
+        private static extern nint GetParentInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetChildCount@FbxNode@fbxsdk@@QEBAH_N@Z")]
-        private static extern int GetChildCountInternal(IntPtr handle, bool pRecursive);
+        private static extern int GetChildCountInternal(nint handle, bool pRecursive);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetChild@FbxNode@fbxsdk@@QEAAPEAV12@H@Z")]
-        private static extern IntPtr GetChildInternal(IntPtr handle, int pIndex);
+        private static extern nint GetChildInternal(nint handle, int pIndex);
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetPreferedAngle@FbxNode@fbxsdk@@QEAAXVFbxVector4@2@@Z")]
-        private static extern void SetPreferedAngleInternal(IntPtr handle, IntPtr pPreferedAngle);
+        private static extern void SetPreferedAngleInternal(nint handle, nint pPreferedAngle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetMesh@FbxNode@fbxsdk@@QEAAPEAVFbxMesh@2@XZ")]
         private static extern nint GetMeshInternal(nint pHandle);
@@ -91,12 +91,12 @@ namespace ZoDream.AutodeskExporter
             }
         }
 
-        public FbxNode(FbxManager Manager, string pName)
-            : this(CreateFromManager(Manager.Handle, pName))
+        public FbxNode(FbxManager manager, string pName)
+            : this(CreateFromManager(manager.Handle, pName))
         {
         }
 
-        public FbxNode(IntPtr InHandle)
+        public FbxNode(nint InHandle)
             : base(InHandle)
         {
             _lclTranslation = GetPropertyPtr(0x78);
@@ -105,33 +105,33 @@ namespace ZoDream.AutodeskExporter
             _visibility = GetPropertyPtr(0xA8);
         }
 
-        public FbxNode(FbxObject Object, string pName)
-            : this(CreateFromObject(Object.Handle, pName))
+        public FbxNode(FbxObject obj, string pName)
+            : this(CreateFromObject(obj.Handle, pName))
         {
         }
 
         public FbxNodeAttribute? SetNodeAttribute(FbxNodeAttribute pNodeAttribute)
         {
-            IntPtr Ptr = SetNodeAttributeInternal(Handle, pNodeAttribute.Handle);
-            return Ptr == IntPtr.Zero ? null : new FbxNodeAttribute(Ptr);
+            nint Ptr = SetNodeAttributeInternal(Handle, pNodeAttribute.Handle);
+            return Ptr == nint.Zero ? null : new FbxNodeAttribute(Ptr);
         }
 
-        public FbxNodeAttribute? GetNodeAttribute(FbxNodeAttribute.EType type)
-        {
-            for (int i = 0; i < NodeAttributeCount; i++)
-            {
-                IntPtr ptr = GetNodeAttributeByIndexInternal(Handle, i);
-                if (ptr != IntPtr.Zero)
-                {
-                    var attr = new FbxNodeAttribute(ptr);
-                    if (attr.AttributeType == type)
-                    {
-                        return attr;
-                    }
-                }
-            }
-            return null;
-        }
+        //public FbxNodeAttribute? GetNodeAttribute(FbxNodeAttribute.EType type)
+        //{
+        //    for (int i = 0; i < NodeAttributeCount; i++)
+        //    {
+        //        nint ptr = GetNodeAttributeByIndexInternal(Handle, i);
+        //        if (ptr != nint.Zero)
+        //        {
+        //            var attr = new FbxNodeAttribute(ptr);
+        //            if (attr.AttributeType == type)
+        //            {
+        //                return attr;
+        //            }
+        //        }
+        //    }
+        //    return null;
+        //}
 
         public bool AddChild(FbxNode pNode)
         {
@@ -145,25 +145,25 @@ namespace ZoDream.AutodeskExporter
                 time = FbxTime.FBXSDK_TIME_INFINITE;
             }
 
-            IntPtr ptr = EvaluateGlobalTransformInternal(Handle, time.Handle, pivotSet, applyTarget, forceEval);
+            nint ptr = EvaluateGlobalTransformInternal(Handle, time.Handle, pivotSet, applyTarget, forceEval);
             return new FbxAMatrix(ptr);
         }
 
         public FbxNode? GetParent()
         {
-            IntPtr ptr = GetParentInternal(Handle);
-            return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
+            nint ptr = GetParentInternal(Handle);
+            return ptr == nint.Zero ? null : new FbxNode(ptr);
         }
 
         public FbxNode? GetChild(int index)
         {
-            IntPtr ptr = GetChildInternal(Handle, index);
-            return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
+            nint ptr = GetChildInternal(Handle, index);
+            return ptr == nint.Zero ? null : new FbxNode(ptr);
         }
 
         public void SetPreferedAngle(Vector4 pPreferedAngle)
         {
-            IntPtr ptr = FbxDouble4.Construct(pPreferedAngle);
+            nint ptr = FbxDouble4.Construct(pPreferedAngle);
             SetPreferedAngleInternal(Handle, ptr);
             FbxUtils.FbxFree(ptr);
         }

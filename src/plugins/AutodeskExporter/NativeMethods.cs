@@ -14,13 +14,13 @@ namespace ZoDream.AutodeskExporter
             NativeLibrary.SetDllImportResolver(typeof(NativeMethods).Assembly, DllImportResolver);
         }
 
-        static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        static nint DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             if (libraryName == DllName)
             {
                 return NativeLibrary.Load(DllFullPath, assembly, searchPath);
             }
-            return IntPtr.Zero;
+            return nint.Zero;
         }
 
         internal static void Ready() 

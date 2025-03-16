@@ -37,7 +37,7 @@ namespace ZoDream.AutodeskExporter
             _leaveFree = true;
         }
 
-        public FbxArray(IntPtr InHandle)
+        public FbxArray(nint InHandle)
             : base(InHandle)
         {
         }
@@ -84,7 +84,7 @@ namespace ZoDream.AutodeskExporter
         internal T? GetAt(int index)
         {
             var ptr = FbxArray.GetAtInternal(Handle, index);
-            if (ptr == IntPtr.Zero)
+            if (ptr == nint.Zero)
             {
                 return default;
             }

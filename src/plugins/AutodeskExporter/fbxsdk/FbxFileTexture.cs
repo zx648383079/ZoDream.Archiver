@@ -26,7 +26,7 @@ namespace ZoDream.AutodeskExporter
         }
 
 
-        public FbxFileTexture(IntPtr handle)
+        public FbxFileTexture(nint handle)
             : base(handle)
         {
         }

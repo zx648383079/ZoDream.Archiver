@@ -6,27 +6,27 @@ namespace ZoDream.AutodeskExporter
     internal class FbxString
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD@Z")]
-        private static extern void ConstructInternal(IntPtr Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        private static extern void ConstructInternal(nint Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "??4FbxString@fbxsdk@@QEAAAEBV01@PEBD@Z")]
-        private static extern void AssignInternal(IntPtr Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        private static extern void AssignInternal(nint Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
 
-        public static IntPtr Construct(string InitialValue = "")
+        public static nint Construct(string InitialValue = "")
         {
-            IntPtr Ptr = FbxUtils.FbxMalloc(8);
+            nint Ptr = FbxUtils.FbxMalloc(8);
             ConstructInternal(Ptr, InitialValue);
             return Ptr;
         }
 
-        public static void Assign(IntPtr InHandle, string pParam)
+        public static void Assign(nint InHandle, string pParam)
         {
             AssignInternal(InHandle, pParam);
         }
 
-        public static unsafe string Get(IntPtr InHandle)
+        public static unsafe string Get(nint inHandle)
         {
-            IntPtr Ptr = new IntPtr(*(long*)InHandle);
-            return (Ptr != IntPtr.Zero) ? FbxUtils.IntPtrToString(Ptr) : "";
+            nint ptr = new nint(*(long*)inHandle);
+            return (ptr != nint.Zero) ? FbxUtils.IntPtrToString(ptr) : "";
         }
     }
 

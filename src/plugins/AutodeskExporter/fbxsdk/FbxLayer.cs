@@ -6,24 +6,24 @@ namespace ZoDream.AutodeskExporter
     internal class FbxLayer : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetNormals@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementNormal@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetNormalsInternal(IntPtr InHandle, IntPtr pNormals);
+        private static extern void SetNormalsInternal(nint InHandle, nint pNormals);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetTangents@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementTangent@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetTangentsInternal(IntPtr InHandle, IntPtr pTangents);
+        private static extern void SetTangentsInternal(nint InHandle, nint pTangents);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetBinormals@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementBinormal@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetBinormalsInternal(IntPtr InHandle, IntPtr pBinormals);
+        private static extern void SetBinormalsInternal(nint InHandle, nint pBinormals);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetUVs@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementUV@2@W4EType@FbxLayerElement@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetUVsInternal(IntPtr InHandle, IntPtr pUVs, FbxLayerElement.EType pTypeIdentifier);
+        private static extern void SetUVsInternal(nint InHandle, nint pUVs, FbxLayerElement.EType pTypeIdentifier);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetVertexColors@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementVertexColor@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetVertexColorsInternal(IntPtr InHandle, IntPtr pVertexColors);
+        private static extern void SetVertexColorsInternal(nint InHandle, nint pVertexColors);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetUserData@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementUserData@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern void SetUserDataInternal(IntPtr InHandle, IntPtr pUserData);
+        private static extern void SetUserDataInternal(nint InHandle, nint pUserData);
 
-        public FbxLayer(IntPtr InHandle)
+        public FbxLayer(nint InHandle)
             : base(InHandle)
         {
         }

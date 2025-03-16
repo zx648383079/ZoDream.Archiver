@@ -7,24 +7,24 @@ namespace ZoDream.AutodeskExporter
     internal class FbxLayerElementArray : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Add@FbxLayerElementArray@fbxsdk@@QEAAHPEBXW4EFbxType@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern int AddInternal(IntPtr InHandle, IntPtr pItem, EFbxType pValueType);
+        private static extern int AddInternal(nint InHandle, nint pItem, EFbxType pValueType);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCount@FbxLayerElementArray@fbxsdk@@QEBAHXZ")]
-        private static extern int GetCountInternal(IntPtr handle);
+        private static extern int GetCountInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetAt@FbxLayerElementArray@fbxsdk@@QEBA_NHPEAPEAXW4EFbxType@2@@Z")]
-        private static extern bool GetAtInternal(IntPtr handle, int pIndex, IntPtr pItem, EFbxType pValueType);
+        private static extern bool GetAtInternal(nint handle, int pIndex, nint pItem, EFbxType pValueType);
 
         public int Count => GetCountInternal(Handle);
 
-        public FbxLayerElementArray(IntPtr InHandle)
+        public FbxLayerElementArray(nint InHandle)
             : base(InHandle)
         {
         }
 
         public int Add(double x, double y, double z, double w = 0.0)
         {
-            IntPtr ptr = FbxUtils.FbxMalloc(32);
+            nint ptr = FbxUtils.FbxMalloc(32);
 
             Marshal.WriteInt64(ptr, 0, BitConverter.ToInt64(BitConverter.GetBytes(x), 0));
             Marshal.WriteInt64(ptr, 8, BitConverter.ToInt64(BitConverter.GetBytes(y), 0));
@@ -39,7 +39,7 @@ namespace ZoDream.AutodeskExporter
 
         public int Add(double x, double y)
         {
-            IntPtr ptr = FbxUtils.FbxMalloc(16);
+            nint ptr = FbxUtils.FbxMalloc(16);
 
             Marshal.WriteInt64(ptr, 0, BitConverter.ToInt64(BitConverter.GetBytes(x), 0));
             Marshal.WriteInt64(ptr, 8, BitConverter.ToInt64(BitConverter.GetBytes(y), 0));
@@ -52,7 +52,7 @@ namespace ZoDream.AutodeskExporter
 
         public int Add(int a)
         {
-            IntPtr ptr = FbxUtils.FbxMalloc(4);
+            nint ptr = FbxUtils.FbxMalloc(4);
             Marshal.WriteInt32(ptr, 0, a);
 
             int idx = AddInternal(Handle, ptr, EFbxType.eFbxInt);
@@ -64,7 +64,7 @@ namespace ZoDream.AutodeskExporter
         public void GetAt(int index, out Vector4 outValue)
         {
             outValue = new Vector4();
-            IntPtr ptr = GetAt(index, EFbxType.eFbxDouble4);
+            nint ptr = GetAt(index, EFbxType.eFbxDouble4);
 
             outValue.X = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 0));
             outValue.Y = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 8));
@@ -76,7 +76,7 @@ namespace ZoDream.AutodeskExporter
         public void GetAt(int index, out Vector3 outValue)
         {
             outValue = new Vector3();
-            IntPtr ptr = GetAt(index, EFbxType.eFbxDouble3);
+            nint ptr = GetAt(index, EFbxType.eFbxDouble3);
 
             outValue.X = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 0));
             outValue.Y = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 8));
@@ -87,7 +87,7 @@ namespace ZoDream.AutodeskExporter
         public void GetAt(int index, out Vector2 outValue)
         {
             outValue = new Vector2();
-            IntPtr ptr = GetAt(index, EFbxType.eFbxDouble2);
+            nint ptr = GetAt(index, EFbxType.eFbxDouble2);
 
             outValue.X = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 0));
             outValue.Y = (float)BitConverter.Int64BitsToDouble(Marshal.ReadInt64(ptr, 8));
@@ -96,12 +96,12 @@ namespace ZoDream.AutodeskExporter
 
         public void GetAt(int index, out int outValue)
         {
-            IntPtr ptr = GetAt(index, EFbxType.eFbxInt);
+            nint ptr = GetAt(index, EFbxType.eFbxInt);
             outValue = Marshal.ReadInt32(ptr);
             FbxUtils.FbxFree(ptr);
         }
 
-        private unsafe IntPtr GetAt(int index, EFbxType type)
+        private unsafe nint GetAt(int index, EFbxType type)
         {
             ulong sizeToAlloc = 0;
             switch (type)
@@ -112,10 +112,10 @@ namespace ZoDream.AutodeskExporter
                 case EFbxType.eFbxInt: sizeToAlloc = 4; break;
             }
 
-            IntPtr ptr = FbxUtils.FbxMalloc(sizeToAlloc);
-            IntPtr ptrPtr = new IntPtr((void*)&ptr);
+            nint ptr = FbxUtils.FbxMalloc(sizeToAlloc);
+            nint ptrPtr = new nint((void*)&ptr);
             GetAtInternal(Handle, index, ptrPtr, type);
-            ptrPtr = IntPtr.Zero;
+            ptrPtr = nint.Zero;
 
             return ptr;
         }

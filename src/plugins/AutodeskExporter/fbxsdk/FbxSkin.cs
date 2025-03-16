@@ -7,19 +7,19 @@ namespace ZoDream.AutodeskExporter
     internal class FbxSkin : FbxDeformer
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSkin@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSkin@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddCluster@FbxSkin@fbxsdk@@QEAA_NPEAVFbxCluster@2@@Z")]
-        private static extern bool AddClusterInternal(IntPtr pHandle, IntPtr pCluster);
+        private static extern bool AddClusterInternal(nint pHandle, nint pCluster);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetClusterCount@FbxSkin@fbxsdk@@QEBAHXZ")]
-        private static extern int GetClusterCountInternal(IntPtr pHandle);
+        private static extern int GetClusterCountInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCluster@FbxSkin@fbxsdk@@QEAAPEAVFbxCluster@2@H@Z")]
-        private static extern IntPtr GetClusterInternal(IntPtr pHandle, int pIndex);
+        private static extern nint GetClusterInternal(nint pHandle, int pIndex);
 
         public int ClusterCount => GetClusterCountInternal(Handle);
 
@@ -36,7 +36,7 @@ namespace ZoDream.AutodeskExporter
             }
         }
 
-        public FbxSkin(IntPtr InHandle)
+        public FbxSkin(nint InHandle)
             : base(InHandle)
         {
         }
@@ -63,8 +63,8 @@ namespace ZoDream.AutodeskExporter
 
         public FbxCluster? GetCluster(int index)
         {
-            IntPtr ptr = GetClusterInternal(Handle, index);
-            return ptr == IntPtr.Zero ? null : new FbxCluster(ptr);
+            nint ptr = GetClusterInternal(Handle, index);
+            return ptr == nint.Zero ? null : new FbxCluster(ptr);
         }
     }
 

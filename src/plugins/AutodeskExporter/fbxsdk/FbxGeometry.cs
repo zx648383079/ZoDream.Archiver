@@ -6,18 +6,18 @@ namespace ZoDream.AutodeskExporter
     internal class FbxGeometry : FbxGeometryBase
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddDeformer@FbxGeometry@fbxsdk@@QEAAHPEAVFbxDeformer@2@@Z")]
-        private static extern int AddDeformerInternal(IntPtr pHandle, IntPtr pDeformer);
+        private static extern int AddDeformerInternal(nint pHandle, nint pDeformer);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetDeformerCount@FbxGeometry@fbxsdk@@QEBAHW4EDeformerType@FbxDeformer@2@@Z")]
-        private static extern int GetDeformerCountInternal(IntPtr pHandle, FbxDeformer.EDeformerType pType);
+        private static extern int GetDeformerCountInternal(nint pHandle, FbxDeformer.EDeformerType pType);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetDeformer@FbxGeometry@fbxsdk@@QEBAPEAVFbxDeformer@2@HW4EDeformerType@32@PEAVFbxStatus@2@@Z")]
-        private static extern IntPtr GetDeformerInternal(IntPtr pHandle, int pIndex, FbxDeformer.EDeformerType pType, IntPtr pStatus);
+        private static extern nint GetDeformerInternal(nint pHandle, int pIndex, FbxDeformer.EDeformerType pType, nint pStatus);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetShapeChannel@FbxGeometry@fbxsdk@@QEAAPEAVFbxAnimCurve@2@HHPEAVFbxAnimLayer@2@_NPEAVFbxStatus@2@@Z")]
         private static extern nint GetShapeChannelInternal(nint pHandle, int pBlendShapeIndex, int pBlendShapeChannelIndex, nint handle, bool pCreateAsNeeded);
 
-        public FbxGeometry(IntPtr InHandle)
+        public FbxGeometry(nint InHandle)
             : base(InHandle)
         {
         }
@@ -42,8 +42,8 @@ namespace ZoDream.AutodeskExporter
         public T? GetDeformer<T>(int index, FbxDeformer.EDeformerType type)
             where T : FbxDeformer
         {
-            IntPtr ptr = GetDeformerInternal(Handle, index, type, IntPtr.Zero);
-            return ptr == IntPtr.Zero ? null : (T)Activator.CreateInstance(typeof(T), ptr);
+            nint ptr = GetDeformerInternal(Handle, index, type, nint.Zero);
+            return ptr == nint.Zero ? null : (T)Activator.CreateInstance(typeof(T), ptr);
         }
     }
 

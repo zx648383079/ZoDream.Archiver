@@ -6,13 +6,13 @@ namespace ZoDream.AutodeskExporter
     internal class FbxIOSettings : FbxObject
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxIOSettings@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateInternal(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateInternal(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetBoolProp@FbxIOSettings@fbxsdk@@QEAAXPEBD_N@Z")]
-        private static extern void SetBoolPropInternal(IntPtr InHandle, [MarshalAs(UnmanagedType.LPStr)] string pName, bool pValue);
+        private static extern void SetBoolPropInternal(nint InHandle, [MarshalAs(UnmanagedType.LPStr)] string pName, bool pValue);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetBoolProp@FbxIOSettings@fbxsdk@@QEBA_NPEBD_N@Z")]
-        private static extern bool GetBoolPropInternal(IntPtr InHandle, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern bool GetBoolPropInternal(nint InHandle, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         #region -- Strings --
 
@@ -40,7 +40,7 @@ namespace ZoDream.AutodeskExporter
         #endregion
 
         public FbxIOSettings() { }
-        public FbxIOSettings(IntPtr InHandle)
+        public FbxIOSettings(nint InHandle)
             : base(InHandle)
         {
         }

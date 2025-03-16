@@ -6,7 +6,7 @@ namespace ZoDream.AutodeskExporter
     internal class FbxDocumentInfo : FbxObject
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxDocumentInfo@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
-        private static extern IntPtr CreateFromManager(IntPtr pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromManager(nint pManager, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
         private readonly nint _mOriginal_ApplicationVendor; // FbxPropertyT<FbxString>
         private readonly nint _mOriginal_ApplicationName; // FbxPropertyT<FbxString>
@@ -19,7 +19,7 @@ namespace ZoDream.AutodeskExporter
         private readonly nint _mTitle; // FbxString
         private readonly nint _mSubject; // FbxString
 
-        public FbxDocumentInfo(IntPtr handle)
+        public FbxDocumentInfo(nint handle)
             : base(handle)
         {
             _mOriginal_ApplicationVendor = GetPropertyPtr(0xA8);

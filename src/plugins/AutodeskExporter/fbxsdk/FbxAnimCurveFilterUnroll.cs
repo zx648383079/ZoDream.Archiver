@@ -23,7 +23,7 @@ namespace ZoDream.AutodeskExporter
       
 
 
-        public FbxAnimCurveFilterUnroll(IntPtr InHandle)
+        public FbxAnimCurveFilterUnroll(nint InHandle)
             : base(InHandle)
         {
         }
@@ -48,7 +48,7 @@ namespace ZoDream.AutodeskExporter
 
         internal void Apply(FbxAnimCurve[] items)
         {
-            var ptr = IntPtr.Zero;
+            var ptr = nint.Zero;
             ApplyInternal(Handle, ptr, items.Length);
         }
 

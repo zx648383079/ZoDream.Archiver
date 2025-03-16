@@ -291,7 +291,7 @@ namespace ZoDream.AutodeskExporter
                         }
                         else
                         {
-                            pClusterArray.Add(new FbxCluster(IntPtr.Zero));
+                            pClusterArray.Add(new FbxCluster(nint.Zero));
                         }
                     }
                 }
@@ -303,24 +303,27 @@ namespace ZoDream.AutodeskExporter
 
                 if (importedMesh.hasNormal)
                 {
-                    var puv = mesh.CreateElementUV("UV0", FbxLayerElement.EType.eTextureDiffuse);
+                    var puv = mesh.CreateElementNormal();
                     puv.MappingMode = EMappingMode.eByControlPoint;
                     puv.ReferenceMode = EReferenceMode.eDirect;
                 }
 
                 for (int i = 0; i < importedMesh.hasUV.Length; i++)
                 {
-                    if (!importedMesh.hasUV[i]) { continue; }
+                    if (!importedMesh.hasUV[i]) 
+                    { 
+                        continue;
+                    }
 
                     if (i == 1 && !exportAllUvsAsDiffuseMaps)
                     {
-                        var puv = mesh.CreateElementUV("UV1", FbxLayerElement.EType.eTextureNormalMap);
+                        var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureNormalMap);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
                     }
                     else
                     {
-                        var puv = mesh.CreateElementUV("UV" + i, FbxLayerElement.EType.eTextureDiffuse);
+                        var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureDiffuse);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
                     }
@@ -775,8 +778,6 @@ namespace ZoDream.AutodeskExporter
             _exporter?.Dispose();
             _setting?.Dispose();
             _manager.Dispose();
-            
-            
         }
     }
 }

@@ -6,15 +6,15 @@ namespace ZoDream.AutodeskExporter
     internal class FbxIOPluginRegistry : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetWriterFormatCount@FbxIOPluginRegistry@fbxsdk@@QEBAHXZ", CallingConvention = CallingConvention.ThisCall)]
-        private static extern int GetWriterFormatCountInternal(IntPtr InHandle);
+        private static extern int GetWriterFormatCountInternal(nint InHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?WriterIsFBX@FbxIOPluginRegistry@fbxsdk@@QEBA_NH@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern bool WriterIsFBXInternal(IntPtr InHandle, int pFileFormat);
+        private static extern bool WriterIsFBXInternal(nint InHandle, int pFileFormat);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetWriterFormatDescription@FbxIOPluginRegistry@fbxsdk@@QEBAPEBDH@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern IntPtr GetWriterFormatDescriptionInternal(IntPtr InHandle, int pFileFormat);
+        private static extern nint GetWriterFormatDescriptionInternal(nint InHandle, int pFileFormat);
 
-        public FbxIOPluginRegistry(IntPtr InHandle)
+        public FbxIOPluginRegistry(nint InHandle)
             : base(InHandle)
         {
         }
@@ -24,8 +24,8 @@ namespace ZoDream.AutodeskExporter
 
         public string GetWriterFormatDescription(int pFileFormat)
         {
-            IntPtr Ptr = GetWriterFormatDescriptionInternal(Handle, pFileFormat);
-            if (Ptr == IntPtr.Zero)
+            nint Ptr = GetWriterFormatDescriptionInternal(Handle, pFileFormat);
+            if (Ptr == nint.Zero)
                 return "";
 
             return FbxUtils.IntPtrToString(Ptr);

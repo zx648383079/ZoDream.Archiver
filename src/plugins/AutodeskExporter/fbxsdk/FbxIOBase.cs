@@ -6,7 +6,7 @@ namespace ZoDream.AutodeskExporter
     internal class FbxIOBase : FbxObject
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetStatus@FbxIOBase@fbxsdk@@QEAAAEAVFbxStatus@2@XZ")]
-        private static extern IntPtr GetStatusInternal(IntPtr handle);
+        private static extern nint GetStatusInternal(nint handle);
 
         public FbxStatus Status => new FbxStatus(GetStatusInternal(Handle));
 

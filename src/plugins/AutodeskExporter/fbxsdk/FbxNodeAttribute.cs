@@ -33,19 +33,18 @@ namespace ZoDream.AutodeskExporter
         };
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetNodeCount@FbxNodeAttribute@fbxsdk@@QEBAHXZ")]
-        private static extern int GetNodeCountInternal(IntPtr handle);
+        private static extern int GetNodeCountInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetNode@FbxNodeAttribute@fbxsdk@@QEBAPEAVFbxNode@2@H@Z")]
-        private static extern IntPtr GetNodeInternal(IntPtr handle, int pIndex);
+        private static extern nint GetNodeInternal(nint handle, int pIndex);
 
-        private delegate EType GetAttributeTypeDelegate(IntPtr handle);
-        private GetAttributeTypeDelegate? GetAttributeTypeInternal;
+        private delegate EType GetAttributeTypeDelegate(nint handle);
+        // private GetAttributeTypeDelegate? GetAttributeTypeInternal;
 
 
         private readonly nint _color;
 
-        public EType AttributeType => GetAttributeTypeInternal is not null ?
-            GetAttributeTypeInternal(Handle) : EType.eUnknown;
+        //public EType AttributeType => GetAttributeTypeInternal is not null ? GetAttributeTypeInternal(Handle) : EType.eUnknown;
         public int NodeCount => GetNodeCountInternal(Handle);
 
         public Vector4 Color {
@@ -56,10 +55,10 @@ namespace ZoDream.AutodeskExporter
         }
 
         public FbxNodeAttribute() { }
-        public FbxNodeAttribute(IntPtr InHandle)
+        public FbxNodeAttribute(nint InHandle)
             : base(InHandle)
         {
-            GetAttributeTypeInternal = Marshal.GetDelegateForFunctionPointer<GetAttributeTypeDelegate>(GetPropertyPtr(0xB8));
+            // GetAttributeTypeInternal = Marshal.GetDelegateForFunctionPointer<GetAttributeTypeDelegate>(GetPropertyPtr(0xB8));
             _color = GetPropertyPtr(0x78);
         }
 
@@ -70,7 +69,7 @@ namespace ZoDream.AutodeskExporter
                 return null;
             }
             var ptr = GetNodeInternal(Handle, index);
-            return ptr == IntPtr.Zero ? null : new FbxNode(ptr);
+            return ptr == nint.Zero ? null : new FbxNode(ptr);
         }
     }
 

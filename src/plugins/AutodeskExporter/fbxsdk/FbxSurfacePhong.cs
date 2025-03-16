@@ -22,7 +22,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxSurfacePhong(IntPtr handle)
+        public FbxSurfacePhong(nint handle)
             : base(handle)
         {
             _specular = GetPropertyPtr(0x188);

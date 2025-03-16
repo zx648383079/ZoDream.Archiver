@@ -6,35 +6,36 @@ namespace ZoDream.AutodeskExporter
     internal static class FbxUtils
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?FbxMalloc@fbxsdk@@YAPEAX_K@Z")]
-        private static extern IntPtr FbxMallocInternal(ulong size);
+        private static extern nint FbxMallocInternal(ulong size);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?FbxFree@fbxsdk@@YAXPEAX@Z")]
-        private static extern void FbxFreeInternal(IntPtr ptr);
+        private static extern void FbxFreeInternal(nint ptr);
 
-        public static IntPtr FbxMalloc(ulong size)
+        public static nint FbxMalloc(ulong size)
         {
             //return Marshal.AllocHGlobal((int)size);
             return FbxMallocInternal(size);
         }
 
-        public static void FbxFree(IntPtr ptr)
+        public static void FbxFree(nint ptr)
         {
             // Marshal.FreeHGlobal(ptr);
             FbxFreeInternal(ptr);
         }
 
-        public static unsafe string IntPtrToString(IntPtr inPtr)
+        public static unsafe string IntPtrToString(nint inPtr)
         {
-            string Str = "";
-            byte* b = (byte*)inPtr;
+            return Marshal.PtrToStringAuto(inPtr);
+            //string Str = "";
+            //byte* b = (byte*)inPtr;
 
-            while ((*b) != 0x00)
-            {
-                Str += (char)(*b);
-                b++;
-            }
+            //while ((*b) != 0x00)
+            //{
+            //    Str += (char)(*b);
+            //    b++;
+            //}
 
-            return Str;
+            //return Str;
         }
     }
 }

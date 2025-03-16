@@ -14,8 +14,6 @@ namespace ZoDream.KhronosExporter
         [JsonIgnore]
         private readonly Dictionary<int, Stream> _bufferViewCacheItems = [];
 
-        [JsonIgnore]
-        private readonly Dictionary<string, int> _bufferViewMaps = [];
         private Stream GetStream(int bufferViewIndex)
         {
             if (_bufferViewCacheItems.TryGetValue(bufferViewIndex, out var stream))
@@ -40,14 +38,9 @@ namespace ZoDream.KhronosExporter
 
         private (int, int) TryCreateBufferView(string name, Func<BufferView> cb)
         {
-            if (_bufferViewMaps.TryGetValue(name, out var bufferViewIndex))
-            {
-                return (bufferViewIndex, BufferViews[bufferViewIndex].ByteLength);
-            }
             var buffer = cb.Invoke();
             buffer.Name = name;
-            bufferViewIndex = BufferViews.AddWithIndex(buffer);
-            _bufferViewMaps.Add(name, bufferViewIndex);
+            var bufferViewIndex = BufferViews.AddWithIndex(buffer);
             return (bufferViewIndex, buffer.ByteLength);
         }
 
@@ -82,7 +75,6 @@ namespace ZoDream.KhronosExporter
             output.Flush();
             buffer.ByteLength = (int)output.Length;
             _bufferViewCacheItems.Clear();
-            _bufferViewMaps.Clear();
         }
 
         public void FlushBuffer()

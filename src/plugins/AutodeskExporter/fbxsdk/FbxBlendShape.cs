@@ -8,7 +8,7 @@ namespace ZoDream.AutodeskExporter
 
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxBlendShape@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
-        private static extern IntPtr CreateFromObject(IntPtr pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
+        private static extern nint CreateFromObject(nint pObject, [MarshalAs(UnmanagedType.LPStr)] string pName);
         
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetBlendShapeChannelCount@FbxBlendShape@fbxsdk@@QEBAHXZ")]
         private static extern int GetBlendShapeChannelCountInternal(nint pHandle);
@@ -22,7 +22,7 @@ namespace ZoDream.AutodeskExporter
         public int BlendShapeChannelCount => GetBlendShapeChannelCountInternal(Handle);
 
 
-        public FbxBlendShape(IntPtr InHandle)
+        public FbxBlendShape(nint InHandle)
             : base(InHandle)
         {
         }

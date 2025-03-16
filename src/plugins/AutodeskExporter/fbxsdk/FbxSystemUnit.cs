@@ -6,7 +6,7 @@ namespace ZoDream.AutodeskExporter
     internal class FbxSystemUnit : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetScaleFactor@FbxSystemUnit@fbxsdk@@QEBANXZ")]
-        private static extern double GetScaleFactorInternal(IntPtr InHandle);
+        private static extern double GetScaleFactorInternal(nint InHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxSystemUnit@fbxsdk@@QEAA@NN@Z")]
         private static extern void ConstructInternal(nint pHandle, double pScaleFactor, double pMultiplier);
@@ -29,7 +29,7 @@ namespace ZoDream.AutodeskExporter
             ConstructInternal(Handle, pScaleFactor, pMultiplier);
             _leaveFree = true;
         }
-        public FbxSystemUnit(IntPtr InHandle)
+        public FbxSystemUnit(nint InHandle)
             : base(InHandle)
         {
         }
@@ -45,7 +45,7 @@ namespace ZoDream.AutodeskExporter
         {
             if (OutUnit == null)
             {
-                IntPtr Module = NativeMethods.LoadLibrary(NativeMethods.DllFullPath);
+                nint Module = NativeMethods.LoadLibrary(NativeMethods.DllFullPath);
                 OutUnit = new FbxSystemUnit(NativeMethods.GetProcAddress(Module, Sig));
                 NativeMethods.FreeLibrary(Module);
             }

@@ -6,13 +6,13 @@ namespace ZoDream.AutodeskExporter
     internal class FbxGeometryConverter : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxGeometryConverter@fbxsdk@@QEAA@PEAVFbxManager@1@@Z")]
-        private static extern void CreateFromManager(IntPtr handle, IntPtr manager);
+        private static extern void CreateFromManager(nint handle, nint manager);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "??1FbxGeometryConverter@fbxsdk@@QEAA@XZ")]
-        private static extern void DisposeInternal(IntPtr handle);
+        private static extern void DisposeInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?ComputeEdgeSmoothingFromNormals@FbxGeometryConverter@fbxsdk@@QEBA_NPEAVFbxMesh@2@@Z")]
-        private static extern bool ComputeEdgeSmoothingFromNormalsInternal(IntPtr handle, IntPtr mesh);
+        private static extern bool ComputeEdgeSmoothingFromNormalsInternal(nint handle, nint mesh);
 
         public FbxGeometryConverter(FbxManager mgr)
             : base(FbxUtils.FbxMalloc(16))

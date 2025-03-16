@@ -6,10 +6,10 @@ namespace ZoDream.AutodeskExporter
     internal class FbxCollection : FbxObject
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?AddMember@FbxCollection@fbxsdk@@UEAA_NPEAVFbxObject@2@@Z")]
-        private static extern void AddMemberInternal(IntPtr pObject, nint layer);
+        private static extern void AddMemberInternal(nint pObject, nint layer);
 
         public FbxCollection() { }
-        public FbxCollection(IntPtr InHandle)
+        public FbxCollection(nint InHandle)
             : base(InHandle)
         {
         }
