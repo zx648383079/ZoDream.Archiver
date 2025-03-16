@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -34,9 +33,9 @@ namespace ZoDream.AutodeskExporter
 
         public FbxManager()
         {
-            _leaveFree = true;
             NativeMethods.Ready();
             Handle = CreateInternal();
+            _leaveFree = true;
         }
 
 
@@ -61,8 +60,11 @@ namespace ZoDream.AutodeskExporter
 
         protected override void Dispose(bool bDisposing)
         {
-            DestroyInternal(Handle);
-            base.Dispose(bDisposing);
+            if (bDisposing)
+            {
+                DestroyInternal(Handle);
+            }
+            // base.Dispose(bDisposing);
         }
     }
 

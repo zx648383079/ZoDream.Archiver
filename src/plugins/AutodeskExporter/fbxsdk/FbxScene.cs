@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -56,5 +55,6 @@ namespace ZoDream.AutodeskExporter
         {
             return AddPoseInternal(Handle, pose.Handle);
         }
+
     }
 }

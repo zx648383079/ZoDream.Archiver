@@ -22,6 +22,8 @@ namespace ZoDream.AutodeskExporter
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetUserData@FbxLayer@fbxsdk@@QEAAXPEAVFbxLayerElementUserData@2@@Z", CallingConvention = CallingConvention.ThisCall)]
         private static extern void SetUserDataInternal(nint InHandle, nint pUserData);
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetUVs@FbxLayer@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@W4EType@FbxLayerElement@2@@Z")]
+        private static extern nint GetUvsInternal(nint handle, FbxLayerElement.EType eType);
 
         public FbxLayer(nint InHandle)
             : base(InHandle)
@@ -57,6 +59,18 @@ namespace ZoDream.AutodeskExporter
         {
             SetUserDataInternal(Handle, pUserData.Handle);
         }
+
+        public T? GetUvs<T>(FbxLayerElement.EType eType)
+            where T : FbxLayerElement
+        {
+            var ptr = GetUvsInternal(Handle, eType);
+            if (ptr == nint.Zero)
+            {
+                return null;
+            }
+            return (T)Activator.CreateInstance(typeof(T), ptr);
+        }
+
     }
 
 }

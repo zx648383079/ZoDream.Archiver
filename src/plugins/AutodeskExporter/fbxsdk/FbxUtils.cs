@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -25,17 +26,24 @@ namespace ZoDream.AutodeskExporter
 
         public static unsafe string IntPtrToString(nint inPtr)
         {
-            return Marshal.PtrToStringAuto(inPtr);
-            //string Str = "";
-            //byte* b = (byte*)inPtr;
+            if (inPtr == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+            var ptr = (byte*)inPtr;
+            var length = 0;
+            while (ptr[length] != '\0')
+            {
+                length++;
+            }
+            var buffer = new byte[length];
+            Marshal.Copy(inPtr, buffer, 0, length);
+            return Encoding.ASCII.GetString(buffer);
+        }
 
-            //while ((*b) != 0x00)
-            //{
-            //    Str += (char)(*b);
-            //    b++;
-            //}
-
-            //return Str;
+        public static unsafe string IntPtrToString(char* ptr, int length)
+        {
+            return new string(ptr, 0, length);
         }
     }
 }

@@ -37,7 +37,6 @@ namespace ZoDream.AutodeskExporter
 
                 PrepareMaterials();
 
-                // TODO some bugs
                 ExportMeshFrames(imported.RootFrame, meshFrames);
             }
             else

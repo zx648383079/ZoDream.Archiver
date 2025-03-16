@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -326,8 +325,11 @@ namespace ZoDream.AutodeskExporter
                         var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureDiffuse);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
+
                     }
                 }
+
+                
 
                 if (importedMesh.hasTangent)
                 {
@@ -521,25 +523,6 @@ namespace ZoDream.AutodeskExporter
             {
                 pClusterArray?.Dispose();
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe void CopyMatrix4x4(in Matrix4x4 matrix, float* buffer)
-        {
-            for (var m = 0; m < 4; m += 1)
-            {
-                for (var n = 0; n < 4; n += 1)
-                {
-                    var index = IndexFrom4x4(m, n);
-                    buffer[index] = matrix[m, n];
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int IndexFrom4x4(int m, int n)
-        {
-            return 4 * m + n;
         }
 
         internal void ExportAnimations(FbxImportedFrame rootFrame, List<FbxImportedKeyframedAnimation> animationList, bool eulerFilter, float filterPrecision)
@@ -773,10 +756,10 @@ namespace ZoDream.AutodeskExporter
             _createdMaterials.Clear();
             _createdTextures.Clear();
 
-            _pose?.Dispose();
-            _scene?.Dispose();
-            _exporter?.Dispose();
-            _setting?.Dispose();
+            // _pose?.Dispose();
+            // _scene?.Dispose();
+            // _exporter?.Dispose();
+            // _setting?.Dispose();
             _manager.Dispose();
         }
     }

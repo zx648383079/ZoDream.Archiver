@@ -33,8 +33,11 @@ namespace ZoDream.AutodeskExporter
 
         protected override void Dispose(bool bDisposing)
         {
-            DestroyInternal(Handle, false);
-            base.Dispose(bDisposing);
+            if (bDisposing)
+            {
+                DestroyInternal(Handle, false);
+            }
+            // base.Dispose(bDisposing);
         }
 
         public override int GetHashCode()

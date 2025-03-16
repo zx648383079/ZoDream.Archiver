@@ -5,17 +5,27 @@ namespace ZoDream.AutodeskExporter
 {
     internal class FbxString
     {
-        [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD@Z")]
-        private static extern void ConstructInternal(nint Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD@Z")]
+        private static extern void ConstructInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD_K@Z")]
+        private static extern void ConstructInternal(nint handle, string pParam, ulong size);
 
-        [DllImport(NativeMethods.DllName, EntryPoint = "??4FbxString@fbxsdk@@QEAAAEBV01@PEBD@Z")]
-        private static extern void AssignInternal(nint Handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??4FbxString@fbxsdk@@QEAAAEBV01@PEBD@Z")]
+        private static extern void AssignInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "?AssignCopy@FbxString@fbxsdk@@AEAA_N_KPEBD@Z")]
+        private static extern void AssignInternal(nint handle, ulong size, string pParam);
 
-        public static nint Construct(string InitialValue = "")
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetLen@FbxString@fbxsdk@@QEBA_KXZ")]
+        private static extern ulong LenInternal(nint handle);
+
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??8FbxString@fbxsdk@@QEBA_NPEBD@Z")]
+        private static extern bool CompareInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
+
+        public static nint Construct(string initialValue = "")
         {
-            nint Ptr = FbxUtils.FbxMalloc(8);
-            ConstructInternal(Ptr, InitialValue);
-            return Ptr;
+            nint ptr = FbxUtils.FbxMalloc(8);
+            ConstructInternal(ptr, initialValue);
+            return ptr;
         }
 
         public static void Assign(nint InHandle, string pParam)
@@ -25,8 +35,12 @@ namespace ZoDream.AutodeskExporter
 
         public static unsafe string Get(nint inHandle)
         {
-            nint ptr = new nint(*(long*)inHandle);
-            return (ptr != nint.Zero) ? FbxUtils.IntPtrToString(ptr) : "";
+            return FbxUtils.IntPtrToString(*(nint*)inHandle);
+        }
+
+        public static bool Compare(nint namePtr, string value)
+        {
+            return CompareInternal(namePtr, value);
         }
     }
 
