@@ -7,10 +7,10 @@ namespace ZoDream.AutodeskExporter
 
     internal class FbxArray
     {
-        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxArray@_N$0BA@@fbxsdk@@QEAA@XZ")]
-        internal static extern nint ConstructInternal();
-        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxArray@_N$0BA@@fbxsdk@@QEAA@H@Z")]
-        internal static extern nint ConstructInternal(int capacity);
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxArray@PEA_J$0BA@@fbxsdk@@QEAA@XZ")]
+        internal static extern void ConstructInternal(nint pHandle);
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxArray@PEA_J$0BA@@fbxsdk@@QEAA@H@Z")]
+        internal static extern void ConstructInternal(nint pHandle, int capacity);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetAt@?$FbxArray@_N$0BA@@fbxsdk@@QEBA_NH@Z")]
         internal static extern nint GetAtInternal(nint pHandle, int index);
@@ -20,21 +20,26 @@ namespace ZoDream.AutodeskExporter
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Add@?$FbxArray@C$0BA@@fbxsdk@@QEAAHAEBC@Z")]
         internal static extern nint AddInternal(nint pHandle, nint data);
+
+        /// <summary>
+        /// 占用的空间，使用 c++ 调用 sizeof(FbxMatrix)
+        /// </summary>
+        internal const ulong SizeOfThis = 0x8;
     }
 
     internal class FbxArray<T> : FbxNative
     {
 
         public FbxArray(int capacity)
-            : this(FbxArray.ConstructInternal(capacity))
+            : base(FbxUtils.FbxMalloc(FbxArray.SizeOfThis))
         {
-
+            FbxArray.ConstructInternal(Handle, capacity);
+            _leaveFree = true;
         }
 
         public FbxArray(IntPtr InHandle)
             : base(InHandle)
         {
-            _leaveFree = true;
         }
 
         public T this[int index] {

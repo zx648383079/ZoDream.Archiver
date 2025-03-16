@@ -8,21 +8,30 @@ namespace ZoDream.AutodeskExporter
     internal class FbxAMatrix : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxAMatrix@fbxsdk@@QEAA@XZ")]
-        private static extern nint ConstructInternal();
+        private static extern void ConstructInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Inverse@FbxAMatrix@fbxsdk@@QEBA?AV12@XZ")]
         private static extern nint InverseInternal(nint pHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "??DFbxAMatrix@fbxsdk@@QEBA?AV01@AEBV01@@Z")]
         private static extern nint MultiplyInternal(nint pHandle, nint pOther);
+
+
+        /// <summary>
+        /// 占用的空间，使用 c++ 调用 sizeof(FbxMatrix)
+        /// </summary>
+        const ulong SizeOfThis = 0x80;
+
         public FbxAMatrix(IntPtr ptr)
             : base(ptr)
         {
         }
 
         public FbxAMatrix(Matrix4x4 matrix)
-            : base(ConstructInternal())
+            : base(FbxUtils.FbxMalloc(SizeOfThis))
         {
+            ConstructInternal(Handle);
+            _leaveFree = true;
             Set(matrix);
         }
 

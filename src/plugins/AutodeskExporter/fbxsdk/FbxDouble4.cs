@@ -6,7 +6,7 @@ namespace ZoDream.AutodeskExporter
 {
     internal class FbxDouble4
     {
-        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxVectorTemplate4@C@fbxsdk@@QEAA@XZ")]
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0?$FbxVectorTemplate4@N@fbxsdk@@QEAA@NNNN@Z")]
         private static extern void ConstructInternal(IntPtr handle, double pValue1, double pValue2, double pValue3, double pValue4);
 
         public static IntPtr Construct(Vector4 value)

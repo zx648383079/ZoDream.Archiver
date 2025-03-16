@@ -27,6 +27,6 @@
         eFbxBlob,               //!< Binary data block type.
         eFbxDistance,           //!< Distance.
         eFbxDateTime,           //!< Date and time.
-        eFbxTypeCount = 24  //!< Indicates the number of type identifiers constants.
+        eFbxTypeCount = 24	//!< Indicates the number of type identifiers constants.
     };
 }

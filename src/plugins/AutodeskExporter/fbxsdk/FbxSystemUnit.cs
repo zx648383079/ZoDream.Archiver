@@ -8,8 +8,13 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetScaleFactor@FbxSystemUnit@fbxsdk@@QEBANXZ")]
         private static extern double GetScaleFactorInternal(IntPtr InHandle);
 
-        [DllImport(NativeMethods.DllName, EntryPoint = "??1FbxSystemUnit@fbxsdk@@QEAA@XZ")]
-        private static extern IntPtr CreateInternal(double pScaleFactor, double pMultiplier);
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxSystemUnit@fbxsdk@@QEAA@NN@Z")]
+        private static extern void ConstructInternal(nint pHandle, double pScaleFactor, double pMultiplier);
+
+        /// <summary>
+        /// 占用的空间，使用 c++ 调用 sizeof(FbxSystemUnit)
+        /// </summary>
+        const ulong SizeOfThis = 0x10;
 
         private static FbxSystemUnit? mMillimeters;
         private static FbxSystemUnit? mCentimeters;
@@ -19,9 +24,10 @@ namespace ZoDream.AutodeskExporter
         public FbxSystemUnit() { }
 
         public FbxSystemUnit(double pScaleFactor, double pMultiplier = 1.0)
-            : base(CreateInternal(pScaleFactor, pMultiplier))
+            : base(FbxUtils.FbxMalloc(SizeOfThis))
         {
-
+            ConstructInternal(Handle, pScaleFactor, pMultiplier);
+            _leaveFree = true;
         }
         public FbxSystemUnit(IntPtr InHandle)
             : base(InHandle)

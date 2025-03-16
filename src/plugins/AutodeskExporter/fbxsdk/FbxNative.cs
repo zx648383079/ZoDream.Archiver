@@ -21,6 +21,7 @@ namespace ZoDream.AutodeskExporter
             Debug.Assert(Handle != IntPtr.Zero);
         }
 
+
         /// <summary>
         /// 根据偏移获取有效的指针地址
         /// </summary>
