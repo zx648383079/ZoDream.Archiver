@@ -1,23 +1,29 @@
 ﻿using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using ZoDream.ChmExtractor.Models;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.ChmExtractor
 {
-    public class ChmReader(BinaryReader reader, IArchiveOptions options) : IArchiveReader
+    public partial class ChmReader : IArchiveReader
     {
-        
-        private readonly long _basePosition = reader.BaseStream.Position;
-        private int _windowSize;
+        public ChmReader(BinaryReader reader, IArchiveOptions options)
+        {
+            _reader = reader;
+            _options = options;
+            _basePosition = _reader.BaseStream.Position;
+            Initialize();
+        }
+
+        private readonly BinaryReader _reader;
+        private readonly IArchiveOptions _options;
+        private readonly long _basePosition;
+        private readonly ChmFile _header = new();
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
@@ -25,8 +31,15 @@ namespace ZoDream.ChmExtractor
             {
                 return;
             }
-            LzxCodec.Decode(new PartialStream(reader.BaseStream, item.Offset, item.Length), output, item.WindowSize);
+            DecompressRegion(new ChmUnitInfo()
+            {
+                Start = item.Offset,
+                Length = item.Length,
+                Space = item.IsCompressed ? 1 : 0,
+            }, output);
         }
+
+      
 
         private void ExtractTo(IReadOnlyEntry entry, string fileName, ArchiveExtractMode mode)
         {
@@ -56,212 +69,21 @@ namespace ZoDream.ChmExtractor
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
-            reader.BaseStream.Seek(_basePosition, SeekOrigin.Begin);
-            ReadHeader();
-            ReadHeaderSectionTableEntry();
-            var entries = ReadHeaderSectionTableEntry()
-                .Where(i => i.Length > 0).ToArray();
-
-            
-
-            var pos = reader.ReadUInt64();
-            reader.BaseStream.Seek((long)pos, SeekOrigin.Begin);
-            ReadNameListFile();
-            ReadSectionData();
-            foreach (var item in entries)
-            {
-                item.WindowSize = _windowSize;
-            }
-            return entries;
-        }
-
-
-        private void ReadHeader()
-        {
-            var magic = Encoding.ASCII.GetString(reader.ReadBytes(4));
-            Debug.Assert(magic == "ITSF");
-            var version = reader.ReadUInt32();
-            var headerSize = reader.ReadUInt32();
-            reader.ReadUInt32();
-            var timestamp = BinaryPrimitives.ReadUInt32BigEndian(reader.ReadBytes(4));
-            var languageId = (WindowsLanguageId)reader.ReadUInt32();
-            var guids = reader.ReadBytes(16 * 2);
-        }
-
-        private FileArchiveEntry[] ReadHeaderSectionTableEntry()
-        {
-            var offset = reader.ReadUInt64();
-            var size = reader.ReadUInt64();
-            var pos = reader.BaseStream.Position;
-            reader.BaseStream.Seek((long)offset, SeekOrigin.Begin);
-            var res = ReadHeaderSection();
-            reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-            return res;
-        }
-
-        private FileArchiveEntry[] ReadHeaderSection()
-        {
-            var magic = reader.ReadBytes(4);
-            if (magic.SequenceEqual((byte[])[0xFE, 0x01, 0x00, 0x00]))
-            {
-                reader.ReadUInt32();
-                // 总文件尺寸
-                var fileSize = reader.ReadUInt32();
-                reader.ReadUInt32();
-                reader.ReadUInt32();
-                return [];
-            } else if (Encoding.ASCII.GetString(magic) == "ITSP")
-            {
-                var version = reader.ReadUInt32();
-                var directoryHeaderLength1 = reader.ReadUInt32();
-                reader.ReadUInt32();
-                var directoryChunkSize = reader.ReadUInt32();
-                var quickRefSectionDensity = reader.ReadUInt32();
-                var indexTreeDepth = reader.ReadUInt32();
-                var rootIndexChunkNumber = reader.ReadUInt32();
-                var firstPMGLChunkNumber = reader.ReadUInt32();
-                var lastPMGLChunkNumber = reader.ReadUInt32();
-                reader.ReadUInt32();
-                var directoryChunkCount = reader.ReadUInt32();
-                var languageId = (WindowsLanguageId)reader.ReadUInt32();
-                var guid = reader.ReadBytes(16);
-                var directoryHeaderLength2 = reader.ReadUInt32();
-                reader.ReadUInt32();
-                reader.ReadUInt32();
-                reader.ReadUInt32();
-                var res = new List<FileArchiveEntry>();
-                for (var i = 0; i < directoryChunkCount; i++)
-                {
-                    // Debug.WriteLine($"{i}: 0x{reader.BaseStream.Position:X}");
-                    res.AddRange(ReadListingChunk(directoryChunkSize));
-                }
-                return [.. res];
-            } else
-            {
-                throw new Exception("error");
-            }
-        }
-
-        private FileArchiveEntry ReadDirectoryListingEntry()
-        {
-            var nameLength = reader.Read7BitEncodedInt();
-            var name = Encoding.ASCII.GetString(reader.ReadBytes(nameLength));
-            var contentSection = reader.Read7BitEncodedInt();
-            var offset = reader.Read7BitEncodedInt();
-            var length = reader.Read7BitEncodedInt();
-
-            return new FileArchiveEntry(name, offset, length);
-        }
-
-        private void ReadDirectoryIndexEntry()
-        {
-            var nameLength = reader.Read7BitEncodedInt();
-            var name = Encoding.ASCII.GetString(reader.ReadBytes(nameLength));
-            var directoryListingChunk = reader.Read7BitEncodedInt();
-        }
-
-        private FileArchiveEntry[] ReadListingChunk(uint directoryChunkSize)
-        {
-            var entryPos = reader.BaseStream.Position;
-            var magic = Encoding.ASCII.GetString(reader.ReadBytes(4));
-            if (magic == "PMGL")
-            {
-                var freeSpaceLength = reader.ReadUInt32();
-                reader.ReadUInt32();
-                var prevChunkNumber = reader.ReadUInt32();
-                var nextChunkNumber = reader.ReadUInt32();
-                var pos = reader.BaseStream.Position;
-                entryPos += directoryChunkSize - 2;
-                reader.BaseStream.Seek(entryPos, SeekOrigin.Begin);
-                var directoryListingEntryCount = reader.ReadUInt16();
-                reader.BaseStream.Seek(entryPos - (freeSpaceLength - 2), SeekOrigin.Begin);
-                for (var i = 0; i < (freeSpaceLength - 2) / 2; i++)
-                {
-                    var offsets = reader.ReadUInt16();
-                }
-                reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                var res = new FileArchiveEntry[directoryListingEntryCount];
-                for (var i = 0; i < directoryListingEntryCount; i++)
-                {
-                    res[i] = ReadDirectoryListingEntry();
-                }
-                reader.BaseStream.Seek(entryPos + 2, SeekOrigin.Begin);
-                return res;
-            } else if (magic == "PMGI")
-            {
-                var freeSpaceLength = reader.ReadUInt32();
-                var pos = reader.BaseStream.Position;
-
-                entryPos += directoryChunkSize - 2;
-                reader.BaseStream.Seek(entryPos, SeekOrigin.Begin);
-                var directoryIndexEntryCount = reader.ReadUInt16();
-                reader.BaseStream.Seek(entryPos - (freeSpaceLength - 2), SeekOrigin.Begin);
-                for (var i = 0; i < (freeSpaceLength - 2) / 2; i++)
-                {
-                    var offsets = reader.ReadUInt16();
-                }
-
-                reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                var res = new FileArchiveEntry[directoryIndexEntryCount];
-                for (var i = 0; i < directoryIndexEntryCount; i++)
-                {
-                    res[i] = ReadDirectoryListingEntry();
-                }
-                reader.BaseStream.Seek(entryPos + 2, SeekOrigin.Begin);
-                return res;
-            } else
-            {
-                throw new Exception("error");
-            }
-        }
-
-        private void ReadNameListEntry()
-        {
-            var nameLength = reader.ReadUInt16();
-            var name = Encoding.Unicode.GetString(reader.ReadBytes(nameLength * 2));
-
-            reader.BaseStream.Seek(2, SeekOrigin.Current);
-        }
-
-        private void ReadNameListFile()
-        {
-            var fileLengthWords = reader.ReadUInt16();
-            var entriesInFile = reader.ReadUInt16();
-            for (var i = 0; i < entriesInFile; i++)
-            {
-                ReadNameListEntry();
-            }
-            reader.BaseStream.Seek(0x2E, SeekOrigin.Current);
-        }
-
-        private void ReadSectionData()
-        {
-            var fileLengthWords = reader.ReadUInt32();
-            var magic = Encoding.ASCII.GetString(reader.ReadBytes(4));
-            Debug.Assert(magic == "LZXC");
-
-            var version = reader.ReadUInt32();
-            var resetInterval = reader.ReadUInt32();
-            var windowSize = reader.ReadUInt32();
-            if (version == 2)
-            {
-                resetInterval *= 0x8000;
-                windowSize *= 0x8000;
-            }
-            var windowsPerReset = reader.ReadUInt32();
-            reader.ReadUInt32();
-
-
-            var resetBlkCount = resetInterval / (windowSize / 2) * windowsPerReset;
-            _windowSize = (int)windowSize;
+            return ReadHeaderSectionTableEntry()
+                .Where(i => i.Length > 0);
+            // var pos = _reader.ReadUInt64();
+            // _reader.BaseStream.Seek((long)pos, SeekOrigin.Begin);
+            // ReadNameListFile();
+            // ReadControlData();
         }
 
         public void Dispose()
         {
-            if (options?.LeaveStreamOpen == false)
+            if (_options?.LeaveStreamOpen == false)
             {
-                reader.BaseStream.Dispose();
+                _reader.BaseStream.Dispose();
             }
         }
+
     }
 }
