@@ -69,12 +69,12 @@ namespace ZoDream.ChmExtractor
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
-            return ReadHeaderSectionTableEntry()
-                .Where(i => i.Length > 0);
-            // var pos = _reader.ReadUInt64();
-            // _reader.BaseStream.Seek((long)pos, SeekOrigin.Begin);
-            // ReadNameListFile();
-            // ReadControlData();
+            return _unitItems.Where(i => i.Length > 0
+#if !DEBUG
+                    && !i.Name.StartsWith("::DataSpace/Storage/MSCompressed/")
+#endif
+
+                ).Select(Convert);
         }
 
         public void Dispose()

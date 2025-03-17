@@ -10,7 +10,7 @@ namespace ZoDream.ChmExtractor
     {
         private void DecompressRegion(ChmUnitInfo info, Stream output)
         {
-            if (info.Space == 0)
+            if (!_header.CompressionEnabled || info.Space == 0)
             {
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.Start, info.Length).CopyTo(output);
                 return;
