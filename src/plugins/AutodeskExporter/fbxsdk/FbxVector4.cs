@@ -7,6 +7,8 @@ namespace ZoDream.AutodeskExporter
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxVector4@fbxsdk@@QEAA@NNNN@Z")]
         private static extern void ConstructInternal(nint handle, double pX, double pY, double pZ, double pW);
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxVector4@fbxsdk@@QEAA@XZ")]
+        private static extern void ConstructInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?Set@FbxVector4@fbxsdk@@QEAAXNNNN@Z")]
         private static extern void SetInternal(nint handle, double pX, double pY, double pZ, double pW);
@@ -19,6 +21,13 @@ namespace ZoDream.AutodeskExporter
         public FbxVector4(nint handle)
             : base(handle)
         {
+        }
+
+        public FbxVector4()
+            : base(FbxUtils.FbxMalloc(SizeOfThis))
+        {
+            ConstructInternal(Handle);
+            _leaveFree = true;
         }
 
         public FbxVector4(double pX, double pY, double pZ, double pW = 1.0)

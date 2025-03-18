@@ -20,10 +20,10 @@ namespace ZoDream.AutodeskExporter
         private static extern void SetQInternal(nint handle, nint pQ);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetQ@FbxAMatrix@fbxsdk@@QEBA?AVFbxQuaternion@2@XZ")]
-        private static extern nint GetQInternal(nint handle);
+        private static extern nint GetQInternal(nint handle, nint qHandle);
 
-        [DllImport(NativeMethods.DllName, EntryPoint = "?GetR@FbxAMatrix@fbxsdk@@QEBA?AVFbxVector4@2@XZ")]
-        private static extern nint GetRInternal(nint handle);
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetR@FbxAMatrix@fbxsdk@@QEBA?AVFbxVector4@2@XZ", CallingConvention = CallingConvention.Cdecl)]
+        private static extern nint GetRInternal(nint handle, nint vec4Handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetR@FbxAMatrix@fbxsdk@@QEAAXAEBVFbxVector4@2@@Z")]
         private static extern void SetRInternal(nint handle, nint pR);
@@ -53,22 +53,28 @@ namespace ZoDream.AutodeskExporter
         }
 
         public Quaternion Q {
-            get => FbxDouble4.Get(GetQInternal(Handle)).AsQuaternion();
+            get {
+                using var ptr = new FbxQuaternion();
+                GetQInternal(Handle, ptr.Handle);
+                return (Quaternion)ptr;
+            }
             set {
-                var ptr = FbxDouble4.Construct(value.AsVector4());
-                SetQInternal(Handle, ptr);
-                //FbxUtils.FbxFree(ptr);
+                using var ptr = new FbxQuaternion(value);
+                SetQInternal(Handle, ptr.Handle);
             }
         }
 
 
 
         public Vector4 R {
-            get => FbxDouble4.Get(GetRInternal(Handle));
+            get {
+                using var ptr = new FbxVector4();
+                GetRInternal(Handle, ptr.Handle);
+                return (Vector4)ptr;
+            }
             set {
-                var ptr = FbxDouble4.Construct(value);
-                SetRInternal(Handle, ptr);
-                //FbxUtils.FbxFree(ptr);
+                using var ptr = new FbxVector4(value);
+                SetRInternal(Handle, ptr.Handle);
             }
         }
 

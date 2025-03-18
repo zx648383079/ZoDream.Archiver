@@ -5,6 +5,10 @@ namespace ZoDream.AutodeskExporter
 {
     internal class FbxQuaternion : FbxNative
     {
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxQuaternion@fbxsdk@@QEAA@XZ")]
+        private static extern void ConstructInternal(nint handle);
+
         [DllImport(NativeMethods.DllName, EntryPoint = "??0FbxQuaternion@fbxsdk@@QEAA@NNNN@Z")]
         private static extern void ConstructInternal(nint handle, double pX, double pY, double pZ, double pW);
         [DllImport(NativeMethods.DllName, EntryPoint = "fbxsdk::FbxQuaternion::GetAt(int)")]
@@ -22,6 +26,13 @@ namespace ZoDream.AutodeskExporter
         public FbxQuaternion(nint handle)
             : base(handle)
         {
+        }
+
+        public FbxQuaternion()
+           : base(FbxUtils.FbxMalloc(SizeOfThis))
+        {
+            ConstructInternal(Handle);
+            _leaveFree = true;
         }
 
         public FbxQuaternion(double pX, double pY, double pZ, double pW = 1.0)
