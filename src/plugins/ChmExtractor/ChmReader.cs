@@ -71,9 +71,8 @@ namespace ZoDream.ChmExtractor
         {
             return _unitItems.Where(i => i.Length > 0
 #if !DEBUG
-                    && !i.Name.StartsWith("::DataSpace/Storage/MSCompressed/")
+                    && !i.Name.StartsWith("::DataSpace") && !i.Name.StartsWith("/#")
 #endif
-
                 ).Select(Convert);
         }
 

@@ -12,7 +12,6 @@ namespace ZoDream.ChmExtractor
     public partial class ChmReader
     {
         private ChmUnitInfo[] _unitItems = [];
-
         private FileArchiveEntry Convert(ChmUnitInfo data)
         {
             return new FileArchiveEntry(data.FileName, data.Start, data.Length, data.Space != 0);
@@ -137,50 +136,35 @@ namespace ZoDream.ChmExtractor
             //    if (signature.Equal(ChmPmglHeader.Signature))
             //    {
             //        var header = ReadPmglHeader(false);
-            //        var end = _reader.BaseStream.Position + _header.BlockLen - header.FreeSpaceLength;
-            //        while (_reader.BaseStream.Position < end)
+            //        foreach (var item in ReadEntryUnit(_reader.BaseStream.Position + _header.BlockLen, header))
             //        {
-            //            var pos = _reader.BaseStream.Position;
-            //            var len = Read7BitEncodedInt64();
-            //            if (len > 512)
+            //            if (item.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase))
             //            {
+            //                data.FileName = item.FileName;
+            //                data.Space = item.Space;
+            //                data.Start = item.Start;
+            //                data.Length = item.Length;
             //                break;
             //            }
-            //            var text = Encoding.ASCII.GetString(_reader.ReadBytes((int)len));
-            //            if (len == fileName.Length && text.Equals(fileName, StringComparison.OrdinalIgnoreCase))
-            //            {
-            //                data.FileName = fileName;
-            //                data.Space = (int)Read7BitEncodedInt64();
-            //                data.Start = Read7BitEncodedInt64();
-            //                data.Length = Read7BitEncodedInt64();
-            //                break;
-            //            }
-            //            Read7BitEncodedInt64();
-            //            Read7BitEncodedInt64();
-            //            Read7BitEncodedInt64();
             //        }
             //        return !string.IsNullOrEmpty(data.FileName);
-            //    } else if (signature.Equal(ChmPmgiHeader.Signature))
+            //    }
+            //    else if (signature.Equal(ChmPmgiHeader.Signature))
             //    {
             //        var header = ReadPmgiHeader(false);
             //        current = -1;
-            //        var end = _reader.BaseStream.Position + _header.BlockLen - header.FreeSpaceLength;
-            //        while (_reader.BaseStream.Position < end)
+            //        foreach (var item in ReadEntryUnit(_reader.BaseStream.Position + _header.BlockLen, header))
             //        {
-            //            var len = Read7BitEncodedInt64();
-            //            if (len > 512)
-            //            {
-            //                break;
-            //            }
-            //            var text = Encoding.ASCII.GetString(_reader.ReadBytes((int)len));
-            //            if (len < fileName.Length || text.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+            //            if (item.Item1.Length < fileName.Length || 
+            //                item.Item1.Equals(fileName, StringComparison.OrdinalIgnoreCase))
             //            {
             //                current = (int)Read7BitEncodedInt64();
             //                continue;
             //            }
             //            break;
             //        }
-            //    } else
+            //    }
+            //    else
             //    {
             //        return false;
             //    }
@@ -290,7 +274,6 @@ namespace ZoDream.ChmExtractor
 
         private IEnumerable<ChmUnitInfo> ReadHeaderSectionTableEntry()
         {
-            var pos = _reader.BaseStream.Position;
             _reader.BaseStream.Seek(_header.DirOffset, SeekOrigin.Begin);
             for (var i = 0; i < _header.ItspHeader.DirectoryChunkCount; i++)
             {
@@ -352,59 +335,91 @@ namespace ZoDream.ChmExtractor
                 accum <<= 7;
                 accum += temp & 0x7f;
             }
-
             return (accum << 7) + temp;
+        }
+
+        /// <summary>
+        /// 解析 free space 的内容
+        /// </summary>
+        /// <param name="blockEndPosition"></param>
+        /// <param name="freeSpaceLength"></param>
+        /// <returns></returns>
+        private int ReadFreeSpace(long blockEndPosition, uint freeSpaceLength)
+        {
+            var pos = _reader.BaseStream.Position;
+            _reader.BaseStream.Seek(blockEndPosition - 2, SeekOrigin.Begin);
+            var directoryListingEntryCount = _reader.ReadUInt16();
+            //var freeSpacePosition = blockEndPosition - freeSpaceLength;
+            //_reader.BaseStream.Seek(freeSpacePosition, SeekOrigin.Begin);
+            //var offsetCount = (freeSpaceLength - 2) / 2;
+            //var offsetItems = new ushort[offsetCount];
+            //for (var i = 0; i < offsetCount; i++)
+            //{
+            //    offsetItems[i] = _reader.ReadUInt16();
+            //}
+            _reader.BaseStream.Seek(pos, SeekOrigin.Begin);
+            return directoryListingEntryCount;
         }
 
         private IEnumerable<ChmUnitInfo> ReadListingChunk()
         {
-            var directoryChunkSize = _header.BlockLen;
             var entryPos = _reader.BaseStream.Position;
+            var endPos = entryPos + _header.BlockLen;
             var magic = _reader.ReadBytes(4);
             if (magic.Equal(ChmPmglHeader.Signature))
             {
                 var header = ReadPmglHeader(false);
-                var pos = _reader.BaseStream.Position;
-                entryPos += directoryChunkSize - 2;
-                _reader.BaseStream.Seek(entryPos, SeekOrigin.Begin);
-                var directoryListingEntryCount = _reader.ReadUInt16();
-                _reader.BaseStream.Seek(entryPos - (header.FreeSpaceLength - 2), SeekOrigin.Begin);
-                for (var i = 0; i < (header.FreeSpaceLength - 2) / 2; i++)
+                foreach (var item in ReadEntryUnit(endPos, header))
                 {
-                    var offsets = _reader.ReadUInt16();
+                    yield return item;
                 }
-                _reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                for (var i = 0; i < directoryListingEntryCount; i++)
-                {
-                    yield return ReadDirectoryListingEntry();
-                }
-                _reader.BaseStream.Seek(entryPos + 2, SeekOrigin.Begin);
-            } else if (magic.Equal(ChmPmgiHeader.Signature))
+                _reader.BaseStream.Seek(endPos, SeekOrigin.Begin);
+            }
+            else if (magic.Equal(ChmPmgiHeader.Signature))
             {
                 var header = ReadPmgiHeader(false);
-                var pos = _reader.BaseStream.Position;
-
-                entryPos += directoryChunkSize - 2;
-                _reader.BaseStream.Seek(entryPos, SeekOrigin.Begin);
-                var directoryIndexEntryCount = _reader.ReadUInt16();
-                _reader.BaseStream.Seek(entryPos - (header.FreeSpaceLength - 2), SeekOrigin.Begin);
-                for (var i = 0; i < (header.FreeSpaceLength - 2) / 2; i++)
-                {
-                    var offsets = _reader.ReadUInt16();
-                }
-
-                _reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-                for (var i = 0; i < directoryIndexEntryCount; i++)
-                {
-                    var nameLength = (int)Read7BitEncodedInt64();
-                    var name = Encoding.ASCII.GetString(_reader.ReadBytes(nameLength));
-                    var blockIndex = (int)Read7BitEncodedInt64();
-                    // yield return ReadDirectoryListingEntry();
-                }
-                _reader.BaseStream.Seek(entryPos + 2, SeekOrigin.Begin);
-            } else
+                ReadEntryUnit(endPos, header);
+                _reader.BaseStream.Seek(endPos, SeekOrigin.Begin);
+            }
+            else
             {
                 throw new Exception("error");
+            }
+        }
+
+        private IEnumerable<(string, int)> ReadEntryUnit(long endPos, ChmPmgiHeader header)
+        {
+            var directoryIndexEntryCount = ReadFreeSpace(endPos, header.FreeSpaceLength);
+            var entryEndPos = endPos - header.FreeSpaceLength;
+            var fileCount = 0;
+            while (_reader.BaseStream.Position < entryEndPos)
+            {
+                var nameLength = (int)Read7BitEncodedInt64();
+                var name = Encoding.ASCII.GetString(_reader.ReadBytes(nameLength));
+                var blockIndex = (int)Read7BitEncodedInt64();
+                yield return (name, blockIndex);
+                fileCount++;
+            }
+            if (directoryIndexEntryCount != fileCount 
+                && directoryIndexEntryCount != 0)
+            {
+                throw new Exception("file error");
+            }
+        }
+
+        private IEnumerable<ChmUnitInfo> ReadEntryUnit(long endPos, ChmPmglHeader header)
+        {
+            var directoryListingEntryCount = ReadFreeSpace(endPos, header.FreeSpaceLength);
+            var entryEndPos = endPos - header.FreeSpaceLength;
+            var fileCount = 0;
+            while (_reader.BaseStream.Position < entryEndPos)
+            {
+                yield return ReadDirectoryListingEntry();
+                fileCount++;
+            }
+            if (directoryListingEntryCount != fileCount && directoryListingEntryCount != 0)
+            {
+                throw new Exception("file error");
             }
         }
 
