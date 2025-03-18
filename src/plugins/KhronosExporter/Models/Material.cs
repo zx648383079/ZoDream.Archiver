@@ -1,4 +1,6 @@
-﻿namespace ZoDream.KhronosExporter.Models
+﻿using System.Numerics;
+
+namespace ZoDream.KhronosExporter.Models
 {
     public class Material : LogicalChildOfRoot
     {
@@ -20,7 +22,7 @@
         /// <summary>
         /// 自发光颜色
         /// </summary>
-        public float[] EmissiveFactor {  get; set; }
+        public Vector3? EmissiveFactor {  get; set; }
 
         public AlphaMode AlphaMode {  get; set; }
 

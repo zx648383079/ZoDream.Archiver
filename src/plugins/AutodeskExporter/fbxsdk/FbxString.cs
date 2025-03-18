@@ -1,9 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
-    internal class FbxString
+    internal class FbxString : FbxNative
     {
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD@Z")]
         private static extern void ConstructInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
@@ -21,9 +20,41 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??8FbxString@fbxsdk@@QEBA_NPEBD@Z")]
         private static extern bool CompareInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
 
+        /// <summary>
+        /// 占用的空间，使用 c++ 调用 sizeof(FbxTime)
+        /// </summary>
+        const ulong SizeOfThis = 0x8;
+
+        public FbxString(nint handle)
+            : base(handle)
+        {
+        }
+
+        public FbxString(string value)
+            : base(FbxUtils.FbxMalloc(SizeOfThis))
+        {
+            ConstructInternal(Handle, value);
+            _leaveFree = true;
+        }
+
+        public override string ToString()
+        {
+            return Get(Handle);
+        }
+
+        public static explicit operator FbxString(string val)
+        {
+            return new(val);
+        }
+
+        public static explicit operator string(FbxString val)
+        {
+            return val.ToString();
+        }
+
         public static nint Construct(string initialValue = "")
         {
-            nint ptr = FbxUtils.FbxMalloc(8);
+            nint ptr = FbxUtils.FbxMalloc(SizeOfThis);
             ConstructInternal(ptr, initialValue);
             return ptr;
         }

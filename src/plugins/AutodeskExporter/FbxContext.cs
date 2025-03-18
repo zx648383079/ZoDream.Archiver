@@ -11,7 +11,6 @@ namespace ZoDream.AutodeskExporter
     {
 
         private readonly FbxManager _manager = new();
-        private FbxIOSettings? _setting;
         private FbxScene? _scene;
         private FbxExporter? _exporter;
         private FbxPose? _pose;
@@ -37,16 +36,17 @@ namespace ZoDream.AutodeskExporter
             bool isAscii, bool is60Fps)
         {
             EnsureNotDisposed();
-            _manager.SetIOSettings(_setting = new FbxIOSettings(_manager, FbxIOSettings.IOSROOT));
-            _scene = new FbxScene(_manager, string.Empty);
+            var setting = new FbxIOSettings(_manager, FbxIOSettings.IOSROOT);
+            _manager.IOSettings = setting;
+            _scene = new FbxScene(_manager, "game_scene");
 
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_MATERIAL, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_TEXTURE, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_EMBEDDED, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_SHAPE, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_GOBO, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_ANIMATION, true);
-            _setting.SetBoolProp(FbxIOSettings.EXP_FBX_GLOBAL_SETTINGS, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_MATERIAL, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_TEXTURE, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_EMBEDDED, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_SHAPE, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_GOBO, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_ANIMATION, true);
+            setting.SetBoolProp(FbxIOSettings.EXP_FBX_GLOBAL_SETTINGS, true);
 
             var globalSetting = _scene.GlobalSettings;
             globalSetting.SetSystemUnit(new FbxSystemUnit(scaleFactor));
@@ -55,8 +55,8 @@ namespace ZoDream.AutodeskExporter
                 globalSetting.SetTimeMode(EMode.eFrames60);
             }
             _exporter = new FbxExporter(_manager, string.Empty);
-            _exporter.SetFileExportVersion("FBX202000");
-            if (!_exporter.Initialize(fileName, isAscii ? 1 : 0, _setting))
+            _exporter.SetFileExportVersion(FbxVersion.FBX202000);
+            if (!_exporter.Initialize(fileName, isAscii ? 1 : 0, setting))
             {
                 var fullMessage = $"Failed to initialize FbxExporter: ";
                 throw new ApplicationException(fullMessage);
@@ -74,7 +74,7 @@ namespace ZoDream.AutodeskExporter
                 return;
             }
 
-            _framePaths = framePaths.ToArray();
+            _framePaths = [.. framePaths];
         }
 
         internal void ExportScene()
@@ -225,9 +225,9 @@ namespace ZoDream.AutodeskExporter
                 return null;
             }
 
-            if (_createdTextures.ContainsKey(texture.Name))
+            if (_createdTextures.TryGetValue(texture.Name, out FbxFileTexture? value))
             {
-                return _createdTextures[texture.Name];
+                return value;
             }
 
             var pTex = new FbxFileTexture(_scene, texture.Name);
@@ -243,12 +243,12 @@ namespace ZoDream.AutodeskExporter
 
             _createdTextures.Add(texture.Name, pTex);
 
-            var file = new FileInfo(texture.Name);
+            //var file = new FileInfo(texture.Name);
 
-            using (var writer = new BinaryWriter(file.Create()))
-            {
-                writer.Write(texture.Data);
-            }
+            //using (var writer = new BinaryWriter(file.Create()))
+            //{
+            //    writer.Write(texture.Data);
+            //}
 
             return pTex;
         }
@@ -307,6 +307,8 @@ namespace ZoDream.AutodeskExporter
                     puv.ReferenceMode = EReferenceMode.eDirect;
                 }
 
+                var uvLayerItems = new Dictionary<int, FbxLayerElementUV>();
+
                 for (int i = 0; i < importedMesh.hasUV.Length; i++)
                 {
                     if (!importedMesh.hasUV[i]) 
@@ -319,13 +321,14 @@ namespace ZoDream.AutodeskExporter
                         var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureNormalMap);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
+                        uvLayerItems.Add(i, puv);
                     }
                     else
                     {
                         var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureDiffuse);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
-
+                        uvLayerItems.Add(i, puv);
                     }
                 }
 
@@ -460,7 +463,8 @@ namespace ZoDream.AutodeskExporter
                         if (importedMesh.hasUV[uvIndex])
                         {
                             var uv = importedVertex.UV[uvIndex];
-                            mesh.GetElementUV($"UV{uvIndex}").DirectArray.Add(uv[0], uv[1]);
+                            var puv = uvLayerItems[uvIndex]; // mesh.GetElementUV($"UV{uvIndex}");
+                            puv.DirectArray.Add(uv[0], uv[1]);
                         }
                     }
 
@@ -545,7 +549,7 @@ namespace ZoDream.AutodeskExporter
                 }
                 else
                 {
-                    takeName = $"Take{i.ToString()}";
+                    takeName = $"Take{i}";
                 }
                 var lAnimStack = new FbxAnimStack(_scene, takeName);
                 var lAnimLayer = new FbxAnimLayer(_scene, "Base Layer");

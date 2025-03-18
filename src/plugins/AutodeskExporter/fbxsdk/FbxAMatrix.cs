@@ -16,6 +16,18 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "??DFbxAMatrix@fbxsdk@@QEBA?AV01@AEBV01@@Z")]
         private static extern nint MultiplyInternal(nint pHandle, nint pOther);
 
+        [DllImport(NativeMethods.DllName, EntryPoint = "?SetQ@FbxAMatrix@fbxsdk@@QEAAXAEBVFbxQuaternion@2@@Z")]
+        private static extern void SetQInternal(nint handle, nint pQ);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetQ@FbxAMatrix@fbxsdk@@QEBA?AVFbxQuaternion@2@XZ")]
+        private static extern nint GetQInternal(nint handle);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetR@FbxAMatrix@fbxsdk@@QEBA?AVFbxVector4@2@XZ")]
+        private static extern nint GetRInternal(nint handle);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?SetR@FbxAMatrix@fbxsdk@@QEAAXAEBVFbxVector4@2@@Z")]
+        private static extern void SetRInternal(nint handle, nint pR);
+
 
         /// <summary>
         /// 占用的空间，使用 c++ 调用 sizeof(FbxMatrix)
@@ -27,12 +39,37 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxAMatrix(Matrix4x4 matrix)
+        public FbxAMatrix()
             : base(FbxUtils.FbxMalloc(SizeOfThis))
         {
             ConstructInternal(Handle);
             _leaveFree = true;
+        }
+
+        public FbxAMatrix(Matrix4x4 matrix)
+            : this()
+        {
             Set(matrix);
+        }
+
+        public Quaternion Q {
+            get => FbxDouble4.Get(GetQInternal(Handle)).AsQuaternion();
+            set {
+                var ptr = FbxDouble4.Construct(value.AsVector4());
+                SetQInternal(Handle, ptr);
+                //FbxUtils.FbxFree(ptr);
+            }
+        }
+
+
+
+        public Vector4 R {
+            get => FbxDouble4.Get(GetRInternal(Handle));
+            set {
+                var ptr = FbxDouble4.Construct(value);
+                SetRInternal(Handle, ptr);
+                //FbxUtils.FbxFree(ptr);
+            }
         }
 
         public void Set(Matrix4x4 matrix)

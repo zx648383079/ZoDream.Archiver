@@ -19,6 +19,7 @@ namespace ZoDream.KhronosExporter
                 {
                     new EnumNameConverter<PropertyPath>(),
                     new EnumNameConverter<AnimationInterpolationMode>(),
+                    new EnumNameConverter<LightType>(),
                     new VectorConverter<Vector2>(),
                     new VectorConverter<Vector3>(),
                     new VectorConverter<Vector4>(),

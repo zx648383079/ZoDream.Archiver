@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -183,5 +184,20 @@ namespace ZoDream.AutodeskExporter
             }
         }
 
+
+        public static Vector3 ToEuler(Quaternion q)
+        {
+            using var mat = new FbxAMatrix();
+            mat.Q = q;
+            var res = mat.R;
+            return new Vector3(res.X, res.Y, res.Z);
+        }
+
+        public static Quaternion ToQuaternion(Vector3 vec)
+        {
+            using var mat = new FbxAMatrix();
+            mat.R = new(vec.X, vec.Y, vec.Z, 1);
+            return mat.Q;
+        }
     }
 }

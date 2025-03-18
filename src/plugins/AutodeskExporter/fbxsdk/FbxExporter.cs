@@ -24,8 +24,8 @@ namespace ZoDream.AutodeskExporter
 
         public bool Initialize(string pFileName, int pFileFormat = -1, FbxIOSettings? pIOSettings = null)
         {
-            nint Ptr = pIOSettings is not null ? pIOSettings.Handle : nint.Zero;
-            return InitializeInternal(Handle, pFileName, pFileFormat, Ptr);
+            var ptr = pIOSettings is not null ? pIOSettings.Handle : nint.Zero;
+            return InitializeInternal(Handle, pFileName, pFileFormat, ptr);
         }
 
         public bool Export(FbxDocument pDocument, bool pNonBlocking = false)
@@ -33,10 +33,10 @@ namespace ZoDream.AutodeskExporter
             return ExportInternal(Handle, pDocument.Handle, pNonBlocking);
         }
 
-        public bool SetFileExportVersion(string pVersion)
+        public bool SetFileExportVersion(FbxVersion version)
         {
-            nint Ptr = FbxString.Construct(pVersion);
-            return SetFileExportVersionInternal(Handle, Ptr, 0);
+            var ptr = FbxString.Construct(Enum.GetName(version) ?? "FBX202000");
+            return SetFileExportVersionInternal(Handle, ptr, 0);
         }
     }
 

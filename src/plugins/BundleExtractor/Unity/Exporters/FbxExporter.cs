@@ -230,7 +230,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private static void SetFrame(FbxImportedFrame frame, Vector3 t, Quaternion q, Vector3 s)
         {
             frame.LocalPosition = new Vector3(-t.X, t.Y, t.Z);
-            frame.LocalRotation = new Quaternion(q.X, -q.Y, -q.Z, q.W).ToEuler();
+            frame.LocalRotation = FbxContext.ToEuler(new Quaternion(q.X, -q.Y, -q.Z, q.W));
             frame.LocalScale = s;
         }
 
@@ -682,7 +682,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
 
                 //textures
-                iMat.Textures = new List<FbxImportedMaterialTexture>();
+                iMat.Textures = [];
                 foreach (var texEnv in mat.m_SavedProperties.m_TexEnvs)
                 {
                     if (!texEnv.Value.m_Texture.TryGet<Texture2D>(out var m_Texture2D)) //TODO other Texture
@@ -750,14 +750,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            using var image = m_Texture2D.ToImage();
-            if (image is null)
-            {
-                return;
-            }
-            using var stream = new MemoryStream();
-            image.Encode(stream, SkiaSharp.SKEncodedImageFormat.Png, 100);
-            iTex = new FbxImportedTexture(stream, name);
+            //using var image = m_Texture2D.ToImage();
+            //if (image is null)
+            //{
+            //    return;
+            //}
+            //using var stream = new MemoryStream();
+            //image.Encode(stream, SkiaSharp.SKEncodedImageFormat.Png, 100);
+            iTex = new FbxImportedTexture(name);
             TextureList.Add(iTex);
         }
 
@@ -803,7 +803,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         for (int i = 0; i < numKeys; i++)
                         {
                             var quat = quats[i];
-                            var value = new Quaternion(quat.X, -quat.Y, -quat.Z, quat.W).ToEuler();
+                            var value = FbxContext.ToEuler(new Quaternion(quat.X, -quat.Y, -quat.Z, quat.W));
                             track.Rotations.Add(new FbxImportedKeyframe<Vector3>(times[i], value));
                         }
                     }
@@ -812,7 +812,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         var track = iAnim.FindTrack(FixBonePath(animationClip, m_RotationCurve.path));
                         foreach (var m_Curve in m_RotationCurve.curve.m_Curve)
                         {
-                            var value = new Quaternion(m_Curve.value.X, -m_Curve.value.Y, -m_Curve.value.Z, m_Curve.value.W).ToEuler();
+                            var value = FbxContext.ToEuler(new Quaternion(m_Curve.value.X, -m_Curve.value.Y, -m_Curve.value.Z, m_Curve.value.W));
                             track.Rotations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.time, value));
                         }
                     }
@@ -957,13 +957,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         )));
                         break;
                     case 2:
-                        var value = new Quaternion
+                        var value = FbxContext.ToEuler(new Quaternion
                         (
                             data[curveIndex++ + offset],
                             -data[curveIndex++ + offset],
                             -data[curveIndex++ + offset],
                             data[curveIndex++ + offset]
-                        ).ToEuler();
+                        ));
                         track.Rotations.Add(new FbxImportedKeyframe<Vector3>(time, value));
                         break;
                     case 3:

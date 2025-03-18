@@ -35,10 +35,7 @@ namespace ZoDream.AutodeskExporter
             GetFileVersionInternal(Handle, out major, out minor, out revision);
         }
 
-        public bool IsFBX()
-        {
-            return IsFBXInternal(Handle);
-        }
+        public bool IsFBX => IsFBXInternal(Handle);
 
         public bool Import(FbxDocument document, bool nonBlocking = false)
         {

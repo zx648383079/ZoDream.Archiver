@@ -224,8 +224,17 @@ namespace ZoDream.KhronosExporter
             return Add(instance);
         }
 
-
-        public int CreateVectorAccessor(string name, float[] values, int vectorCount)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="values"></param>
+        /// <param name="vectorCount"></param>
+        /// <param name="isNotVector">比如 /animations/1/samplers/0/output</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public int CreateVectorAccessor(string name, 
+            float[] values, int vectorCount, bool isNotVector = false)
         {
             var step = values.Length / vectorCount;
             if (step < 2 || step > 4)
@@ -235,7 +244,7 @@ namespace ZoDream.KhronosExporter
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Vectors_" + step, () => new BufferView()
             {
                 ByteStride = step * 4,
-                Target = BufferMode.ARRAY_BUFFER
+                Target = isNotVector ? null : BufferMode.ARRAY_BUFFER
             });
             var accessor = new Accessor
             {
@@ -273,11 +282,19 @@ namespace ZoDream.KhronosExporter
             return index;
         }
 
-        public int CreateAccessor(string name, float[] items)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="items"></param>
+        /// <param name="hasMinMax">例如 /animations/1/samplers/0/input</param>
+        /// <returns></returns>
+        public int CreateAccessor(string name, float[] items, bool hasMinMax = false)
         {
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Float_", () => new BufferView()
             {
-                Target = BufferMode.ARRAY_BUFFER
+                //ByteStride = hasMinMax ? 4 : null,
+                Target = hasMinMax ? null : BufferMode.ARRAY_BUFFER
             });
             var accessor = new Accessor
             {
@@ -287,6 +304,11 @@ namespace ZoDream.KhronosExporter
                 BufferView = bufferViewIndex,
                 ByteOffset = bufferOffset
             };
+            if (hasMinMax)
+            {
+                accessor.Min = [items.Min()];
+                accessor.Max = [items.Max()];
+            }
             var index = Add(accessor);
             var writer = OpenWrite(bufferViewIndex);
             foreach (var item in items)

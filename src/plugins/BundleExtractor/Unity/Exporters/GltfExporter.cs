@@ -42,7 +42,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 PbrMetallicRoughness = new()
                 {
                     RoughnessFactor = .5f,
-                    BaseColorFactor = [0.8f, .8f, .8f, 1f]
+                    BaseColorFactor = new(0.8f, 0.8f, 0.8f, 1f)
                 }
             });
         }
@@ -50,6 +50,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly ModelSource _root;
         private readonly Dictionary<string, IFileExporter> _attachItems = [];
         private readonly Dictionary<string, int> _nodeItems = [];
+        private readonly Dictionary<string, int> _materialItems = [];
         private readonly HashSet<AnimationClip> _animationItems = [];
         private readonly Dictionary<uint, string> _morphChannelNames = [];
         private readonly Dictionary<uint, string> _bonePathHash = [];
@@ -361,6 +362,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private int FindNode(string name, int parent)
         {
             var items = _root.Nodes[parent].Children;
+            if (items is null)
+            {
+                return parent;
+            }
             foreach (var index in items)
             {
                 if (_root.Nodes[index].Name == name)
@@ -413,9 +418,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 // var skin = AddNode(obj.m_SkinnedMeshRenderer, sceneIndex);
                 if (res >= 0)
                 {
-                    _root.Nodes[res].Scale = trans.m_LocalScale.AsArray();
-                    _root.Nodes[res].Translation = trans.m_LocalPosition.AsArray();
-                    _root.Nodes[res].Rotation = trans.m_LocalRotation.AsArray();
+                    UpdateNode(res, trans.m_LocalPosition, trans.m_LocalRotation, trans.m_LocalScale);
                     nodeIndex = res;
                 }
             }
@@ -753,38 +756,54 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private int AddMaterial(UnityMaterial mat)
         {
+            if (_materialItems.TryGetValue(mat.Name, out var materialIndex))
+            {
+                return materialIndex;
+            }
             var res = new Material()
             {
                 Name = mat.m_Name,
+                EmissiveFactor = new(0, 0, 0),
                 PbrMetallicRoughness = new()
+                {
+                    BaseColorFactor = new(0.8f, 0.8f, 0.8f, 1)
+                }
             };
 
-            var pbr = new MaterialPBRSpecularGlossiness();
+            var pbr = new MaterialPBRSpecularGlossiness()
+            {
+                DiffuseFactor = new(0, 0, 0, 1),
+                SpecularFactor = new(0.2f, 0.2f, 0.2f),
+                GlossinessFactor = 20
+            };
             res.AddExtension(MaterialPBRSpecularGlossiness.ExtensionName, pbr);
             _root.AddExtensionUsed(MaterialPBRSpecularGlossiness.ExtensionName);
             foreach (var col in mat.m_SavedProperties.m_Colors)
             {
                 switch (col.Key)
                 {
+                    case "_BaseColor":
                     case "_Color":
-                        pbr.DiffuseFactor = col.Value.AsArray();
+                        // pbr.DiffuseFactor = col.Value;
+                        res.PbrMetallicRoughness.BaseColorFactor = col.Value;
                         break;
                     case "_SColor":
-                        res.PbrMetallicRoughness.BaseColorFactor = col.Value.AsArray();
-                        res.AlphaMode = AlphaMode.MASK;
+                        res.PbrMetallicRoughness.BaseColorFactor = col.Value;
+                        //res.AlphaMode = AlphaMode.MASK;
                         break;
                     case "_EmissionColor":
-                        res.EmissiveFactor = [col.Value.X, col.Value.Y, col.Value.Z];
+                        res.EmissiveFactor = new(col.Value.X, col.Value.Y, col.Value.Z);
+                        //res.PbrMetallicRoughness.RoughnessFactor = col.Value.W;
                         break;
                     case "_SpecularColor":
-                        pbr.SpecularFactor = [col.Value.X, col.Value.Y, col.Value.Z];
+                    case "_SpecColor":
+                        pbr.SpecularFactor = new(col.Value.X, col.Value.Y, col.Value.Z);
+                        //res.PbrMetallicRoughness.MetallicFactor = col.Value.W;
                         break;
                     case "_ReflectColor":
-                        res.PbrMetallicRoughness = new()
-                        {
-                            BaseColorFactor = col.Value.AsArray(),
-                            MetallicFactor = 1
-                        };
+                        //res.PbrMetallicRoughness.BaseColorFactor = col.Value;
+                        //res.PbrMetallicRoughness.MetallicFactor = 1;
+                        pbr.DiffuseFactor = col.Value;
                         break;
                 }
             }
@@ -793,9 +812,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 switch (flt.Key)
                 {
-                    case "_Shininess":
+                    case "_Glossiness":
                         pbr.GlossinessFactor = flt.Value;
                         break;
+                    //case "_Shininess":
+                    //    pbr.GlossinessFactor = flt.Value;
+                    //    break;
                     case "_Transparency":
                         res.AlphaCutoff = flt.Value;
                         break;
@@ -807,7 +829,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     continue;
                 }
-                ;
                 var trans = new TextureTransform()
                 {
                     Offset = texEnv.Value.m_Offset,
@@ -815,6 +836,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 };
                 if (texEnv.Key == "_MainTex")
                 {
+                    res.PbrMetallicRoughness ??= new();
                     res.PbrMetallicRoughness.BaseColorTexture = new()
                     {
                         Index = AddTexture(image),
@@ -839,7 +861,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     };
                     _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
-                else if (texEnv.Key.Contains("Specular"))
+                else if (texEnv.Key.Contains("Emission"))
+                {
+                    res.EmissiveTexture = new()
+                    {
+                        Index = AddTexture(image),
+                        Extensions = new()
+                        {
+                            {TextureTransform.ExtensionName, trans }
+                        }
+                    };
+                    _root.AddExtensionUsed(TextureTransform.ExtensionName);
+                }
+                else if (texEnv.Key.Contains("Specular") || texEnv.Key.Contains("Spec"))
                 {
                     pbr.SpecularGlossinessTexture = new()
                     {
@@ -865,7 +899,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 
             }
-            return _root.Add(res);
+            materialIndex = _root.Add(res);
+            _materialItems.Add(mat.Name, materialIndex);
+            return materialIndex;
         }
 
         private int AddTexture(Texture2D image, Action? addFn = null)
@@ -884,6 +920,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 Name = image.m_Name,
                 Source = _root.Add(new Image()
                 {
+                    Name = image.m_Name,
                     Uri = $"{image.m_Name}.png",
                     MimeType = "image/png"
                 })
@@ -947,7 +984,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         t += data[i];
                         times[i] = t * 0.01f / animator.m_SampleRate;
                     }
-                    var timeIndex = _root.CreateAccessor("Times_" + m_CompressedRotationCurve.m_Path, times);
+                    var timeIndex = _root.CreateAccessor("Times_" + m_CompressedRotationCurve.m_Path, times, true);
                     timeMaps.TryAdd(m_CompressedRotationCurve.m_Path, timeIndex);
                     var quats = m_CompressedRotationCurve.m_Values.UnpackQuats();
                     var values = new float[numKeys * 4];
@@ -965,7 +1002,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         Sampler = res.Samplers.AddWithIndex(new()
                         {
                             Input = timeIndex,
-                            Output = _root.CreateVectorAccessor("RotationCurve", values, (int)numKeys),
+                            Output = _root.CreateVectorAccessor("RotationCurve", 
+                            values, (int)numKeys, true),
                             Interpolation = AnimationInterpolationMode.LINEAR
                         }),
                         Target = new()
@@ -995,7 +1033,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         Sampler = res.Samplers.AddWithIndex(new()
                         {
                             Input = timeIndex,
-                            Output = _root.CreateVectorAccessor("RotationCurve", values, m_RotationCurve.curve.m_Curve.Count),
+                            Output = _root.CreateVectorAccessor("RotationCurve", 
+                            values, m_RotationCurve.curve.m_Curve.Count, true),
                             Interpolation = AnimationInterpolationMode.LINEAR
                         }),
                         Target = new()
@@ -1024,7 +1063,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         Sampler = res.Samplers.AddWithIndex(new()
                         {
                             Input = timeIndex,
-                            Output = _root.CreateVectorAccessor("PositionCurve", values, m_PositionCurve.curve.m_Curve.Count),
+                            Output = _root.CreateVectorAccessor("PositionCurve", 
+                            values, m_PositionCurve.curve.m_Curve.Count, true),
                             Interpolation = AnimationInterpolationMode.LINEAR
                         }),
                         Target = new()
@@ -1053,7 +1093,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         Sampler = res.Samplers.AddWithIndex(new()
                         {
                             Input = timeIndex,
-                            Output = _root.CreateVectorAccessor("ScaleCurve", values, m_ScaleCurve.curve.m_Curve.Count),
+                            Output = _root.CreateVectorAccessor("ScaleCurve", values, 
+                            m_ScaleCurve.curve.m_Curve.Count, true),
                             Interpolation = AnimationInterpolationMode.LINEAR
                         }),
                         Target = new()
@@ -1086,7 +1127,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             Sampler = res.Samplers.AddWithIndex(new()
                             {
                                 Input = timeIndex,
-                                Output = _root.CreateVectorAccessor("RotationCurve", values, m_EulerCurve.curve.m_Curve.Count),
+                                Output = _root.CreateVectorAccessor("RotationCurve", 
+                                values, m_EulerCurve.curve.m_Curve.Count, true),
                                 Interpolation = AnimationInterpolationMode.LINEAR
                             }),
                             Target = new()
@@ -1124,7 +1166,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             Sampler = res.Samplers.AddWithIndex(new()
                             {
                                 Input = timeIndex,
-                                Output = _root.CreateAccessor("RotationCurve", values),
+                                Output = _root.CreateAccessor("RotationCurve", values, true),
                                 Interpolation = AnimationInterpolationMode.LINEAR
                             }),
                             Target = new()
@@ -1190,7 +1232,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         {
                             Sampler = res.Samplers.AddWithIndex(new()
                             {
-                                Input = _root.CreateAccessor("Times_" + track.Key + i, track.Value[i].ToArray()),
+                                Input = _root.CreateAccessor("Times_" + track.Key + i, track.Value[i].ToArray(), true),
                                 Output = _root.CreateVectorAccessor("AnyCurve", track.Value[i + 1].ToArray(), track.Value[i].Count),
                                 Interpolation = AnimationInterpolationMode.LINEAR
                             }),

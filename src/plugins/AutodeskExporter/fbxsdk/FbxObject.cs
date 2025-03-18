@@ -1,9 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
-    internal class FbxObject : FbxNative, IDisposable
+    internal class FbxObject : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Destroy@FbxObject@fbxsdk@@QEAAX_N@Z", CallingConvention = CallingConvention.ThisCall)]
         protected static extern nint DestroyInternal(nint InHandle, bool pRecursive);

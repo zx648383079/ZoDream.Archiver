@@ -222,6 +222,15 @@ namespace ZoDream.AutodeskExporter
             Name = name;
             Data = stream.ToArray();
         }
+        /// <summary>
+        /// 不用重复导出
+        /// </summary>
+        /// <param name="name"></param>
+        public FbxImportedTexture(string name)
+        {
+            Name = name;
+            Data = [];
+        }
     }
 
     public class FbxImportedKeyframedAnimation

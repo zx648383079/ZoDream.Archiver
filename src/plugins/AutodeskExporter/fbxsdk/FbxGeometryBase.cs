@@ -43,7 +43,7 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@HW4EType@FbxLayerElement@2@@Z")]
         private static extern nint GetElementUVInternal(nint handle, int pIndex, FbxLayerElement.EType pType);
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "?GetElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@PEBD@Z")]
-        private static extern nint GetElementUVInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string name);
+        private static extern nint GetElementUVInternal(nint handle, nint nameHandle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetElementVertexColor@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementVertexColor@2@H@Z")]
         private static extern nint GetElementVertexColorInternal(nint handle, int pIndex);
@@ -136,21 +136,23 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementUV? GetElementUV(string name)
         {
-            foreach (var layer in GetLayers())
-            {
-                for (var i = FbxLayerElement.EType.eTextureDiffuse; 
-                    i < FbxLayerElement.EType.eTypeCount; i++)
-                {
-                    var uv = layer.GetUvs<FbxLayerElementUV>(i);
-                    if (uv?.Name == name)
-                    {
-                        return uv;
-                    }
-                }
-            }
-            return null;
+            //foreach (var layer in GetLayers())
+            //{
+            //    for (var i = FbxLayerElement.EType.eTextureDiffuse;
+            //        i < FbxLayerElement.EType.eTypeCount; i++)
+            //    {
+            //        var uv = layer.GetUvs<FbxLayerElementUV>(i);
+            //        if (uv?.Name == name)
+            //        {
+            //            return uv;
+            //        }
+            //    }
+            //}
+            //return null;
             // 内置方法有问题
-            var ptr = GetElementUVInternal(Handle, name);
+            var namePtr = FbxString.Construct(name);
+            var ptr = GetElementUVInternal(Handle, namePtr);
+            FbxUtils.FbxFree(namePtr);
             return ptr == nint.Zero ? null : new FbxLayerElementUV(ptr);
         }
 
@@ -207,7 +209,7 @@ namespace ZoDream.AutodeskExporter
         {
             var namePtr = FbxString.Construct(pUVSetName);
             var ptr = CreateElementUVInternal(Handle, namePtr, pTypeIdentifier);
-            FbxUtils.FbxFree(namePtr);
+            // FbxUtils.FbxFree(namePtr);
             Debug.Assert(ptr != nint.Zero);
             return new FbxLayerElementUV(ptr);
         }

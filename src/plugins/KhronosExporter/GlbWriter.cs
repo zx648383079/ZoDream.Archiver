@@ -92,7 +92,8 @@ namespace ZoDream.KhronosExporter
                             Name = item.Name,
                             ByteOffset = (int)bin.Position,
                             ByteLength = buffer.Length,
-                            Buffer = 0
+                            Buffer = 0,
+                            Target = null
                         });
                         bin.Write(buffer, 0, buffer.Length);
                         item.Uri = null;
@@ -107,6 +108,7 @@ namespace ZoDream.KhronosExporter
                                 Name = item.Name,
                                 ByteOffset = (int)bin.Position,
                                 ByteLength = (int)src.Length,
+                                Target = null,
                                 Buffer = 0,
                             });
                             src.Position = 0;

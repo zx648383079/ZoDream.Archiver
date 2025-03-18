@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Numerics;
 
 namespace ZoDream.KhronosExporter.Models
 {
+    /// <summary>
+    /// 控制高光反射
+    /// </summary>
     public class MaterialsSpecular
     {
         public const string ExtensionName = "KHR_materials_specular";
@@ -10,8 +13,7 @@ namespace ZoDream.KhronosExporter.Models
 
         public TextureInfo? SpecularTexture { get; set; }
 
-        [Length(3, 3)]
-        public float[]? SpecularColorFactor { get; set; }
+        public Vector3? SpecularColorFactor { get; set; }
 
         public TextureInfo? SpecularColorTexture { get; set; }
     }

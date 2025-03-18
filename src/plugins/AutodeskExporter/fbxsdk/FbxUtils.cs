@@ -14,6 +14,7 @@ namespace ZoDream.AutodeskExporter
 
         public static nint FbxMalloc(ulong size)
         {
+            NativeMethods.Ready();
             //return Marshal.AllocHGlobal((int)size);
             return FbxMallocInternal(size);
         }

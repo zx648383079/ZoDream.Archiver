@@ -38,18 +38,10 @@ namespace ZoDream.AutodeskExporter
             _leaveFree = true;
         }
 
+        public FbxIOSettings IOSettings { get => new(GetIOSettingsInternal(Handle)); set => SetIOSettingsInternal(Handle, value.Handle); }
 
-        public FbxIOPluginRegistry IOPluginRegistry => new FbxIOPluginRegistry(GetIOPluginRegistryInternal(Handle));
+        public FbxIOPluginRegistry IOPluginRegistry => new(GetIOPluginRegistryInternal(Handle));
 
-        public void SetIOSettings(FbxIOSettings settings)
-        {
-            SetIOSettingsInternal(Handle, settings.Handle);
-        }
-
-        public FbxIOSettings GetIOSettings()
-        {
-            return new FbxIOSettings(GetIOSettingsInternal(Handle));
-        }
 
         public string GetVersion(bool pFull = true)
         {

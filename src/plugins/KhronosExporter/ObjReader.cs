@@ -112,10 +112,10 @@ namespace ZoDream.KhronosExporter
             {
                 AlphaMode = mode,
                 Name = name,
-                EmissiveFactor = [ 1f, 1, 1 ],
+                EmissiveFactor = new( 1f, 1, 1 ),
                 PbrMetallicRoughness = new()
                 {
-                    BaseColorFactor = [ 0.5f, 0.5f, 0.5f, 1 ],
+                    BaseColorFactor = new( 0.5f, 0.5f, 0.5f, 1 ),
                     MetallicFactor = 1f,
                     RoughnessFactor = 0f
                 }
@@ -208,15 +208,15 @@ namespace ZoDream.KhronosExporter
             };
             if (mat.Diffuse != null)
             {
-                gMat.PbrMetallicRoughness.BaseColorFactor = ToArray(mat.Diffuse.Color, alpha);
+                gMat.PbrMetallicRoughness.BaseColorFactor = new(ToArray(mat.Diffuse.Color, alpha));
             }
             else if (mat.Ambient != null)
             {
-                gMat.PbrMetallicRoughness.BaseColorFactor = ToArray(mat.Ambient.Color, alpha);
+                gMat.PbrMetallicRoughness.BaseColorFactor = new(ToArray(mat.Ambient.Color, alpha));
             }
             else
             {
-                gMat.PbrMetallicRoughness.BaseColorFactor = [ 0.7f, 0.7f, 0.7f, (float)alpha ];
+                gMat.PbrMetallicRoughness.BaseColorFactor = new( 0.7f, 0.7f, 0.7f, (float)alpha );
             }
 
 
@@ -244,7 +244,7 @@ namespace ZoDream.KhronosExporter
 
             if (mat.Emissive != null && mat.Emissive.Color != null)
             {
-                gMat.EmissiveFactor = ToArray(mat.Emissive.Color);
+                gMat.EmissiveFactor = new(ToArray(mat.Emissive.Color));
             }
 
             if (alpha < 1.0)
