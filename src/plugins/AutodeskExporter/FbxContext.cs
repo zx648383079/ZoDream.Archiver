@@ -757,7 +757,7 @@ namespace ZoDream.AutodeskExporter
 
             // _pose?.Dispose();
             // _scene?.Dispose();
-            // _exporter?.Dispose();
+            _exporter?.Dispose();
             // _setting?.Dispose();
             _manager.Dispose();
         }
