@@ -7,14 +7,14 @@ namespace ZoDream.AutodeskExporter
     public partial class FbxContext(
         string fileName, 
         IFbxImported imported, 
-        bool allNodes, bool exportSkins, bool castToBone, float boneSize, bool exportAllUvsAsDiffuseMaps, float scaleFactor, int versionIndex, bool isAscii)
+        bool allNodes, bool exportSkins, bool castToBone, float boneSize, bool exportAllUvsAsDiffuseMaps, float scaleFactor)
     {
 
         public void Initialize()
         {
             var is60Fps = imported.AnimationList.Count > 0 && imported.AnimationList[0].SampleRate.Equals(60.0f);
 
-            Initialize(fileName, scaleFactor, versionIndex, isAscii, is60Fps);
+            Initialize(fileName, scaleFactor, is60Fps);
 
             if (!allNodes)
             {

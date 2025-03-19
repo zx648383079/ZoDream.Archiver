@@ -22,6 +22,13 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pFileName"></param>
+        /// <param name="pFileFormat">0 是 bin, 1 是 txt</param>
+        /// <param name="pIOSettings"></param>
+        /// <returns></returns>
         public bool Initialize(string pFileName, int pFileFormat = -1, FbxIOSettings? pIOSettings = null)
         {
             var ptr = pIOSettings is not null ? pIOSettings.Handle : nint.Zero;

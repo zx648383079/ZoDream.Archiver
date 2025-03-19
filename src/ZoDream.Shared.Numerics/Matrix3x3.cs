@@ -59,6 +59,21 @@ namespace ZoDream.Shared.Numerics
             M33 = m.M33;
         }
 
+        public Matrix3x3(Matrix.Matrix4x4 m)
+        {
+            M11 = m.M11;
+            M12 = m.M12;
+            M13 = m.M13;
+
+            M21 = m.M21;
+            M22 = m.M22;
+            M23 = m.M23;
+
+            M31 = m.M31;
+            M32 = m.M32;
+            M33 = m.M33;
+        }
+
         public Matrix3x3(Vector3 col1, Vector3 col2, Vector3 col3)
         {
             M11 = col1.X;

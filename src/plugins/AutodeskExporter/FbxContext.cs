@@ -31,9 +31,7 @@ namespace ZoDream.AutodeskExporter
             throw new ObjectDisposedException(nameof(FbxContext));
         }
 
-        internal void Initialize(string fileName, float scaleFactor, 
-            int versionIndex, 
-            bool isAscii, bool is60Fps)
+        internal void Initialize(string fileName, float scaleFactor, bool is60Fps)
         {
             EnsureNotDisposed();
             var setting = new FbxIOSettings(_manager, FbxIOSettings.IOSROOT);
@@ -56,10 +54,9 @@ namespace ZoDream.AutodeskExporter
             }
             _exporter = new FbxExporter(_manager, string.Empty);
             _exporter.SetFileExportVersion(FbxVersion.FBX202000);
-            if (!_exporter.Initialize(fileName, isAscii ? 1 : 0, setting))
+            if (!_exporter.Initialize(fileName, 0, setting))
             {
-                var fullMessage = $"Failed to initialize FbxExporter: ";
-                throw new ApplicationException(fullMessage);
+                throw new ApplicationException($"Failed to initialize FbxExporter: ");
             }
             _pose = new FbxPose(_manager, "BindPose");
             _scene.AddPose(_pose);

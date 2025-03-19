@@ -7,15 +7,38 @@ using System.Numerics;
 using System.Text;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Unity.UI;
-using ZoDream.Shared.Drawing;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.Numerics;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FbxExporter : IMultipartExporter, IFbxImported
+    internal class FbxExporter : IFbxImported, IFileExporter //, IMultipartExporter
     {
+        public FbxExporter()
+        {
+
+        }
+
+        public FbxExporter(GameObject obj)
+        {
+            Append(obj);
+        }
+
+        public FbxExporter(Mesh obj)
+        {
+            Append(obj);
+        }
+
+        public FbxExporter(AnimationClip obj)
+        {
+            Append(obj);
+        }
+
+        public FbxExporter(Animator obj)
+        {
+            Append(obj);
+        }
 
         public FbxImportedFrame RootFrame { get; protected set; }
         public List<FbxImportedMesh> MeshList { get; protected set; } = [];
@@ -25,13 +48,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public List<FbxImportedMorph> MorphList { get; protected set; } = [];
 
         private Avatar _avatar;
-        private HashSet<AnimationClip> _animationClipHashSet = [];
-        private Dictionary<AnimationClip, string> _boundAnimationPathDic = [];
-        private Dictionary<uint, string> _bonePathHash = [];
-        private Dictionary<Texture2D, string> _textureNameDictionary = [];
-        private Dictionary<Transform, FbxImportedFrame> _transformDictionary = [];
-        Dictionary<uint, string> _morphChannelNames = [];
-        public bool IsEmpty => MeshList.Count == 0;
+        private readonly HashSet<AnimationClip> _animationClipHashSet = [];
+        private readonly Dictionary<AnimationClip, string> _boundAnimationPathDic = [];
+        private readonly Dictionary<uint, string> _bonePathHash = [];
+        private readonly Dictionary<Texture2D, string> _textureNameDictionary = [];
+        private readonly Dictionary<Transform, FbxImportedFrame> _transformDictionary = [];
+        private readonly Dictionary<uint, string> _morphChannelNames = [];
+        public bool IsEmpty => MeshList.Count == 0 || RootFrame is null;
         public string FileName => string.Empty;
         public void Append(GameObject obj)
         {
@@ -75,7 +98,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var name = Path.GetFileName(fileName);
 
             using (var exporter = new FbxContext(name, this, true, true, false, 
-                10, false, 1, 3, true))
+                10, false, 1))
             {
                 exporter.Initialize();
                 exporter.ExportAll(true, true, true, .25f);
@@ -112,7 +135,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 if (frameList.Count > 0)
                 {
-                    RootFrame = frameList[frameList.Count - 1];
+                    // 只能导出单个模型
+                    RootFrame = frameList[^1];
                     for (var i = frameList.Count - 2; i >= 0; i--)
                     {
                         var frame = frameList[i];
@@ -222,8 +246,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static FbxImportedFrame CreateFrame(string name, Vector3 t, Quaternion q, Vector3 s)
         {
-            var frame = new FbxImportedFrame();
-            frame.Name = name;
+            var frame = new FbxImportedFrame
+            {
+                Name = name
+            };
             SetFrame(frame, t, q, s);
             return frame;
         }
@@ -240,6 +266,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var frame = ConvertTransform(trans);
             if (parent == null)
             {
+                // 只能导出单个模型
                 RootFrame = frame;
             }
             else
@@ -378,7 +405,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         {
                             c = 3;
                         }
-                        iVertex.UV[uv] = new[] { m_UV[j * c], m_UV[j * c + 1] };
+                        iVertex.UV[uv] = [m_UV[j * c], m_UV[j * c + 1]];
                     }
                 }
                 //Tangent
@@ -470,7 +497,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         {
                             bone.Path = GetTransformPath(m_Transform);
                         }
-                        var convert = System.Numerics.Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
+                        var convert = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
                         bone.Matrix = convert * mesh.m_BindPose[i] * convert;
                         iMesh.BoneList.Add(bone);
                     }
@@ -485,7 +512,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         var boneHash = mesh.m_BoneNameHashes[i];
                         var path = GetPathFromHash(boneHash);
                         bone.Path = FixBonePath(path);
-                        var convert = System.Numerics.Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
+                        var convert = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
                         bone.Matrix = convert * mesh.m_BindPose[i] * convert;
                         iMesh.BoneList.Add(bone);
                     }
@@ -711,19 +738,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         texture.Name = textureName;
                     }
-                    else if (FbxImportedHelpers.FindTexture(m_Texture2D.m_Name + ext, TextureList) != null) //已有相同名字的图片
-                    {
-                        for (int i = 1; ; i++)
-                        {
-                            var name = m_Texture2D.m_Name + $" ({i}){ext}";
-                            if (FbxImportedHelpers.FindTexture(name, TextureList) == null)
-                            {
-                                texture.Name = name;
-                                _textureNameDictionary.Add(m_Texture2D, name);
-                                break;
-                            }
-                        }
-                    }
+                    //else if (FbxImportedHelpers.FindTexture(m_Texture2D.m_Name + ext, TextureList) != null) //已有相同名字的图片
+                    //{
+                    //    for (int i = 1; ; i++)
+                    //    {
+                    //        var name = m_Texture2D.m_Name + $" ({i}){ext}";
+                    //        if (FbxImportedHelpers.FindTexture(name, TextureList) == null)
+                    //        {
+                    //            texture.Name = name;
+                    //            _textureNameDictionary.Add(m_Texture2D, name);
+                    //            break;
+                    //        }
+                    //    }
+                    //}
                     else
                     {
                         texture.Name = m_Texture2D.m_Name + ext;

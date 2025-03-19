@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace ZoDream.Shared.Numerics
+namespace ZoDream.Shared.Numerics.Matrix
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
@@ -621,10 +621,10 @@ namespace ZoDream.Shared.Numerics
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override String ToString()
+        public override string ToString()
         {
             var info = CultureInfo.CurrentCulture;
-            return String.Format(info, 
+            return string.Format(info, 
                 "{{[M11:{0} M12:{1} M13:{2} M14:{3}] [M21:{4} M22:{5} M23:{6} M24:{7}] [M31:{8} M32:{9} M33:{10} M34:{11}] [M41:{12} M42:{13} M43:{14} M44:{15}]}}",
                 M11.ToString(info), M12.ToString(info), M13.ToString(info), M14.ToString(info),
                 M21.ToString(info), M22.ToString(info), M23.ToString(info), M24.ToString(info),
