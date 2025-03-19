@@ -74,7 +74,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             var name = Path.GetFileName(fileName);
 
-            using (var exporter = new FbxContext(name, this, true, true, false, 10, false, 1, 3, false))
+            using (var exporter = new FbxContext(name, this, true, true, false, 
+                10, false, 1, 3, true))
             {
                 exporter.Initialize();
                 exporter.ExportAll(true, true, true, .25f);

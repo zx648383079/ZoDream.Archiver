@@ -24,17 +24,8 @@ namespace ZoDream.AutodeskExporter
 
         public int Add(double x, double y, double z, double w = 0.0)
         {
-            nint ptr = FbxUtils.FbxMalloc(32);
-
-            Marshal.WriteInt64(ptr, 0, BitConverter.ToInt64(BitConverter.GetBytes(x), 0));
-            Marshal.WriteInt64(ptr, 8, BitConverter.ToInt64(BitConverter.GetBytes(y), 0));
-            Marshal.WriteInt64(ptr, 16, BitConverter.ToInt64(BitConverter.GetBytes(z), 0));
-            Marshal.WriteInt64(ptr, 24, BitConverter.ToInt64(BitConverter.GetBytes(w), 0));
-
-            int idx = AddInternal(Handle, ptr, EFbxType.eFbxDouble4);
-            FbxUtils.FbxFree(ptr);
-
-            return idx;
+            using var vec = new FbxVector4(x, y, z, w);
+            return AddInternal(Handle, vec.Handle, EFbxType.eFbxDouble4);
         }
 
         public int Add(double x, double y)

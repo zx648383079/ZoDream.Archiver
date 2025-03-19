@@ -7,7 +7,7 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD@Z")]
         private static extern void ConstructInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??0FbxString@fbxsdk@@QEAA@PEBD_K@Z")]
-        private static extern void ConstructInternal(nint handle, string pParam, ulong size);
+        private static extern void ConstructInternal(nint handle, nint pParam, ulong size);
 
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "??4FbxString@fbxsdk@@QEAAAEBV01@PEBD@Z")]
         private static extern void AssignInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string pParam);
@@ -30,7 +30,7 @@ namespace ZoDream.AutodeskExporter
         {
         }
 
-        public FbxString(string value)
+        public unsafe FbxString(string value)
             : base(FbxUtils.FbxMalloc(SizeOfThis))
         {
             ConstructInternal(Handle, value);

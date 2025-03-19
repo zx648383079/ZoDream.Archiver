@@ -135,7 +135,7 @@ namespace ZoDream.AutodeskExporter
             node.LclScaling = localScale;
             node.LclRotation = localRotation;
             node.LclTranslation = localPosition;
-            node.SetPreferedAngle(new Vector4(localRotation.X, localRotation.Y, localRotation.Z, 1f));
+            node.SetPreferedAngle(new(localRotation, 1));
 
             parentNode.AddChild(node);
             _pose?.Add(node, new FbxMatrix(node.EvaluateGlobalTransform()));
@@ -307,7 +307,7 @@ namespace ZoDream.AutodeskExporter
                     puv.ReferenceMode = EReferenceMode.eDirect;
                 }
 
-                var uvLayerItems = new Dictionary<int, FbxLayerElementUV>();
+                //var uvLayerItems = new Dictionary<int, FbxLayerElementUV>();
 
                 for (int i = 0; i < importedMesh.hasUV.Length; i++)
                 {
@@ -321,14 +321,14 @@ namespace ZoDream.AutodeskExporter
                         var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureNormalMap);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
-                        uvLayerItems.Add(i, puv);
+                        //uvLayerItems.Add(i, puv);
                     }
                     else
                     {
                         var puv = mesh.CreateElementUV($"UV{i}", FbxLayerElement.EType.eTextureDiffuse);
                         puv.MappingMode = EMappingMode.eByControlPoint;
                         puv.ReferenceMode = EReferenceMode.eDirect;
-                        uvLayerItems.Add(i, puv);
+                        //uvLayerItems.Add(i, puv);
                     }
                 }
 
@@ -450,7 +450,7 @@ namespace ZoDream.AutodeskExporter
                     var importedVertex = vertexList[j];
 
                     var vertex = importedVertex.Vertex;
-                    mesh.GetControlPoints()[j] = new Vector4(vertex.X, vertex.Y, vertex.Z, 0);
+                    mesh.SetControlPointAt(j, new Vector4(vertex.X, vertex.Y, vertex.Z, 0));
 
                     if (importedMesh.hasNormal)
                     {
@@ -463,7 +463,7 @@ namespace ZoDream.AutodeskExporter
                         if (importedMesh.hasUV[uvIndex])
                         {
                             var uv = importedVertex.UV[uvIndex];
-                            var puv = uvLayerItems[uvIndex]; // mesh.GetElementUV($"UV{uvIndex}");
+                            var puv = mesh.GetElementUV($"UV{uvIndex}");// uvLayerItems[uvIndex];
                             puv.DirectArray.Add(uv[0], uv[1]);
                         }
                     }
@@ -724,19 +724,17 @@ namespace ZoDream.AutodeskExporter
 
                         var vectorCount = pMesh.ControlPointsCount;
 
-                        var srcControlPoints = pMesh.GetControlPoints();
-
                         lShape.InitControlPoints(vectorCount);
 
                         for (int j = 0; j < vectorCount; j++)
                         {
-                            lShape.SetControlPointAt(srcControlPoints[j], j); ;
+                            lShape.SetControlPointAt(j, pMesh.GetControlPointAt(j)); ;
                         }
 
                         foreach (var vertex in keyframe.VertexList)
                         {
                             var v = vertex.Vertex.Vertex;
-                            lShape.SetControlPointAt(new Vector4(v.X, v.Y, v.Z, 0), (int)vertex.Index);
+                            lShape.SetControlPointAt((int)vertex.Index, new Vector4(v.X, v.Y, v.Z, 0));
                         }
 
                         if (keyframe.hasNormals)
@@ -746,7 +744,7 @@ namespace ZoDream.AutodeskExporter
                             foreach (var vertex in keyframe.VertexList)
                             {
                                 var v = vertex.Vertex.Normal;
-                                lShape.SetControlPointNormalAt(new Vector4(v.X, v.Y, v.Z, 0), (int)vertex.Index);
+                                lShape.SetControlPointNormalAt((int)vertex.Index, new Vector4(v.X, v.Y, v.Z, 0));
                             }
                         }
                     }

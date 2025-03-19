@@ -43,13 +43,18 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@HW4EType@FbxLayerElement@2@@Z")]
         private static extern nint GetElementUVInternal(nint handle, int pIndex, FbxLayerElement.EType pType);
         [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "?GetElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@PEBD@Z")]
-        private static extern nint GetElementUVInternal(nint handle, nint nameHandle);
+        private static extern nint GetElementUVInternal(nint handle, [MarshalAs(UnmanagedType.LPStr)] string name);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetElementVertexColor@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementVertexColor@2@H@Z")]
         private static extern nint GetElementVertexColorInternal(nint handle, int pIndex);
 
-        [DllImport(NativeMethods.DllName, EntryPoint = "?SetControlPointAt@FbxGeometryBase@fbxsdk@@UEAAXAEBVFbxVector4@2@0H_N@Z")]
+        [DllImport(NativeMethods.DllName, EntryPoint = "?SetControlPointAt@FbxGeometryBase@fbxsdk@@UEAAXAEBVFbxVector4@2@H@Z")]
         private static extern nint SetControlPointAtInternal(nint handle, nint pCtrlPoint, int pIndex);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetControlPointAt@FbxGeometryBase@fbxsdk@@UEBA?AVFbxVector4@2@H@Z")]
+        private static extern nint GetControlPointAtInternal(nint handle, nint pCtrlPoint, int pIndex);
+
+
         [DllImport(NativeMethods.DllName, EntryPoint = "?InitNormals@FbxGeometryBase@fbxsdk@@QEAAXPEAV12@@Z")]
         private static extern nint InitNormalsInternal(nint handle, nint pSrc);
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetControlPointNormalAt@FbxGeometryBase@fbxsdk@@UEAAXAEBVFbxVector4@2@H_N@Z")]
@@ -61,8 +66,8 @@ namespace ZoDream.AutodeskExporter
         private static extern nint CreateElementVertexColorInternal(nint pHandle);
         [DllImport(NativeMethods.DllName, EntryPoint = "?CreateElementTangent@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementTangent@2@XZ")]
         private static extern nint CreateElementTangentInternal(nint pHandle);
-        [DllImport(NativeMethods.DllName, EntryPoint = "?CreateElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@PEBDW4EType@FbxLayerElement@2@@Z")]
-        private static extern nint CreateElementUVInternal(nint pHandle, nint pUVSetName, FbxLayerElement.EType pTypeIdentifier);
+        [DllImport(NativeMethods.DllName, CharSet = CharSet.Auto, EntryPoint = "?CreateElementUV@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementUV@2@PEBDW4EType@FbxLayerElement@2@@Z")]
+        private static extern nint CreateElementUVInternal(nint pHandle, [MarshalAs(UnmanagedType.LPStr)] string pUVSetName, FbxLayerElement.EType pTypeIdentifier);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?CreateElementNormal@FbxGeometryBase@fbxsdk@@QEAAPEAVFbxLayerElementNormal@2@XZ")]
         private static extern nint CreateElementNormalInternal(nint pHandle);
@@ -84,12 +89,15 @@ namespace ZoDream.AutodeskExporter
             InitControlPointsInternal(Handle, pCount);
         }
 
-        internal void SetControlPointAt(Vector4 pCtrlPoint, int pIndex)
+        internal void SetControlPointAt(int pIndex, Vector4 pCtrlPoint)
         {
-            nint ptr = FbxDouble4.Construct(pCtrlPoint);
-            SetControlPointAtInternal(Handle, ptr, pIndex);
-            FbxUtils.FbxFree(ptr);
+            using var ptr = new FbxVector4(pCtrlPoint);
+            SetControlPointAt(pIndex, ptr);
+        }
 
+        internal void SetControlPointAt(int pIndex, FbxVector4 pCtrlPoint)
+        {
+            SetControlPointAtInternal(Handle, pCtrlPoint.Handle, pIndex);
         }
 
         internal void InitNormals(FbxGeometryBase pSrc)
@@ -97,18 +105,24 @@ namespace ZoDream.AutodeskExporter
             InitNormalsInternal(Handle, pSrc.Handle);
         }
 
-        internal void SetControlPointNormalAt(Vector4 pNormal, int pIndex)
+        internal void SetControlPointNormalAt(int pIndex, Vector4 pNormal)
         {
-            nint ptr = FbxDouble4.Construct(pNormal);
-            SetControlPointNormalAtInternal(Handle, ptr, pIndex);
-            FbxUtils.FbxFree(ptr);
+            using var ptr = new FbxVector4(pNormal);
+            SetControlPointNormalAt(pIndex, ptr);
         }
 
-        public FbxArray<Vector4> GetControlPoints()
+        internal void SetControlPointNormalAt(int pIndex, FbxVector4 pNormal)
         {
-            nint Ptr = GetControlPointsInternal(Handle, nint.Zero);
-            return new FbxArray<Vector4>(Ptr);
+            SetControlPointNormalAtInternal(Handle, pNormal.Handle, pIndex);
         }
+
+        public FbxVector4 GetControlPointAt(int index)
+        {
+            var vec = new FbxVector4();
+            GetControlPointAtInternal(Handle, vec.Handle, index);
+            return vec;
+        }
+
 
         public FbxLayerElementTangent? GetElementTangent(int index)
         {
@@ -149,10 +163,7 @@ namespace ZoDream.AutodeskExporter
             //    }
             //}
             //return null;
-            // 内置方法有问题
-            var namePtr = FbxString.Construct(name);
-            var ptr = GetElementUVInternal(Handle, namePtr);
-            FbxUtils.FbxFree(namePtr);
+            var ptr = GetElementUVInternal(Handle, name);
             return ptr == nint.Zero ? null : new FbxLayerElementUV(ptr);
         }
 
@@ -207,9 +218,8 @@ namespace ZoDream.AutodeskExporter
 
         internal FbxLayerElementUV CreateElementUV(string pUVSetName, FbxLayerElement.EType pTypeIdentifier)
         {
-            var namePtr = FbxString.Construct(pUVSetName);
-            var ptr = CreateElementUVInternal(Handle, namePtr, pTypeIdentifier);
-            // FbxUtils.FbxFree(namePtr);
+            //using var namePtr = new FbxString(pUVSetName);
+            var ptr = CreateElementUVInternal(Handle, pUVSetName, pTypeIdentifier);
             Debug.Assert(ptr != nint.Zero);
             return new FbxLayerElementUV(ptr);
         }

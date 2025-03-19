@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
@@ -145,7 +146,7 @@ namespace ZoDream.AutodeskExporter
             EndGetMeshEdgeIndexForPolygonInternal(Handle);
         }
 
-        
+       
     }
 
 }

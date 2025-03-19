@@ -37,8 +37,8 @@ namespace ZoDream.AutodeskExporter
             _leaveFree = true;
         }
 
-        public FbxArray(nint InHandle)
-            : base(InHandle)
+        public FbxArray(nint inHandle)
+            : base(inHandle)
         {
         }
 
@@ -61,6 +61,11 @@ namespace ZoDream.AutodeskExporter
                 FbxUtils.FbxFree(ptr);
                 return;
             }
+            if (value is FbxVector4 v)
+            {
+                FbxArray.SetAtInternal(Handle, index, v.Handle);
+                return;
+            }
             throw new NotSupportedException();
         }
 
@@ -76,6 +81,11 @@ namespace ZoDream.AutodeskExporter
                 var ptr = FbxDouble4.Construct(vec);
                 FbxArray.AddInternal(Handle, ptr);
                 FbxUtils.FbxFree(ptr);
+                return;
+            }
+            if (value is FbxVector4 v)
+            {
+                FbxArray.AddInternal(Handle, v.Handle);
                 return;
             }
             throw new NotSupportedException();

@@ -163,7 +163,7 @@ namespace ZoDream.AutodeskExporter
 
         public void SetPreferedAngle(Vector4 pPreferedAngle)
         {
-            nint ptr = FbxDouble4.Construct(pPreferedAngle);
+            var ptr = FbxDouble4.Construct(pPreferedAngle);
             SetPreferedAngleInternal(Handle, ptr);
             FbxUtils.FbxFree(ptr);
         }
