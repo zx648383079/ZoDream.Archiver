@@ -61,11 +61,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public bool IsEmpty => _root.Nodes.Count == 0;
 
-        public string FileName { get; private set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
 
         public void Append(GameObject obj)
         {
-            FileName = obj.m_Name;
+            Name = obj.m_Name;
             if (obj.m_Animator is not null)
             {
                 AddAnimator(obj.m_Animator);

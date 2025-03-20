@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -21,23 +20,15 @@ namespace ZoDream.AutodeskExporter
 
         public FbxLayerElementArray? DirectArray {
             get {
-                nint Ptr = GetDirectArrayInternal(Handle);
-                if (Ptr == nint.Zero)
-                {
-                    return null;
-                }
-                return new FbxLayerElementArray(Ptr);
+                var ptr = GetDirectArrayInternal(Handle);
+                return ptr == nint.Zero ? null : new FbxLayerElementArray(ptr);
             }
         }
 
         public FbxLayerElementArray? IndexArray {
             get {
-                nint Ptr = GetIndexArrayInternal(Handle);
-                if (Ptr == nint.Zero)
-                {
-                    return null;
-                }
-                return new FbxLayerElementArray(Ptr);
+                var ptr = GetIndexArrayInternal(Handle);
+                return ptr == nint.Zero ? null : new FbxLayerElementArray(ptr);
             }
         }
     }

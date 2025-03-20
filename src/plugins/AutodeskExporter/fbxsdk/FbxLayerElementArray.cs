@@ -7,48 +7,40 @@ namespace ZoDream.AutodeskExporter
     internal class FbxLayerElementArray : FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Add@FbxLayerElementArray@fbxsdk@@QEAAHPEBXW4EFbxType@2@@Z", CallingConvention = CallingConvention.ThisCall)]
-        private static extern int AddInternal(nint InHandle, nint pItem, EFbxType pValueType);
+        internal static extern int AddInternal(nint InHandle, nint pItem, EFbxType pValueType);
+
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCount@FbxLayerElementArray@fbxsdk@@QEBAHXZ")]
-        private static extern int GetCountInternal(nint handle);
+        internal static extern int GetCountInternal(nint handle);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetAt@FbxLayerElementArray@fbxsdk@@QEBA_NHPEAPEAXW4EFbxType@2@@Z")]
-        private static extern bool GetAtInternal(nint handle, int pIndex, nint pItem, EFbxType pValueType);
+        internal static extern bool GetAtInternal(nint handle, int pIndex, nint pItem, EFbxType pValueType);
 
         public int Count => GetCountInternal(Handle);
 
-        public FbxLayerElementArray(nint InHandle)
-            : base(InHandle)
+        public FbxLayerElementArray(nint inHandle)
+            : base(inHandle)
         {
         }
 
         public int Add(double x, double y, double z, double w = 0.0)
         {
-            using var vec = new FbxVector4(x, y, z, w);
+            using var vec = new FbxDouble4(x, y, z, w);
             return AddInternal(Handle, vec.Handle, EFbxType.eFbxDouble4);
         }
 
         public int Add(double x, double y)
         {
-            nint ptr = FbxUtils.FbxMalloc(16);
-
-            Marshal.WriteInt64(ptr, 0, BitConverter.ToInt64(BitConverter.GetBytes(x), 0));
-            Marshal.WriteInt64(ptr, 8, BitConverter.ToInt64(BitConverter.GetBytes(y), 0));
-
-            int idx = AddInternal(Handle, ptr, EFbxType.eFbxDouble2);
-            FbxUtils.FbxFree(ptr);
-
-            return idx;
+            using var vec = new FbxDouble2(x, y);
+            return AddInternal(Handle, vec.Handle, EFbxType.eFbxDouble2);
         }
 
         public int Add(int a)
         {
             nint ptr = FbxUtils.FbxMalloc(4);
             Marshal.WriteInt32(ptr, 0, a);
-
             int idx = AddInternal(Handle, ptr, EFbxType.eFbxInt);
             FbxUtils.FbxFree(ptr);
-
             return idx;
         }
 
@@ -94,22 +86,40 @@ namespace ZoDream.AutodeskExporter
 
         private unsafe nint GetAt(int index, EFbxType type)
         {
-            ulong sizeToAlloc = 0;
-            switch (type)
-            {
-                case EFbxType.eFbxDouble4: sizeToAlloc = 8 * 4; break;
-                case EFbxType.eFbxDouble3: sizeToAlloc = 8 * 3; break;
-                case EFbxType.eFbxDouble2: sizeToAlloc = 8 * 2; break;
-                case EFbxType.eFbxInt: sizeToAlloc = 4; break;
-            }
-
-            nint ptr = FbxUtils.FbxMalloc(sizeToAlloc);
-            nint ptrPtr = new nint((void*)&ptr);
+            ulong sizeToAlloc = FbxUtils.SizeOf(type);
+            var ptr = FbxUtils.FbxMalloc(sizeToAlloc);
+            var ptrPtr = (nint)(void*)&ptr;
             GetAtInternal(Handle, index, ptrPtr, type);
-            ptrPtr = nint.Zero;
-
             return ptr;
         }
+
+ 
     }
 
+
+    internal class FbxLayerElementArray<T> : FbxNative
+        where T : FbxNative, new()
+    {
+        public FbxLayerElementArray(nint inHandle)
+            : base(inHandle)
+        {
+        }
+
+        public int Count => FbxLayerElementArray.GetCountInternal(Handle);
+
+        private static readonly EFbxType FbxType = FbxUtils.Convert<T>();
+
+        public int Add(T item)
+        {
+            return FbxLayerElementArray.AddInternal(Handle, 
+                item.Handle, FbxType);
+        }
+
+        public T? GetAt(int index)
+        {
+            var res = new T();
+            FbxLayerElementArray.GetAtInternal(Handle, index, res.Handle, FbxType);
+            return res;
+        }
+    }
 }

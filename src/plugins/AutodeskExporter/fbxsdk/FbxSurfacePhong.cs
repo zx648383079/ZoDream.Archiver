@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
@@ -9,6 +8,9 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSurfacePhong@fbxsdk@@SAPEAV12@PEAVFbxObject@2@PEBD@Z")]
         private static extern nint CreateFromObject(nint handle, string name);
 
+        [DllImport(NativeMethods.DllName, EntryPoint = "?Create@FbxSurfacePhong@fbxsdk@@SAPEAV12@PEAVFbxManager@2@PEBD@Z")]
+        private static extern nint CreateFromManager(nint handle, string name);
+
         private readonly nint _specular;
         private readonly nint _reflection;
         private readonly nint _shininess;
@@ -16,6 +18,11 @@ namespace ZoDream.AutodeskExporter
         public Vector3 Reflection { get => FbxProperty.GetDouble3(_reflection); set => FbxProperty.Set(_reflection, value); }
         public double Shininess { get => FbxProperty.GetDouble(_shininess); set => FbxProperty.Set(_shininess, value); }
 
+        public FbxSurfacePhong(FbxManager manager, string name)
+            : this(CreateFromManager(manager.Handle, name))
+        {
+            
+        }
 
         public FbxSurfacePhong(FbxObject obj, string name)
             : this(CreateFromObject(obj.Handle, name))
@@ -32,7 +39,7 @@ namespace ZoDream.AutodeskExporter
 
         internal void SpecularConnectSrcObject(FbxFileTexture pTexture)
         {
-            FbxProperty.ConnectSrcObject(_specular, pTexture);
+            new FbxProperty(_specular).Object.ConnectSrcObject(pTexture);
         }
     }
 

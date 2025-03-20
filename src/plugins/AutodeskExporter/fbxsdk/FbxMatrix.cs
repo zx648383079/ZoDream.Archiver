@@ -18,7 +18,7 @@ namespace ZoDream.AutodeskExporter
         /// <summary>
         /// 占用的空间，使用 c++ 调用 sizeof(FbxMatrix)
         /// </summary>
-        const ulong SizeOfThis = 0x80;
+        internal const ulong SizeOfThis = 0x80;
 
         public FbxMatrix(nint ptr)
             : base(ptr)

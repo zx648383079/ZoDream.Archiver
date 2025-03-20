@@ -12,6 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class ShaderExporter(Shader shader) : IFileExporter
     {
+        public string Name => shader.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (!LocationStorage.TryCreate(fileName, ".shader", mode, out fileName))

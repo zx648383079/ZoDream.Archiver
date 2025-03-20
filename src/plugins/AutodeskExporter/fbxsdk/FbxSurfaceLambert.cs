@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace ZoDream.AutodeskExporter
@@ -41,17 +40,17 @@ namespace ZoDream.AutodeskExporter
 
         internal void BumpConnectSrcObject(FbxFileTexture pTexture)
         {
-            FbxProperty.ConnectSrcObject(_bump, pTexture);
+            new FbxProperty(_bump).Object.ConnectSrcObject(pTexture);
         }
 
         internal void DiffuseConnectSrcObject(FbxFileTexture pTexture)
         {
-            FbxProperty.ConnectSrcObject(_diffuse, pTexture);
+            new FbxProperty(_diffuse).Object.ConnectSrcObject(pTexture);
         }
 
         internal void NormalMapConnectSrcObject(FbxFileTexture pTexture)
         {
-            FbxProperty.ConnectSrcObject(_normalMap, pTexture);
+            new FbxProperty(_normalMap).Object.ConnectSrcObject(pTexture);
         }
 
     

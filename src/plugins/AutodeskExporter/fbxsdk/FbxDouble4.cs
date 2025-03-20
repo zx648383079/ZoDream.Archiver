@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -13,7 +12,7 @@ namespace ZoDream.AutodeskExporter
         /// <summary>
         /// 占用的空间，使用 c++ 调用 sizeof(FbxTime)
         /// </summary>
-        const ulong SizeOfThis = 0x20;
+        internal const ulong SizeOfThis = 0x20;
 
         public FbxDouble4(nint handle)
             : base(handle)
@@ -66,7 +65,7 @@ namespace ZoDream.AutodeskExporter
 
         public static nint Construct(Vector4 value)
         {
-            nint ptr = FbxUtils.FbxMalloc(8 * 4);
+            nint ptr = FbxUtils.FbxMalloc(SizeOfThis);
             ConstructInternal(ptr, value.X, value.Y, value.Z, value.W);
             return ptr;
         }

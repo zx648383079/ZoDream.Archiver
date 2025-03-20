@@ -10,6 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class LuaExporter(TextAsset asset) : IFileExporter
     {
+        public string Name => asset.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             var extension = Path.GetExtension(fileName);

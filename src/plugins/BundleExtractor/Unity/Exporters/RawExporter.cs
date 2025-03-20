@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -7,9 +8,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class RawExporter : IFileExporter
     {
-
+        
         public RawExporter(TextAsset asset)
         {
+            Name = asset.Name;
             // spine 的骨骼文件也是在这里，无法具体判断
             var buffer = ArrayPool<byte>.Shared.Rent(100);
             try
@@ -30,6 +32,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         }
 
         private readonly IFileExporter _exporter;
+        public string Name { get; private set; }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {

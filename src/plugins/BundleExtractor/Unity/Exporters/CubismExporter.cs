@@ -10,6 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class CubismExporter(IBundleBinaryReader reader) : IFileExporter
     {
+        public string Name => string.Empty;
+
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (!LocationStorage.TryCreate(fileName, ".moc3", mode, out var exportFullPath))

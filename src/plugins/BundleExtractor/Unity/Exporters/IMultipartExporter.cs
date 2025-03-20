@@ -9,7 +9,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public bool IsEmpty { get; }
 
-        public string FileName { get; }
         public void Append(GameObject obj);
         public void Append(Mesh mesh);
         public void Append(Animator animator);

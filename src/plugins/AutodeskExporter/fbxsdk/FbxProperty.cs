@@ -8,7 +8,7 @@ namespace ZoDream.AutodeskExporter
     /// 
     /// 获取属性地址偏移的方法  &((FbxNull*)0)->Look
     /// </summary>
-    internal class FbxProperty: FbxObject
+    internal class FbxProperty: FbxNative
     {
         [DllImport(NativeMethods.DllName, EntryPoint = "?Set@FbxProperty@fbxsdk@@AEAA_NAEAPEBX@Z")]
         private static extern bool SetInternal(nint inHandle, nint pValue);
@@ -22,15 +22,25 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?Get@FbxProperty@fbxsdk@@IEBA_NPEAXAEBW4EFbxType@2@@Z")]
         private static extern bool GetInternal(nint inHandle, ref nint pValue, ref EFbxType pValueType);
 
+
         [DllImport(NativeMethods.DllName, EntryPoint = "?GetCurve@FbxProperty@fbxsdk@@QEAAPEAVFbxAnimCurve@2@PEAVFbxAnimLayer@2@PEBD_N@Z")]
         private static extern nint GetCurveInternal(nint inHandle, nint pAnimLayer, [MarshalAs(UnmanagedType.LPStr)] string pChannel, bool pCreate = false);
 
         [DllImport(NativeMethods.DllName, EntryPoint = "?ConnectSrcObject@FbxProperty@fbxsdk@@QEAA_NPEAVFbxObject@2@W4EType@FbxConnection@2@@Z")]
-        private static extern void ConnectSrcObjectInternal(nint inHandle, nint objHandle);
+        private static extern nint ConnectSrcObjectInternal(nint inHandle, nint objHandle, FbxConnection.EType eType);
 
-        [DllImport(NativeMethods.DllName, EntryPoint = "?Get@FbxProperty@fbxsdk@@AEBAPEAXXZ")]
-        private static extern nint GetInternal(nint inHandle);
+        [DllImport(NativeMethods.DllName, EntryPoint = "?ConnectSrc@FbxProperty@fbxsdk@@AEAA_NAEBV12@W4EType@FbxConnection@2@@Z")]
+        private static extern nint ConnectSrcInternal(nint inHandle, nint propertyHandle, FbxConnection.EType eType);
 
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?NotifyGet@FbxProperty@fbxsdk@@IEBA_NXZ")]
+        private static extern void NotifyGetInternal(nint inHandle);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetSrcObject@FbxProperty@fbxsdk@@QEBAPEAVFbxObject@2@H@Z")]
+        private static extern void GetSrcObjectInternal(nint inHandle, int index);
+
+        [DllImport(NativeMethods.DllName, EntryPoint = "?GetFbxObject@FbxProperty@fbxsdk@@QEBAPEAVFbxObject@2@XZ")]
+        private static extern nint GetFbxObjectInternal(ref nint inHandle);
 
         public FbxProperty(nint handle)
             : base(handle)
@@ -38,10 +48,22 @@ namespace ZoDream.AutodeskExporter
             
         }
 
-        public nint Get()
+        public T Get<T>()
+            where T : FbxNative
         {
-            return GetInternal(Handle);
+            var ptr = nint.Zero;
+            var type = FbxUtils.Convert<T>();
+            GetInternal(Handle, ref ptr, ref type);
+            return (T)Activator.CreateInstance(typeof(T), ptr);
         }
+
+        public FbxObject Object {
+            get {
+                var ptr = Handle;
+                return new(GetFbxObjectInternal(ref ptr));
+            }
+        }
+
         public void Set(string value)
         {
             Set(Handle, value);
@@ -63,9 +85,9 @@ namespace ZoDream.AutodeskExporter
             SetEnum(Handle, (int)(object)value);
         }
 
-        internal void ConnectSrcObject(FbxObject obj)
+        internal void ConnectSrc(FbxProperty obj)
         {
-            ConnectSrcObjectInternal(Handle, obj.Handle);
+            ConnectSrc(this, obj);
         }
 
         public static void Set(nint inHandle, string value)
@@ -132,15 +154,12 @@ namespace ZoDream.AutodeskExporter
             return new FbxAnimCurve(ptr);
         }
 
-        internal static void ConnectSrcObject(nint inHandle, FbxObject obj)
+
+        internal static void ConnectSrc(FbxProperty target, FbxProperty source, FbxConnection.EType eType = FbxConnection.EType.eNone)
         {
-            ConnectSrcObjectInternal(inHandle, obj.Handle);
+            ConnectSrcInternal(target.Handle, source.Handle, eType);
         }
 
-        public static explicit operator nint(FbxProperty p)
-        {
-            return p.Get();
-        }
 
         public static explicit operator string(FbxProperty p)
         {

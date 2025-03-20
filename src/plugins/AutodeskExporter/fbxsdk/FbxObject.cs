@@ -13,12 +13,19 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?SetName@FbxObject@fbxsdk@@QEAAXPEBD@Z", CallingConvention = CallingConvention.ThisCall)]
         protected static extern void SetNameInternal(nint InHandle, [MarshalAs(UnmanagedType.LPStr)] string pName);
 
+        [DllImport(NativeMethods.DllName, EntryPoint = "?ConnectSrcObject@FbxObject@fbxsdk@@QEAA_NPEAV12@W4EType@FbxConnection@2@@Z")]
+        private static extern bool ConnectSrcObjectInternal(nint inHandle, nint objHandle, FbxConnection.EType eType);
+
+
+        public FbxProperty RootProperty => new(GetPropertyPtr(0x10));
+
+
         internal FbxObject()
         {
         }
 
-        public FbxObject(nint InHandle)
-            : base(InHandle)
+        public FbxObject(nint inHandle)
+            : base(inHandle)
         {
         }
 
@@ -28,6 +35,11 @@ namespace ZoDream.AutodeskExporter
                 return FbxUtils.IntPtrToString(StrPtr);
             }
             set => SetNameInternal(Handle, value);
+        }
+
+        internal void ConnectSrcObject(FbxObject obj)
+        {
+            ConnectSrcObject(Handle, obj);
         }
 
         protected override void Dispose(bool bDisposing)
@@ -66,6 +78,11 @@ namespace ZoDream.AutodeskExporter
             }
 
             return !a.Equals(b);
+        }
+
+        internal static void ConnectSrcObject(nint inHandle, FbxObject obj, FbxConnection.EType eType = FbxConnection.EType.eNone)
+        {
+            ConnectSrcObjectInternal(inHandle, obj.Handle, eType);
         }
     }
 

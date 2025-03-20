@@ -8,7 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class FsbExporter(AudioClip audio) : IFileExporter
     {
-
+        public string Name => audio.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             //audio.m_AudioData.Position = 0;

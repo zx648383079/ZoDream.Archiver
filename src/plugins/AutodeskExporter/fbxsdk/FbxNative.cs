@@ -14,7 +14,12 @@ namespace ZoDream.AutodeskExporter
         private bool _disposedValue;
 
         public nint Handle { get => _handle; protected set => _handle = value; }
-        public FbxNative() { }
+
+        public FbxNative()
+        {
+            
+        }
+
         public FbxNative(nint InHandle)
         {
             _handle = InHandle;
@@ -32,13 +37,7 @@ namespace ZoDream.AutodeskExporter
             return Marshal.ReadIntPtr(_handle, offset);
         }
 
-        ~FbxNative()
-        {
-            if (_leaveFree)
-            {
-                Dispose(disposing: false);
-            }
-        }
+
 
         protected virtual void Dispose(bool disposing)
         {
@@ -57,6 +56,14 @@ namespace ZoDream.AutodeskExporter
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        ~FbxNative()
+        {
+            if (_leaveFree)
+            {
+                Dispose(disposing: false);
+            }
         }
     }
 }

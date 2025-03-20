@@ -23,7 +23,7 @@ namespace ZoDream.AutodeskExporter
         /// <summary>
         /// 占用的空间，使用 c++ 调用 sizeof(FbxTime)
         /// </summary>
-        const ulong SizeOfThis = 0x8;
+        internal const ulong SizeOfThis = 0x8;
 
         public FbxString(nint handle)
             : base(handle)

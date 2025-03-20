@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -227,17 +226,15 @@ namespace ZoDream.AutodeskExporter
                 return value;
             }
 
-            var pTex = new FbxFileTexture(_scene, texture.Name);
-            pTex.SetFileName(texture.Name);
+            var pTex = new FbxFileTexture(_manager, texture.Name);
+            pTex.FileName = texture.Name;
             pTex.SetTextureUse(FbxFileTexture.ETextureUse.eStandard);
             pTex.SetMappingType(FbxFileTexture.EMappingType.eUV);
-            pTex.SetMaterialUse(FbxFileTexture.EMaterialUse.eModelMaterial);
+            pTex.MaterialUse = FbxFileTexture.EMaterialUse.eModelMaterial;
             pTex.SetSwapUV(false);
             pTex.SetTranslation(0.0, 0.0);
             pTex.SetScale(1.0, 1.0);
             pTex.SetRotation(0.0, 0.0);
-
-
             _createdTextures.Add(texture.Name, pTex);
 
             //var file = new FileInfo(texture.Name);
@@ -371,7 +368,7 @@ namespace ZoDream.AutodeskExporter
                             var specular = mat.Specular;
                             var reflection = mat.Reflection;
 
-                            pMat = new(_scene, mat.Name);
+                            pMat = new(_manager, mat.Name);
                             pMat.Diffuse = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
                             pMat.Ambient = new Vector3(ambient.X, ambient.Y, ambient.Z);
                             pMat.Emissive = new Vector3(emissive.X, emissive.Y, emissive.Z);
@@ -452,7 +449,7 @@ namespace ZoDream.AutodeskExporter
                     if (importedMesh.hasNormal)
                     {
                         var normal = importedVertex.Normal;
-                        mesh.GetElementNormal(0).DirectArray.Add(normal.X, normal.Y, normal.Z, 0);
+                        mesh.GetElementNormal(0).AddDirect(normal.X, normal.Y, normal.Z, 0);
                     }
 
                     for (var uvIndex = 0; uvIndex < importedMesh.hasUV.Length; uvIndex += 1)
@@ -461,20 +458,20 @@ namespace ZoDream.AutodeskExporter
                         {
                             var uv = importedVertex.UV[uvIndex];
                             var puv = mesh.GetElementUV($"UV{uvIndex}");// uvLayerItems[uvIndex];
-                            puv.DirectArray.Add(uv[0], uv[1]);
+                            puv.AddDirect(uv[0], uv[1]);
                         }
                     }
 
                     if (importedMesh.hasTangent)
                     {
                         var tangent = importedVertex.Tangent;
-                        mesh.GetElementTangent(0).DirectArray.Add(tangent.X, tangent.Y, tangent.Z, tangent.W);
+                        mesh.GetElementTangent(0).AddDirect(tangent.X, tangent.Y, tangent.Z, tangent.W);
                     }
 
                     if (importedMesh.hasColor)
                     {
                         var color = importedVertex.Color;
-                        mesh.GetElementVertexColor(0).DirectArray.Add(color.X, color.Y, color.Z, color.W);
+                        mesh.GetElementVertexColor(0).AddDirect(color.X, color.Y, color.Z, color.W);
                     }
 
                     if (hasBones && importedVertex.BoneIndices != null)
@@ -751,6 +748,10 @@ namespace ZoDream.AutodeskExporter
 
         public void Dispose()
         {
+            foreach (var item in _frameToNode)
+            {
+                item.Value.Dispose();
+            }
             _frameToNode.Clear();
             _createdMaterials.Clear();
             _createdTextures.Clear();

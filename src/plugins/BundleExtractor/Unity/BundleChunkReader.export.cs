@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using ZoDream.BundleExtractor.Unity;
@@ -55,7 +56,7 @@ namespace ZoDream.BundleExtractor
                     }
                     try
                     {
-                        var exportPath = _fileItems.Create(FileNameHelper.Create(asset.FullPath, obj.Name), folder);
+                        var fileName = string.IsNullOrEmpty(obj.Name) ? obj.FileID.ToString() : obj.Name;
                         if (TryGetExporterType(obj, out var targetType))
                         {
                             if (batchItems.TryGetValue(targetType, out var instance))
@@ -75,12 +76,16 @@ namespace ZoDream.BundleExtractor
                                 }
                                 else if (target is IFileExporter f)
                                 {
-                                    f.SaveAs(exportPath, mode);
+                                    f.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
+                                        string.IsNullOrEmpty(f.Name) ? fileName : f.Name
+                                    ), folder), mode);
                                 }
                             }
                             continue;
                         }
-                        ExportConvertFile(obj, exportPath, mode);
+                        ExportConvertFile(obj,
+                            _fileItems.Create(FileNameHelper.Create(asset.FullPath, fileName), folder)
+                            , mode);
                     }
                     catch (Exception e)
                     {
@@ -94,7 +99,8 @@ namespace ZoDream.BundleExtractor
                 }
                 foreach (var batch in batchItems)
                 {
-                    batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, batch.Value.FileName), folder), mode);
+                    batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
+                        batch.Value.Name), folder), mode);
                     batch.Value.Dispose();
                 }
                 batchItems.Clear();

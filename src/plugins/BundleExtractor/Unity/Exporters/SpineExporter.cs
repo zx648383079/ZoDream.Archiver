@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class SpineExporter(TextAsset asset) : IFileExporter
     {
-
+        public string Name => asset.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (fileName.EndsWith(".skel"))

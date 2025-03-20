@@ -58,9 +58,6 @@ namespace ZoDream.AutodeskExporter
 
         private nint _name;
 
-        private FbxLayerElement()
-        {
-        }
 
         public FbxLayerElement(nint handle)
             : base(handle)

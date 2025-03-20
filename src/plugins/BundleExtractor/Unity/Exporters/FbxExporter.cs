@@ -55,9 +55,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly Dictionary<Transform, FbxImportedFrame> _transformDictionary = [];
         private readonly Dictionary<uint, string> _morphChannelNames = [];
         public bool IsEmpty => MeshList.Count == 0 || RootFrame is null;
-        public string FileName => string.Empty;
+        public string Name { get; private set; } = string.Empty;
         public void Append(GameObject obj)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(obj.Name))
+            {
+                Name = obj.Name;
+            }
             if (obj.m_Animator != null)
             {
                 InitWithAnimator(obj.m_Animator);
@@ -71,16 +75,28 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(Mesh mesh)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            {
+                Name = mesh.Name;
+            }
         }
 
         public void Append(Animator animator)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
             InitWithAnimator(animator);
             CollectAnimationClip(animator);
         }
 
         public void Append(AnimationClip animator)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
             _animationClipHashSet.Add(animator);
         }
 
@@ -288,6 +304,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             if (mesh == null)
             {
                 return;
+            }
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            {
+                Name = mesh.Name;
             }
             var iMesh = new FbxImportedMesh();
             meshR.m_GameObject.TryGet(out var m_GameObject2);

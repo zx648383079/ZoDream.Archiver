@@ -13,11 +13,6 @@ namespace ZoDream.AutodeskExporter
         [DllImport(NativeMethods.DllName, EntryPoint = "?Set@FbxVector4@fbxsdk@@QEAAXNNNN@Z")]
         private static extern void SetInternal(nint handle, double pX, double pY, double pZ, double pW);
 
-        /// <summary>
-        /// 占用的空间，使用 c++ 调用 sizeof(FbxTime)
-        /// </summary>
-        const ulong SizeOfThis = 0x20;
-
         public FbxVector4(nint handle)
             : base(handle)
         {
@@ -71,5 +66,6 @@ namespace ZoDream.AutodeskExporter
         {
             return new(q);
         }
+
     }
 }
