@@ -188,5 +188,4 @@
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
 
-	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
 </Project>

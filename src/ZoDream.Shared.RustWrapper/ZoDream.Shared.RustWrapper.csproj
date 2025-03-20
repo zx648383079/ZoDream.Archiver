@@ -9,10 +9,19 @@
 	  <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
 
-	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
-
 	<ItemGroup>
 	  <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
 	</ItemGroup>
 	
+	
+	
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<SourceFile Include="..\..\zodream\target\debug\zodream.dll" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<SourceFile Include="..\..\zodream\target\release\zodream.dll" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Link="x64\zodream.dll" CopyToOutputDirectory="PreserveNewest" Include="@(SourceFile)" />
+	</ItemGroup>
 </Project>

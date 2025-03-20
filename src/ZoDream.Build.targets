@@ -1,3 +1,5 @@
+<!-- <Import Project="$(SolutionDir)ZoDream.Build.targets" /> -->
+
 <Project>
 	<Target Name="CopyExtraFiles" AfterTargets="AfterBuild"  Condition="$(ProjectName.Contains('Wrapper'))">
 		<Message Text="Copying extra files for $(RuntimeIdentifier)($(TargetFramework))... " Importance="high" />
