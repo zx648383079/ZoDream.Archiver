@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="FFmpeg.AutoGen" Version="7.0.0" />
-	  <PackageReference Include="FFmpeg4Sharp" Version="7.0.0" />
+	  <PackageReference Include="FFmpeg4Sharp" Version="7.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

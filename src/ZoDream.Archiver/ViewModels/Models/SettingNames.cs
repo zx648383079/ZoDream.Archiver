@@ -7,6 +7,6 @@
         AppInstalled,
         FFmpegPath,
         TemporaryPath,
-        Format3D,
+        ModelFormat,
     }
 }

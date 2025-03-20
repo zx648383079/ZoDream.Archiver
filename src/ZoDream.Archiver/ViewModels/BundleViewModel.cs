@@ -88,7 +88,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             FFmpegBinariesHelper.RegisterFFmpegBinaries(
                 _app.Setting.Get<string>(SettingNames.FFmpegPath));
-            _options.ModelFormat = _app.Setting.Get<bool>(SettingNames.Format3D) ? "fbx" : "glb";
+            _options.ModelFormat = _app.Setting.Get<string>(SettingNames.ModelFormat);
         }
 
         private async void TapView(object? _)

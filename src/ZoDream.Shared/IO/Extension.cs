@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZoDream.Shared.IO
 {
@@ -155,6 +156,21 @@ namespace ZoDream.Shared.IO
             }
             ArrayPool<byte>.Shared.Return(buffer);
             return len;
+        }
+
+        public static string ToBase64String(this Stream input, string mimeType)
+        {
+            var length = (int)(input.Length - input.Position);
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                input.ReadExactly(buffer, 0, length);
+                return $"data:{mimeType};base64,{Convert.ToBase64String(buffer, 0, length)}";
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
         public static void SaveAs(this Stream input, string fileName)

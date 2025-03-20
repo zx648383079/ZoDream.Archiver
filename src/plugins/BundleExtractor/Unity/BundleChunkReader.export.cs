@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
-using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor
 {
@@ -28,23 +23,12 @@ namespace ZoDream.BundleExtractor
             {typeof(AnimationClip), typeof(GltfExporter)},
         };
 
-        private bool TryGetExporterType(UIObject obj, [NotNullWhen(true)] out Type? exporterType)
-        {
-            if (_options is IBundleExtractOptions o)
-            {
-                if (o.ModelFormat.Equals("fbx", StringComparison.OrdinalIgnoreCase) 
-                    && obj is GameObject or Mesh or Animator or AnimationClip)
-                {
-                    exporterType = typeof(FbxExporter);
-                    return true;
-                }
-            }
-            return _exportItems.TryGetValue(obj.GetType(), out exporterType);
-        }
+        private readonly Dictionary<Type, IMultipartExporter> _batchItems = [];
+
 
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
-            var batchItems = new Dictionary<Type, IMultipartExporter>();
+            
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.Children)
@@ -57,35 +41,10 @@ namespace ZoDream.BundleExtractor
                     try
                     {
                         var fileName = string.IsNullOrEmpty(obj.Name) ? obj.FileID.ToString() : obj.Name;
-                        if (TryGetExporterType(obj, out var targetType))
-                        {
-                            if (batchItems.TryGetValue(targetType, out var instance))
-                            {
-                                targetType.GetMethod("Append",
-                                    [obj.GetType()])?.Invoke(instance, [obj]);
-                            }
-                            else
-                            {
-                                var target = targetType.GetConstructor([obj.GetType()])?.Invoke([obj]);
-                                target ??= targetType.GetConstructor([])?.Invoke([]);
-                                if (target is IMultipartExporter m)
-                                {
-                                    targetType.GetMethod("Append",
-                                        [obj.GetType()])?.Invoke(m, [obj]);
-                                    batchItems.TryAdd(targetType, m);
-                                }
-                                else if (target is IFileExporter f)
-                                {
-                                    f.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
-                                        string.IsNullOrEmpty(f.Name) ? fileName : f.Name
-                                    ), folder), mode);
-                                }
-                            }
-                            continue;
-                        }
-                        ExportConvertFile(obj,
-                            _fileItems.Create(FileNameHelper.Create(asset.FullPath, fileName), folder)
-                            , mode);
+                        var exporter = TryParse(obj);
+                        exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
+                            string.IsNullOrEmpty(exporter.Name) ? fileName : exporter.Name
+                        ), folder), mode);
                     }
                     catch (Exception e)
                     {
@@ -97,97 +56,76 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                foreach (var batch in batchItems)
+                foreach (var batch in _batchItems)
                 {
                     batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
                         batch.Value.Name), folder), mode);
                     batch.Value.Dispose();
                 }
-                batchItems.Clear();
+                _batchItems.Clear();
             }
         }
 
-        internal bool ExportRawFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        private IMultipartExporter? TryParseModel()
         {
-            return false;
-            if (!LocationStorage.TryCreate(exportPath,  ".dat", mode, out var exportFullPath))
+            if (_options is IBundleExtractOptions o)
             {
-                return false;
+                return o.ModelFormat.ToLower() switch
+                {
+                    "fbx" => new FbxExporter(),
+                    _ => new GltfExporter(o),
+                };
             }
-            var stream = item.GetRawData();
-            if (stream.Length == 0)
-            {
-                return false;
-            }
-            stream.SaveAs(exportFullPath);
-            return true;
+            return new GltfExporter();
         }
 
-        internal bool ExportConvertFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        private IFileExporter? TryParse(UIObject obj)
         {
-            switch (item.Type)
+            IMultipartExporter? instance;
+            if (obj is GameObject or Mesh or Animator or AnimationClip)
             {
-                case ElementIDType.GameObject:
-                    ((GameObject)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Texture2D:
-                    ((Texture2D)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.AudioClip:
-                    ((AudioClip)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Shader:
-                    ((Shader)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.TextAsset:
-                    ((TextAsset)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.MonoBehavior:
-                    ((MonoBehavior)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Font:
-                    ((Font)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Mesh:
-                    ((Mesh)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.VideoClip:
-                    ((VideoClip)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.MovieTexture:
-                    ((MovieTexture)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Sprite:
-                    ((Sprite)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Animator:
-                    ((Animator)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.AnimationClip:
-                    ((AnimationClip)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.MiHoYoBinData:
-                    ((MiHoYoBinData)item)?.SaveAs(exportPath, mode);
-                    return true;
-                case ElementIDType.Material:
-                    return ExportJSONFile(item, exportPath, mode);
-                default:
-                    return ExportRawFile(item, exportPath, mode);
+                instance = TryParseModel();
+                if (instance is not null)
+                {
+                    TryAppend(instance, obj);
+                    return instance;
+                }
             }
+            if (!_exportItems.TryGetValue(obj.GetType(), out var targetType))
+            {
+                return obj is IFileExporter f ? f : null;
+            }
+            if (_batchItems.TryGetValue(targetType, out instance))
+            {
+                TryAppend(instance, obj);
+                return null;
+            }
+            var fn = targetType.GetConstructor([obj.GetType()]);
+            object? target;
+            if (fn is not null)
+            {
+                target = fn?.Invoke([obj]);
+            }
+            else
+            {
+                target = targetType.GetConstructor([])?.Invoke([]);
+            }
+            if (target is not IMultipartExporter m)
+            {
+                return (IFileExporter)target;
+            }
+            if (fn is null)
+            {
+                TryAppend(target, obj);
+            }
+            _batchItems.TryAdd(targetType, m);
+            return null;
         }
 
-        internal bool ExportJSONFile(UIObject item, string exportPath, ArchiveExtractMode mode)
+        private static void TryAppend(object instance, UIObject obj)
         {
-            //if (!TryExportFile(exportPath, item, ".json", out var exportFullPath))
-            //    return false;
-
-            //var settings = new JsonSerializerSettings();
-            //settings.Converters.Add(new StringEnumConverter());
-            //var str = JsonConvert.SerializeObject(item, Formatting.Indented, settings);
-            //File.WriteAllText(exportFullPath, str);
-            // TODO
-            return true;
+            instance.GetType().GetMethod("Append",
+                    [obj.GetType()])?.Invoke(instance, [obj]);
         }
-
     }
 }

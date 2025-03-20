@@ -15,7 +15,7 @@ namespace ZoDream.KhronosExporter
                 new GlbWriter().Write(data, await entry.OpenWriteAsync());
             } else if (entry.HasExtension(".gltf"))
             {
-                new GltfWriter().Write(data, await entry.OpenWriteAsync());
+                new GltfWriter().Serialize(data, await entry.OpenWriteAsync());
             }
         }
 

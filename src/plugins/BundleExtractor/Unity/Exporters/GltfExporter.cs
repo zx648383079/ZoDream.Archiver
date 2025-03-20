@@ -34,19 +34,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _root = new();
             _root.Add(new Scene());
-            _root.Add(new Material()
-            {
-                Name = "Material",
-                AlphaMode = AlphaMode.OPAQUE,
-                DoubleSided = true,
-                PbrMetallicRoughness = new()
-                {
-                    RoughnessFactor = .5f,
-                    BaseColorFactor = new(0.8f, 0.8f, 0.8f, 1f)
-                }
-            });
         }
 
+        public GltfExporter(IBundleExtractOptions options)
+            : this()
+        {
+            _isBinaryFile = options.ModelFormat == "glb";
+        }
+
+        private readonly bool _isBinaryFile = true;
         private readonly ModelSource _root;
         private readonly Dictionary<string, IFileExporter> _attachItems = [];
         private readonly Dictionary<string, int> _nodeItems = [];
@@ -65,7 +61,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(GameObject obj)
         {
-            Name = obj.m_Name;
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(obj.Name))
+            {
+                Name = obj.Name;
+            }
             if (obj.m_Animator is not null)
             {
                 AddAnimator(obj.m_Animator);
@@ -475,6 +474,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private int AddNode(UnityMesh mesh, int sceneIndex, int parentIndex, 
             UIRenderer? meshR = null)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            {
+                Name = mesh.Name;
+            }
             if (_nodeItems.TryGetValue(mesh.m_Name, out var cacheIndex))
             {
                 if (parentIndex >= 0)
@@ -483,6 +486,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 return cacheIndex;
             }
+            
             #region 转换 Mesh
             var psItems = new List<MeshPrimitive>();
             var hasUv = mesh.m_UV0 is not null && mesh.m_UV0.Length > 0;
@@ -929,6 +933,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(UnityMesh mesh)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            {
+                Name = mesh.Name;
+            }
             if (_nodeItems.ContainsKey(mesh.m_Name))
             {
                 return;
@@ -942,11 +950,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(Animator animator)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
             AddAnimator(animator);
         }
 
         public void Append(AnimationClip animator)
         {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
             _animationItems.Add(animator);
         }
 
@@ -1421,9 +1437,23 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         #endregion
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (IsEmpty || !LocationStorage.TryCreate(fileName, ".glb", mode, out fileName))
+            if (IsEmpty || !LocationStorage.TryCreate(fileName, _isBinaryFile ? ".glb" : ".gltf", mode, out fileName))
             {
                 return;
+            }
+            if (_root.Materials?.Count == 0)
+            {
+                _root.Add(new Material()
+                {
+                    Name = "Material",
+                    AlphaMode = AlphaMode.OPAQUE,
+                    DoubleSided = true,
+                    PbrMetallicRoughness = new()
+                    {
+                        RoughnessFactor = .5f,
+                        BaseColorFactor = new(0.8f, 0.8f, 0.8f, 1f)
+                    }
+                });
             }
             AddAnimation();
             var folder = Path.GetDirectoryName(fileName);
@@ -1433,8 +1463,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             _root.FileName = fileName;
             using var fs = File.Create(fileName);
-            new GlbWriter().Write(_root, fs);
-            
+            if (_isBinaryFile)
+            {
+                new GlbWriter().Write(_root, fs);
+            } else
+            {
+                new GltfWriter().Write(_root, fs);
+            }
         }
 
         public void Dispose()

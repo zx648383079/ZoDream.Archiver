@@ -135,7 +135,7 @@ namespace ZoDream.KhronosExporter
             writer.Write(0U);
             writer.Write(GlbReader.CHUNKJSON);
             var jsonPos = output.Position;
-            new GltfWriter().Write(data, output);
+            new GltfWriter().Serialize(data, output);
             var pos = output.Position;
             var jsonPadding = GetPaddingLength(pos - jsonPos);
             for (int i = 0; i < jsonPadding; i++)
@@ -181,7 +181,7 @@ namespace ZoDream.KhronosExporter
             writer.Write(0U);
             writer.Write(GlbReader.CHUNKJSON);
             var jsonPos = output.Position;
-            new GltfWriter().Write(data, output);
+            new GltfWriter().Serialize(data, output);
             var pos = output.Position;
             var jsonPadding = GetPaddingLength(pos - jsonPos);
             for (int i = 0; i < jsonPadding; i++)

@@ -7,13 +7,12 @@ using System.Numerics;
 using System.Text;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Unity.UI;
-using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FbxExporter : IFbxImported, IFileExporter //, IMultipartExporter
+    internal class FbxExporter : IFbxImported, IMultipartExporter
     {
         public FbxExporter()
         {

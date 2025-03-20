@@ -50,10 +50,9 @@
                 Content="&#xED62;"
                 Style="{StaticResource IconBtn}" />
         </Grid>
-        <ToggleSwitch
+        <ComboBox
             Header="3D格式"
-            IsOn="{Binding Format3D, Mode=TwoWay}"
-            OffContent="GLB"
-            OnContent="FBX" />
+            ItemsSource="{Binding ModelFormatItems}"
+            SelectedItem="{Binding ModelFormat, Mode=TwoWay}" />
     </StackPanel>
 </ContentDialog>
