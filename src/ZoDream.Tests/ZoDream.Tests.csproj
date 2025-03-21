@@ -15,11 +15,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.8.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.8.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.8.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\plugins\AutodeskExporter\AutodeskExporter.csproj" />
     <ProjectReference Include="..\plugins\BundleExtractor\BundleExtractor.csproj" />
     <ProjectReference Include="..\plugins\FModExporter\FModExporter.csproj" />
     <ProjectReference Include="..\plugins\KhronosExporter\KhronosExporter.csproj" />
@@ -34,5 +35,5 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
-	<Import Project="$(SolutionDir)ZoDream.Build.targets" />
+	
 </Project>
