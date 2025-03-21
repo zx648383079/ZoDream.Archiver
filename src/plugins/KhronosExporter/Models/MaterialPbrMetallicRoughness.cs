@@ -2,10 +2,15 @@
 
 namespace ZoDream.KhronosExporter.Models
 {
+    /// <summary>
+    /// 可以搭配 KHR_materials_specular
+    /// </summary>
     public class MaterialPbrMetallicRoughness : ExtraProperties
     {
         public Vector4? BaseColorFactor { get; set; }
-
+        /// <summary>
+        /// 贴图和颜色只能有一个
+        /// </summary>
         public TextureInfo? BaseColorTexture { get; set; }
 
         /// <summary>

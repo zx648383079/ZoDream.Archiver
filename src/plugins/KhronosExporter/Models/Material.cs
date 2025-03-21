@@ -6,19 +6,19 @@ namespace ZoDream.KhronosExporter.Models
     {
 
 
-        public MaterialPbrMetallicRoughness PbrMetallicRoughness { get; set; }
+        public MaterialPbrMetallicRoughness? PbrMetallicRoughness { get; set; }
         /// <summary>
         /// 法线贴图
         /// </summary>
-        public MaterialNormalTextureInfo NormalTexture {  get; set; }
+        public MaterialNormalTextureInfo? NormalTexture {  get; set; }
         /// <summary>
         /// 遮挡贴图
         /// </summary>
-        public MaterialOcclusionTextureInfo OcclusionTexture {  get; set; }
+        public MaterialOcclusionTextureInfo? OcclusionTexture {  get; set; }
         /// <summary>
         /// 自发光贴图
         /// </summary>
-        public TextureInfo EmissiveTexture {  get; set; }
+        public TextureInfo? EmissiveTexture {  get; set; }
         /// <summary>
         /// 自发光颜色
         /// </summary>

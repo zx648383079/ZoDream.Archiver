@@ -6,9 +6,9 @@
 
         public TextureMipMapFilter MinFilter { get; set; }
 
-        public TextureWrapMode WrapS { get; set; }
+        public TextureWrapMode? WrapS { get; set; }
 
-        public TextureWrapMode WrapT { get; set; }
+        public TextureWrapMode? WrapT { get; set; }
 
 
     }

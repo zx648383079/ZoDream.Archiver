@@ -90,7 +90,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return false;
         }
 
-        public bool TryGet<T2>([NotNullWhen(true)] out T2 result) where T2 : UIObject
+        public bool TryGet<T2>([NotNullWhen(true)] out T2? result) where T2 : UIObject
         {
             if (TryGetAssetsFile(out var sourceFile))
             {

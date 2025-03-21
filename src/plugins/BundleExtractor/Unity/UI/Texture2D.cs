@@ -15,12 +15,17 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
     internal class GLTextureSettings : IElementLoader
     {
+        /// <summary>
+        /// point Bilinear Trilinear
+        /// </summary>
         public int m_FilterMode;
         public int m_Aniso;
         public float m_MipBias;
         public int m_WrapMode;
+        public int m_WrapV;
+        public int m_WrapW;
 
-        
+
 
         public void Read(IBundleBinaryReader reader)
         {
@@ -32,8 +37,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
             if (version.Major >= 2017)//2017.x and up
             {
                 m_WrapMode = reader.ReadInt32(); //m_WrapU
-                int m_WrapV = reader.ReadInt32();
-                int m_WrapW = reader.ReadInt32();
+                m_WrapV = reader.ReadInt32();
+                m_WrapW = reader.ReadInt32();
             }
             else
             {

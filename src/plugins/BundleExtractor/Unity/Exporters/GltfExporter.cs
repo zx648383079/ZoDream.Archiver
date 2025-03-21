@@ -30,19 +30,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
     /// </summary>
     internal class GltfExporter : IMultipartExporter
     {
-        public GltfExporter()
+        public GltfExporter(IBundleContainer container)
         {
+            _container = container;
             _root = new();
             _root.Add(new Scene());
         }
 
-        public GltfExporter(IBundleExtractOptions options)
-            : this()
-        {
-            _isBinaryFile = options.ModelFormat == "glb";
-        }
-
-        private readonly bool _isBinaryFile = true;
+        private readonly IBundleContainer _container;
+        private bool IsBinaryFile => _container.Options?.ModelFormat == "glb";
         private readonly ModelSource _root;
         private readonly Dictionary<string, IFileExporter> _attachItems = [];
         private readonly Dictionary<string, int> _nodeItems = [];
@@ -54,13 +50,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly Dictionary<Transform, string> _transformItems = [];
 
         private Avatar? _avatar;
+        private long _entryFileId;
 
         public bool IsEmpty => _root.Nodes.Count == 0;
-
         public string Name { get; private set; } = string.Empty;
 
         public void Append(GameObject obj)
         {
+            _entryFileId = obj.FileID;
             if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(obj.Name))
             {
                 Name = obj.Name;
@@ -80,7 +77,42 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //AddNode(obj.m_Transform, sceneIndex, -1);
         }
 
-   
+        public void Append(UnityMesh mesh)
+        {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            {
+                Name = mesh.Name;
+            }
+            if (_nodeItems.ContainsKey(mesh.m_Name))
+            {
+                return;
+            }
+            //if (string.IsNullOrEmpty(FileName))
+            //{
+            //    FileName = mesh.m_Name;
+            //}
+            //AddNode(mesh, _root.Scene, -1);
+        }
+
+        public void Append(Animator animator)
+        {
+            _entryFileId = animator.FileID;
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
+            AddAnimator(animator);
+        }
+
+        public void Append(AnimationClip animator)
+        {
+            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
+            {
+                Name = animator.Name;
+            }
+            _animationItems.Add(animator);
+        }
+
 
         private void AddAnimator(Animator animator)
         {
@@ -88,6 +120,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 _avatar = m_Avatar;
             }
+            _container.TryAddExclude(animator.m_GameObject.m_PathID);
             if (animator.m_GameObject.TryGet(out var game))
             {
                 AddGame(game);
@@ -120,7 +153,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private void AddMeshRenderer(Transform m_Transform, int meshParent = -1)
         {
             m_Transform.m_GameObject.TryGet(out var m_GameObject);
-
+            _container.TryAddExclude(m_Transform.m_GameObject.m_PathID);
             if (m_GameObject?.m_MeshRenderer != null)
             {
                 meshParent = AddMeshRenderer(m_GameObject.m_MeshRenderer, meshParent);
@@ -148,6 +181,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             foreach (var pptr in m_Transform.m_Children)
             {
+                _container.TryAddExclude(pptr.m_PathID);
                 if (pptr.TryGet(out var child))
                 {
                     AddMeshRenderer(child, meshParent);
@@ -476,7 +510,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
             {
-                Name = mesh.Name;
+                Name = mesh.Name + _entryFileId.ToString()[^3..];
             }
             if (_nodeItems.TryGetValue(mesh.m_Name, out var cacheIndex))
             {
@@ -768,19 +802,20 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 Name = mat.m_Name,
                 EmissiveFactor = new(0, 0, 0),
-                PbrMetallicRoughness = new()
-                {
-                    BaseColorFactor = new(0.8f, 0.8f, 0.8f, 1)
-                }
             };
 
             var pbr = new MaterialPBRSpecularGlossiness()
             {
-                DiffuseFactor = new(0, 0, 0, 1),
+                DiffuseFactor = new(0.8f, 0.8f, 0.8f, 1),
                 SpecularFactor = new(0.2f, 0.2f, 0.2f),
                 GlossinessFactor = 20
             };
             res.AddExtension(MaterialPBRSpecularGlossiness.ExtensionName, pbr);
+            res.AddExtension(MaterialsIOR.ExtensionName, new MaterialsIOR()
+            {
+                Ior = 1000
+            });
+            _root.AddExtensionUsed(MaterialsIOR.ExtensionName);
             _root.AddExtensionUsed(MaterialPBRSpecularGlossiness.ExtensionName);
             foreach (var col in mat.m_SavedProperties.m_Colors)
             {
@@ -788,8 +823,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     case "_BaseColor":
                     case "_Color":
-                        // pbr.DiffuseFactor = col.Value;
-                        res.PbrMetallicRoughness.BaseColorFactor = col.Value;
+                         pbr.DiffuseFactor = col.Value;
                         break;
                     case "_SColor":
                         res.PbrMetallicRoughness.BaseColorFactor = col.Value;
@@ -840,8 +874,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 };
                 if (texEnv.Key == "_MainTex")
                 {
-                    res.PbrMetallicRoughness ??= new();
-                    res.PbrMetallicRoughness.BaseColorTexture = new()
+                    pbr.DiffuseTexture = new()
                     {
                         Index = AddTexture(image),
                         Extensions = new()
@@ -875,6 +908,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
+                    res.EmissiveFactor = null;
                     _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 else if (texEnv.Key.Contains("Specular") || texEnv.Key.Contains("Spec"))
@@ -887,6 +921,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             {TextureTransform.ExtensionName, trans }
                         }
                     };
+                    pbr.SpecularFactor = null;
                     _root.AddExtensionUsed(TextureTransform.ExtensionName);
                 }
                 else if (texEnv.Key.Contains("Normal"))
@@ -922,6 +957,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return _root.Add(new KhronosExporter.Models.Texture()
             {
                 Name = image.m_Name,
+                Sampler = _root.Add(new TextureSampler()
+                {
+                    MinFilter = TextureMipMapFilter.LINEAR_MIPMAP_LINEAR,
+                    MagFilter = TextureInterpolationFilter.LINEAR,
+                    WrapS = TextureWrapMode.REPEAT,
+                    WrapT = TextureWrapMode.REPEAT
+                }),
                 Source = _root.Add(new Image()
                 {
                     Name = image.m_Name,
@@ -931,41 +973,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             });
         }
 
-        public void Append(UnityMesh mesh)
-        {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
-            {
-                Name = mesh.Name;
-            }
-            if (_nodeItems.ContainsKey(mesh.m_Name))
-            {
-                return;
-            }
-            //if (string.IsNullOrEmpty(FileName))
-            //{
-            //    FileName = mesh.m_Name;
-            //}
-            //AddNode(mesh, _root.Scene, -1);
-        }
-
-        public void Append(Animator animator)
-        {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
-            {
-                Name = animator.Name;
-            }
-            AddAnimator(animator);
-        }
-
-        public void Append(AnimationClip animator)
-        {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
-            {
-                Name = animator.Name;
-            }
-            _animationItems.Add(animator);
-        }
-
+       
 
         #region 动画
 
@@ -1437,7 +1445,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         #endregion
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (IsEmpty || !LocationStorage.TryCreate(fileName, _isBinaryFile ? ".glb" : ".gltf", mode, out fileName))
+            if (IsEmpty || !LocationStorage.TryCreate(fileName, IsBinaryFile ? ".glb" : ".gltf", mode, out fileName))
             {
                 return;
             }
@@ -1463,7 +1471,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             _root.FileName = fileName;
             using var fs = File.Create(fileName);
-            if (_isBinaryFile)
+            if (IsBinaryFile)
             {
                 new GlbWriter().Write(_root, fs);
             } else

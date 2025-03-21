@@ -1,5 +1,4 @@
-﻿
-using ZoDream.BundleExtractor.Models;
+﻿using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI

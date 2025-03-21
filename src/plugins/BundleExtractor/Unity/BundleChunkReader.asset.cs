@@ -35,20 +35,27 @@ namespace ZoDream.BundleExtractor
                                 {
                                     case Transform m_Transform:
                                         m_GameObject.m_Transform = m_Transform;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
                                     case MeshRenderer m_MeshRenderer:
                                         m_GameObject.m_MeshRenderer = m_MeshRenderer;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
-                                    case MeshFilter m_MeshFilter:m_GameObject.m_MeshFilter = m_MeshFilter;
+                                    case MeshFilter m_MeshFilter:
+                                        m_GameObject.m_MeshFilter = m_MeshFilter;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
                                     case SkinnedMeshRenderer m_SkinnedMeshRenderer:
                                         m_GameObject.m_SkinnedMeshRenderer = m_SkinnedMeshRenderer;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
                                     case Animator m_Animator:
                                         m_GameObject.m_Animator = m_Animator;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
                                     case Animation m_Animation:
                                         m_GameObject.m_Animation = m_Animation;
+                                        TryAddExclude(pPtr.m_PathID);
                                         break;
                                 }
                             }

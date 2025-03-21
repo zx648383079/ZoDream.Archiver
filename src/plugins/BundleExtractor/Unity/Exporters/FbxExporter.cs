@@ -12,32 +12,8 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FbxExporter : IFbxImported, IMultipartExporter
+    internal class FbxExporter(IBundleContainer container) : IFbxImported, IMultipartExporter
     {
-        public FbxExporter()
-        {
-
-        }
-
-        public FbxExporter(GameObject obj)
-        {
-            Append(obj);
-        }
-
-        public FbxExporter(Mesh obj)
-        {
-            Append(obj);
-        }
-
-        public FbxExporter(AnimationClip obj)
-        {
-            Append(obj);
-        }
-
-        public FbxExporter(Animator obj)
-        {
-            Append(obj);
-        }
 
         public FbxImportedFrame RootFrame { get; protected set; }
         public List<FbxImportedMesh> MeshList { get; protected set; } = [];
@@ -74,10 +50,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(Mesh mesh)
         {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
-            {
-                Name = mesh.Name;
-            }
+            //if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            //{
+            //    Name = mesh.Name;
+            //}
         }
 
         public void Append(Animator animator)
@@ -125,8 +101,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private void InitWithAnimator(Animator m_Animator)
         {
             if (m_Animator.m_Avatar.TryGet(out var m_Avatar))
+            {
                 _avatar = m_Avatar;
-
+            }
+            container.TryAddExclude(m_Animator.m_GameObject.m_PathID);
             m_Animator.m_GameObject.TryGet(out var m_GameObject);
             InitWithGameObject(m_GameObject, m_Animator.m_HasTransformHierarchy);
         }

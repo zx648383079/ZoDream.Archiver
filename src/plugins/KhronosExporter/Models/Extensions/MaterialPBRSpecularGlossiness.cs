@@ -2,6 +2,9 @@
 
 namespace ZoDream.KhronosExporter.Models
 {
+    /// <summary>
+    /// 跟自带的 PbrMetallicRoughness 冲突
+    /// </summary>
     public class MaterialPBRSpecularGlossiness
     {
         public const string ExtensionName = "KHR_materials_pbrSpecularGlossiness";

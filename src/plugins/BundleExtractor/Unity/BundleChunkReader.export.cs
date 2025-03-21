@@ -28,7 +28,6 @@ namespace ZoDream.BundleExtractor
 
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
-            
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.Children)
@@ -37,6 +36,10 @@ namespace ZoDream.BundleExtractor
                     {
                         Logger.Info("Exporting assets has been cancelled !!");
                         return;
+                    }
+                    if (IsExclude(obj.FileID))
+                    {
+                        continue;
                     }
                     try
                     {
@@ -68,15 +71,11 @@ namespace ZoDream.BundleExtractor
 
         private IMultipartExporter? TryParseModel()
         {
-            if (_options is IBundleExtractOptions o)
+            return Options?.ModelFormat.ToLower() switch
             {
-                return o.ModelFormat.ToLower() switch
-                {
-                    "fbx" => new FbxExporter(),
-                    _ => new GltfExporter(o),
-                };
-            }
-            return new GltfExporter();
+                "fbx" => new FbxExporter(this),
+                _ => new GltfExporter(this),
+            };
         }
 
         private IFileExporter? TryParse(UIObject obj)

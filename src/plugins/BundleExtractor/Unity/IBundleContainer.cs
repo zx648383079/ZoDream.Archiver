@@ -1,9 +1,23 @@
 ﻿using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity
 {
     internal interface IBundleContainer
     {
+        public IBundleExtractOptions Options { get; }
+        /// <summary>
+        /// 添加一个不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        public void TryAddExclude(long fileId);
+        /// <summary>
+        /// 判断一个对象不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        public bool IsExclude(long fileId);
+
         /// <summary>
         /// 判断文件在 Asset 中的位置
         /// </summary>
