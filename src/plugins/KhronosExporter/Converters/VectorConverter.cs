@@ -13,8 +13,7 @@ namespace ZoDream.KhronosExporter.Converters
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var cvt = options.GetConverter(typeof(float[])) as JsonConverter<float[]>;
-            var data = cvt?.Read(ref reader, typeToConvert, options);
+            var data = JsonSerializer.Deserialize<float[]>(ref reader, options);
             object res;
             if (typeToConvert == typeof(Vector2))
             {
@@ -83,8 +82,7 @@ namespace ZoDream.KhronosExporter.Converters
                     data = [];
                     break;
             }
-            var cvt = options.GetConverter(typeof(float[])) as JsonConverter<float[]>;
-            cvt?.Write(writer, data, options);
+            JsonSerializer.Serialize(writer, data, options);
         }
     }
 }
