@@ -193,7 +193,8 @@ namespace ZoDream.BundleExtractor
         }
         private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
         {
-            _service.Get<ITemporaryStorage>().Add(stream.BaseStream);
+            var temporary = _service.Get<ITemporaryStorage>();
+            temporary.Add(stream.BaseStream);
             stream.Add(_service.Get<IBundleCodec>());
             var name = FileNameHelper.GetFileName(fullName);
             using var reader = _scheme.Open(stream, fullName, name, new ArchiveOptions()
@@ -216,6 +217,7 @@ namespace ZoDream.BundleExtractor
                 s.Container = this;
                 _assetItems.Add(s);
                 AddDependency(s.Dependencies, fullName);
+                temporary.Add(s);
                 return;
             }
             var entries = reader.ReadEntry().ToArray();
@@ -225,7 +227,7 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                var ms = _service.Get<ITemporaryStorage>().Create();
+                var ms = temporary.Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
                 LoadFile(ms, FileNameHelper.Combine(fullName, item.Name), token);

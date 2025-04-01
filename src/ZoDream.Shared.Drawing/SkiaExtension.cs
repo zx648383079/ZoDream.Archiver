@@ -196,6 +196,37 @@ namespace ZoDream.Shared.Drawing
             return Mutate((int)rect.Width, (int)rect.Height, action);
         }
 
+        /// <summary>
+        /// 进行操作并销毁 source
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="cb"></param>
+        /// <returns></returns>
+        public static SKImage? Mutate(this SKImage source, Func<SKImage> cb)
+        {
+            var res = cb?.Invoke();
+            if (res != source)
+            {
+                source.Dispose();
+            }
+            return res;
+        }
+        /// <summary>
+        /// 进行操作并销毁 source
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="cb"></param>
+        /// <returns></returns>
+        public static SKImage? Mutate(this SKImage source, Func<SKImage, SKImage> cb)
+        {
+            var res = cb?.Invoke(source);
+            if (res != source)
+            {
+                source.Dispose();
+            }
+            return res;
+        }
+
         public static SKBitmap Mutate(int width, 
             int height, 
             Action<SKCanvas> action)

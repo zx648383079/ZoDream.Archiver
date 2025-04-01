@@ -67,6 +67,8 @@ namespace ZoDream.Shared.IO
                     p.BaseStream.Dispose();
                 }
             }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
         #endregion
 

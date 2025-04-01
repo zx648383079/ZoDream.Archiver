@@ -54,6 +54,8 @@ namespace ZoDream.Archiver.ViewModels
             {
                 item.Dispose();
             }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
         #endregion
 

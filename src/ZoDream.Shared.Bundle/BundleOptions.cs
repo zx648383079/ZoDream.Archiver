@@ -60,9 +60,19 @@ namespace ZoDream.Shared.Bundle
             DisplayName = o.DisplayName;
         }
 
-        public void Load(IBundleOptions? bundleOptions)
+        public void Load(IBundleOptions? options)
         {
-            throw new NotImplementedException();
+            if (options is null)
+            {
+                return;
+            }
+            Engine = options.Engine;
+            Platform = options.Platform;
+            Package = options.Package;
+            Producer = options.Producer;
+            Version = options.Version;
+            Entrance = options.Entrance;
+            DisplayName = options.DisplayName;
         }
     }
 }

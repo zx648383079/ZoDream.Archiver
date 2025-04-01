@@ -123,6 +123,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public void Dispose()
         {
+            _childrenDict.Clear();
             if (_options?.LeaveStreamOpen == false)
             {
                 _reader.LeaveStreamOpen = false;

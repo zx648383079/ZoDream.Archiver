@@ -168,7 +168,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 return;
             }
             using var image = ToImage();
-            image?.Flip(false).SaveAs(fileName);
+            using var res = image?.Flip(false);
+            res?.SaveAs(fileName);
         }
 
         public SKImage? ToImage()

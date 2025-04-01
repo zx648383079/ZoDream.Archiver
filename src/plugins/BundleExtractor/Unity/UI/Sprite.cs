@@ -114,75 +114,101 @@ namespace ZoDream.BundleExtractor.Unity.UI
         private static SKImage? CutImage(Sprite m_Sprite, Texture2D m_Texture2D, Rectf textureRect, Vector2 textureRectOffset, float downscaleMultiplier, SpriteSettings settingsRaw)
         {
             var originalImage = m_Texture2D.ToImage();
-            if (originalImage != null)
+            if (originalImage == null)
             {
-                // using (originalImage)
+                return null;
+            }
+            var isUpdated = false;
+            SKImage? temp;
+            if (downscaleMultiplier > 0f && downscaleMultiplier != 1f)
+            {
+                var width = (int)(m_Texture2D.m_Width / downscaleMultiplier);
+                var height = (int)(m_Texture2D.m_Height / downscaleMultiplier);
+                temp = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
+                originalImage.Dispose();
+                originalImage = temp;
+                isUpdated = true;
+            }
+            if (originalImage is null)
+            {
+                return null;
+            }
+            var rectX = (int)Math.Floor(textureRect.x);
+            var rectY = (int)Math.Floor(textureRect.y);
+            var rectRight = (int)Math.Ceiling(textureRect.x + textureRect.width);
+            var rectBottom = (int)Math.Ceiling(textureRect.y + textureRect.height);
+            rectRight = Math.Min(rectRight, originalImage.Width);
+            rectBottom = Math.Min(rectBottom, originalImage.Height);
+            if (rectX != 0 || rectY != 0 || rectRight != originalImage.Width 
+                || rectBottom != originalImage.Height)
+            {
+                var rect = new SKRectI(rectX, rectY, rectRight, rectBottom);
+                temp = originalImage.Subset(rect);
+                originalImage.Dispose();
+                originalImage = temp;
+                isUpdated = true;
+            }
+            
+            if (settingsRaw.packed == 1)
+            {
+                //RotateAndFlip
+                switch (settingsRaw.packingRotation)
                 {
-                    if (downscaleMultiplier > 0f && downscaleMultiplier != 1f)
-                    {
-                        var width = (int)(m_Texture2D.m_Width / downscaleMultiplier);
-                        var height = (int)(m_Texture2D.m_Height / downscaleMultiplier);
-                        originalImage = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
-                    }
-                    if (originalImage is null)
-                    {
-                        return null;
-                    }
-                    var rectX = (int)Math.Floor(textureRect.x);
-                    var rectY = (int)Math.Floor(textureRect.y);
-                    var rectRight = (int)Math.Ceiling(textureRect.x + textureRect.width);
-                    var rectBottom = (int)Math.Ceiling(textureRect.y + textureRect.height);
-                    rectRight = Math.Min(rectRight, originalImage.Width);
-                    rectBottom = Math.Min(rectBottom, originalImage.Height);
-                    var rect = new SKRectI(rectX, rectY, rectRight, rectBottom);
-                    var spriteImage = originalImage.Subset(rect);
-                    if (settingsRaw.packed == 1)
-                    {
-                        //RotateAndFlip
-                        switch (settingsRaw.packingRotation)
-                        {
-                            case SpritePackingRotation.FlipHorizontal:
-                                spriteImage = spriteImage.Flip();
-                                break;
-                            case SpritePackingRotation.FlipVertical:
-                                spriteImage = spriteImage.Flip(false);
-                                break;
-                            case SpritePackingRotation.Rotate180:
-                                spriteImage = spriteImage.Rotate(180);
-                                break;
-                            case SpritePackingRotation.Rotate90:
-                                spriteImage.Rotate(270);
-                                break;
-                        }
-                    }
-
-                    //Tight
-                    if (settingsRaw.packingMode == SpritePackingMode.Tight)
-                    {
-                        try
-                        {
-                            var triangles = GetTriangles(m_Sprite.m_RD);
-                            var path = new SKPath();
-                            var matrix = Matrix3x2.CreateScale(m_Sprite.m_PixelsToUnits);
-                            matrix *= Matrix3x2.CreateTranslation(m_Sprite.m_Rect.width * m_Sprite.m_Pivot.X - textureRectOffset.X, m_Sprite.m_Rect.height * m_Sprite.m_Pivot.Y - textureRectOffset.Y);
-                            foreach (var item in triangles)
-                            {
-                                path.AddPoly(item, true);
-                            }
-                            path.Transform(matrix.AsMatrix());
-                            return spriteImage?.ClipAndFlip(path, false);
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
-                    }
-
-                    //Rectangle
-                    return spriteImage?.Flip(false);
+                    case SpritePackingRotation.FlipHorizontal:
+                        temp = originalImage.Flip();
+                        break;
+                    case SpritePackingRotation.FlipVertical:
+                        temp = originalImage.Flip(false);
+                        break;
+                    case SpritePackingRotation.Rotate180:
+                        temp = originalImage.Rotate(180);
+                        break;
+                    case SpritePackingRotation.Rotate90:
+                        temp = originalImage.Rotate(270);
+                        break;
+                    default:
+                        temp = null;
+                        break;
+                }
+                if (temp is not null)
+                {
+                    isUpdated = true;
+                    originalImage.Dispose();
+                    originalImage = temp;
                 }
             }
 
+            //Tight
+            if (settingsRaw.packingMode == SpritePackingMode.Tight)
+            {
+                try
+                {
+                    var triangles = GetTriangles(m_Sprite.m_RD);
+                    var path = new SKPath();
+                    var matrix = Matrix3x2.CreateScale(m_Sprite.m_PixelsToUnits);
+                    matrix *= Matrix3x2.CreateTranslation(m_Sprite.m_Rect.width * m_Sprite.m_Pivot.X - textureRectOffset.X, m_Sprite.m_Rect.height * m_Sprite.m_Pivot.Y - textureRectOffset.Y);
+                    foreach (var item in triangles)
+                    {
+                        path.AddPoly(item, true);
+                    }
+                    path.Transform(matrix.AsMatrix());
+                    temp = originalImage?.ClipAndFlip(path, false);
+                    originalImage?.Dispose();
+                    return temp;
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            if (isUpdated)
+            {
+                temp = originalImage.Flip(false);
+                originalImage?.Dispose();
+                return temp;
+            }
+            originalImage?.Dispose();
             return null;
         }
 
