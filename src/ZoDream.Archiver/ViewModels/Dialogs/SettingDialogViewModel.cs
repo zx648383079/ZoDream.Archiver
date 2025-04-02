@@ -19,6 +19,7 @@ namespace ZoDream.Archiver.ViewModels
             FFmpegBin = _setting.Get<string>(SettingNames.FFmpegPath);
             TemporaryFolder = _setting.Get<string>(SettingNames.TemporaryPath);
             ModelFormat = _setting.Get<string>(SettingNames.ModelFormat);
+            MaxBatchCount = _setting.Get<int>(SettingNames.MaxBatchCount);
         }
 
         private readonly ISettingContainer _setting;
@@ -45,6 +46,13 @@ namespace ZoDream.Archiver.ViewModels
         public string ModelFormat {
             get => _modelFormat;
             set => Set(ref _modelFormat, value);
+        }
+
+        private int _maxBatchCount = 100;
+
+        public int MaxBatchCount {
+            get => _maxBatchCount;
+            set => Set(ref _maxBatchCount, value);
         }
 
 
@@ -98,6 +106,7 @@ namespace ZoDream.Archiver.ViewModels
             _setting.Set(SettingNames.FFmpegPath, FFmpegBin);
             _setting.Set(SettingNames.TemporaryPath, TemporaryFolder);
             _setting.Set(SettingNames.ModelFormat, ModelFormat);
+            _setting.Set(SettingNames.MaxBatchCount, MaxBatchCount);
             await _setting.SaveAsync();
         }
     }

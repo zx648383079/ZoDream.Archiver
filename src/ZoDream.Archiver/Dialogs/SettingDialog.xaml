@@ -18,7 +18,7 @@
         <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
     </ContentDialog.Resources>
     <StackPanel>
-        <TextBlock Text="FFmpeg" />
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="FFmpeg" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -31,7 +31,7 @@
                 Content="&#xE8E5;"
                 Style="{StaticResource IconBtn}" />
         </Grid>
-        <TextBlock Text="缓存目录" />
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="缓存目录" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -50,9 +50,21 @@
                 Content="&#xED62;"
                 Style="{StaticResource IconBtn}" />
         </Grid>
-        <ComboBox
-            Header="3D格式"
-            ItemsSource="{Binding ModelFormatItems}"
-            SelectedItem="{Binding ModelFormat, Mode=TwoWay}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <ComboBox
+                Header="3D格式"
+                ItemsSource="{Binding ModelFormatItems}"
+                SelectedItem="{Binding ModelFormat, Mode=TwoWay}" />
+            <NumberBox
+                Grid.Column="1"
+                Header="最大批处理数"
+                Minimum="1"
+                Value="{Binding MaxBatchCount, Mode=TwoWay}" />
+        </Grid>
+
     </StackPanel>
 </ContentDialog>

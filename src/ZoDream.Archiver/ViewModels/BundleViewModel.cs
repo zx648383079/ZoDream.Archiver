@@ -89,6 +89,11 @@ namespace ZoDream.Archiver.ViewModels
             FFmpegBinariesHelper.RegisterFFmpegBinaries(
                 _app.Setting.Get<string>(SettingNames.FFmpegPath));
             _options.ModelFormat = _app.Setting.Get<string>(SettingNames.ModelFormat);
+            _options.MaxBatchCount = _app.Setting.Get<int>(SettingNames.MaxBatchCount);
+            if (_options.MaxBatchCount < 1)
+            {
+                _options.MaxBatchCount = 100;
+            }
         }
 
         private async void TapView(object? _)

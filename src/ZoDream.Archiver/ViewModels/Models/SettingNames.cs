@@ -8,5 +8,6 @@
         FFmpegPath,
         TemporaryPath,
         ModelFormat,
+        MaxBatchCount,
     }
 }

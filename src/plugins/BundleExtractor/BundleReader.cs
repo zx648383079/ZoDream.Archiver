@@ -86,6 +86,9 @@ namespace ZoDream.BundleExtractor
 
         public void Dispose()
         {
+            var service = scheme;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
     }
 }

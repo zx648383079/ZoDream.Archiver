@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Engines
@@ -8,7 +9,7 @@ namespace ZoDream.BundleExtractor.Engines
         public string AliasName => string.Empty;
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
         {
-            return fileItems.EnumerateChunk(500);
+            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {

@@ -41,13 +41,26 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private bool IsBinaryFile => _container.Options?.ModelFormat == "glb";
         private readonly ModelSource _root;
         private readonly Dictionary<string, IFileExporter> _attachItems = [];
-        private readonly Dictionary<string, int> _nodeItems = [];
+        /// <summary>
+        /// mesh to node
+        /// </summary>
+        private readonly Dictionary<long, int> _nodeItems = [];
+        /// <summary>
+        /// frame to node
+        /// </summary>
+        private readonly Dictionary<string, int> _pathNodeItems = [];
         private readonly Dictionary<string, int> _materialItems = [];
         private readonly HashSet<AnimationClip> _animationItems = [];
         private readonly Dictionary<uint, string> _morphChannelNames = [];
+        /// <summary>
+        /// unity 内部的 crc 名称绑定
+        /// </summary>
         private readonly Dictionary<uint, string> _bonePathHash = [];
-        private readonly Dictionary<string, string> _channelPathItems = [];
-        private readonly Dictionary<Transform, string> _transformItems = [];
+        private readonly Dictionary<string, int> _channelPathItems = [];
+        /// <summary>
+        /// transform 转 node 
+        /// </summary>
+        private readonly Dictionary<Transform, int> _transformItems = [];
 
         private Avatar? _avatar;
         private long _entryFileId;
@@ -83,7 +96,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 Name = mesh.Name;
             }
-            if (_nodeItems.ContainsKey(mesh.m_Name))
+            if (_nodeItems.ContainsKey(mesh.FileID))
             {
                 return;
             }
@@ -157,11 +170,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             if (m_GameObject?.m_MeshRenderer != null)
             {
                 meshParent = AddMeshRenderer(m_GameObject.m_MeshRenderer, meshParent);
+                if (meshParent >= 0)
+                {
+                    _transformItems.TryAdd(m_Transform, meshParent);
+                }
             }
 
             if (m_GameObject?.m_SkinnedMeshRenderer != null)
             {
-                AddMeshRenderer(m_GameObject.m_SkinnedMeshRenderer);
+                var skinIndex = AddMeshRenderer(m_GameObject.m_SkinnedMeshRenderer);
+                if (skinIndex >= 0)
+                {
+                    _transformItems.TryAdd(m_Transform, skinIndex);
+                }
             }
 
             if (m_GameObject?.m_Animation != null)
@@ -191,9 +212,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private int AddTransform(Transform trans)
         {
+            if (_transformItems.TryGetValue(trans, out var nodeIndex))
+            {
+                return nodeIndex;
+            }
             trans.m_GameObject.TryGet(out var m_GameObject);
-            var nodeIndex = FindNode(m_GameObject?.m_Name, -1);
-            _transformItems.Add(trans, m_GameObject?.m_Name);
+            nodeIndex = FindNode(m_GameObject?.m_Name, -1);
+            _transformItems.Add(trans, nodeIndex);
             UpdateNode(nodeIndex, trans.m_LocalPosition, trans.m_LocalRotation, trans.m_LocalScale);
             return nodeIndex;
         }
@@ -296,7 +321,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         if (sMesh.m_Bones[i].TryGet(out var m_Transform))
                         {
-                            joinItems[i] = FindNode(GetTransformPath(m_Transform), nodeIndex);
+                            joinItems[i] = FindNodeByTransform(m_Transform, nodeIndex);
                         }
                         var convert = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
                         matrixItems[i] = convert * mesh.m_BindPose[i] * convert;
@@ -304,7 +329,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     _root.Nodes[nodeIndex].Skin = _root.Add(new Skin()
                     {
                         InverseBindMatrices = _root.CreateAccessor($"skins_{nodeIndex}", matrixItems),
-                        Joints = joinItems,
+                        Joints = [.. joinItems.Distinct()],
                         Skeleton = nodeIndex,
                     });
                 }
@@ -325,7 +350,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     _root.Nodes[nodeIndex].Skin = _root.Add(new Skin()
                     {
                         InverseBindMatrices = _root.CreateAccessor($"skins_{nodeIndex}", matrixItems),
-                        Joints = joinItems,
+                        Joints = [.. joinItems.Distinct()],
                         Skeleton = nodeIndex,
                     });
                 }
@@ -334,7 +359,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 if (mesh.m_Shapes?.channels?.Count > 0)
                 {
                     meshR.m_GameObject.TryGet(out var m_GameObject2);
-                    _channelPathItems[mesh.Name] = GetTransformPath(m_GameObject2.m_Transform);
+                    _channelPathItems[mesh.Name] = FindNodeByTransform(m_GameObject2.m_Transform);
                     for (int i = 0; i < mesh.m_Shapes.channels.Count; i++)
                     {
                         var shapeChannel = mesh.m_Shapes.channels[i];
@@ -392,22 +417,63 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return nodeIndex;
         }
 
-        private int FindNode(string name, int parent)
+        private int FindNode(string path, int parent)
         {
-            var items = _root.Nodes[parent].Children;
-            if (items is null)
+            var routes = path.Split('/');
+            for (var i = routes.Length - 1; i >= 0; i--)
             {
-                return parent;
-            }
-            foreach (var index in items)
-            {
-                if (_root.Nodes[index].Name == name)
+                var j = FindNode(routes, i, parent);
+                if (j >= 0)
                 {
-                    return index;
+                    return j;
                 }
             }
-            // TODO ?
             return parent;
+        }
+
+        private int FindNode(string path)
+        {
+            if (_pathNodeItems.TryGetValue(path, out var nodexIndex))
+            {
+                return nodexIndex;
+            }
+            var routes = path.Split('/');
+            for (var i = 0; i < _root.Nodes.Count; i++)
+            {
+                var j =  FindNode(routes, 0, i);
+                if (j >= 0)
+                {
+                    _pathNodeItems.TryAdd(path, j);
+                    return j;
+                }
+            }
+            return -1;
+        }
+
+        private int FindNode(string[] routes, int routeIndex, int parentNode)
+        {
+            var parent = _root.Nodes[parentNode];
+            if (!parent.Name.Equals(routes[routeIndex], StringComparison.Ordinal))
+            {
+                return -1;
+            }
+            if (routeIndex == routes.Length - 1)
+            {
+                return parentNode;
+            }
+            if (parent.Children is null || parent.Children.Count == 0)
+            {
+                return -1;
+            }
+            foreach (var i in parent.Children)
+            {
+                var j = FindNode(routes, routeIndex + 1, i);
+                if (j >= 0)
+                {
+                    return j;
+                }
+            }
+            return -1;
         }
 
         private static UnityMesh GetMesh(UIRenderer meshR)
@@ -434,13 +500,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return null;
         }
 
-        private string GetTransformPath(Transform transform)
+        private int FindNodeByTransform(Transform transform, int parentNode = -1)
         {
             if (_transformItems.TryGetValue(transform, out var item))
             {
                 return item;
             }
-            return null;
+            return parentNode;
         }
         private void AddNode(Transform trans, int sceneIndex, int parentIndex)
         {
@@ -512,12 +578,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 Name = mesh.Name + _entryFileId.ToString()[^3..];
             }
-            if (_nodeItems.TryGetValue(mesh.m_Name, out var cacheIndex))
+            if (_nodeItems.TryGetValue(mesh.FileID, out var cacheIndex))
             {
-                if (parentIndex >= 0)
-                {
-                    (_root.Nodes[parentIndex].Children ??= []).Add(cacheIndex);
-                }
+                BindNode(parentIndex, cacheIndex);
                 return cacheIndex;
             }
             
@@ -713,13 +776,26 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 Name = mesh.m_Name,
                 Mesh = meshIndex
             });
-            _nodeItems.Add(mesh.m_Name, nodeIndex);
+            _nodeItems.Add(mesh.FileID, nodeIndex);
+            BindNode(parentIndex, nodeIndex);
+            _root.Scenes[sceneIndex].Nodes.Add(nodeIndex);
+            return nodeIndex;
+        }
+
+        /// <summary>
+        /// 绑定 node 的上下级关系 
+        /// </summary>
+        /// <param name="parentIndex"></param>
+        /// <param name="nodeIndex"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void BindNode(int parentIndex, int nodeIndex)
+        {
             if (parentIndex >= 0)
             {
                 (_root.Nodes[parentIndex].Children ??= []).Add(nodeIndex);
+            } else
+            {
             }
-            _root.Scenes[sceneIndex].Nodes.Add(nodeIndex);
-            return nodeIndex;
         }
 
         private int AddNode(Skeleton mesh, int sceneIndex, int parentIndex)
@@ -994,7 +1070,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 Name = animator.m_Name,
             };
-            var timeMaps = new Dictionary<string, int>();
+            var timeMaps = new Dictionary<int, int>();
             if (animator.m_Legacy)
             {
                 foreach (var m_CompressedRotationCurve in animator.m_CompressedRotationCurves)
@@ -1009,7 +1085,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         times[i] = t * 0.01f / animator.m_SampleRate;
                     }
                     var timeIndex = _root.CreateAccessor("Times_" + m_CompressedRotationCurve.m_Path, times, true);
-                    timeMaps.TryAdd(m_CompressedRotationCurve.m_Path, timeIndex);
+                    timeMaps.TryAdd(FindNode(m_CompressedRotationCurve.m_Path), timeIndex);
                     var quats = m_CompressedRotationCurve.m_Values.UnpackQuats();
                     var values = new float[numKeys * 4];
                     for (int i = 0; i < numKeys; i++)
@@ -1039,7 +1115,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 foreach (var m_RotationCurve in animator.m_RotationCurves)
                 {
-                    if (!timeMaps.TryGetValue(m_RotationCurve.path, out var timeIndex))
+                    if (!timeMaps.TryGetValue(FindNode(m_RotationCurve.path), out var timeIndex))
                     {
                         continue;
                     }
@@ -1070,7 +1146,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 foreach (var m_PositionCurve in animator.m_PositionCurves)
                 {
-                    if (!timeMaps.TryGetValue(m_PositionCurve.path, out var timeIndex))
+                    if (!timeMaps.TryGetValue(FindNode(m_PositionCurve.path), out var timeIndex))
                     {
                         continue;
                     }
@@ -1100,7 +1176,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 foreach (var m_ScaleCurve in animator.m_ScaleCurves)
                 {
-                    if (!timeMaps.TryGetValue(m_ScaleCurve.path, out var timeIndex))
+                    if (!timeMaps.TryGetValue(FindNode(m_ScaleCurve.path), out var timeIndex))
                     {
                         continue;
                     }
@@ -1132,7 +1208,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     foreach (var m_EulerCurve in animator.m_EulerCurves)
                     {
-                        if (!timeMaps.TryGetValue(m_EulerCurve.path, out var timeIndex))
+                        if (!timeMaps.TryGetValue(FindNode(m_EulerCurve.path), out var timeIndex))
                         {
                             continue;
                         }
@@ -1174,7 +1250,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             channelName = channelName.Substring(dotPos + 1);
                         }
 
-                        if (!timeMaps.TryGetValue(m_FloatCurve.path ?? GetPathByChannelName(channelName), out var timeIndex))
+                        if (!timeMaps.TryGetValue(!string.IsNullOrEmpty(m_FloatCurve.path) ? FindNode(m_FloatCurve.path) : GetPathByChannelName(channelName), out var timeIndex))
                         {
                             continue;
                         }
@@ -1204,7 +1280,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             } 
             else
             {
-                var cachedData = new Dictionary<string, List<float>[]>(); 
+                var cachedData = new Dictionary<int, List<float>[]>(); 
                 var m_Clip = animator.m_MuscleClip.m_Clip;
                 var streamedFrames = m_Clip.m_StreamedClip.ReadData();
                 var m_ClipBindingConstant = animator.m_ClipBindingConstant ?? m_Clip.ConvertValueArrayToGenericBinding();
@@ -1256,13 +1332,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         {
                             Sampler = res.Samplers.AddWithIndex(new()
                             {
-                                Input = _root.CreateAccessor("Times_" + track.Key + i, track.Value[i].ToArray(), true),
+                                Input = _root.CreateAccessor($"Times_{track.Key}_{i}", track.Value[i].ToArray(), true),
                                 Output = _root.CreateVectorAccessor("AnyCurve", track.Value[i + 1].ToArray(), track.Value[i].Count),
                                 Interpolation = AnimationInterpolationMode.LINEAR
                             }),
                             Target = new()
                             {
-                                Node = 0, // TODO find
+                                Node = track.Key, // TODO find
                                 Path = i switch
                                 {
                                     0 => PropertyPath.Weights,
@@ -1279,7 +1355,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _root.Add(res);
         }
 
-        private void ReadCurveData(Dictionary<string, List<float>[]> cachedData, 
+        private void ReadCurveData(Dictionary<int, List<float>[]> cachedData, 
             AnimationClipBindingConstant m_ClipBindingConstant, 
             int index, float time, 
             float[] data, 
@@ -1301,14 +1377,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
 
                 var bPath = GetPathFromHash(binding.path);
-                if (string.IsNullOrEmpty(bPath))
-                {
-                    bPath = GetPathByChannelName(channelName);
-                }
-                if (!cachedData.TryGetValue(bPath, out var track))
+                var nodeIndex = string.IsNullOrEmpty(bPath) ?
+                    GetPathByChannelName(channelName) : FindNode(bPath);
+                if (!cachedData.TryGetValue(nodeIndex, out var track))
                 {
                     track = CreateArray(10);
-                    cachedData.Add(bPath, track);
+                    cachedData.Add(nodeIndex, track);
                 }
                 // channelName;
                 // BlendShape
@@ -1317,11 +1391,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             else if (binding.typeID == ElementIDType.Transform)
             {
-                var path = GetPathFromHash(binding.path);
-                if (!cachedData.TryGetValue(path, out var track))
+                var nodeIndex = FindNode(GetPathFromHash(binding.path));
+                if (!cachedData.TryGetValue(nodeIndex, out var track))
                 {
                     track = CreateArray(10);
-                    cachedData.Add(path, track);
+                    cachedData.Add(nodeIndex, track);
                 }
 
                 switch (binding.attribute)
@@ -1434,13 +1508,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return boneName;
         }
 
-        private string? GetPathByChannelName(string channelName)
+        private int GetPathByChannelName(string channelName)
         {
             if (_channelPathItems.TryGetValue(channelName, out var item)) 
             {
                 return item;
             }
-            return null;
+            return -1;
         }
         #endregion
         public void SaveAs(string fileName, ArchiveExtractMode mode)

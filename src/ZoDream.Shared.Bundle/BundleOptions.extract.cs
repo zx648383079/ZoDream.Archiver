@@ -8,6 +8,8 @@ namespace ZoDream.Shared.Bundle
 
         public ArchiveExtractMode FileMode { get; set; } = ArchiveExtractMode.Overwrite;
 
+        public int MaxBatchCount { get; set; } = 100;
+
         public bool EnabledImage { get; set; } = true;
         public bool EnabledVideo { get; set; } = true;
         public bool EnabledAudio { get; set; } = true;

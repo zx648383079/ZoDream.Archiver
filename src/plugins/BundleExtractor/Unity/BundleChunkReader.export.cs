@@ -48,6 +48,10 @@ namespace ZoDream.BundleExtractor
                         exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
                             string.IsNullOrEmpty(exporter.Name) ? fileName : exporter.Name
                         ), folder), mode);
+                        if (exporter is IDisposable d)
+                        {
+                            d?.Dispose();
+                        }
                     }
                     catch (Exception e)
                     {
