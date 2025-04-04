@@ -26,8 +26,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //    return;
             //}
             audio.m_AudioData.Position = 0;
-            new FModReader(audio.m_AudioData, Path.GetFileName(fileName), null)
-                .ExtractToDirectory(Path.GetDirectoryName(fileName), mode);
+            using var reader = new FModReader(audio.m_AudioData, Path.GetFileName(fileName), null);
+            reader.ExtractToDirectory(Path.GetDirectoryName(fileName), mode);
             // using var fs = File.Create(fileName);
             //Audio.Decode(audio.m_AudioData, m_CompressionFormat switch
             //{

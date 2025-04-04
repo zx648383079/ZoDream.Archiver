@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.LuaDecompiler;
 using ZoDream.Shared.Bundle;
@@ -13,6 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public string Name => asset.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            asset.Script.Position = 0;
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -39,6 +41,20 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Dispose()
         {
+
+        }
+
+        internal static bool IsSupport(byte[] buffer, int length)
+        {
+            if (buffer.StartsWith(LuacReader.Signature))
+            {
+                return true;
+            }
+            if (buffer.StartsWith(LuaJitReader.Signature))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

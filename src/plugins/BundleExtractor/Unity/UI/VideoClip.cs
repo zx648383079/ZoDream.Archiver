@@ -65,16 +65,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 var m_sRGB = reader.ReadBoolean();
             }
 
-            //ResourceReader resourceReader;
-            //if (!string.IsNullOrEmpty(m_ExternalResources.m_Source))
-            //{
-            //    resourceReader = new ResourceReader(m_ExternalResources.m_Source, assetsFile, m_ExternalResources.m_Offset, m_ExternalResources.m_Size);
-            //}
-            //else
-            //{
-            //    resourceReader = new ResourceReader(reader, reader.BaseStream.Position, m_ExternalResources.m_Size);
-            //}
-            m_VideoData = new PartialStream(reader.BaseStream, m_ExternalResources.m_Size);
+            if (!string.IsNullOrEmpty(m_ExternalResources.m_Source))
+            {
+                m_VideoData = _reader.OpenResource(m_ExternalResources.m_Source, m_ExternalResources.m_Offset, m_ExternalResources.m_Size);
+            }
+            else
+            {
+                m_VideoData = new PartialStream(reader.BaseStream, m_ExternalResources.m_Size);
+            }
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

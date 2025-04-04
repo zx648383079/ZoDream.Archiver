@@ -55,18 +55,23 @@ namespace ZoDream.BundleExtractor.Unity.UI
             return Source.Container!.OpenResource(fileName, Source);
         }
 
-        public Stream OpenResource(StreamingInfo info)
+        public Stream OpenResource(string fileName, long offset, long size)
         {
-            if (string.IsNullOrWhiteSpace(info.path))
+            if (string.IsNullOrWhiteSpace(fileName))
             {
                 return new EmptyStream();
             }
-            var stream = OpenResource(info.path);
+            var stream = Source.Container?.OpenResource(fileName, Source);
             if (stream is null)
             {
                 return new EmptyStream();
             }
-            return new PartialStream(stream, info.offset, info.size);
+            return new PartialStream(stream, offset, size);
+        }
+
+        public Stream OpenResource(StreamingInfo info)
+        {
+            return OpenResource(info.path, info.offset, info.size);
         }
 
     }

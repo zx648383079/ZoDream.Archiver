@@ -10,7 +10,7 @@ namespace ZoDream.LuaDecompiler
 {
     public partial class LuacReader
     {
-        internal const string Signature = "\x1BLua";
+        public const string Signature = "\x1BLua";
 
         public LuaBytecode ReadBytecode(Stream stream)
         {

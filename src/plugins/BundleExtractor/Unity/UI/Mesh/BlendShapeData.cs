@@ -36,8 +36,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     scanner.TryRead(reader, shape);
                     shapes.Add(shape);
                 }
-
-                
             }
             else
             {

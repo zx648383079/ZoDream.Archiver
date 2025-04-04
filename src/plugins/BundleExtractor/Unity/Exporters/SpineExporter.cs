@@ -21,6 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
+            asset.Script.Position = 0;
             asset.Script.SaveAs(fileName);
         }
 

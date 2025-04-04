@@ -27,7 +27,7 @@ namespace ZoDream.LuaDecompiler
         const int BCDUMP_KTAB_NUM = 4;
         const int BCDUMP_KTAB_STR = 5;
 
-        internal const string Signature = "\x1BLJ";
+        public const string Signature = "\x1BLJ";
 
         public LuaBytecode ReadBytecode(Stream stream)
         {
