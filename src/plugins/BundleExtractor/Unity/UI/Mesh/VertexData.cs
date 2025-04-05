@@ -107,7 +107,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
             for (var s = 0; s < m_Streams.Count; s++)
             {
                 var m_Stream = m_Streams[s];
-                var channelMask = new BitArray(new[] { (int)m_Stream.channelMask });
+                var channelMask = new BitArray([(int)m_Stream.channelMask]);
                 byte offset = 0;
                 for (int i = 0; i < 6; i++)
                 {
