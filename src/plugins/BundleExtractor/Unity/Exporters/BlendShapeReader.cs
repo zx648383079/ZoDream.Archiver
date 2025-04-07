@@ -6,6 +6,9 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
+    /// <summary>
+    /// 导出Blend Shapes作为Morph Targets
+    /// </summary>
     public class BlendShapeReader
     {
         public object Read(Stream input)
@@ -76,6 +79,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     break;
                 }
                 var index = reader.Read7BitEncodedInt();
+                // 对应 vertex map 的 第四个值
                 while (true)
                 {
                     if (reader.ReadByte() is not 0x1D and not 0x25 and not 0x2D)

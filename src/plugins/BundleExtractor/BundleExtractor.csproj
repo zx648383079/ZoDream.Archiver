@@ -30,6 +30,7 @@
 	  <ProjectReference Include="..\FModExporter\FModExporter.csproj" />
 	  <ProjectReference Include="..\KhronosExporter\KhronosExporter.csproj" />
 	  <ProjectReference Include="..\LuaDecompiler\LuaDecompiler.csproj" />
+	  <ProjectReference Include="..\ShaderDecompiler\ShaderDecompiler.csproj" />
   </ItemGroup>
 
   <ItemGroup>

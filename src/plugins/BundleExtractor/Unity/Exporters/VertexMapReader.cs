@@ -5,6 +5,9 @@ using System.Text;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
+    /// <summary>
+    /// COLOR_0 vec4
+    /// </summary>
     public class VertexMapReader
     {
         public object Read(Stream input)
@@ -32,6 +35,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 var end = reader.BaseStream.Position + len;
                 while (reader.BaseStream.Position < end)
                 {
+                    // 第一个值 8 表示 uv 表明 第二 值对应 blend shape 的 index
+                    // 第二个值 是自增的 序号 从 0 开始 为 0 时 第一第二值可能没有
+                    // 第三个值 16 表示 vec4 表明第四个值 tangent
+                    // 第四个值 对应 blend shape index
                     var value = reader.Read7BitEncodedInt();
                 }
                 if (input.Position >= input.Length)

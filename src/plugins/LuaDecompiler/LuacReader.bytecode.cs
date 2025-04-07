@@ -54,7 +54,7 @@ namespace ZoDream.LuaDecompiler
                 chunk.VarArg = new() { NeedArg = true, HasArg = true };
             }
             chunk.MaxStack = reader.ReadByte();
-            Debug.WriteLine($"p:{reader.Position:x}");
+            // Debug.WriteLine($"p:{reader.Position:x}");
             var opcodeItems = ReadArray(reader, header, () => {
                 return header.SizeOfInstruction == 4 ? reader.ReadUInt32() : 0;
             });

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
+using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Cocos;
+using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.KhronosExporter;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.IO;
@@ -45,10 +48,10 @@ namespace ZoDream.Tests
             Assert.IsTrue(res);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestGltf()
         {
-            var fileName = "F:\\Desktop\\good.glb";
+            var fileName = "F:\\Desktop\\bad.glb";
             using var fs = File.OpenRead(fileName);
             var res = new GlbReader().Read(fs);
             if (res is not null)
@@ -56,6 +59,33 @@ namespace ZoDream.Tests
                 res.FileName = fileName;
                 var items = res.Accessors.Select(res.ReadAccessorBuffer).ToArray();
             }
+            Assert.IsTrue(res is not null);
+        }
+
+        //[TestMethod]
+        public void TestFbx()
+        {
+            var data = FbxContext.ToEuler(new(0.00392036f, -0.00511095f, -0.613622f, 0.789573f));
+            var fileName = "F:\\Desktop\\bad.fbx";
+            var res = new FbxReader(fileName).Read();
+            Assert.IsTrue(res);
+        }
+
+        [TestMethod]
+        public void TestVertexMap()
+        {
+            var fileName = "F:\\apk\\test_output\\AssetBundles\\vertex_map_components_pc_a01_suit_swim.ab\\Swimbra_obj001.txt";
+            using var fs = File.OpenRead(fileName);
+            var res = new VertexMapReader().Read(fs);
+            Assert.IsTrue(res is not null);
+        }
+
+        [TestMethod]
+        public void TestBlendShape()
+        {
+            var fileName = "F:\\apk\\test_output\\AssetBundles\\bare_blend_shape_pc_a01_nk.ab\\E01.txt";
+            using var fs = File.OpenRead(fileName);
+            var res = new BlendShapeReader().Read(fs);
             Assert.IsTrue(res is not null);
         }
 

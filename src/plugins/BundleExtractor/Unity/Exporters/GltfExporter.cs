@@ -26,7 +26,7 @@ using UnityMesh = ZoDream.BundleExtractor.Unity.UI.Mesh;
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     /// <summary>
-    /// 存在问题， 不确定 node 与 frame 通过 name 联系？
+    /// unity 使用的时 y up 坐标 gltf 使用 z up 坐标
     /// </summary>
     internal class GltfExporter : IMultipartExporter
     {
@@ -586,10 +586,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             
             #region 转换 Mesh
             var psItems = new List<MeshPrimitive>();
-            var hasUv = mesh.m_UV0 is not null && mesh.m_UV0.Length > 0;
+            var hasUv = mesh.m_UV0?.Length > 0;
             var vStep = ComputeStep(mesh.m_Vertices.Length, mesh.m_VertexCount, 3, 4);
             var uStep = ComputeStep(mesh.m_UV0?.Length??0, mesh.m_VertexCount, 4, 2, 3);
             var nStep = ComputeStep(mesh.m_Normals.Length, mesh.m_VertexCount, 3, 4);
+            var cStep = ComputeStep(mesh.m_Colors.Length, mesh.m_VertexCount, 3, 4);
+            var hasColor = mesh.m_Colors?.Length > 0;
             int firstSubMesh = 0;
             if (meshR is not null && meshR.m_StaticBatchInfo?.subMeshCount > 0)
             {
@@ -615,6 +617,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                 var positionItems = new List<float>();
                 var normalItems = new List<float>();
+                var colorItems = new List<float>();
                 var uvItems = CreateArray(8);
                 var indicesItems = new List<int>();
                 var faceVertexCache = new Dictionary<int, int>();
@@ -645,6 +648,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         faceVertexCache.Add(v1, faceVertexCount++);
                         positionItems.AddRange(p1.AsArray());
                         normalItems.AddRange(n1.AsArray());
+                        if (hasColor)
+                        {
+                            colorItems.AddRange(mesh.m_Colors[v1 * cStep],
+                                mesh.m_Colors[v1 * cStep + 1],
+                                mesh.m_Colors[v1 * cStep + 2],
+                                nStep > 3 ? mesh.m_Colors[v1 * cStep + 3] : 1f
+                            );
+                        }
+                       
 
                         if (hasUv)
                         {
@@ -673,6 +685,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             mesh.m_Normals[v2 * nStep + 1],
                             mesh.m_Normals[v2 * nStep + 2]
                          );
+                        if (hasColor)
+                        {
+                            colorItems.AddRange(mesh.m_Colors[v2 * cStep],
+                                mesh.m_Colors[v2 * cStep + 1],
+                                mesh.m_Colors[v2 * cStep + 2],
+                                nStep > 3 ? mesh.m_Colors[v2 * cStep + 3] : 1f
+                            );
+                        }
 
                         if (hasUv)
                         {
@@ -699,6 +719,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             mesh.m_Normals[v3 * nStep + 1],
                             mesh.m_Normals[v3 * nStep + 2]
                          );
+                        if (hasColor)
+                        {
+                            colorItems.AddRange(mesh.m_Colors[v3 * cStep],
+                                mesh.m_Colors[v3 * cStep + 1],
+                                mesh.m_Colors[v3 * cStep + 2],
+                                nStep > 3 ? mesh.m_Colors[v3 * cStep + 3] : 1f
+                            );
+                        }
 
                         if (hasUv)
                         {
@@ -757,6 +785,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             _root.CreateVectorAccessor($"{mesh.m_Name}_{i}_{j}_texcoords",
                             uvItems[j].ToArray(), uvItems[j].Count / 2));
                     }
+                }
+                if (colorItems.Count > 0)
+                {
+                    ps.Attributes.Add("COLOR_0",
+                    _root.CreateVectorAccessor($"{mesh.m_Name}_{i}_color",
+                        colorItems.ToArray(), colorItems.Count / 4));
                 }
                 psItems.Add(ps);
                 sum = end;
