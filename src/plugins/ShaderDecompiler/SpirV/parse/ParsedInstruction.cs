@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler.SpirV
 {
-    public class ParsedOperand : IOperand
+    public class ParsedOperand : IInstructionOperand
     {
         public ParsedOperand(IReadOnlyList<uint> words, int index, int count, object value, SpvInstructionOperand operand)
         {
@@ -69,29 +68,28 @@ namespace ZoDream.ShaderDecompiler.SpirV
 
         public override string ToString()
         {
-            StringBuilder sb = new();
-            ToString(sb);
+            var sb = new StringBuilder();
+            Write(new CodeWriter(sb));
             return sb.ToString();
         }
 
-        public StringBuilder ToString(StringBuilder sb)
+        public void Write(ICodeWriter sb)
         {
             for (int i = 0; i < Values.Count; ++i)
             {
                 if (Values[i] is ObjectReference objRef)
                 {
-                    objRef.ToString(sb);
+                    objRef.Write(sb);
                 }
                 else
                 {
-                    sb.Append(Values[i]);
+                    sb.Write(Values[i]);
                 }
                 if (i < (Values.Count - 1))
                 {
-                    sb.Append(' ');
+                    sb.Write(' ');
                 }
             }
-            return sb;
         }
 
         public IReadOnlyList<object> Values { get; }
@@ -160,9 +158,9 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"%{Id}";
         }
 
-        public StringBuilder ToString(StringBuilder sb)
+        public void Write(ICodeWriter sb)
         {
-            return sb.Append('%').Append(Id);
+            sb.Write('%').Write(Id);
         }
 
         public uint Id { get; }
@@ -267,8 +265,8 @@ namespace ZoDream.ShaderDecompiler.SpirV
         public string? Name { get; set; }
         public object? Value { get; set; }
 
-        IOperand[] IInstruction.Operands => [..Operands];
-
         public string Mnemonic => Instruction.Mnemonic;
+
+        public IInstructionOperand[] OperandItems => [..Operands];
     }
 }

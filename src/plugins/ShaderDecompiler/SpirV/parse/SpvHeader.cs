@@ -1,6 +1,8 @@
-﻿namespace ZoDream.ShaderDecompiler.SpirV
+﻿using ZoDream.Shared.Language;
+
+namespace ZoDream.ShaderDecompiler.SpirV
 {
-    public class SpvHeader
+    public class SpvHeader : ILanguageHeader
     {
         public uint Version { get; set; }
         public uint Generator { get; set; }

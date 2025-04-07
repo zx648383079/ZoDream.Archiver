@@ -1,21 +1,19 @@
-﻿using System;
-using System.IO;
-using ZoDream.Shared.IO;
+﻿using System.IO;
+using ZoDream.ShaderDecompiler.SpirV;
 using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.ShaderDecompiler
 {
-    public class ShaderScheme : ILanguageScheme
+    public class ShaderScheme : ILanguageScheme<SpvBytecode>
     {
        
 
-        public void Create(Stream stream, GlobalExpression data)
+        public void Create(Stream stream, SpvBytecode data)
         {
-            throw new NotImplementedException();
+            new SpirVWriter(data).Write(stream);
         }
 
-        public GlobalExpression? Open(Stream stream, string filePath, string fileName)
+        public SpvBytecode? Open(Stream stream)
         {
             var pos = stream.Position;
             var buffer = new byte[4];
@@ -23,30 +21,23 @@ namespace ZoDream.ShaderDecompiler
             stream.Seek(pos, SeekOrigin.Begin);
             if (SmolvReader.IsSupport(buffer, 4))
             {
-                return new SmolvReader().Read(stream);
+                return new SmolvReader(stream).Read();
             }
             if (SpirVReader.IsSupport(buffer, 4))
             {
-                return new SpirVReader().Read(stream);
+                return new SpirVReader(stream).Read();
             }
             return null;
         }
 
-        public static string Disassemble(PartialStream stream)
+        public static void Disassemble(Stream input, ICodeWriter output)
         {
-            var pos = stream.Position;
-            var buffer = new byte[4];
-            stream.ReadExactly(buffer, 0, 4);
-            stream.Seek(pos, SeekOrigin.Begin);
-            if (SmolvReader.IsSupport(buffer, 4))
+            var scheme = new ShaderScheme();
+            var data = scheme.Open(input);
+            if (data is not null)
             {
-                return new SpirVWriter(new SmolvReader().ReadBytecode(stream)).ToString();
+                new SpirVWriter(data).Decompile(output);
             }
-            if (SpirVReader.IsSupport(buffer, 4))
-            {
-                return new SpirVWriter(new SpirVReader().ReadBytecode(stream)).ToString();
-            }
-            return string.Empty;
         }
     }
 }

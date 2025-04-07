@@ -1,11 +1,11 @@
 ﻿using System.IO;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.Shared.Language
 {
-    public interface ILanguageScheme
+    public interface ILanguageScheme<T> 
+        where T : IBytecode
     {
-        public void Create(Stream stream, GlobalExpression data);
-        public GlobalExpression? Open(Stream stream, string filePath, string fileName);
+        public void Create(Stream stream, T data);
+        public T? Open(Stream stream);
     }
 }

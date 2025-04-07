@@ -13,7 +13,7 @@
 
         public LuaConstant(bool value)
         {
-            Type=LuaConstantType.Bool;
+            Type = LuaConstantType.Bool;
             Value = value;
         }
 

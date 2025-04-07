@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ZoDream.ShaderDecompiler.SpirV;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler
 {
-    public partial class SpirVWriter : IDisassembler
+    public partial class SpirVWriter : ILanguageWriter, IDisassembler
     {
         private static readonly SpvOperand[] _debugInstructions =
         [
@@ -43,34 +43,34 @@ namespace ZoDream.ShaderDecompiler
             }
         }
 
-        public string Decompile(IInstruction instruction)
+        public void Decompile(ICodeWriter writer, IInstruction instruction)
         {
             if (instruction is ParsedInstruction item)
             {
-                return Decompile(item);
+                Decompile(writer, item);
             }
-            return string.Empty;
         }
 
-        public string Decompile(SpvOperandCode code)
+        public void Write(Stream output)
         {
-            return Decompile(new ParsedInstruction(Convert(code.Operand), code.Data));
+            using var writer = new CodeWriter(output);
+            Disassemble(writer, DisassemblyOptions.Default);
         }
 
-        public string Decompile(ParsedInstruction instruction)
+        public void Decompile(ICodeWriter writer)
         {
-            var sb = new StringBuilder();
-            PrintInstruction(sb, instruction, DisassemblyOptions.Default);
-            return sb.ToString();
+            Disassemble(writer, DisassemblyOptions.Default);
         }
 
-        public override string ToString()
+        public void Decompile(ICodeWriter writer, SpvOperandCode code)
         {
-            var sb = new StringBuilder();
-            Disassemble(sb);
-            return sb.ToString();
+            Decompile(writer, new ParsedInstruction(Convert(code.Operand), code.Data));
         }
 
+        public void Decompile(ICodeWriter writer, ParsedInstruction instruction)
+        {
+            PrintInstruction(writer, instruction, DisassemblyOptions.Default);
+        }
 
         private void ProcessInstruction()
         {
@@ -384,5 +384,7 @@ namespace ZoDream.ShaderDecompiler
                     break;
             }
         }
+
+
     }
 }

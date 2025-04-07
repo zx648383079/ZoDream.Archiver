@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler.SpirV
 {
     public class SpvType
     {
-        public virtual StringBuilder ToString(StringBuilder sb)
+        public virtual void Write(ICodeWriter sb)
         {
-            return sb;
         }
     }
 
@@ -21,9 +18,9 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return "void";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return sb.Append("void");
+            sb.Write("void");
         }
     }
 
@@ -38,9 +35,9 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return "bool";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return sb.Append("bool");
+            sb.Write("bool");
         }
     }
 
@@ -64,17 +61,17 @@ namespace ZoDream.ShaderDecompiler.SpirV
             }
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
             if (Signed)
             {
-                sb.Append('i').Append(Width);
+                sb.Write('i');
             }
             else
             {
-                sb.Append('u').Append(Width);
+                sb.Write('u');
             }
-            return sb;
+            sb.Write(Width);
         }
 
         public int Width { get; }
@@ -93,9 +90,10 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"f{Width}";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return sb.Append('f').Append(Width);
+            sb.Write('f');
+            sb.Write(Width);
         }
 
         public int Width { get; }
@@ -114,9 +112,10 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"{ComponentType}_{ComponentCount}";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return ComponentType.ToString(sb).Append('_').Append(ComponentCount);
+            ComponentType.Write(sb);
+            sb.Write('_').Write(ComponentCount);
         }
 
         public SpvScalarType ComponentType { get; }
@@ -136,9 +135,9 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"{ColumnType}x{ColumnCount}";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return sb.Append(ColumnType).Append('x').Append(ColumnCount);
+            sb.Write(ColumnType).Write('x').Write(ColumnCount);
         }
 
         public SpvVectorType ColumnType { get; }
@@ -163,52 +162,51 @@ namespace ZoDream.ShaderDecompiler.SpirV
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            ToString(sb);
+            var sb = new StringBuilder();
+            Write(new CodeWriter(sb));
             return sb.ToString();
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
             switch (AccessQualifier)
             {
                 case AccessQualifier.ReadWrite:
-                    sb.Append("read_write ");
+                    sb.Write("read_write ");
                     break;
                 case AccessQualifier.WriteOnly:
-                    sb.Append("write_only ");
+                    sb.Write("write_only ");
                     break;
                 case AccessQualifier.ReadOnly:
-                    sb.Append("read_only ");
+                    sb.Write("read_only ");
                     break;
             }
 
-            sb.Append("Texture");
+            sb.Write("Texture");
             switch (Dim)
             {
                 case Dim.Dim1D:
-                    sb.Append("1D");
+                    sb.Write("1D");
                     break;
                 case Dim.Dim2D:
-                    sb.Append("2D");
+                    sb.Write("2D");
                     break;
                 case Dim.Dim3D:
-                    sb.Append("3D");
+                    sb.Write("3D");
                     break;
                 case Dim.Cube:
-                    sb.Append("Cube");
+                    sb.Write("Cube");
                     break;
             }
 
             if (IsMultisampled)
             {
-                sb.Append("MS");
+                sb.Write("MS");
             }
             if (IsArray)
             {
-                sb.Append("Array");
+                sb.Write("Array");
             }
-            return sb;
         }
 
         public SpvType SampledType { get; }
@@ -228,9 +226,9 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return "sampler";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return sb.Append("sampler");
+            sb.Write("sampler");
         }
     }
 
@@ -246,9 +244,10 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"{ImageType}Sampled";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return ImageType.ToString(sb).Append("Sampled");
+            ImageType.Write(sb);
+            sb.Write("Sampled");
         }
 
         public SpvImageType ImageType { get; }
@@ -267,9 +266,10 @@ namespace ZoDream.ShaderDecompiler.SpirV
             return $"{ElementType}[{ElementCount}]";
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            return ElementType.ToString(sb).Append('[').Append(ElementCount).Append(']');
+            ElementType.Write(sb);
+            sb.Write('[').Write(ElementCount).Write(']');
         }
 
         public int ElementCount { get; }
@@ -291,7 +291,7 @@ namespace ZoDream.ShaderDecompiler.SpirV
         public SpvStructType(IReadOnlyList<SpvType> memberTypes)
         {
             MemberTypes = memberTypes;
-            memberNames_ = new List<string>();
+            memberNames_ = [];
 
             for (int i = 0; i < memberTypes.Count; ++i)
             {
@@ -306,38 +306,37 @@ namespace ZoDream.ShaderDecompiler.SpirV
 
         public override string ToString()
         {
-            StringBuilder sb = new();
-            ToString(sb);
+            var sb = new StringBuilder();
+            Write(new CodeWriter(sb));
             return sb.ToString();
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            sb.Append("struct {");
+            sb.Write("struct {");
             for (int i = 0; i < MemberTypes.Count; ++i)
             {
                 SpvType memberType = MemberTypes[i];
-                memberType.ToString(sb);
+                memberType.Write(sb);
                 if (!string.IsNullOrEmpty(memberNames_[i]))
                 {
-                    sb.Append(' ');
-                    sb.Append(MemberNames[i]);
+                    sb.Write(' ');
+                    sb.Write(MemberNames[i]);
                 }
 
-                sb.Append(';');
+                sb.Write(';');
                 if (i < (MemberTypes.Count - 1))
                 {
-                    sb.Append(' ');
+                    sb.Write(' ');
                 }
             }
-            sb.Append('}');
-            return sb;
+            sb.Write('}');
         }
 
         public IReadOnlyList<SpvType> MemberTypes { get; }
         public IReadOnlyList<string> MemberNames => memberNames_;
 
-        private List<string> memberNames_;
+        private readonly List<string> memberNames_;
     }
 
     public class SpvOpaqueType : SpvType
@@ -374,12 +373,12 @@ namespace ZoDream.ShaderDecompiler.SpirV
             }
         }
 
-        public override StringBuilder ToString(StringBuilder sb)
+        public override void Write(ICodeWriter sb)
         {
-            sb.Append(StorageClass.ToString()).Append(' ');
-            Type?.ToString(sb);
-            sb.Append('*');
-            return sb;
+            sb.Write(StorageClass.ToString());
+            sb.Write(' ');
+            Type?.Write(sb);
+            sb.Write('*');
         }
 
         public StorageClass StorageClass { get; }

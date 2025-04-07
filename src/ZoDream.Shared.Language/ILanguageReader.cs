@@ -1,10 +1,8 @@
-﻿using System.IO;
-using ZoDream.Shared.Language.AST;
-
-namespace ZoDream.Shared.Language
+﻿namespace ZoDream.Shared.Language
 {
-    public interface ILanguageReader
+    public interface ILanguageReader<T> 
+        where T : IBytecode
     {
-        public GlobalExpression Read(Stream input);
+        public T Read();
     }
 }

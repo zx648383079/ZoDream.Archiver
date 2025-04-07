@@ -35,8 +35,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             var evaluator = new MatchEvaluator(match => {
                 var index = int.Parse(match.Groups[1].Value);
-                ShaderSubProgramWrap subProgramWrap = m_SubProgramWraps[index];
-                ShaderSubProgram subProgram = subProgramWrap.GenShaderSubProgram();
+                var subProgramWrap = m_SubProgramWraps[index];
+                var subProgram = subProgramWrap.GenShaderSubProgram();
                 var subProgramsStr = subProgram.Export();
                 return subProgramsStr;
             });

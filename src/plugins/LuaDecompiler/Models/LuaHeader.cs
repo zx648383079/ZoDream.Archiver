@@ -1,8 +1,9 @@
-﻿using ZoDream.Shared.Models;
+﻿using ZoDream.Shared.Language;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.LuaDecompiler.Models
 {
-    public class LuaHeader
+    public class LuaHeader : ILanguageHeader
     {
         public LuaVersion Version { get; set; }
         public byte FormatVersion { get; set; }

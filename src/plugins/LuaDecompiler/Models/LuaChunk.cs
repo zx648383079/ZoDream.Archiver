@@ -1,6 +1,8 @@
-﻿namespace ZoDream.LuaDecompiler.Models
+﻿using ZoDream.Shared.Language;
+
+namespace ZoDream.LuaDecompiler.Models
 {
-    public class LuaChunk
+    public class LuaChunk : ILanguageChunk
     {
         public string Name { get; internal set; } = string.Empty;
 
@@ -12,7 +14,7 @@
         public byte ParameterCount { get; internal set; }
         public LuaVarArgInfo? VarArg { get; internal set; }
         public byte MaxStack { get; internal set; }
-        public IOperandCode[] OpcodeItems { get; internal set; } = [];
+        public ILanguageOpcode[] OpcodeItems { get; internal set; } = [];
 
         public LuaConstant[] ConstantItems { get; internal set; } = [];
         public LuaConstant[] NumberConstantItems { get; internal set; } = [];

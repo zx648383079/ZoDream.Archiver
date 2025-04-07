@@ -272,6 +272,5 @@ namespace ZoDream.LuaDecompiler.Models
         DEFAULT,
         [Operand("default", 0, OperandFormat.AR, OperandFormat.BR, OperandFormat.C, OperandFormat.k)]
         DEFAULT54,
-
     }
 }

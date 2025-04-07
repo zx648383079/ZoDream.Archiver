@@ -1,15 +1,15 @@
 ﻿using System;
 using System.IO;
+using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.LuaDecompiler
 {
-    public class LuaScheme: ILanguageScheme
+    public class LuaScheme: ILanguageScheme<LuaBytecode>
     {
 
-        public GlobalExpression? Open(Stream stream, string filePath, string fileName)
+        public LuaBytecode? Open(Stream stream)
         {
             var pos = stream.Position;
             var buffer = new byte[4];
@@ -17,18 +17,18 @@ namespace ZoDream.LuaDecompiler
             stream.Seek(pos, SeekOrigin.Begin);
             if (buffer.StartsWith(LuacReader.Signature))
             {
-                return new LuacReader().Read(stream);
+                return new LuacReader(stream).Read();
             }
             if (buffer.StartsWith(LuaJitReader.Signature))
             {
-                return new LuaJitReader().Read(stream);
+                return new LuaJitReader(stream).Read();
             }
             return null;
         }
 
-        public void Create(Stream stream, GlobalExpression data)
+        public void Create(Stream stream, LuaBytecode data)
         {
-            new LuaWriter().Write(stream, data);
+            new LuaWriter(data).Write(stream);
         }
 
     }

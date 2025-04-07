@@ -1,6 +1,8 @@
-﻿namespace ZoDream.ShaderDecompiler.SpirV
+﻿using ZoDream.Shared.Language;
+
+namespace ZoDream.ShaderDecompiler.SpirV
 {
-    public class SpvOperandCode(SpvOperand op, uint[] data)
+    public class SpvOperandCode(SpvOperand op, uint[] data) : ILanguageOpcode
     {
         public SpvOperand Operand { get; set; } = op;
 

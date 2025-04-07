@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
+using ZoDream.ShaderDecompiler.SpirV;
 using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.ShaderDecompiler
 {
-    public partial class SmolvReader : ILanguageReader
+    public partial class SmolvReader(Stream stream) : ILanguageReader<SpvBytecode>
     {
         
         /// <summary>
@@ -15,10 +15,9 @@ namespace ZoDream.ShaderDecompiler
 
         private const int HeaderSize = 6 * sizeof(uint);
 
-        public GlobalExpression Read(Stream input)
+        public SpvBytecode Read()
         {
-            var builder = new GlobalExpression();
-            return builder;
+            return ReadBytecode(stream);
         }
 
 
@@ -26,5 +25,6 @@ namespace ZoDream.ShaderDecompiler
         {
             return BitConverter.ToUInt32(buffer) == Signature;
         }
+
     }
 }

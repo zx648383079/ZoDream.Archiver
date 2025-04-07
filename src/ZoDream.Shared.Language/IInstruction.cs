@@ -3,12 +3,12 @@
     public interface IInstruction
     {
 
-        public IOperand[] Operands { get; }
+        public IInstructionOperand[] OperandItems { get; }
 
         public string Mnemonic { get; }
     }
 
-    public interface IOperand
+    public interface IInstructionOperand
     {
     }
 }

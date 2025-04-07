@@ -6,6 +6,7 @@ namespace ZoDream.Shared.Language
     {
         public IEnumerable<IInstruction> Disassemble();
 
-        public string Decompile(IInstruction instruction);
+        public void Decompile(ICodeWriter writer, IInstruction instruction);
+        public void Decompile(ICodeWriter writer);
     }
 }

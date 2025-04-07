@@ -1,13 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using ZoDream.LuaDecompiler.Models;
-using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
-using ZoDream.Shared.Models;
-
-namespace ZoDream.LuaDecompiler
+﻿namespace ZoDream.LuaDecompiler
 {
     public partial class LuacReader
     {

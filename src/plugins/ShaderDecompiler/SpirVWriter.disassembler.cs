@@ -1,86 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ZoDream.ShaderDecompiler.SpirV;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler
 {
     public partial class SpirVWriter
     {
 
-        private void Disassemble(StringBuilder builder)
+        private void Disassemble(ICodeWriter builder, DisassemblyOptions options)
         {
-            Disassemble(builder, DisassemblyOptions.Default);
-        }
-
-        private void Disassemble(StringBuilder builder, DisassemblyOptions options)
-        {
-            builder.AppendLine("; SPIR-V");
-            builder.Append("; Version: ").Append(_header.Version).AppendLine();
+            builder.WriteLine("; SPIR-V")
+                .Write("; Version: ")
+                .Write(_header.Version)
+                .WriteLine();
             var generator = SpvGenerator.Items[_header.GeneratorId];
             if (generator is null)
             {
-                builder.Append("; Generator: unknown; ").Append(_header.GeneratorVersion).AppendLine();
+                builder.Write("; Generator: unknown; ")
+                    .Write(_header.GeneratorVersion)
+                    .WriteLine();
             }
             else
             {
-                builder.Append("; Generator: ").Append(generator.Vendor).Append(' ').
-                    Append(generator.Name).Append("; ").Append(_header.GeneratorVersion).AppendLine();
+                builder.Write("; Generator: ")
+                    .Write(generator.Vendor)
+                    .Write(' ')
+                    .Write(generator.Name)
+                    .Write("; ")
+                    .Write(_header.GeneratorVersion)
+                    .WriteLine();
             }
-            builder.Append("; Bound: ").Append(_header.Bound).AppendLine();
-            builder.Append("; Schema: ").Append(_header.Reserved).AppendLine();
-
-            var lines = new string[_instructions.Length + 1];
-            lines[0] = builder.ToString();
-            builder.Clear();
-
-            for (int i = 0; i < _instructions.Length; i++)
+            builder.Write("; Bound: ")
+                .Write(_header.Bound)
+                .WriteLine()
+                .Write("; Schema: ")
+                .Write(_header.Reserved)
+                .WriteLine();
+            foreach (var item in _instructions)
             {
-                var instruction = _instructions[i];
-                PrintInstruction(builder, instruction, options);
-                lines[i + 1] = builder.ToString();
-                builder.Clear();
-            }
-
-            int longestPrefix = 0;
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                longestPrefix = Math.Max(longestPrefix, line.IndexOf('='));
-                if (longestPrefix > 50)
-                {
-                    longestPrefix = 50;
-                    break;
-                }
-            }
-
-            builder.Append(lines[0]);
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                int index = line.IndexOf('=');
-                if (index == -1)
-                {
-                    builder.Append(' ', longestPrefix + 4);
-                    builder.Append(line);
-                }
-                else
-                {
-                    int pad = Math.Max(0, longestPrefix - index);
-                    builder.Append(' ', pad);
-                    builder.Append(line, 0, index);
-                    builder.Append('=');
-                    builder.Append(line, index + 1, line.Length - index - 1);
-                }
-                builder.AppendLine();
+                builder.WriteIndent();
+                PrintInstruction(builder, item, options);
+                builder.WriteLine();
             }
         }
 
-        private static void PrintInstruction(StringBuilder sb, ParsedInstruction instruction, DisassemblyOptions options)
+        private static void PrintInstruction(ICodeWriter builder, ParsedInstruction instruction, DisassemblyOptions options)
         {
             if (instruction.Operands.Count == 0)
             {
-                sb.Append(instruction.Instruction.Mnemonic);
+                builder.Write(instruction.Instruction.Mnemonic);
                 return;
             }
 
@@ -90,7 +59,8 @@ namespace ZoDream.ShaderDecompiler
                 if (options.HasFlag(DisassemblyOptions.ShowTypes))
                 {
                     var resultType = instruction.ResultType ?? throw new NullReferenceException();
-                    resultType.ToString(sb).Append(' ');
+                    resultType.Write(builder);
+                    builder.Write(' ');
                 }
                 ++currentOperand;
             }
@@ -99,40 +69,38 @@ namespace ZoDream.ShaderDecompiler
             {
                 if (!options.HasFlag(DisassemblyOptions.ShowNames) || string.IsNullOrWhiteSpace(instruction.Name))
                 {
-                    PrintOperandValue(sb, instruction.Operands[currentOperand].Value, options);
+                    PrintOperandValue(builder, instruction.Operands[currentOperand].Value, options);
                 }
                 else
                 {
-                    sb.Append(instruction.Name);
+                    builder.Write(instruction.Name);
                 }
-                sb.Append(" = ");
+                builder.Write(" = ");
 
                 ++currentOperand;
             }
 
-            sb.Append(instruction.Instruction.Mnemonic);
-            sb.Append(' ');
+            builder.Write(instruction.Instruction.Mnemonic)
+                .Write(' ');
 
             for (; currentOperand < instruction.Operands.Count; ++currentOperand)
             {
-                PrintOperandValue(sb, instruction.Operands[currentOperand].Value, options);
-                sb.Append(' ');
+                PrintOperandValue(builder, instruction.Operands[currentOperand].Value, options);
+                builder.Write(' ');
             }
         }
 
-        private static void PrintOperandValue(StringBuilder sb, object value, DisassemblyOptions options)
+        private static void PrintOperandValue(ICodeWriter builder, object value, DisassemblyOptions options)
         {
             switch (value)
             {
                 case Type t:
-                    sb.Append(t.Name);
+                    builder.Write(t.Name);
                     break;
 
                 case string s:
                     {
-                        sb.Append('"');
-                        sb.Append(s);
-                        sb.Append('"');
+                        builder.Write(s, true);
                     }
                     break;
 
@@ -140,42 +108,42 @@ namespace ZoDream.ShaderDecompiler
                     {
                         if (options.HasFlag(DisassemblyOptions.ShowNames) && or.Reference != null && !string.IsNullOrWhiteSpace(or.Reference.Name))
                         {
-                            sb.Append(or.Reference.Name);
+                            builder.Write(or.Reference.Name);
                         }
                         else
                         {
-                            or.ToString(sb);
+                            or.Write(builder);
                         }
                     }
                     break;
 
                 case IBitEnumOperandValue beov:
-                    PrintBitEnumValue(sb, beov, options);
+                    PrintBitEnumValue(builder, beov, options);
                     break;
 
                 case IValueEnumOperandValue veov:
-                    PrintValueEnumValue(sb, veov, options);
+                    PrintValueEnumValue(builder, veov, options);
                     break;
 
                 case VaryingOperandValue varOpVal:
-                    varOpVal.ToString(sb);
+                    varOpVal.Write(builder);
                     break;
 
                 default:
-                    sb.Append(value);
+                    builder.Write(value);
                     break;
             }
         }
 
-        private static void PrintBitEnumValue(StringBuilder sb, IBitEnumOperandValue enumOperandValue, DisassemblyOptions options)
+        private static void PrintBitEnumValue(ICodeWriter sb, IBitEnumOperandValue enumOperandValue, DisassemblyOptions options)
         {
             foreach (uint key in enumOperandValue.Values.Keys)
             {
-                sb.Append(enumOperandValue.GetEnumName(key));
+                sb.Write(enumOperandValue.GetEnumName(key));
                 IReadOnlyList<object> value = enumOperandValue.Values[key];
                 if (value.Count != 0)
                 {
-                    sb.Append(' ');
+                    sb.Write(' ');
                     foreach (object v in value)
                     {
                         PrintOperandValue(sb, v, options);
@@ -184,12 +152,12 @@ namespace ZoDream.ShaderDecompiler
             }
         }
 
-        private static void PrintValueEnumValue(StringBuilder sb, IValueEnumOperandValue valueOperandValue, DisassemblyOptions options)
+        private static void PrintValueEnumValue(ICodeWriter sb, IValueEnumOperandValue valueOperandValue, DisassemblyOptions options)
         {
-            sb.Append(valueOperandValue.Key);
+            sb.Write(valueOperandValue.Key);
             if (valueOperandValue.Value is IList<object> valueList && valueList.Count > 0)
             {
-                sb.Append(' ');
+                sb.Write(' ');
                 foreach (object v in valueList)
                 {
                     PrintOperandValue(sb, v, options);

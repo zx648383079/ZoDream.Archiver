@@ -1,6 +1,8 @@
-﻿namespace ZoDream.LuaDecompiler.Models
+﻿using ZoDream.Shared.Language;
+
+namespace ZoDream.LuaDecompiler.Models
 {
-    public class OperandCode(Operand op, int code, OperandExtractor extractor) : IOperandCode
+    public class OperandCode(Operand op, int code, OperandExtractor extractor) : ILanguageOpcode
     {
         public Operand Operand { get; set; } = op;
 

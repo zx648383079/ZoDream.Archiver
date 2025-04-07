@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
+using ZoDream.ShaderDecompiler.SpirV;
 using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.ShaderDecompiler
 {
     /// <summary>
     /// see https://github.com/KhronosGroup/SPIRV-Headers
     /// </summary>
-    public partial class SpirVReader : ILanguageReader
+    public partial class SpirVReader(Stream stream) : ILanguageReader<SpvBytecode>
     {
         public const uint Signature = 0x07230203;
         public const uint Version12 = 0x10200;
@@ -20,10 +20,9 @@ namespace ZoDream.ShaderDecompiler
         public const uint Revision10 = 12;
         public const uint OpCodeMask = 0xffff;
         public const uint WordCountShift = 16;
-        public GlobalExpression Read(Stream input)
+        public SpvBytecode Read()
         {
-            var builder = new GlobalExpression();
-            return builder;
+            return ReadBytecode(stream);
         }
 
         public static bool IsSupport(byte[] buffer, int length)

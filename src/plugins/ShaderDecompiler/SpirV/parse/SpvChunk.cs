@@ -1,7 +1,11 @@
-﻿namespace ZoDream.ShaderDecompiler.SpirV
+﻿using ZoDream.Shared.Language;
+
+namespace ZoDream.ShaderDecompiler.SpirV
 {
-    public class SpvChunk
+    public class SpvChunk : ILanguageChunk
     {
         public SpvOperandCode[] OpcodeItems { get; internal set; } = [];
+
+        ILanguageOpcode[] ILanguageChunk.OpcodeItems => OpcodeItems;
     }
 }

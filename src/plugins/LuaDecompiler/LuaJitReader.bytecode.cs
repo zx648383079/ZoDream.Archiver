@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Language;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.LuaDecompiler
 {
-    public partial class LuaJitReader : ILanguageReader
+    public partial class LuaJitReader
     {
         const int BCDUMP_KGC_CHILD = 0;
         const int BCDUMP_KGC_TAB = 1;

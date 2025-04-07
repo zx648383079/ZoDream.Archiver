@@ -18,7 +18,7 @@ namespace ZoDream.ShaderDecompiler.SpirV
         /// </summary>
         Varying
     }
-    public class SpvInstructionOperand(OperandType kind, string? name, SpvOperandQuantifier quantifier) : IOperand
+    public class SpvInstructionOperand(OperandType kind, string? name, SpvOperandQuantifier quantifier) : IInstructionOperand
     {
         public string? Name { get; } = name;
         public OperandType Type { get; } = kind;
@@ -32,6 +32,6 @@ namespace ZoDream.ShaderDecompiler.SpirV
 
         public string Mnemonic => $"Op{Enum.GetName(code)}";
 
-        IOperand[] IInstruction.Operands => Operands;
+        public IInstructionOperand[] OperandItems => Operands;
     }
 }

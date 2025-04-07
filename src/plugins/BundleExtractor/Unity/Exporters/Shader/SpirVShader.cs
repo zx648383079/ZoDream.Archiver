@@ -2,6 +2,7 @@
 using System.Text;
 using ZoDream.ShaderDecompiler;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -10,6 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public static string Convert(byte[] m_ProgramCode)
         {
             var sb = new StringBuilder();
+            using var builder = new CodeWriter(sb);
             using (var ms = new MemoryStream(m_ProgramCode))
             {
                 using var reader = new BinaryReader(ms);
@@ -36,7 +38,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             minOffset = offset;
                         }
                         var pos = ms.Position;
-                        sb.Append(ShaderScheme.Disassemble(new PartialStream(ms, offset, size)));
+                        ShaderScheme.Disassemble(new PartialStream(ms, offset, size), builder);
                         ms.Position = pos;
                     }
                 }
