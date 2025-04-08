@@ -229,7 +229,7 @@ namespace ZoDream.LuaDecompiler
                 case Operand.EQ:
                 case Operand.LE:
                 case Operand.LT:
-                    builder.WriteFormat("%s = %s %s %s",
+                    builder.WriteFormat("{0} = {1} {2} {3}",
                         fieldItems[0], fieldItems[1], TranslateOperation(code.Operand), fieldItems[2]);
                     break;
                 case Operand.ADD54:
@@ -244,7 +244,7 @@ namespace ZoDream.LuaDecompiler
                 case Operand.BXOR54:
                 case Operand.SHL54:
                 case Operand.SHR54:
-                    builder.WriteFormat("%s = %s %s %s", 
+                    builder.WriteFormat("{0} = {1} {2} {3}", 
                         fieldItems[0], GetLocalName(chunk, code.B) ?? fieldItems[1],
                         TranslateOperation(code.Operand),
                         GetLocalName(chunk, code.C) ?? fieldItems[2]);
@@ -253,7 +253,7 @@ namespace ZoDream.LuaDecompiler
                 case Operand.NOT:
                 case Operand.LEN:
                 case Operand.BNOT:
-                    builder.WriteFormat("%s = %s%s", fieldItems[0], TranslateOperation(code.Operand), fieldItems[1]);
+                    builder.WriteFormat("{0} = {1}{2}", fieldItems[0], TranslateOperation(code.Operand), fieldItems[1]);
                     break;
                 case Operand.CONCAT:
                     builder.Write(fieldItems[0]).Write(" = ");
@@ -606,7 +606,7 @@ namespace ZoDream.LuaDecompiler
                 case Operand.BXORK:
                     {
                         var swap = GetNextOperand(chunk, index + 1).K;
-                        builder.WriteFormat("%s = %s %s %s", 
+                        builder.WriteFormat("{0} = {1} {2} {3}", 
                             fieldItems[0], 
                             swap ? chunk.ConstantItems[code.C].Value : $"r{code.B}",
                             TranslateOperation(code.Operand),

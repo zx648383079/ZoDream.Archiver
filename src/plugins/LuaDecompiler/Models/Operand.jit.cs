@@ -158,7 +158,7 @@ namespace ZoDream.LuaDecompiler.Models
         [JitOperand("TGETB", JitOperandFormat.DST, JitOperandFormat.VAR, JitOperandFormat.LIT)]
         TGETB, // {A} = {B}[{C}]
 
-                    // Added in bytecode version 2
+        // Added in bytecode version 2
         [JitOperand("TGETR", JitOperandFormat.DST, JitOperandFormat.VAR, JitOperandFormat.VAR)]
         TGETR, // {A} = {B}[{C}]
 

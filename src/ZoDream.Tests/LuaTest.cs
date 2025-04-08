@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZoDream.LuaDecompiler;
 using ZoDream.LuaDecompiler.Models;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.Tests
 {
@@ -16,11 +17,15 @@ namespace ZoDream.Tests
         public void TestDecompiler()
         {
             var root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../zodream/tests"));
-            var path = Path.Combine(root, "lua51//concat-int.luac");
+            var path = Path.Combine(root, "luajit//float.luac");
             var scheme = new LuaScheme();
             using var fs = File.OpenRead(path);
-            var res = scheme.Open(fs, string.Empty, string.Empty);
+            var res = scheme.Open(fs);
             Assert.IsNotNull(res);
+            using var sb = new CodeWriter();
+            new LuaWriter(res).Decompile(sb);
+            var str = sb.ToString();
+            Assert.IsTrue(!string.IsNullOrWhiteSpace(str));
         }
 
         [TestMethod]

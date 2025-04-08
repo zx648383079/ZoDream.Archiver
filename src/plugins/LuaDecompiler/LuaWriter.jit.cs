@@ -13,234 +13,148 @@ namespace ZoDream.LuaDecompiler
             {
                 return;
             }
+            var cd = attr.ArgsCount == 3 ? code.C : code.D;
             switch (code.Operand)
             {
                 case JitOperand.ISLT:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" < ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISGE:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" >= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISLE:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" <= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISGT:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" > ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISEQV:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" == ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISNEV:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" ~= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISEQS:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" == ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISNES:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" ~= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISEQN:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" == ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISNEN:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" ~= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISEQP:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" == ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.ISNEP:
-                    builder.Write("if ").Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" ~= ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                    builder.WriteFormat("if {0} {1} {2}",
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateOperation(code.Operand),
+                        Translate(chunk, index, (int)cd, attr.CDType)
+                        );
                     break;
                 case JitOperand.ISTC:
                     {
-                        var d = Translate(chunk, index, (int)code.D, attr.CDType);
+                        var d = Translate(chunk, index, (int)cd, attr.CDType);
                         builder.Write(Translate(chunk, index, code.A, attr.AType)).Write(" = ")
                             .Write(d).Write("; if ").Write(d);
                         break;
                     }
                 case JitOperand.ISFC:
                     {
-                        var d = Translate(chunk, index, (int)code.D, attr.CDType);
+                        var d = Translate(chunk, index, (int)cd, attr.CDType);
                         builder.Write(Translate(chunk, index, code.A, attr.AType))
                             .Write(" = ").Write(d)
                             .Write("; if not ").Write(d);
                         break;
                     }
                 case JitOperand.IST:
-                    builder.Write("if ").Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                    builder.Write("if ").Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.ISF:
-                    builder.Write("if not ").Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                    builder.Write("if not ").Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.ISTYPE:
                     break;
                 case JitOperand.ISNUM:
                     break;
                 case JitOperand.MOV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                         .Write(" = ")
-                         .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                    builder.WriteFormat("{0} = {1}",
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.NOT:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = not ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.UNM:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = -")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
-                    break;
                 case JitOperand.LEN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = #")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                    builder.WriteFormat("{0} = {1}{2}", 
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateOperation(code.Operand),
+                        Translate(chunk, index, (int)cd, attr.CDType)
+                        );
                     break;
                 case JitOperand.ADDVN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" + ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.SUBVN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" - ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.MULVN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" * ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.DIVVN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" / ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.MODVN:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" % ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
-                case JitOperand.ADDNV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" + ").Write(Translate(chunk, index, code.B, attr.BType));
-                    break;
-                case JitOperand.SUBNV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" - ").Write(Translate(chunk, index, code.B, attr.BType));
-                    break;
-                case JitOperand.MULNV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" * ").Write(Translate(chunk, index, code.B, attr.BType));
-                    break;
-                case JitOperand.DIVNV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" / ").Write(Translate(chunk, index, code.B, attr.BType));
-                    break;
-                case JitOperand.MODNV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" % ").Write(Translate(chunk, index, code.B, attr.BType));
+                    builder.WriteFormat("{0} = {1} {2} {3}",
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateNotSet(chunk, index, (int)cd, attr.BType),
+                        TranslateOperation(code.Operand),
+                        TranslateNotSet(chunk, index, code.B, attr.CDType));
                     break;
                 case JitOperand.ADDVV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" + ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.SUBVV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" - ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.MULVV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" * ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.DIVVV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" / ").Write(Translate(chunk, index, code.C, attr.CDType));
-                    break;
                 case JitOperand.MODVV:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" % ").Write(Translate(chunk, index, code.C, attr.CDType));
+                    builder.WriteFormat("{0} = {1} {2} {3}",
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateNotSet(chunk, index, code.B, attr.BType),
+                        TranslateOperation(code.Operand),
+                        TranslateNotSet(chunk, index, (int)cd, attr.CDType));
+                    break;
+                case JitOperand.ADDNV:
+                case JitOperand.SUBNV:
+                case JitOperand.MULNV:
+                case JitOperand.DIVNV:
+                case JitOperand.MODNV:
+                    builder.WriteFormat("{0} = {1} {2} {3}",
+                        Translate(chunk, index, code.A, attr.AType),
+                        TranslateNotSet(chunk, index, (int)cd, attr.CDType),
+                        TranslateOperation(code.Operand),
+                        TranslateNotSet(chunk, index, code.B, attr.BType));
                     break;
                 case JitOperand.POW:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ").Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(" ^ ").Write(Translate(chunk, index, code.C, attr.CDType))
+                        .Write(" = ").Write(TranslateNotSet(chunk, index, code.B, attr.BType))
+                        .Write(" ^ ").Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType))
                         .Write(" (pow)");
                     break;
                 case JitOperand.CAT:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = ");
-                    for (var i = 0; i <= code.D - code.B; i++)
                     {
-                        if (i > 0)
+                        builder.Write(Translate(chunk, index, code.A, attr.AType))
+                            .Write(" = ");
+                        var count = (int)cd - code.B;
+                        for (int i = 0; i <= count; i++)
                         {
-                            builder.Write(", ");
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(Translate(chunk, index, code.B + i, JitOperandFormat.VAR));
                         }
-                        builder.Write(Translate(chunk, index, code.B + i, JitOperandFormat.VAR));
                     }
                     break;
                 case JitOperand.KSTR:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.KCDATA:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                          .Write(" = ")
-                         .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                         .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.KSHORT:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                          .Write(" = ")
-                         .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                         .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.KNUM:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.KPRI:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.KNIL:
                     {
-                        for (var i = code.A; i <= code.D; i++)
+                        for (var i = code.A; i <= cd; i++)
                         {
                             if (i > 0)
                             {
@@ -256,114 +170,117 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.UGET:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.USETV:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.USETS:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.USETN:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.USETP:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(TranslateNotSet(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.UCLO:
                     builder.Write("nil uvs >= ").Write(Translate(chunk, index, code.A, attr.AType))
                         .Write("; goto ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.FNEW:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = function ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.TNEW:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = new table( array: ")
-                        .Write(code.D & 0b0000011111111111)
-                        .Write(", dict: ").Write(Math.Pow(2, code.D >> 11)).Write(')');
+                        .Write(cd & 0b0000011111111111)
+                        .Write(", dict: ").Write(Math.Pow(2, cd >> 11)).Write(')');
                     break;
                 case JitOperand.TDUP:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = copy ")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType));
+                        .Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.GGET:
-                    builder.Write(Translate(chunk, index, code.A, attr.AType))
-                        .Write(" = _env[")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType))
-                        .Write("]");
+                    if (attr.CDType == JitOperandFormat.STR)
+                    {
+                        _envItems[Translate(chunk, index, code.A, attr.AType)] = chunk.ConstantItems[cd].Value.ToString();
+                        break;
+                    }
+                    builder.WriteFormat("{0} = _env[{1}]",
+                        Translate(chunk, index, code.A, attr.AType),
+                        Translate(chunk, index, (int)cd, attr.CDType)
+                    );
                     break;
                 case JitOperand.GSET:
-                    builder.Write("_env[")
-                        .Write(Translate(chunk, index, (int)code.D, attr.CDType))
-                        .Write("]")
-                        .Write(" = ")
-                        .Write(Translate(chunk, index, code.A, attr.AType));
+                    builder.WriteFormat("_env[{0}] = {1}",
+                        Translate(chunk, index, (int)cd, attr.CDType),
+                        TranslateNotSet(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.TGETV:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
                         .Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
                         .Write("]");
                     break;
                 case JitOperand.TGETS:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
                         .Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(".").Write(Translate(chunk, index, code.C, attr.CDType));
+                        .Write(".").Write(Translate(chunk, index, (int)cd, attr.CDType));
                     break;
                 case JitOperand.TGETB:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
                         .Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
                         .Write("]");
                     break;
                 case JitOperand.TGETR:
                     builder.Write(Translate(chunk, index, code.A, attr.AType))
                         .Write(" = ")
                         .Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
                         .Write("]");
                     break;
                 case JitOperand.TSETV:
                     builder.Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
                         .Write("] = ").Write(Translate(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.TSETS:
                     builder.Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write(".").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write(" = ").Write(Translate(chunk, index, code.A, attr.AType));
+                        .Write(".").Write(Translate(chunk, index, (int)cd, attr.CDType))
+                        .Write(" = ").Write(TranslateNotSet(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.TSETB:
                     builder.Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write("] = ").Write(Translate(chunk, index, code.A, attr.AType));
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
+                        .Write("] = ").Write(TranslateNotSet(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.TSETM:
                     builder.Write("for i = 0, MULTRES, 1 do ")
                         .Write(Translate(chunk, index, code.A - 1, JitOperandFormat.VAR))
-                        .Write('[').Write(code.D)
+                        .Write('[').Write(cd)
                         .Write(" + i] = slot(").Write(code.A).Write(" + i)");
                     break;
                 case JitOperand.TSETR:
                     builder.Write(Translate(chunk, index, code.B, attr.BType))
-                        .Write("[").Write(Translate(chunk, index, code.C, attr.CDType))
-                        .Write("] = ").Write(Translate(chunk, index, code.A, attr.AType));
+                        .Write("[").Write(Translate(chunk, index, (int)cd, attr.CDType))
+                        .Write("] = ").Write(TranslateNotSet(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.CALLM:
                     {
@@ -375,9 +292,9 @@ namespace ZoDream.LuaDecompiler
                             }
                             builder.Write(Translate(chunk, index, code.A + i, JitOperandFormat.DST));
                         }
-                        builder.Write(" = ").Write(Translate(chunk, index, code.A, JitOperandFormat.VAR))
+                        builder.Write(" = ").Write(TranslateNotSet(chunk, index, code.A, JitOperandFormat.VAR))
                             .Write('(');
-                        for (int i = 0; i < code.D; i++)
+                        for (int i = 0; i < cd; i++)
                         {
                             if (i > 0)
                             {
@@ -398,9 +315,10 @@ namespace ZoDream.LuaDecompiler
                             }
                             builder.Write(Translate(chunk, index, code.A + i, JitOperandFormat.DST));
                         }
-                        builder.Write(" = ").Write(Translate(chunk, index, code.A, JitOperandFormat.VAR))
+                        builder.Write(" = ").Write(TranslateNotSet(chunk, index, code.A, JitOperandFormat.VAR))
                             .Write('(');
-                        for (int i = 0; i < code.D - 1; i++)
+                        var count = (int)cd - 1;
+                        for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
@@ -414,9 +332,10 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.CALLMT:
                     {
                         builder.Write("return ")
-                            .Write(Translate(chunk, index, code.A, JitOperandFormat.VAR))
+                            .Write(TranslateNotSet(chunk, index, code.A, JitOperandFormat.VAR))
                             .Write('(');
-                        for (int i = 0; i < code.D - 1; i++)
+                        var count = (int)cd - 1;
+                        for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
@@ -430,9 +349,10 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.CALLT:
                     {
                         builder.Write("return ")
-                            .Write(Translate(chunk, index, code.A, JitOperandFormat.VAR))
+                            .Write(TranslateNotSet(chunk, index, code.A, JitOperandFormat.VAR))
                             .Write('(');
-                        for (int i = 0; i < code.D - 1; i++)
+                        var count = (int)cd - 1;
+                        for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
@@ -490,7 +410,7 @@ namespace ZoDream.LuaDecompiler
                     }
                 case JitOperand.ISNEXT:
                     {
-                        var d = Translate(chunk, index, (int)code.D, JitOperandFormat.JMP);
+                        var d = Translate(chunk, index, (int)cd, JitOperandFormat.JMP);
                         builder.Write("Verify ITERN at ").Write(d)
                             .Write("; goto ").Write(d);
                         break;
@@ -498,7 +418,8 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.RETM:
                     {
                         builder.Write("return ");
-                        for (int i = 0; i < code.D - 1; i++)
+                        var count = (int)cd - 1;
+                        for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
@@ -512,7 +433,8 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.RET:
                     {
                         builder.Write("return ");
-                        for (int i = 0; i < code.D - 2; i++)
+                        var count = (int)cd - 2;
+                        for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
@@ -526,7 +448,7 @@ namespace ZoDream.LuaDecompiler
                     builder.Write("return");
                     break;
                 case JitOperand.RET1:
-                    builder.Write("return ").Write(Translate(chunk, index, code.A, attr.AType));
+                    builder.Write("return ").Write(TranslateNotSet(chunk, index, code.A, attr.AType));
                     break;
                 case JitOperand.FORI:
                 case JitOperand.JFORI:
@@ -537,7 +459,7 @@ namespace ZoDream.LuaDecompiler
                             .Write(",").Write(Translate(chunk, index, code.A + 1, JitOperandFormat.BS))
                             .Write(",").Write(Translate(chunk, index, code.A + 2, JitOperandFormat.BS))
                             .Write(") goto ")
-                            .Write(Translate(chunk, index, (int)code.D, JitOperandFormat.JMP));
+                            .Write(Translate(chunk, index, (int)cd, JitOperandFormat.JMP));
                         break;
                     }
                 case JitOperand.FORL:
@@ -554,7 +476,7 @@ namespace ZoDream.LuaDecompiler
                             .Write(", ")
                             .Write(Translate(chunk, index, code.A + 1, JitOperandFormat.VAR))
                             .Write(") goto ")
-                            .Write(Translate(chunk, index, (int)code.D, JitOperandFormat.JMP));
+                            .Write(Translate(chunk, index, (int)cd, JitOperandFormat.JMP));
                         break;
                     }
                 case JitOperand.ITERL:
@@ -566,7 +488,7 @@ namespace ZoDream.LuaDecompiler
                             .Write(" = ").Write(a)
                             .Write("; if ").Write(a)
                             .Write(" != nil goto ")
-                            .Write(Translate(chunk, index, (int)code.D,
+                            .Write(Translate(chunk, index, (int)cd,
                             //code.Operand == JitOperand.JITERL ? JitOperandFormat.LIT : 
                             JitOperandFormat.JMP));
                         break;
@@ -582,7 +504,7 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case JitOperand.JMP:
                     builder.Write("    goto ")
-                          .Write(Translate(chunk, index, (int)code.D, JitOperandFormat.JMP));
+                          .Write(Translate(chunk, index, (int)cd, JitOperandFormat.JMP));
                     break;
                 case JitOperand.FUNCF:
                     builder.Write("Fixed-arg function with frame size ")
@@ -624,7 +546,17 @@ namespace ZoDream.LuaDecompiler
             }
             
         }
-
+        private string TranslateNotSet(LuaChunk chunk,
+            int index, int value,
+            JitOperandFormat format)
+        {
+            var res = Translate(chunk, index, value, format);
+            if (format == JitOperandFormat.VAR && _envItems.TryGetValue(res, out var fn))
+            {
+                return fn;
+            }
+            return res;
+        }
         private string Translate(LuaChunk chunk,
             int index, int value,
             JitOperandFormat format)
@@ -639,8 +571,9 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.UV)
             {
-                var name = chunk.DebugInfo.UpValueNameItems[value];
-                return $"slot{value}\"${name}\"";
+                var name = chunk.DebugInfo.UpValueNameItems.Length > value ? 
+                    chunk.DebugInfo.UpValueNameItems[value] : "unknwon";
+                return $"uv{value}\"${name}\"";
             }
             if (format == JitOperandFormat.PRI)
             {
@@ -657,7 +590,7 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.STR)
             {
-                return $"\"{chunk.NumberConstantItems[value].Value}\"";
+                return $"\"{chunk.ConstantItems[value].Value}\"";
             }
             if (format == JitOperandFormat.TAB)
             {
@@ -680,6 +613,32 @@ namespace ZoDream.LuaDecompiler
                 return $"r{value}";
             }
             return " ";
+        }
+
+        private static string TranslateOperation(JitOperand op)
+        {
+            return op switch
+            {
+                JitOperand.ADDNV or JitOperand.ADDVV or JitOperand.ADDVN => "+",
+                JitOperand.SUBNV or JitOperand.SUBVV or JitOperand.SUBVN => "-",
+                JitOperand.MULNV or JitOperand.MULVV or JitOperand.MULVN => "*",
+                JitOperand.DIVNV or JitOperand.ADDVV or JitOperand.ADDVN => "/",
+                JitOperand.MODNV or JitOperand.MODNV or JitOperand.MODNV => "%",
+                JitOperand.POW => "^",
+                JitOperand.CAT => "..",
+
+                JitOperand.UNM => "-",
+                JitOperand.NOT => "not ",
+                JitOperand.LEN => "#",
+
+                JitOperand.ISEQN or JitOperand.ISEQP or JitOperand.ISEQS or JitOperand.ISEQV => "==",
+                JitOperand.ISNEN or JitOperand.ISNEP or JitOperand.ISNES or JitOperand.ISNEV => "~=",
+                JitOperand.ISLE => "<=",
+                JitOperand.ISLT => "<",
+                JitOperand.ISGT => ">",
+                JitOperand.ISGE => ">=",
+                _ => throw new NotImplementedException()
+            };
         }
     }
 }
