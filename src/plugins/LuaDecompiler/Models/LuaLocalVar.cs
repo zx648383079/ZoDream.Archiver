@@ -5,6 +5,5 @@
         public string Name { get; set; } = string.Empty;
         public ulong StartPc { get; set; }
         public ulong EndPc { get; set; }
-
     }
 }

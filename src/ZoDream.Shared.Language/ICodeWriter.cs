@@ -11,6 +11,13 @@ namespace ZoDream.Shared.Language
 
         public ICodeWriter Write(string? text);
         /// <summary>
+        /// 调用 string.Format
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public ICodeWriter WriteFormat(string format, params object[] args);
+        /// <summary>
         /// 写入以引号包围的字符串
         /// </summary>
         /// <param name="text">需要手动进行内部引号的转义</param>

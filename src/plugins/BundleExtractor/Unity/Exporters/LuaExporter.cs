@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 extension = ".txt";
             }
             var decompressor = new LuaScheme();
-            var res = decompressor.Open(asset.Script, string.Empty, string.Empty);
+            var res = decompressor.Open(asset.Script);
             if (res is null)
             {
                 if (!LocationStorage.TryCreate(fileName, extension, mode, out fileName))

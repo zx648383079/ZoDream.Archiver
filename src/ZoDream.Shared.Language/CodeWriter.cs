@@ -34,6 +34,12 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
+        public ICodeWriter WriteFormat(string format, params object[] args)
+        {
+            writer.Write(string.Format(format, args));
+            return this;
+        }
+
         public ICodeWriter Write(string text, bool outDoubleQuote)
         {
             var code = outDoubleQuote ? '\'' : '"';
