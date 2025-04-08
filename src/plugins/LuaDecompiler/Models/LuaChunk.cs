@@ -22,5 +22,6 @@ namespace ZoDream.LuaDecompiler.Models
         public LuaChunk[] PrototypeItems { get; internal set; } = [];
 
         public LuaDebugInfo DebugInfo { get; internal set; } = new();
+
     }
 }

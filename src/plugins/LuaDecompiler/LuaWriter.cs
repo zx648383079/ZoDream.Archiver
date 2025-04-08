@@ -75,7 +75,8 @@ namespace ZoDream.LuaDecompiler
                             .Write(" ")
                             .Write("FNEW ").Write(jit.A).Write("  ").Write(jit.D).Write(" ; ");
                             Decompile(writer, chunk.PrototypeItems[jit.D]);
-                        } else
+                        } 
+                        else
                         {
                             Translate(writer, chunk, index, jit);
                         }
@@ -84,6 +85,7 @@ namespace ZoDream.LuaDecompiler
                         Translate(writer, chunk, index, code);
                         break;
                 }
+                writer.WriteLine();
             }
         }
 

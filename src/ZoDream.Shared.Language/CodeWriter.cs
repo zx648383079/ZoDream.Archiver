@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -17,7 +18,12 @@ namespace ZoDream.Shared.Language
             : this(new StringWriter(builder))
         {
         }
-    
+
+        public CodeWriter()
+            : this(new StringWriter())
+        {
+        }
+
         public int Indent { get; set; }
 
         public void Dispose()
@@ -34,7 +40,7 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
-        public ICodeWriter WriteFormat(string format, params object[] args)
+        public ICodeWriter WriteFormat([StringSyntax("CompositeFormat")] string format, params object?[] args)
         {
             writer.Write(string.Format(format, args));
             return this;
@@ -165,5 +171,9 @@ namespace ZoDream.Shared.Language
             writer.Flush();
         }
 
+        public override string? ToString()
+        {
+            return writer.ToString();
+        }
     }
 }

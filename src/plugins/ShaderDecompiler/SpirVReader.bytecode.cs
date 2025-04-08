@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using ZoDream.ShaderDecompiler.SpirV;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler
 {
     /// <summary>
     /// see https://github.com/KhronosGroup/SPIRV-Headers
     /// </summary>
-    public partial class SpirVReader : ILanguageReader
+    public partial class SpirVReader
     {
 
         public SpvBytecode ReadBytecode(Stream input)

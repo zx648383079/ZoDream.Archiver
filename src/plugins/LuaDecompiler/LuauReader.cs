@@ -1,14 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Language;
-using ZoDream.Shared.Language.AST;
 
 namespace ZoDream.LuaDecompiler
 {
-    public class LuauReader : ILanguageReader
+    public class LuauReader(Stream input) : ILanguageReader<LuaBytecode>
     {
-        public GlobalExpression Read(Stream input)
+        public LuaBytecode Read()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

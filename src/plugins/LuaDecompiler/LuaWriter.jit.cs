@@ -653,7 +653,7 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.NUM)
             {
-                return (string)chunk.NumberConstantItems[value].Value;
+                return chunk.NumberConstantItems[value].Value.ToString();
             }
             if (format == JitOperandFormat.STR)
             {
@@ -665,7 +665,7 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.CDT)
             {
-                return (string)chunk.ConstantItems[value].Value;
+                return chunk.ConstantItems[value].Value.ToString();
             }
             if (format == JitOperandFormat.JMP)
             {

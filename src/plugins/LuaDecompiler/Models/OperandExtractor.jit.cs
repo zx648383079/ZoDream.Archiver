@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.LuaDecompiler.Models
 {
     public partial class JitOperandExtractor(LuaVersion version) : IOperandExtractor
     {
-        public IOperandCode Extract([Length(4,4)] byte[] buffer)
+        public ILanguageOpcode Extract([Length(4,4)] byte[] buffer)
         {
             var op = ParseOperand(buffer[0], version);
             var a = buffer[1];
@@ -21,7 +22,7 @@ namespace ZoDream.LuaDecompiler.Models
             return res;
         }
 
-        public IOperandCode Extract(uint code)
+        public ILanguageOpcode Extract(uint code)
         {
             return Extract(BitConverter.GetBytes(code));
         }

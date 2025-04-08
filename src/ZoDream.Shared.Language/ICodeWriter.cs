@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZoDream.Shared.Language
 {
@@ -16,7 +17,7 @@ namespace ZoDream.Shared.Language
         /// <param name="format"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public ICodeWriter WriteFormat(string format, params object[] args);
+        public ICodeWriter WriteFormat([StringSyntax("CompositeFormat")] string format, params object?[] args);
         /// <summary>
         /// 写入以引号包围的字符串
         /// </summary>
