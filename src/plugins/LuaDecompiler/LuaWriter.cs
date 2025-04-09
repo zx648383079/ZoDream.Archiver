@@ -72,8 +72,9 @@ namespace ZoDream.LuaDecompiler
                         Translate(writer, chunk, code);
                         break;
                 }
-                writer.WriteLine($"        ; {item}");
+                writer.WriteLine($"        ;[{chunk.CurrentIndex}] {item}");
             }
+            RemoveTemporary();
         }
 
         private void Translate(ICodeWriter writer, int index, LuaConstantTable table)

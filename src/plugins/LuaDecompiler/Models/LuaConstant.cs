@@ -28,6 +28,11 @@
             Type = LuaConstantType.String;
             Value = value;
         }
+
+        public override string ToString()
+        {
+            return $"[{Type}]{Value}";
+        }
     }
 
     public enum LuaConstantType

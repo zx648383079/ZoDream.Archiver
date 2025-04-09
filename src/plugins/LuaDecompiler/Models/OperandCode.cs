@@ -24,5 +24,10 @@ namespace ZoDream.LuaDecompiler.Models
         public int SBx => extractor.SBx.Extract(code);
         public int X => extractor.X.Extract(code);
 
+        public override string ToString()
+        {
+            return $"{Operand}:{Codepoint}={A},{B},{C},{K},{X}";
+        }
+
     }
 }

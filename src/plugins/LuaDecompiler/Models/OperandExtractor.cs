@@ -1,14 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using ZoDream.LuaDecompiler.Attributes;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.LuaDecompiler.Models
 {
     public partial class OperandExtractor: IOperandExtractor
     {
-
         private readonly Operand[] _maps;
         private readonly int _rkOffset = -1;
 
@@ -56,7 +53,7 @@ namespace ZoDream.LuaDecompiler.Models
             var data = new ILanguageOpcode[items.Length];
             for (var i = 0; i < items.Length; i++)
             {
-                var op = i > 0 && extraByte[i - 1] ? Operand.EXTRABYTE : GetOperand(items[i]);
+                var op = i > 0 && extraByte[i - 1] ? Operand.EXTRAARG : GetOperand(items[i]);
                 data[i] = new OperandCode(op, (int)items[i], this);
             }
             return data;
@@ -73,21 +70,32 @@ namespace ZoDream.LuaDecompiler.Models
                 LuaVersion.Lua54 or LuaVersion.Lua54Beta => _opcodeMapV54,
                 _ => throw new NotImplementedException()
             };
+            X = new(32, 0);
             switch (version)
             {
-                case LuaVersion.Lua51 or LuaVersion.Lua52:
+                case LuaVersion.Lua50 or LuaVersion.Lua51:
                     Op = new(6, 0);
                     A = new(8, 6);
                     B = new(9, 23);
                     C = new(9, 14);
-                    K = new();
-                    Ax = new(26, 6);
-                    SJ = new();
                     Bx = new(18, 14);
                     SBx = new(18, 14, 131071);
-                    X = new(32, 0);
+                    K = new();
+                    Ax = new();
+                    SJ = new();
                     break;
-                case LuaVersion.Lua53 or LuaVersion.Lua54 or LuaVersion.Lua54Beta:
+                case LuaVersion.Lua52 or LuaVersion.Lua53:
+                    Op = new(6, 0);
+                    A = new(8, 6);
+                    B = new(9, 23);
+                    C = new(9, 14);
+                    Ax = new(26, 6);
+                    Bx = new(18, 14);
+                    SBx = new(18, 14, 131071);
+                    K = new();
+                    SJ = new();
+                    break;
+                case LuaVersion.Lua54 or LuaVersion.Lua54Beta:
                     Op = new(7, 0);
                     A = new(8, 7);
                     B = new(8, 16);
@@ -97,7 +105,6 @@ namespace ZoDream.LuaDecompiler.Models
                     SJ = new(25, 7, (1 << 24) - 1);
                     Bx = new(17, 15);
                     SBx = new(17, 15, (1 << 16) - 1);
-                    X = new(32, 0);
                     break;
                 default:
                     throw new ArgumentException();
@@ -110,29 +117,6 @@ namespace ZoDream.LuaDecompiler.Models
             };
         }
 
-        public static OperandAttribute? GetAttribute(Operand operand)
-        {
-            var type = operand.GetType();
-            var name = Enum.GetName(operand);
-            if (name is null)
-            {
-                return null;
-            }
-            var field = type.GetField(name);
-            return field?.GetCustomAttribute<OperandAttribute>();
-        }
-
-        public static OperandFieldAttribute? GetAttribute(OperandFormat format)
-        {
-            var type = format.GetType();
-            var name = Enum.GetName(format);
-            if (name is null)
-            {
-                return null;
-            }
-            var field = type.GetField(name);
-            return field?.GetCustomAttribute<OperandFieldAttribute>();
-        }
     }
 
     public class OperandFieldExtractor(int size, int shift, int offset)

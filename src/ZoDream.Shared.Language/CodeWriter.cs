@@ -149,6 +149,16 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
+        public ICodeWriter WriteLine(bool autoIndent)
+        {
+            WriteLine();
+            if (autoIndent)
+            {
+                WriteIndent();
+            }
+            return this;
+        }
+
         public ICodeWriter WriteOutdent()
         {
             return WriteIndent(Indent - 1);

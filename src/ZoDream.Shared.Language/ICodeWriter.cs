@@ -62,6 +62,12 @@ namespace ZoDream.Shared.Language
         /// <returns></returns>
         public ICodeWriter WriteLine();
         /// <summary>
+        /// 写换行符，同时是否加入缩进
+        /// </summary>
+        /// <param name="autoIndent">是否加入缩进</param>
+        /// <returns></returns>
+        public ICodeWriter WriteLine(bool autoIndent);
+        /// <summary>
         /// 写入当前行缩进， 不改变当前行缩进
         /// </summary>
         public ICodeWriter WriteIndent();

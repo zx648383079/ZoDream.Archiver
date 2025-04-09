@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
-using ZoDream.LuaDecompiler.Attributes;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Language;
 
@@ -8,58 +8,545 @@ namespace ZoDream.LuaDecompiler
 {
     public partial class LuaWriter
     {
+        private void Translate(ICodeWriter builder, LuaChunk chunk, OperandCode code)
+        {
+            switch (code.Operand)
+            {
+                case Operand.MOVE:
+                    {
+                        var key = TranslateValue(chunk, code.B, OperandFormat.REGISTER);
+                        if (Contains(key))
+                        {
+                            Rename(key, TranslateName(chunk, code.A, OperandFormat.REGISTER));
+                            break;
+                        }
+                        var val = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        Add(TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            val);
+                        //builder.WriteFormat("{0} := {1}",
+                        //    TranslateName(chunk, code.A, OperandFormat.REGISTER),
+                        //    TranslateValue(chunk, code.B, OperandFormat.REGISTER)
+                        //    );
+                    }
+                    break;
+                case Operand.LOADI:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        code.SBx
+                        );
+                    break;
+                case Operand.LOADF:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.SBx, OperandFormat.IMMEDIATE_FLOAT)
+                        );
+                    break;
+                case Operand.LOADK:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.Bx, OperandFormat.CONSTANT)
+                        );
+                    break;
+                case Operand.LOADBOOL:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        code.B != 0 ? "true" : "false")
+                        .WriteLine(true)
+                        .WriteFormat("if ({0}) pc++", code.C);
+                    break;
+                case Operand.LOADFALSE:
+                    builder.WriteFormat("{0} := false",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER));
+                    break;
+                case Operand.LOADTRUE:
+                    builder.WriteFormat("{0} := true",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER));
+                    break;
+                case Operand.LFALSESKIP:
+                    builder.WriteFormat("{0} := false", // pc++
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER));
+                    chunk.MoveNext();
+                    break;
+                case Operand.LOADKX:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, GetNextOperand(chunk).Codepoint, OperandFormat.CONSTANT)
+                        );
+                    break;
+                case Operand.LOADNIL:
+                    {
+                        var begin = code.A;
+                        var count = code.B;
+                        for (int i = 0; i <= count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateIsSet(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                        builder.Write(" := nil");
+                    }
+                    break;
+                case Operand.GETUPVAL:
+                    // ? _env[] = UPVALUE
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.B, OperandFormat.UPVALUE)
+                        ); 
+                    break;
+                case Operand.SETUPVAL:
+                    builder.WriteFormat("{1} := {0}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.B, OperandFormat.UPVALUE)
+                        );
+                    break;
+                case Operand.GETGLOBAL:
+                    Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
+                        TranslateValue(chunk, code.Bx, OperandFormat.CONSTANT));
+                    //builder.WriteFormat("{0} := _G[{1}]",
+                    //    TranslateName(chunk, code.A, OperandFormat.REGISTER),
+                    //    TranslateValue(chunk, code.Bx, OperandFormat.CONSTANT)
+                    //    );
+                    break;
+                case Operand.SETGLOBAL:
+                    builder.WriteFormat("_G[{1}] := {0}",
+                        TranslateName(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.Bx, OperandFormat.CONSTANT)
+                        );
+                    break;
+                case Operand.SELF:
+                    builder.WriteFormat("{0} := {1}",
+                        TranslateName(chunk, code.A + 1, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.B, OperandFormat.REGISTER)
+                        ).WriteLine(true)
+                        .WriteFormat("{0} := {1}[{2}]",
+                            TranslateName(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateValue(chunk, code.B, OperandFormat.REGISTER),
+                            TranslateValue(chunk, code.C, OperandFormat.CONSTANT_STRING)
+                        );
+                    break;
+                case Operand.ADD:
+                case Operand.SUB:
+                case Operand.MUL:
+                case Operand.DIV:
+                case Operand.MOD:
+                case Operand.POW:
+                case Operand.IDIV:
+                case Operand.BAND:
+                case Operand.BOR:
+                case Operand.BXOR:
+                case Operand.SHL:
+                case Operand.SHR:
 
-        private static string[] Translate(LuaChunk chunk, OperandCode code)
-        {
-            var attr = OperandExtractor.GetAttribute(code.Operand);
-            if (attr is null)
-            {
-                return [];
+                case Operand.EQ:
+                case Operand.LE:
+                case Operand.LT:
+                    builder.WriteFormat("{0} = {1} {2} {3}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER), 
+                        TranslateOperation(code.Operand),
+                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER));
+                    break;
+                case Operand.UNM:
+                case Operand.NOT:
+                case Operand.LEN:
+                case Operand.BNOT:
+                    builder.WriteFormat("{0} = {1}{2}",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER), 
+                        TranslateOperation(code.Operand),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER));
+                    break;
+                case Operand.CONCAT:
+                    {
+                        builder.Write(TranslateIsSet(chunk, code.A, OperandFormat.REGISTER))
+                        .Write(" = ");
+                        var begin = code.A;
+                        var count = code.B;
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(" .. ");
+                            }
+                            builder.Write(
+                                TranslateValue(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                    }
+                    break;
+                case Operand.JMP:
+                    // pc += sj
+                    builder.WriteFormat("    goto {0}",
+                        TranslateValue(chunk, code.SJ, OperandFormat.JUMP));
+                    break;
+                case Operand.TEST:
+                    builder.WriteFormat("if (not {0} == {1}) then pc++",
+                        TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                        code.K
+                        );
+                    break;
+                case Operand.TESTSET:
+                    builder.WriteFormat("if (not {0} == {1}) then pc++ else {2} := {0} (*)",
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        code.K,
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER)
+                        );
+                    break;
+               
+                case Operand.CALL:
+                    {
+                        var fn = TranslateNotSet(chunk, code.A, OperandFormat.REGISTER);
+                        var begin = code.A;
+                        var count = code.C - 1;
+                        if (count > 0)
+                        {
+                            for (var i = 0; i < count; i++)
+                            {
+                                if (i > 0)
+                                {
+                                    builder.Write(", ");
+                                }
+                                builder.Write(
+                                    TranslateIsSet(chunk, begin + i, OperandFormat.REGISTER));
+                            }
+                            builder.Write(" = ");
+                        }
+                        builder.Write(fn)
+                            .Write('(');
+                        begin = code.A + 1;
+                        count = code.B - 1;
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                        builder.Write(')');
+                    }
+                    break;
+                case Operand.TAILCALL:
+                    {
+                        builder.Write("return ")
+                                .Write(TranslateNotSet(chunk, code.A, OperandFormat.REGISTER))
+                                .Write('(');
+                        var begin = code.A + 1;
+                        var count = code.B - 1;
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                        builder.Write(')');
+                    }
+                    break;
+                case Operand.RETURN:
+                    {
+                        builder.Write("return ");
+                        var begin = code.A;
+                        var count = code.B - 1;
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                    }
+                    break;
+                case Operand.RETURN0:
+                    builder.Write("return");
+                    break;
+                case Operand.RETURN1:
+                    builder.Write("return ")
+                        .Write(TranslateNotSet(chunk, code.A, OperandFormat.REGISTER));
+                    break;
+                case Operand.SETLIST:
+                    {
+                        var count = code.B == 0 ? code.Codepoint - code.A - 1 : code.B;
+                        var offset = 
+                            (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
+                        for (int i = 1; i < count; i++)
+                        {
+                            builder.WriteFormat("{0}[{1}] = {2}",
+                                TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                                offset,
+                                TranslateNotSet(chunk, code.A + i, OperandFormat.REGISTER)
+                            );
+                        }
+                    }
+                    break;
+                case Operand.SETLISTO:
+                    {
+                        var count = code.Codepoint - code.A - 1;
+                        var offset = code.Bx - code.Bx % 32;
+                        for (int i = 1; i < count; i++)
+                        {
+                            builder.WriteFormat("{0}[{1}] = {2}",
+                                TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                                offset,
+                                TranslateNotSet(chunk, code.A + i, OperandFormat.REGISTER)
+                            );
+                        }
+                    }
+                    break;
+                case Operand.CLOSE:
+                    break;
+                case Operand.CLOSURE:
+                    {
+                        var fn = TranslateValue(chunk, code.A, OperandFormat.REGISTER);
+                        if (chunk.MoveNext())
+                        {
+                            var next = (OperandCode)chunk.CurrentOpcode;
+                            Debug.Assert(next.Operand == Operand.SETTABUP);
+                            fn = chunk.ConstantItems[code.B].Value.ToString();
+                        }
+                        var sub = chunk.PrototypeItems[code.Bx];
+                        var args = new string[sub.ParameterCount];
+                        for (var i = 0; i < args.Length; i++)
+                        {
+                            args[i] = TranslateName(sub, i, OperandFormat.REGISTER);
+                        }
+                        // TODO 判断输入参数名
+                        builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args)).WriteLine()
+                            .WriteIncIndent().WriteFormat(";{0} {1} FNEW {2};",
+                                    chunk.CurrentIndex,
+                                    chunk.DebugInfo.LineNoItems.Length > chunk.CurrentIndex ?
+                                    chunk.DebugInfo.LineNoItems[chunk.CurrentIndex] : 0,
+                                    code.A);
+                        Decompile(builder, sub);
+                        builder.WriteOutdent().Write("end");
+                    }
+                    break;
+                case Operand.VARARG:
+                    {
+                        var begin = code.A;
+                        var count = code.C - 1;
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateIsSet(chunk, begin + i, OperandFormat.REGISTER));
+                        }
+                        builder.Write(" = ...");
+                    }
+                    break;
+                case Operand.GETTABUP:
+                    {
+                        var target = TranslateName(chunk, code.B, OperandFormat.UPVALUE);
+                        if (target.Equals("_env", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
+                                TranslateName(chunk, code.C, OperandFormat.CONSTANT_STRING));
+                            break;
+                        }
+                        builder.WriteFormat("{0} := {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            target,
+                            TranslateNotSet(chunk, code.C, OperandFormat.CONSTANT_STRING)
+                        );
+                    }
+                    break;
+                case Operand.SETTABUP:
+                    builder.WriteFormat("{0}[{1}] := {2}",
+                        TranslateNotSet(chunk, code.A, OperandFormat.UPVALUE),
+                        TranslateValue(chunk, code.B, OperandFormat.CONSTANT_STRING),
+                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER)
+                        );
+                    break;
+                
+                case Operand.GETTABLE:
+                    builder.WriteFormat("{0} := {1}[{2}]",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER)
+                        );
+                    break;
+       
+                case Operand.SETTABLE:
+                    builder.WriteFormat("{0}[{1}] := {2}",
+                        TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K)
+                        );
+                    break;
+
+                case Operand.NEWTABLE:
+                    var arraySize = code.C;
+                    if (code.K)
+                    {
+                        arraySize += GetNextOperand(chunk).Ax * (code.Extractor.C.Max + 1);
+                    }
+                    builder.WriteFormat("{0} := new table(array: {1}, dict: {2})", 
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        arraySize,
+                        code.B == 0 ? 0 : (1 << (code.B - 1)));
+                    break;
+                case Operand.GETI:
+                    builder.WriteFormat("{0} := {1}[{2}]",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        code.C);
+                    break;
+                case Operand.GETFIELD:
+                    builder.WriteFormat("{0} := {1}[{2}]",
+                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        TranslateValue(chunk, code.C, OperandFormat.CONSTANT_STRING));
+                    break;
+                case Operand.SETI:
+                    builder.WriteFormat("{0}[{1}] := {2}",
+                         TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                         code.B,
+                         TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K));
+                    break;
+                case Operand.SETFIELD:
+                    builder.WriteFormat("{0}[{1}] := {2}",
+                         TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                         TranslateValue(chunk, code.B, OperandFormat.CONSTANT_STRING),
+                         TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K));
+                    break;
+                case Operand.ADDI:
+                case Operand.SHRI:
+                    {
+                        builder.WriteFormat("{0} := {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                            TranslateOperation(code.Operand),
+                            code.SC);
+                    }
+                    break;
+                case Operand.SHLI:
+                    {
+                        builder.WriteFormat("{0} := {3} {2} {1}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                            TranslateOperation(code.Operand),
+                            code.SC);
+                    }
+                    break;
+                case Operand.ADDK:
+                case Operand.SUBK:
+                case Operand.MULK:
+                case Operand.MODK:
+                case Operand.POWK:
+                case Operand.DIVK:
+                case Operand.IDIVK:
+                case Operand.BANDK:
+                case Operand.BORK:
+                case Operand.BXORK:
+                    {
+                        builder.WriteFormat("{0} = {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                            TranslateOperation(code.Operand),
+                            TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K));
+                    }
+                    break;
+                
+                case Operand.MMBIN:
+                    break;
+                case Operand.MMBINI:
+                    break;
+                case Operand.MMBINK:
+                    break;
+                case Operand.TBC:
+                    break;
+                case Operand.EQK:
+                    builder.WriteFormat("if (({0} == {1}) ~= {2}) then pc++",
+                        TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER_K),
+                        code.K);
+                    break;
+                case Operand.EQI:
+                case Operand.LTI:
+                case Operand.LEI:
+                case Operand.GTI:
+                case Operand.GEI:
+                    builder.WriteFormat("if (({0} {1} {2}) ~= {3}) then pc++",
+                            TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateOperation(code.Operand),
+                            code.SB,
+                            code.K);
+                    break;
+                case Operand.VARARGPREP:
+                    break;
+                case Operand.FORLOOP:
+                    // update counters; if loop continues then pc-=Bx;
+                    break;
+                case Operand.FORPREP:
+                    //<check values and prepare counters>; if not to run then pc+= Bx + 1;
+                    break;
+                case Operand.TFORLOOP:
+                    builder.WriteFormat("if {0} ~= nil then {{ {1}={0}; pc -= {2} }}",
+                        TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                        code.Bx
+                        );
+                    break;
+                case Operand.TFORPREP:
+                    // create upvalue for R[A + 3]; pc+=Bx
+                    break;
+                case Operand.TFORCALL:
+                    {
+                        var begin = code.A + 4;
+                        var count = code.C;
+                        for (var i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.Write(", ");
+                            }
+                            builder.Write(TranslateIsSet(chunk, begin + 1, OperandFormat.REGISTER));
+                        }
+                        builder.WriteFormat(" := {0}({1}, {2})",
+                            TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateNotSet(chunk, code.A + 1, OperandFormat.REGISTER),
+                            TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER)
+                            );
+                    }
+                    break;
+                case Operand.EXTRAARG:
+                    break;
             }
-            return [.. attr.Operands.Select(i => Translate(chunk, code, i))];
         }
 
-        private static string Translate(LuaChunk chunk, OperandCode code, OperandFormat format)
+        private string TranslateIsSet(LuaChunk chunk, int value, OperandFormat format)
         {
-            var attr = OperandExtractor.GetAttribute(format);
-            if (attr is null)
+            var res = TranslateValue(chunk, value, format);
+            Remove(res);
+            if (format == OperandFormat.FUNCTION && TryGetLocal(chunk, value, out var fn))
             {
-                return string.Empty;
+                return fn;
             }
-            return Translate(chunk, code, attr);
+            return res;
         }
-        private static string Translate(LuaChunk chunk, OperandCode code, OperandFieldAttribute attr)
+
+
+        private string TranslateNotSet(LuaChunk chunk, int value, OperandFormat format)
         {
-            var field = attr.Field switch
+            var res = TranslateValue(chunk, value, format);
+            if (format is OperandFormat.REGISTER or OperandFormat.REGISTER_K)
             {
-                OperandField.A => code.Extractor.A,
-                OperandField.B => code.Extractor.B,
-                OperandField.C => code.Extractor.C,
-                OperandField.k => code.Extractor.K,
-                OperandField.Ax => code.Extractor.Ax,
-                OperandField.sJ => code.Extractor.SJ,
-                OperandField.Bx => code.Extractor.Bx,
-                OperandField.sBx => code.Extractor.SBx,
-                OperandField.x => code.Extractor.X,
-                _ => throw new NotImplementedException(),
-            };
-            var val = field.Extract(code.Codepoint);
-            return attr.Format switch
-            {
-                OperandFieldFormat.RAW or OperandFieldFormat.IMMEDIATE_INTEGER
-                or OperandFieldFormat.IMMEDIATE_FLOAT => val.ToString() ?? string.Empty,
-                OperandFieldFormat.REGISTER => $"r{val}",
-                OperandFieldFormat.UPVALUE => $"u{val}",
-                OperandFieldFormat.REGISTER_K => code.Extractor.IsK(val) ? $"k{code.Extractor.DecodeK(val)}" : $"r{val}",
-                OperandFieldFormat.REGISTER_K54 => code.K ? $"k{val}" : $"r{val}",
-                OperandFieldFormat.CONSTANT or OperandFieldFormat.CONSTANT_INTEGER or OperandFieldFormat.CONSTANT_STRING => TranslateConstant(chunk.ConstantItems[val]),
-                OperandFieldFormat.FUNCTION => $"f{val}",
-                OperandFieldFormat.IMMEDIATE_SIGNED_INTEGER => (val - field.Max / 2).ToString(),
-                OperandFieldFormat.JUMP => (val + attr.Offset).ToString(),
-                OperandFieldFormat.JUMP_NEGATIVE => (-val).ToString(),
-                _ => throw new NotImplementedException(),
-            };
+                if (TryGet(res, out var fn))
+                {
+                    return fn;
+                }
+                if (TryGetLocal(chunk, value, out fn))
+                {
+                    return fn;
+                }
+            }
+            return res;
         }
+
 
         private static string TranslateConstant(LuaConstant constant)
         {
@@ -81,32 +568,52 @@ namespace ZoDream.LuaDecompiler
             }
             return null;
         }
+        private static bool TryGetLocal(LuaChunk chunk, int index, [NotNullWhen(true)] out string? varName)
+        {
+            if (chunk.DebugInfo.LocalItems.Length > index)
+            {
+                var item = chunk.DebugInfo.LocalItems[index];
+                var current = 0UL;
+                current = chunk.CurrentIndex >= chunk.DebugInfo.AbsoluteLineItems.Length ? 0 : chunk.DebugInfo.AbsoluteLineItems[Math.Max(chunk.CurrentIndex, 0)].ProgramCounter;
+                //for (int i = 0; i <= chunk.CurrentIndex; i++)
+                //{
+                //    current += chunk.DebugInfo.AbsoluteLineItems[i].ProgramCounter;
+                //}
+                if (item.StartPc < current && item.EndPc > current)
+                {
+                    varName = chunk.DebugInfo.LocalItems[index].Name;
+                    return true;
+                }
+            }
+            varName = null;
+            return false;
+        }
         private static string TranslateOperation(Operand op)
         {
             return op switch
             {
-                Operand.ADD or Operand.ADDK or Operand.ADD54 or Operand.ADDI => "+",
-                Operand.SUB or Operand.SUBK or Operand.SUB54 => "-",
-                Operand.MUL or Operand.MULK or Operand.MUL54 => "*",
-                Operand.DIV or Operand.DIVK or Operand.DIV54 => "/",
-                Operand.MOD or Operand.MODK or Operand.MOD54 => "%",
-                Operand.POW or Operand.POWK or Operand.POW54 => "^",
-                Operand.IDIV or Operand.IDIVK or Operand.IDIV54 => "//",
-                Operand.BAND or Operand.BANDK or Operand.BAND54 => "&",
-                Operand.BOR or Operand.BORK or Operand.BOR54 => "|",
-                Operand.BXOR or Operand.BXORK or Operand.BXOR54 => "~",
-                Operand.SHL or Operand.SHL54 => "<<",
-                Operand.SHR or Operand.SHR54 => ">>",
-                Operand.CONCAT or Operand.CONCAT54 => "..",
+                Operand.ADD or Operand.ADDK or Operand.ADDI => "+",
+                Operand.SUB or Operand.SUBK => "-",
+                Operand.MUL or Operand.MULK => "*",
+                Operand.DIV or Operand.DIVK => "/",
+                Operand.MOD or Operand.MODK => "%",
+                Operand.POW or Operand.POWK => "^",
+                Operand.IDIV or Operand.IDIVK => "//",
+                Operand.BAND or Operand.BANDK => "&",
+                Operand.BOR or Operand.BORK => "|",
+                Operand.BXOR or Operand.BXORK => "~",
+                Operand.SHL => "<<",
+                Operand.SHR => ">>",
+                Operand.CONCAT => "..",
 
                 Operand.UNM => "-",
                 Operand.NOT => "not ",
                 Operand.LEN => "#",
                 Operand.BNOT => "~",
 
-                Operand.EQ or Operand.EQ54 or Operand.EQK or Operand.EQI => "==",
-                Operand.LE or Operand.LE54 or Operand.LEI => "<=",
-                Operand.LT or Operand.LT54 or Operand.LTI => "<",
+                Operand.EQ or Operand.EQK or Operand.EQI => "==",
+                Operand.LE or Operand.LEI => "<=",
+                Operand.LT or Operand.LTI => "<",
                 Operand.GTI => ">",
                 Operand.GEI => ">=",
                 _ => throw new NotImplementedException(),
@@ -133,6 +640,7 @@ namespace ZoDream.LuaDecompiler
         }
 
 
+        
         private static OperandCode? GetNextOperand(LuaChunk chunk)
         {
             if (chunk.MoveNext())
@@ -142,540 +650,30 @@ namespace ZoDream.LuaDecompiler
             return null;
         }
 
-        private void Translate(ICodeWriter builder, LuaChunk chunk, OperandCode code)
+        private static string TranslateValue(LuaChunk chunk, int val, OperandFormat format)
         {
-            var extractor = code.Extractor;
-            var fieldItems = Translate(chunk, code);
-            switch (code.Operand)
+            return format switch
             {
-                case Operand.MOVE:
-                    builder.Write(fieldItems[0]).Write(" = ").Write(fieldItems[1]);
-                    break;
-                case Operand.LOADI:
-                    builder.Write(fieldItems[0]).Write(" = ").Write(fieldItems[1]);
-                    break;
-                case Operand.LOADF:
-                    builder.Write(fieldItems[0]).Write(" = ").Write(fieldItems[1]);
-                    break;
-                case Operand.LOADK:
-                    builder.Write(fieldItems[0]).Write(" = ").Write(fieldItems[1]);
-                    break;
-                case Operand.LOADBOOL:
-                    builder.Write(fieldItems[0]).Write(" = ").Write(code.B != 0 ? "true" : "false");
-                    break;
-                case Operand.LFALSESKIP:
-                case Operand.LOADFALSE:
-                    builder.Write(fieldItems[0]).Write(" = false");
-                    break;
-                case Operand.LOADTRUE:
-                    builder.Write(fieldItems[0]).Write(" = true");
-                    break;
-                
-                case Operand.LOADKX:
-                    builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(chunk.ConstantItems[GetNextOperand(chunk)!.Ax]);
-                    break;
-                case Operand.LOADNIL:
-                    for (int i = code.A; i <= code.B; i++)
-                    {
-                        builder.Write($"r{i}").Write(" = nil");
-                    }
-                    break;
-                case Operand.LOADNIL52:
-                    for (int i = 0; i <= code.B; i++)
-                    {
-                        builder.Write($"r{code.A + i}").Write(" = nil");
-                    }
-                    break;
-                case Operand.GETUPVAL:
-                    builder.Write(fieldItems[0]).Write(" = _ENV[").Write(fieldItems[1]).Write(']');
-                    break;
-                case Operand.GETGLOBAL:
-                    builder.Write(fieldItems[0]).Write(" = _G[").Write(fieldItems[1]).Write(']');
-                    break;
-                case Operand.SETGLOBAL:
-                    builder.Write("_G[").Write(fieldItems[0]).Write("] = ")
-                        .Write(fieldItems[1]);
-                    break;
-                case Operand.SETUPVAL:
-                    builder.Write("_ENV[").Write(fieldItems[0]).Write("] = ")
-                        .Write(fieldItems[1]);
-                    break;
-                case Operand.SELF:
-                    builder.Write($"r{code.A + 1}").Write(" = ")
-                        .Write($"r{code.B}");
-                    builder.Write($"r{code.A}").Write(" = ")
-                        .Write($"r{code.C}"); // c table ref
-                    break;
-                case Operand.SELF54:
-                    builder.Write($"r{code.A + 1}").Write(" = ")
-                        .Write($"r{code.B}");
-                    builder.Write($"r{code.A}").Write(" = ")
-                        .Write($"r{code.C}"); // c table ref
-                    break;
-                case Operand.ADD:
-                case Operand.SUB:
-                case Operand.MUL:
-                case Operand.DIV:
-                case Operand.MOD:
-                case Operand.POW:
-                case Operand.IDIV:
-                case Operand.BAND:
-                case Operand.BOR:
-                case Operand.BXOR:
-                case Operand.SHL:
-                case Operand.SHR:
+                OperandFormat.RAW or OperandFormat.IMMEDIATE_INTEGER => val.ToString() ?? string.Empty,
+                OperandFormat.IMMEDIATE_FLOAT => BitConverter.ToSingle(BitConverter.GetBytes(val)).ToString(),
+                OperandFormat.REGISTER or OperandFormat.REGISTER_K => $"r{val}",
+                OperandFormat.UPVALUE => chunk.DebugInfo.UpValueNameItems.Length > val ? chunk.DebugInfo.UpValueNameItems[val] : $"u{val}",
+                OperandFormat.CONSTANT or OperandFormat.CONSTANT_INTEGER 
+                or OperandFormat.CONSTANT_STRING => TranslateConstant(chunk.ConstantItems[val]),
+                OperandFormat.FUNCTION => $"f{val}",
+                OperandFormat.JUMP_NEGATIVE => (-val).ToString(),
+                OperandFormat.JUMP => val.ToString(),
+                _ => throw new NotImplementedException(),
+            };
+        }
 
-                case Operand.EQ:
-                case Operand.LE:
-                case Operand.LT:
-                    builder.WriteFormat("{0} = {1} {2} {3}",
-                        fieldItems[0], fieldItems[1], TranslateOperation(code.Operand), fieldItems[2]);
-                    break;
-                case Operand.ADD54:
-                case Operand.SUB54:
-                case Operand.MUL54:
-                case Operand.DIV54:
-                case Operand.MOD54:
-                case Operand.POW54:
-                case Operand.IDIV54:
-                case Operand.BAND54:
-                case Operand.BOR54:
-                case Operand.BXOR54:
-                case Operand.SHL54:
-                case Operand.SHR54:
-                    builder.WriteFormat("{0} = {1} {2} {3}", 
-                        fieldItems[0], GetLocalName(chunk, code.B) ?? fieldItems[1],
-                        TranslateOperation(code.Operand),
-                        GetLocalName(chunk, code.C) ?? fieldItems[2]);
-                    break;
-                case Operand.UNM:
-                case Operand.NOT:
-                case Operand.LEN:
-                case Operand.BNOT:
-                    builder.WriteFormat("{0} = {1}{2}", fieldItems[0], TranslateOperation(code.Operand), fieldItems[1]);
-                    break;
-                case Operand.CONCAT:
-                    builder.Write(fieldItems[0]).Write(" = ");
-                    for (var i = 0; i <= code.C - code.B; i++)
-                    {
-                        if (i > 0)
-                        {
-                            builder.Write(" .. ");
-                        }
-                        builder.Write($"r{code.B + i}");
-                    }
-                    break;
-                case Operand.CONCAT54:
-                    builder.Write(fieldItems[0]).Write(" = ");
-                    for (var i = 0; i <= code.B; i++)
-                    {
-                        if (i > 0)
-                        {
-                            builder.Write(" .. ");
-                        }
-                        builder.Write($"r{code.A + i}");
-                    }
-                    break;
-                case Operand.JMP:
-                    builder.Write("goto ").Write(fieldItems[0]);
-                    break;
-                case Operand.JMP54:
-                    break;
-                case Operand.JMP52:
-                    break;
-                case Operand.TEST:
-                    break;
-                case Operand.TEST50:
-                    break;
-                case Operand.TEST54:
-                    break;
-                case Operand.TESTSET:
-                    break;
-                case Operand.TESTSET54:
-                    break;
-               
-                case Operand.CALL:
-                    {
-                        var b = code.B == 0 ? code.Codepoint - code.A : code.B;
-                        var c = code.C == 0 ? code.Codepoint - code.A + 1 : code.C;
-                        if (c == 2)
-                        {
-                            if (code.C >= 3 || code.C == 0)
-                            {
-                                for (var i = 0; i <= b - 2; i++)
-                                {
-                                    if (i > 0)
-                                    {
-                                        builder.Write(", ");
-                                    }
-                                    builder.Write($"r{code.A + i}");
-                                }
-                            } else
-                            {
-                                builder.Write(fieldItems[0]);
-                            }
-                            builder.Write(" = ");
-                        }
-                        builder.Write(GetLocalName(chunk, code.A) ?? fieldItems[0])
-                            .Write('(');
-                        for (var i = 1; i < b; i++)
-                        {
-                            if (i > 1)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write($"r{code.A + i}");
-                        }
-                        builder.Write(')');
-                        //if (c == 1)
-                        //{
-                        //    builder.Write("()");
-                        //}
-                    }
-                    break;
-                case Operand.TAILCALL:
-                case Operand.TAILCALL54:
-                    {
-                        var b = code.B == 0 ? code.Codepoint - code.A : code.B;
-                        builder.Write("return ")
-                            .Write(GetLocalName(chunk, code.A) ?? fieldItems[0])
-                            .Write('(');
-                        for (var i = 1; i < b; i++)
-                        {
-                            if (i > 1)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write($"r{code.A + i}");
-                        }
-                        builder.Write(')');
-                    }
-                    break;
-                case Operand.RETURN:
-                case Operand.RETURN54:
-                    {
-                        var b = code.B == 0 ? code.Codepoint - code.A + 1 : code.B;
-                        builder.Write("return ");
-                        for (var i = 0; i <= b - 2; i++)
-                        {
-                            if (i > 1)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write($"r{code.A + i}");
-                        }
-                    }
-                    break;
-                case Operand.RETURN0:
-                    builder.Write("return 0");
-                    break;
-                case Operand.RETURN1:
-                    builder.Write("return ").Write(fieldItems[0]);
-                    break;
-                case Operand.SETLIST:
-                    {
-                        var stack = code.A;
-                        var count = code.B == 0 ? code.Codepoint - code.A - 1 : code.B;
-                        var offset = 
-                            (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
-                        for (int i = 1; i < count; i++)
-                        {
-                            builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
-                        }
-                    }
-                    break;
-                case Operand.SETLIST50:
-                    {
-                        var stack = code.A;
-                        var count = 1 + code.Bx % 32;
-                        var offset = code.Bx - code.Bx % 32;
-                        for (int i = 1; i < count; i++)
-                        {
-                            builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
-                        }
-                    }
-                    break;
-                case Operand.SETLIST52:
-                    {
-                        var stack = code.A;
-                        var count = 1 + code.Bx % 32;
-                        var offset = (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
-                        for (int i = 1; i < count; i++)
-                        {
-                            builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
-                        }
-                    }
-                    break;
-                case Operand.SETLIST54:
-                    {
-                        var c = code.C;
-                        if (code.K)
-                        {
-                            c += GetNextOperand(chunk).Ax * (code.Extractor.C.Max + 1);
-                        }
-                        var stack = code.A;
-                        var count = 1 + code.Bx % 32;
-                        var offset = (c - 1) % 50;
-                        for (int i = 1; i < count; i++)
-                        {
-                            builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
-                        }
-                    }
-                    break;
-                case Operand.SETLISTO:
-                    {
-                        var stack = code.A;
-                        var count = code.Codepoint - code.A - 1;
-                        var offset = code.Bx - code.Bx % 32;
-                        for (int i = 1; i < count; i++)
-                        {
-                            builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
-                        }
-                    }
-                    break;
-                case Operand.CLOSE:
-                    break;
-                case Operand.CLOSURE:
-                    builder.Write(fieldItems[0]).Write(" = ");
-                    Decompile(builder, chunk.PrototypeItems[code.Bx]);
-                    break;
-                case Operand.VARARG:
-                    {
-                        var multiple = code.B != 2;
-                        var b = code.B == 0 ? code.Codepoint - code.A + 1 : code.B;
-                        for (int i = 0; i <= b - 2; i++)
-                        {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write($"r{code.A + i}");
-                        }
-                        builder.Write(" = ").Write(multiple ? "..." : "(...)");
-                    }
-                    break;
-                case Operand.VARARG54:
-                    {
-                        var multiple = code.C != 2;
-                        var c = code.C == 0 ? code.Codepoint - code.A + 1 : code.B;
-                        for (int i = 0; i <= c - 2; i++)
-                        {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write($"r{code.A + i}");
-                        }
-                        builder.Write(" = ").Write(multiple ? "..." : "(...)");
-                    }
-                    break;
-                case Operand.GETTABUP:
-                    builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(fieldItems[1]).Write("[").Write(code.C).Write("]");
-                    break;
-                case Operand.SETTABUP:
-                    builder.Write(fieldItems[0]).Write("[").Write(code.B).Write("]").Write(" = ")
-                        .Write(fieldItems[2]);
-                    break;
-                
-                case Operand.GETTABLE:
-                    builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(fieldItems[1]).Write("[").Write(fieldItems[2]).Write("]");
-                    break;
-       
-                case Operand.SETTABLE:
-                    break;
-
-                case Operand.NEWTABLE:
-                    builder.Write(fieldItems[0])
-                        .Write(" = new table( array: ")
-                        .Write(code.B)
-                        .Write(", dict: ")
-                        .Write(code.C).Write(')');
-                    break;
-                case Operand.NEWTABLE50:
-                    builder.Write(fieldItems[0])
-                        .Write(" = new table( array: ")
-                        .Write(code.B)
-                        .Write(", dict: ")
-                        .Write(code.C == 0 ? 0 : 1 << code.C).Write(')');
-                    break;
-                case Operand.NEWTABLE54:
-                    {
-                        var arraySize = code.C;
-                        if (code.K)
-                        {
-                            arraySize += GetNextOperand(chunk).Ax * (extractor.C.Max + 1);
-                        }
-                        builder.Write(fieldItems[0])
-                            .Write(" = new table( array: ")
-                            .Write(arraySize)
-                            .Write(", dict: ")
-                            .Write(code.B == 0 ? 0 : (1 << (code.B - 1))).Write(')');
-                    }
-                    break;
-            
-                
-                
-               
-                case Operand.GETTABUP54:
-                    break;
-                case Operand.GETTABLE54:
-                    break;
-                case Operand.GETI:
-                    builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(fieldItems[1]).Write("[").Write(code.C).Write("]");
-                    break;
-                case Operand.GETFIELD:
-                    builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(fieldItems[1]).Write("[").Write(fieldItems[2]).Write("]");
-                    break;
-                case Operand.SETTABUP54:
-                    break;
-                case Operand.SETTABLE54:
-                    break;
-                case Operand.SETI:
-                    builder.Write(fieldItems[0]).Write("[").Write(code.B).Write("]").Write(" = ")
-                        .Write(fieldItems[2]);
-                    break;
-                case Operand.SETFIELD:
-                    builder.Write(fieldItems[0]).Write("[").Write(fieldItems[1])
-                        .Write("]").Write(" = ")
-                        .Write(fieldItems[2]);
-                    break;
-                case Operand.ADDI:
-                    {
-                        var next = GetNextOperand(chunk);
-                        var op = TranslateOperation(next.C);
-                        var immediate = code.SC;
-                        var swap = false;
-                        if (next.K)
-                        {
-                            swap = true;
-                        } else if (op == "-")
-                        {
-                            immediate = -immediate;
-                        }
-                        builder.Write(fieldItems[0])
-                            .Write(" = ")
-                            .Write(swap ? immediate : $"r{code.B}")
-                            .Write(op)
-                            .Write(!swap ? immediate : $"r{code.B}");
-                    }
-                    break;
-                case Operand.SHRI:
-                    {
-                        var next = GetNextOperand(chunk);
-                        var op = TranslateOperation(next.C);
-                        var immediate = code.SC;
-                        var swap = false;
-                        if (next.K)
-                        {
-                            swap = true;
-                        }
-                        else if (op == "<<")
-                        {
-                            immediate = -immediate;
-                        }
-                        builder.Write(fieldItems[0])
-                            .Write(" = ")
-                            .Write(swap ? immediate : $"r{code.B}")
-                            .Write(op)
-                            .Write(!swap ? immediate : $"r{code.B}");
-                    }
-                    break;
-                case Operand.SHLI:
-                    {
-                        builder.Write(fieldItems[0])
-                            .Write(" = ")
-                            .Write(code.SC)
-                            .Write(" << ")
-                            .Write($"r{code.B}");
-                    }
-                    break;
-                case Operand.ADDK:
-                case Operand.SUBK:
-                case Operand.MULK:
-                case Operand.MODK:
-                case Operand.POWK:
-                case Operand.DIVK:
-                case Operand.IDIVK:
-                case Operand.BANDK:
-                case Operand.BORK:
-                case Operand.BXORK:
-                    {
-                        var swap = GetNextOperand(chunk).K;
-                        builder.WriteFormat("{0} = {1} {2} {3}", 
-                            fieldItems[0], 
-                            swap ? chunk.ConstantItems[code.C].Value : $"r{code.B}",
-                            TranslateOperation(code.Operand),
-                            !swap ? chunk.ConstantItems[code.C].Value : $"r{code.B}");
-                    }
-                    break;
-                
-                case Operand.MMBIN:
-                    break;
-                case Operand.MMBINI:
-                    break;
-                case Operand.MMBINK:
-                    break;
-                
-                case Operand.TBC:
-                    break;
-                
-                case Operand.EQ54:
-                    break;
-                case Operand.LT54:
-                    break;
-                case Operand.LE54:
-                    break;
-                case Operand.EQK:
-                    break;
-                case Operand.EQI:
-                    break;
-                case Operand.LTI:
-                    break;
-                case Operand.LEI:
-                    break;
-                case Operand.GTI:
-                    break;
-                case Operand.GEI:
-                    break;
-        
-                case Operand.FORLOOP54:
-                    break;
-                case Operand.FORPREP54:
-                    break;
-                case Operand.TFORPREP54:
-                    break;
-                case Operand.TFORCALL54:
-                    break;
-                case Operand.TFORLOOP54:
-                    break;
-                case Operand.VARARGPREP:
-                    break;
-                case Operand.EXTRABYTE:
-                    break;
-                case Operand.DEFAULT:
-                    break;
-                case Operand.DEFAULT54:
-                    break;
-                case Operand.FORLOOP:
-                    break;
-                case Operand.FORPREP:
-                    break;
-                case Operand.TFORLOOP:
-                    break;
-                case Operand.TFORPREP:
-                    break;
-                case Operand.TFORCALL:
-                    break;
-                case Operand.TFORLOOP52:
-                    break;
-                case Operand.EXTRAARG:
-                    break;
+        private static string TranslateName(LuaChunk chunk, int val, OperandFormat format)
+        {
+            if (format == OperandFormat.CONSTANT_STRING)
+            {
+                return chunk.ConstantItems[val].Value.ToString() ?? string.Empty;
             }
+            return TranslateValue(chunk, val, format);
         }
     }
 }
