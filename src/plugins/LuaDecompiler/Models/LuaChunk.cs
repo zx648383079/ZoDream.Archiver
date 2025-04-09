@@ -23,5 +23,21 @@ namespace ZoDream.LuaDecompiler.Models
 
         public LuaDebugInfo DebugInfo { get; internal set; } = new();
 
+
+        #region MoveCursor
+        public int CurrentIndex { get; private set; } = -1;
+        public ILanguageOpcode CurrentOpcode => OpcodeItems[CurrentIndex];
+        public bool CanMoveNext => CurrentIndex < OpcodeItems.Length - 1;
+        public bool MoveNext()
+        {
+            if (!CanMoveNext)
+            {
+                return false;
+            }
+            CurrentIndex++;
+            return true;
+        }
+        #endregion
+
     }
 }

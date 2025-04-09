@@ -39,7 +39,7 @@ namespace ZoDream.LuaDecompiler
                     reader.ReadBytes(reader.Read7BitEncodedInt()));
             }
             var extractor = new JitOperandExtractor(data.Header.Version);
-            var items = new Queue<LuaChunk>();
+            var items = new Stack<LuaChunk>();
             while (true)
             {
                 var chunk = ReadChunk(reader, data.Header, items, extractor);
@@ -47,9 +47,9 @@ namespace ZoDream.LuaDecompiler
                 {
                     break;
                 }
-                items.Enqueue(chunk);
+                items.Push(chunk);
             }
-            if (!items.TryDequeue(out var item))
+            if (!items.TryPop(out var item))
             {
                 return data;
             }
@@ -61,7 +61,7 @@ namespace ZoDream.LuaDecompiler
         private LuaChunk? ReadChunk(
             BundleBinaryReader reader, 
             LuaHeader header,
-            Queue<LuaChunk> protoItems,
+            Stack<LuaChunk> protoItems,
             JitOperandExtractor extractor)
         {
             var size = reader.Read7BitEncodedInt();
@@ -70,11 +70,13 @@ namespace ZoDream.LuaDecompiler
             {
                 return null;
             }
-            var chunk = new LuaChunk();
-            chunk.Flags = new LuaProtoFlags(reader.ReadByte());
-            chunk.ParameterCount = reader.ReadByte();
-            chunk.MaxStack = reader.ReadByte(); // framesize
-            chunk.UpValueCount = reader.ReadByte();
+            var chunk = new LuaChunk
+            {
+                Flags = new LuaProtoFlags(reader.ReadByte()),
+                ParameterCount = reader.ReadByte(),
+                MaxStack = reader.ReadByte(), // framesize
+                UpValueCount = reader.ReadByte()
+            };
             var constantsCount = reader.Read7BitEncodedInt();
             var numericConstantsCount = reader.Read7BitEncodedInt();
             var instructionsCount = reader.Read7BitEncodedInt();
@@ -120,7 +122,7 @@ namespace ZoDream.LuaDecompiler
                     case BCDUMP_KGC_TAB:
                         return ReadTable(reader, header);
                     case BCDUMP_KGC_CHILD:
-                        if (protoItems.TryDequeue(out var proto))
+                        if (protoItems.TryPop(out var proto))
                         {
                             prototypeItems.Add(proto);
                             return new LuaConstant(LuaConstantType.Proto, prototypeItems.Count - 1);
@@ -133,13 +135,12 @@ namespace ZoDream.LuaDecompiler
                 }
             }).Reverse().ToArray();
             chunk.NumberConstantItems = reader.ReadArray(numericConstantsCount, (_, _) => {
-                var isNum = (reader.ReadByte() & 0x1) != 0;
-                var lo = (uint)reader.Read7BitEncodedInt();
+                var (isNum, lo) = Read7BitEncodedUInt(reader);
                 if (!isNum)
                 {
-                    return new LuaConstant(LuaConstantType.Number, lo);
+                    return new LuaConstant(LuaConstantType.Number, ToInt64(lo));
                 }
-                return new LuaConstant(LuaConstantType.Number, CombineFloat(lo, (uint)reader.Read7BitEncodedInt(), header));
+                return new LuaConstant(LuaConstantType.Number, CombineFloat((uint)lo, (uint)reader.Read7BitEncodedInt(), header));
             });
             chunk.PrototypeItems = [..prototypeItems];
             if (debugInfoSize > 0)
@@ -180,6 +181,40 @@ namespace ZoDream.LuaDecompiler
             }
             reader.BaseStream.Seek(nextPosition, SeekOrigin.Begin);
             return chunk;
+        }
+
+
+        private static long ToInt64(ulong val)
+        {
+            if ((val & 0x80000000) != 0)
+            {
+                return - (long)(0x100000000UL - val);
+            }
+            return (long)val;
+        }
+ 
+        private static (bool, ulong) Read7BitEncodedUInt(BinaryReader reader)
+        {
+            var b = reader.ReadByte();
+            var isNum = (b & 0x1) != 0;
+            var val = (ulong)b >> 1;
+            if (val < 0x40)
+            {
+                return (isNum, val);
+            }
+            var bitShift = -1;
+            val &= 0x3f;
+            while (true)
+            {
+                b = reader.ReadByte();
+                bitShift += 7;
+                val |= (ulong)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return (isNum, val);
         }
 
         private LuaConstant ReadTable(BundleBinaryReader reader, LuaHeader header)

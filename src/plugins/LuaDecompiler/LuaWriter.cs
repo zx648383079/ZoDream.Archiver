@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Language;
@@ -40,15 +41,14 @@ namespace ZoDream.LuaDecompiler
 
         private void Decompile(ICodeWriter writer, LuaChunk chunk)
         {
-            writer.Write(data.MainChunk.Name).Write(":")
-                .Write(chunk.LineDefined).Write("-")
-                .Write(chunk.LastLineDefined).Write(": ")
-                .Write(chunk.ParameterCount).Write(chunk.Flags?.IsVariadic == true ? "+" : string.Empty)
-                .Write(" args, ").Write(chunk.UpValueCount).Write(" upvalues, ")
-                .Write(chunk.MaxStack)
-                .WriteLine(" slots");
+            writer.WriteFormat("{0}:{1}-{2}: {3} {4} args, {5} upvalues, {6} slots",
+                data.MainChunk.Name,
+                chunk.LineDefined,
+                chunk.LastLineDefined, chunk.ParameterCount, 
+                chunk.Flags?.IsVariadic == true ? "+" : string.Empty,
+                chunk.UpValueCount, chunk.MaxStack).WriteLine();
 
-            writer.WriteLine(";;;; constant tables ;;;;");
+            writer.WriteIndent().WriteLine(";;;; constant tables ;;;;");
             for (int i = 0; i < chunk.ConstantItems.Length; i++)
             {
                 var item = chunk.ConstantItems[i];
@@ -58,32 +58,21 @@ namespace ZoDream.LuaDecompiler
                 }
                 Translate(writer, i, (LuaConstantTable)item.Value);
             }
-            writer.WriteLine(";;;; instructions ;;;;");
-
-            var index = 0;
-            foreach (var item in chunk.OpcodeItems)
+            writer.WriteIndent().WriteLine(";;;; instructions ;;;;");
+            while (chunk.MoveNext())
             {
-                index++;
-                switch(item)
+                writer.WriteIndent();
+                var item = chunk.CurrentOpcode;
+                switch (item)
                 {
                     case JitOperandCode jit:
-                        if (jit.Operand == JitOperand.FNEW)
-                        {
-                            writer.Write(index).Write(" ").Write(chunk.DebugInfo.LineNoItems[index])
-                            .Write(" ")
-                            .Write("FNEW ").Write(jit.A).Write("  ").Write(jit.D).Write(" ; ");
-                            Decompile(writer, chunk.PrototypeItems[jit.D]);
-                        } 
-                        else
-                        {
-                            Translate(writer, chunk, index, jit);
-                        }
+                        Translate(writer, chunk, jit);
                         break;
                     case OperandCode code:
-                        Translate(writer, chunk, index, code);
+                        Translate(writer, chunk, code);
                         break;
                 }
-                writer.WriteLine();
+                writer.WriteLine($"        ; {item}");
             }
         }
 

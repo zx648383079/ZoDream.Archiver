@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Buffers.Binary;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using ZoDream.Shared.Models;
 
@@ -169,6 +170,50 @@ namespace ZoDream.Shared.IO
         {
             int length = ReadInt32();
             return ReadString(length);
+        }
+
+        public uint Read7BitEncodedUInt()
+        {
+            var val = (uint)ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = ReadByte();
+                bitShift += 7;
+                val |= (uint)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
+        }
+
+        public ulong Read7BitEncodedUInt64()
+        {
+            var val = (ulong)ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = ReadByte();
+                bitShift += 7;
+                val |= (ulong)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
         }
 
         public string ReadString(int length)

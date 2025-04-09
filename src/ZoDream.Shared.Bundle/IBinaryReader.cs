@@ -98,7 +98,10 @@ namespace ZoDream.Shared.Bundle
         /// <param name="alignment"></param>
         /// <returns></returns>
         public T AlignStream<T>(Func<IBundleBinaryReader, T> cb, int alignment = 4);
-        
+
+        public uint Read7BitEncodedUInt();
+
+        public ulong Read7BitEncodedUInt64();
         #endregion
         #region 设置获取一些已知信息
         public void Add(string name, object value);

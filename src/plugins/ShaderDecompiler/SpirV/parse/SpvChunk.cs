@@ -7,5 +7,6 @@ namespace ZoDream.ShaderDecompiler.SpirV
         public SpvOperandCode[] OpcodeItems { get; internal set; } = [];
 
         ILanguageOpcode[] ILanguageChunk.OpcodeItems => OpcodeItems;
+
     }
 }

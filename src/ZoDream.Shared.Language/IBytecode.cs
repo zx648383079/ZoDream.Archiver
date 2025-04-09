@@ -13,7 +13,6 @@
 
     public interface ILanguageChunk
     {
-
         public ILanguageOpcode[] OpcodeItems { get; }
     }
 

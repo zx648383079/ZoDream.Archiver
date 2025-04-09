@@ -10,5 +10,10 @@ namespace ZoDream.LuaDecompiler.Models
         public byte B { get; internal set; }
         public byte C { get; internal set; }
         public uint D { get; internal set; }
+
+        public override string ToString()
+        {
+            return $"{Operand}:{A},{B},{C},{D}";
+        }
     }
 }

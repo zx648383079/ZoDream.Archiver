@@ -1,8 +1,8 @@
-﻿using SharpCompress.Compressors.Xz;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -365,7 +365,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         var shapeChannel = mesh.m_Shapes.channels[i];
                         var blendShapeName = "blendShape." + shapeChannel.name;
                         var bytes = Encoding.UTF8.GetBytes(blendShapeName);
-                        _morphChannelNames[Crc32.Compute(bytes)] = blendShapeName;
+                        _morphChannelNames[Crc32.HashToUInt32(bytes)] = blendShapeName;
 
                         var node = _root.Meshes[FindNode(shapeChannel.name, nodeIndex)];
                         node.Weights ??= [];
@@ -1511,13 +1511,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             var name = FbxExporter.GetTransformPathByFather(m_Transform);
             var bytes = Encoding.UTF8.GetBytes(name);
-            _bonePathHash[Crc32.Compute(bytes)] = name;
+            _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
             int index;
             while ((index = name.IndexOf('/')) >= 0)
             {
                 name = name[(index + 1)..];
                 bytes = Encoding.UTF8.GetBytes(name);
-                _bonePathHash[Crc32.Compute(bytes)] = name;
+                _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
             }
             foreach (var pptr in m_Transform.m_Children)
             {

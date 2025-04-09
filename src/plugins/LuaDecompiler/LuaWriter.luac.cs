@@ -133,16 +133,16 @@ namespace ZoDream.LuaDecompiler
         }
 
 
-        private static OperandCode? GetNextOperand(LuaChunk chunk, int index)
+        private static OperandCode? GetNextOperand(LuaChunk chunk)
         {
-            if (chunk.OpcodeItems.Length > index)
+            if (chunk.MoveNext())
             {
-                return (OperandCode)chunk.OpcodeItems[index];
+                return (OperandCode)chunk.CurrentOpcode;
             }
             return null;
         }
 
-        private void Translate(ICodeWriter builder, LuaChunk chunk, int index, OperandCode code)
+        private void Translate(ICodeWriter builder, LuaChunk chunk, OperandCode code)
         {
             var extractor = code.Extractor;
             var fieldItems = Translate(chunk, code);
@@ -173,7 +173,7 @@ namespace ZoDream.LuaDecompiler
                 
                 case Operand.LOADKX:
                     builder.Write(fieldItems[0]).Write(" = ")
-                        .Write(chunk.ConstantItems[GetNextOperand(chunk, index + 1)!.Ax]);
+                        .Write(chunk.ConstantItems[GetNextOperand(chunk)!.Ax]);
                     break;
                 case Operand.LOADNIL:
                     for (int i = code.A; i <= code.B; i++)
@@ -378,7 +378,7 @@ namespace ZoDream.LuaDecompiler
                         var stack = code.A;
                         var count = code.B == 0 ? code.Codepoint - code.A - 1 : code.B;
                         var offset = 
-                            (code.C == 0 ? GetNextOperand(chunk, index + 1).Codepoint : code.C - 1) % 50;
+                            (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
                         for (int i = 1; i < count; i++)
                         {
                             builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
@@ -400,7 +400,7 @@ namespace ZoDream.LuaDecompiler
                     {
                         var stack = code.A;
                         var count = 1 + code.Bx % 32;
-                        var offset = (code.C == 0 ? GetNextOperand(chunk, index + 1).Codepoint : code.C - 1) % 50;
+                        var offset = (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
                         for (int i = 1; i < count; i++)
                         {
                             builder.Write($"r{stack}[{offset + i}] = r{stack + i}");
@@ -412,7 +412,7 @@ namespace ZoDream.LuaDecompiler
                         var c = code.C;
                         if (code.K)
                         {
-                            c += GetNextOperand(chunk, index + 1).Ax * (code.Extractor.C.Max + 1);
+                            c += GetNextOperand(chunk).Ax * (code.Extractor.C.Max + 1);
                         }
                         var stack = code.A;
                         var count = 1 + code.Bx % 32;
@@ -506,7 +506,7 @@ namespace ZoDream.LuaDecompiler
                         var arraySize = code.C;
                         if (code.K)
                         {
-                            arraySize += GetNextOperand(chunk, index + 1).Ax * (extractor.C.Max + 1);
+                            arraySize += GetNextOperand(chunk).Ax * (extractor.C.Max + 1);
                         }
                         builder.Write(fieldItems[0])
                             .Write(" = new table( array: ")
@@ -546,7 +546,7 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.ADDI:
                     {
-                        var next = GetNextOperand(chunk, index + 1);
+                        var next = GetNextOperand(chunk);
                         var op = TranslateOperation(next.C);
                         var immediate = code.SC;
                         var swap = false;
@@ -566,7 +566,7 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.SHRI:
                     {
-                        var next = GetNextOperand(chunk, index + 1);
+                        var next = GetNextOperand(chunk);
                         var op = TranslateOperation(next.C);
                         var immediate = code.SC;
                         var swap = false;
@@ -605,7 +605,7 @@ namespace ZoDream.LuaDecompiler
                 case Operand.BORK:
                 case Operand.BXORK:
                     {
-                        var swap = GetNextOperand(chunk, index + 1).K;
+                        var swap = GetNextOperand(chunk).K;
                         builder.WriteFormat("{0} = {1} {2} {3}", 
                             fieldItems[0], 
                             swap ? chunk.ConstantItems[code.C].Value : $"r{code.B}",
