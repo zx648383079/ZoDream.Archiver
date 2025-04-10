@@ -8,6 +8,7 @@ namespace ZoDream.LuaDecompiler
 {
     public partial class LuaWriter
     {
+        
         private void Translate(ICodeWriter builder, LuaChunk chunk, OperandCode code)
         {
             switch (code.Operand)
@@ -77,6 +78,10 @@ namespace ZoDream.LuaDecompiler
                     {
                         var begin = code.A;
                         var count = code.B;
+                        if (Version is LuaVersion.Lua51 or LuaVersion.Lua50)
+                        {
+                            count = code.B - code.A + 1;
+                        }
                         for (int i = 0; i <= count; i++)
                         {
                             if (i > 0)
@@ -116,15 +121,19 @@ namespace ZoDream.LuaDecompiler
                         );
                     break;
                 case Operand.SELF:
-                    builder.WriteFormat("{0} := {1}",
-                        TranslateName(chunk, code.A + 1, OperandFormat.REGISTER),
-                        TranslateValue(chunk, code.B, OperandFormat.REGISTER)
-                        ).WriteLine(true)
-                        .WriteFormat("{0} := {1}[{2}]",
-                            TranslateName(chunk, code.A, OperandFormat.REGISTER),
-                            TranslateValue(chunk, code.B, OperandFormat.REGISTER),
-                            TranslateValue(chunk, code.C, OperandFormat.CONSTANT_STRING)
-                        );
+                    {
+                        var c = TranslateValue(chunk, code.C, 
+                            Version is LuaVersion.Lua54Beta ? OperandFormat.CONSTANT_STRING : OperandFormat.REGISTER_K);
+                        builder.WriteFormat("{0} := {1}",
+                            TranslateName(chunk, code.A + 1, OperandFormat.REGISTER),
+                            TranslateValue(chunk, code.B, OperandFormat.REGISTER)
+                            ).WriteLine(true)
+                            .WriteFormat("{0} := {1}[{2}]",
+                                TranslateName(chunk, code.A, OperandFormat.REGISTER),
+                                TranslateValue(chunk, code.B, OperandFormat.REGISTER),
+                                c
+                            );
+                    }
                     break;
                 case Operand.ADD:
                 case Operand.SUB:
@@ -142,36 +151,45 @@ namespace ZoDream.LuaDecompiler
                 case Operand.EQ:
                 case Operand.LE:
                 case Operand.LT:
-                    builder.WriteFormat("{0} = {1} {2} {3}",
-                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER), 
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER));
+                    {
+                        var bcType = Version is LuaVersion.Lua53 or LuaVersion.Lua52 or LuaVersion.Lua51 or LuaVersion.Lua50 ?
+                            OperandFormat.REGISTER_K : OperandFormat.REGISTER;
+                        var b = TranslateNotSet(chunk, code.B, 
+                            bcType);
+                        var c = TranslateNotSet(chunk, code.C,
+                            bcType);
+                        builder.WriteFormat("{0} = {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b,
+                            TranslateOperation(code.Operand),
+                            c);
+                    }
                     break;
                 case Operand.UNM:
                 case Operand.NOT:
                 case Operand.LEN:
                 case Operand.BNOT:
-                    builder.WriteFormat("{0} = {1}{2}",
-                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER), 
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} = {1}{2}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            TranslateOperation(code.Operand),
+                            b);
+                    }
                     break;
                 case Operand.CONCAT:
                     {
-                        builder.Write(TranslateIsSet(chunk, code.A, OperandFormat.REGISTER))
-                        .Write(" = ");
                         var begin = code.A;
                         var count = code.B;
+                        var args = new string[count];
                         for (var i = 0; i < count; i++)
                         {
-                            if (i > 0)
-                            {
-                                builder.Write(" .. ");
-                            }
-                            builder.Write(
-                                TranslateValue(chunk, begin + i, OperandFormat.REGISTER));
+                            args[i] = TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER);
                         }
+                        builder.WriteFormat("{0} = {1}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            string.Join(" .. ", args));
+                        
                     }
                     break;
                 case Operand.JMP:
@@ -196,8 +214,16 @@ namespace ZoDream.LuaDecompiler
                 case Operand.CALL:
                     {
                         var fn = TranslateNotSet(chunk, code.A, OperandFormat.REGISTER);
-                        var begin = code.A;
-                        var count = code.C - 1;
+                        var begin = code.A + 1;
+                        var count = code.B - 1;
+                        var args = new string[count];
+                        for (var i = 0; i < count; i++)
+                        {
+                            args[i] = TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER);
+                        }
+
+                        begin = code.A;
+                        count = code.C - 1;
                         if (count > 0)
                         {
                             for (var i = 0; i < count; i++)
@@ -211,19 +237,7 @@ namespace ZoDream.LuaDecompiler
                             }
                             builder.Write(" = ");
                         }
-                        builder.Write(fn)
-                            .Write('(');
-                        begin = code.A + 1;
-                        count = code.B - 1;
-                        for (var i = 0; i < count; i++)
-                        {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write(TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER));
-                        }
-                        builder.Write(')');
+                        builder.WriteFormat("{0}({1})", fn, string.Join(", ", args));
                     }
                     break;
                 case Operand.TAILCALL:
@@ -242,6 +256,11 @@ namespace ZoDream.LuaDecompiler
                             builder.Write(TranslateNotSet(chunk, begin + i, OperandFormat.REGISTER));
                         }
                         builder.Write(')');
+                        if (TryMoveNext(chunk, Operand.RETURN, out var next) && next.B <= 1)
+                        {
+                            chunk.MoveNext();
+                        }
+                        TryMoveNext(chunk, Operand.RETURN0);
                     }
                     break;
                 case Operand.RETURN:
@@ -265,18 +284,38 @@ namespace ZoDream.LuaDecompiler
                 case Operand.RETURN1:
                     builder.Write("return ")
                         .Write(TranslateNotSet(chunk, code.A, OperandFormat.REGISTER));
+                    TryMoveNext(chunk, Operand.RETURN0);
                     break;
                 case Operand.SETLIST:
                     {
-                        var count = code.B == 0 ? code.Codepoint - code.A - 1 : code.B;
-                        var offset = 
-                            (code.C == 0 ? GetNextOperand(chunk).Codepoint : code.C - 1) % 50;
-                        for (int i = 1; i < count; i++)
+                        var begin = 1;
+                        var count = code.B;
+                        var lt = code.C;
+                        var rt = code.A;
+                        if (Version is LuaVersion.Lua54Beta)
                         {
+                            count = code.VB;
+                            lt = code.VC;
+                        }
+                        if (Version is LuaVersion.Lua50)
+                        {
+                            count = code.Bx % 32 + 1;
+                            lt = code.Bx - code.Bx % 32;
+                        }
+                        if (Version is LuaVersion.Lua53 or LuaVersion.Lua52 or LuaVersion.Lua51)
+                        {
+                            lt = (code.C - 1) * 50;
+                        }
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (i > 0)
+                            {
+                                builder.WriteLine(true);
+                            }
                             builder.WriteFormat("{0}[{1}] = {2}",
                                 TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
-                                offset,
-                                TranslateNotSet(chunk, code.A + i, OperandFormat.REGISTER)
+                                lt + begin + i,
+                                TranslateNotSet(chunk, rt + begin + i, OperandFormat.REGISTER)
                             );
                         }
                     }
@@ -299,18 +338,26 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.CLOSURE:
                     {
+                        RemoveTemporary();
                         var fn = TranslateValue(chunk, code.A, OperandFormat.REGISTER);
-                        if (chunk.MoveNext())
+                        if (Version > LuaVersion.Lua53 && chunk.MoveNext())
                         {
                             var next = (OperandCode)chunk.CurrentOpcode;
                             Debug.Assert(next.Operand == Operand.SETTABUP);
-                            fn = chunk.ConstantItems[code.B].Value.ToString();
+                            Debug.Assert(next.C == code.A);
+                            fn = TranslateName(chunk, next.B, OperandFormat.CONSTANT_STRING);
                         }
                         var sub = chunk.PrototypeItems[code.Bx];
                         var args = new string[sub.ParameterCount];
+                        var begin = 0;
+                        if (Version is LuaVersion.Lua51 or LuaVersion.Lua50)
+                        {
+                            // sub = chunk
+                            begin = code.A;
+                        }
                         for (var i = 0; i < args.Length; i++)
                         {
-                            args[i] = TranslateName(sub, i, OperandFormat.REGISTER);
+                            args[i] = TranslateNotSet(sub, begin + i, OperandFormat.REGISTER);
                         }
                         // TODO 判断输入参数名
                         builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args)).WriteLine()
@@ -327,6 +374,13 @@ namespace ZoDream.LuaDecompiler
                     {
                         var begin = code.A;
                         var count = code.C - 1;
+                        if (Version is LuaVersion.Lua53 or LuaVersion.Lua52)
+                        {
+                            count = code.B - 1;
+                        } else if (Version is LuaVersion.Lua51 or LuaVersion.Lua50)
+                        {
+                            count = code.B;
+                        }
                         for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
@@ -341,39 +395,49 @@ namespace ZoDream.LuaDecompiler
                 case Operand.GETTABUP:
                     {
                         var target = TranslateName(chunk, code.B, OperandFormat.UPVALUE);
+                        var cType = Version is LuaVersion.Lua53 or LuaVersion.Lua52 ?
+                            OperandFormat.REGISTER_K : OperandFormat.CONSTANT_STRING;
                         if (target.Equals("_env", StringComparison.OrdinalIgnoreCase))
                         {
                             Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
-                                TranslateName(chunk, code.C, OperandFormat.CONSTANT_STRING));
+                                TranslateName(chunk, code.C, cType));
                             break;
                         }
+                        var c = TranslateNotSet(chunk, code.C, cType);
                         builder.WriteFormat("{0} := {1}[{2}]",
                             TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
                             target,
-                            TranslateNotSet(chunk, code.C, OperandFormat.CONSTANT_STRING)
+                            c
                         );
                     }
                     break;
                 case Operand.SETTABUP:
                     builder.WriteFormat("{0}[{1}] := {2}",
                         TranslateNotSet(chunk, code.A, OperandFormat.UPVALUE),
-                        TranslateValue(chunk, code.B, OperandFormat.CONSTANT_STRING),
+                        TranslateValue(chunk, code.B, Version is LuaVersion.Lua53 or LuaVersion.Lua52 ?
+                            OperandFormat.REGISTER_K : OperandFormat.CONSTANT_STRING),
                         TranslateNotSet(chunk, code.C, OperandFormat.REGISTER)
                         );
                     break;
                 
                 case Operand.GETTABLE:
-                    builder.WriteFormat("{0} := {1}[{2}]",
-                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.C, OperandFormat.REGISTER)
-                        );
+                    {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        var c = TranslateNotSet(chunk, code.C, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} := {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b,
+                            c
+                            );
+                    }
                     break;
        
                 case Operand.SETTABLE:
                     builder.WriteFormat("{0}[{1}] := {2}",
                         TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                        TranslateNotSet(chunk, code.B, 
+                            Version is LuaVersion.Lua53 or LuaVersion.Lua52 ? 
+                            OperandFormat.REGISTER_K : OperandFormat.REGISTER),
                         TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K)
                         );
                     break;
@@ -390,16 +454,22 @@ namespace ZoDream.LuaDecompiler
                         code.B == 0 ? 0 : (1 << (code.B - 1)));
                     break;
                 case Operand.GETI:
-                    builder.WriteFormat("{0} := {1}[{2}]",
-                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
-                        code.C);
+                    {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} := {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b,
+                            code.C);
+                    }
                     break;
                 case Operand.GETFIELD:
-                    builder.WriteFormat("{0} := {1}[{2}]",
-                        TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
-                        TranslateValue(chunk, code.C, OperandFormat.CONSTANT_STRING));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} := {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b,
+                            TranslateValue(chunk, code.C, OperandFormat.CONSTANT_STRING));
+                    }
                     break;
                 case Operand.SETI:
                     builder.WriteFormat("{0}[{1}] := {2}",
@@ -425,9 +495,10 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.SHLI:
                     {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
                         builder.WriteFormat("{0} := {3} {2} {1}",
                             TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                            TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                            b,
                             TranslateOperation(code.Operand),
                             code.SC);
                     }
@@ -443,11 +514,13 @@ namespace ZoDream.LuaDecompiler
                 case Operand.BORK:
                 case Operand.BXORK:
                     {
+                        var b = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
+                        var c = TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K);
                         builder.WriteFormat("{0} = {1} {2} {3}",
                             TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
-                            TranslateNotSet(chunk, code.B, OperandFormat.REGISTER),
+                            b,
                             TranslateOperation(code.Operand),
-                            TranslateNotSet(chunk, code.C, OperandFormat.REGISTER_K));
+                            c);
                     }
                     break;
                 
@@ -480,17 +553,44 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.FORLOOP:
                     // update counters; if loop continues then pc-=Bx;
+                    {
+                        var b = TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER);
+                        var c = TranslateNotSet(chunk, code.A + 1, OperandFormat.REGISTER);
+                        var a = TranslateIsSet(chunk, code.A, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} += {1}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b
+                            ).WriteLine(true);
+                        if (Version is LuaVersion.Lua50)
+                        {
+                            builder.WriteFormat("if {0} <?= {1} then pc+= {2}",
+                                a,
+                                c,
+                                code.SBx
+                                );
+                        } else
+                        {
+                            builder.WriteFormat("if {0} <?= {1} then {{ pc+= {2}; {3} = {0} }}",
+                                a,
+                                c,
+                                code.SBx,
+                                TranslateIsSet(chunk, code.A + 3, OperandFormat.REGISTER)
+                                );
+                        }
+                    }
                     break;
                 case Operand.FORPREP:
                     //<check values and prepare counters>; if not to run then pc+= Bx + 1;
+                    {
+                        var b = TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER);
+                        builder.WriteFormat("{0} -= {1}; pc += {2}",
+                            TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                            b, 
+                            code.SBx
+                            );
+                    }
                     break;
-                case Operand.TFORLOOP:
-                    builder.WriteFormat("if {0} ~= nil then {{ {1}={0}; pc -= {2} }}",
-                        TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER),
-                        TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
-                        code.Bx
-                        );
-                    break;
+              
                 case Operand.TFORPREP:
                     // create upvalue for R[A + 3]; pc+=Bx
                     break;
@@ -504,7 +604,7 @@ namespace ZoDream.LuaDecompiler
                             {
                                 builder.Write(", ");
                             }
-                            builder.Write(TranslateIsSet(chunk, begin + 1, OperandFormat.REGISTER));
+                            builder.Write(TranslateIsSet(chunk, begin + i, OperandFormat.REGISTER));
                         }
                         builder.WriteFormat(" := {0}({1}, {2})",
                             TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
@@ -513,8 +613,88 @@ namespace ZoDream.LuaDecompiler
                             );
                     }
                     break;
+                case Operand.TFORLOOP:
+                    {
+                        if (Version is LuaVersion.Lua51 or LuaVersion.Lua50)
+                        {
+                            var begin = code.A + 3;
+                            var count = code.C;
+                            if (Version is LuaVersion.Lua50)
+                            {
+                                begin = code.A + 2;
+                                count = code.C + 1;
+                            }
+                            for (var i = 0; i < count; i++)
+                            {
+                                if (i > 0)
+                                {
+                                    builder.Write(", ");
+                                }
+                                builder.Write(TranslateIsSet(chunk, begin + i, OperandFormat.REGISTER));
+                            }
+                            builder.WriteFormat(" := {0}({1}, {2})",
+                                TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                                TranslateNotSet(chunk, code.A + 1, OperandFormat.REGISTER),
+                                TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER)
+                                );
+                            if (Version is LuaVersion.Lua50)
+                            {
+                                builder.WriteFormat("if {0} ~= nil then pc++",
+                                    TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER)
+                                );
+                            } else
+                            {
+                                builder.WriteFormat("if {0} ~= nil then {1} = {0} else pc++",
+                                    TranslateNotSet(chunk, code.A + 3, OperandFormat.REGISTER),
+                                    TranslateNotSet(chunk, code.A + 2, OperandFormat.REGISTER)
+                                );
+                            }
+                        } else
+                        {
+                            var a = TranslateNotSet(chunk, code.A +
+                            (Version is LuaVersion.Lua53 or LuaVersion.Lua52 ? 1 : 2),
+                            OperandFormat.REGISTER);
+                            builder.WriteFormat("if {0} ~= nil then {{ {1}={0}; pc += {2} }}",
+                                a,
+                                TranslateNotSet(chunk, code.A, OperandFormat.REGISTER),
+                                Version is LuaVersion.Lua53 or LuaVersion.Lua52
+                                ? code.SBx : (-code.Bx)
+                            );
+                        }
+                    }
+                    break;
                 case Operand.EXTRAARG:
                     break;
+            }
+        }
+        /// <summary>
+        /// 查看下一个是否是，不移动指针
+        /// </summary>
+        /// <param name="chunk"></param>
+        /// <param name="op"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        private static bool TryMoveNext(LuaChunk chunk, Operand op, [NotNullWhen(true)] out OperandCode? next)
+        {
+            if (chunk.CanMoveNext && chunk.OpcodeItems[chunk.CurrentIndex + 1] is OperandCode res && res.Operand == op)
+            {
+                next = res;
+                return true;
+            }
+            next = null;
+            return false;
+        }
+
+        /// <summary>
+        /// 查看下一个是否是，是则移动指针
+        /// </summary>
+        /// <param name="chunk"></param>
+        /// <param name="op"></param>
+        private static void TryMoveNext(LuaChunk chunk, Operand op)
+        {
+            if (TryMoveNext(chunk, op, out _)) 
+            {
+                chunk.MoveNext();
             }
         }
 
@@ -522,7 +702,7 @@ namespace ZoDream.LuaDecompiler
         {
             var res = TranslateValue(chunk, value, format);
             Remove(res);
-            if (format == OperandFormat.FUNCTION && TryGetLocal(chunk, value, out var fn))
+            if (format == OperandFormat.REGISTER && TryGetLocal(chunk, value, out var fn))
             {
                 return fn;
             }
@@ -560,25 +740,25 @@ namespace ZoDream.LuaDecompiler
             };
         }
 
-        private static string? GetLocalName(LuaChunk chunk, int index)
-        {
-            if (chunk.DebugInfo.LocalItems.Length > index)
-            {
-                return chunk.DebugInfo.LocalItems[index].Name;
-            }
-            return null;
-        }
-        private static bool TryGetLocal(LuaChunk chunk, int index, [NotNullWhen(true)] out string? varName)
+        private bool TryGetLocal(LuaChunk chunk, int index, [NotNullWhen(true)] out string? varName)
         {
             if (chunk.DebugInfo.LocalItems.Length > index)
             {
                 var item = chunk.DebugInfo.LocalItems[index];
+                var pc = Math.Max(chunk.CurrentIndex, 0);
                 var current = 0UL;
-                current = chunk.CurrentIndex >= chunk.DebugInfo.AbsoluteLineItems.Length ? 0 : chunk.DebugInfo.AbsoluteLineItems[Math.Max(chunk.CurrentIndex, 0)].ProgramCounter;
-                //for (int i = 0; i <= chunk.CurrentIndex; i++)
-                //{
-                //    current += chunk.DebugInfo.AbsoluteLineItems[i].ProgramCounter;
-                //}
+                if (Version is LuaVersion.LuaJit21 or LuaVersion.LuaJit2 or LuaVersion.LuaJit1)
+                {
+                    current = chunk.DebugInfo.AbsoluteLineItems[pc].ProgramCounter;
+                    //for (int i = 0; i <= chunk.CurrentIndex; i++)
+                    //{
+                    //    current += chunk.DebugInfo.AbsoluteLineItems[i].ProgramCounter;
+                    //}
+                }
+                else
+                {
+                    current = (ulong)pc + 2;
+                }
                 if (item.StartPc < current && item.EndPc > current)
                 {
                     varName = chunk.DebugInfo.LocalItems[index].Name;
@@ -652,6 +832,14 @@ namespace ZoDream.LuaDecompiler
 
         private static string TranslateValue(LuaChunk chunk, int val, OperandFormat format)
         {
+            if (format == OperandFormat.REGISTER_K)
+            {
+                var extractor = (chunk.OpcodeItems[0] as OperandCode).Extractor;
+                if (extractor.IsK(val))
+                {
+                    return chunk.ConstantItems[extractor.DecodeK(val)].Value.ToString();
+                }
+            }
             return format switch
             {
                 OperandFormat.RAW or OperandFormat.IMMEDIATE_INTEGER => val.ToString() ?? string.Empty,

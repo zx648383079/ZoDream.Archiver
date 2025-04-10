@@ -24,6 +24,10 @@ namespace ZoDream.LuaDecompiler.Models
         public int SBx => extractor.SBx.Extract(code);
         public int X => extractor.X.Extract(code);
 
+        #region 5.4BETA 新增
+        public int VB => extractor.VB.Extract(code);
+        public int VC => extractor.VC.Extract(code);
+        #endregion
         public override string ToString()
         {
             return $"{Operand}:{Codepoint}={A},{B},{C},{K},{X}";

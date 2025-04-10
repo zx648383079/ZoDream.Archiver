@@ -13,13 +13,16 @@ namespace ZoDream.LuaDecompiler.Models
         public OperandFieldExtractor A { get; private set; }
         public OperandFieldExtractor B { get; private set; }
         public OperandFieldExtractor C { get; private set; }
-        public OperandFieldExtractor K { get; private set; }
-        public OperandFieldExtractor Ax { get; private set; }
-        public OperandFieldExtractor SJ { get; private set; }
+        public OperandFieldExtractor K { get; private set; } = new();
+        public OperandFieldExtractor Ax { get; private set; } = new();
+        public OperandFieldExtractor SJ { get; private set; } = new();
         public OperandFieldExtractor Bx { get; private set; }
         public OperandFieldExtractor SBx { get; private set; }
-        public OperandFieldExtractor X { get; private set; }
-
+        public OperandFieldExtractor X { get; private set; } = new(32, 0);
+        #region 5.4BETA 新增
+        public OperandFieldExtractor VB { get; private set; } = new();
+        public OperandFieldExtractor VC { get; private set; } = new();
+        #endregion
 
         public bool IsK(int field) => field >= _rkOffset;
 
@@ -80,9 +83,6 @@ namespace ZoDream.LuaDecompiler.Models
                     C = new(9, 14);
                     Bx = new(18, 14);
                     SBx = new(18, 14, 131071);
-                    K = new();
-                    Ax = new();
-                    SJ = new();
                     break;
                 case LuaVersion.Lua52 or LuaVersion.Lua53:
                     Op = new(6, 0);
@@ -92,10 +92,8 @@ namespace ZoDream.LuaDecompiler.Models
                     Ax = new(26, 6);
                     Bx = new(18, 14);
                     SBx = new(18, 14, 131071);
-                    K = new();
-                    SJ = new();
                     break;
-                case LuaVersion.Lua54 or LuaVersion.Lua54Beta:
+                case LuaVersion.Lua54:
                     Op = new(7, 0);
                     A = new(8, 7);
                     B = new(8, 16);
@@ -105,6 +103,19 @@ namespace ZoDream.LuaDecompiler.Models
                     SJ = new(25, 7, (1 << 24) - 1);
                     Bx = new(17, 15);
                     SBx = new(17, 15, (1 << 16) - 1);
+                    break;
+                case LuaVersion.Lua54Beta:
+                    Op = new(7, 0);
+                    A = new(8, 7);
+                    B = new(8, 16);
+                    C = new(8, 24);
+                    K = new(1, 15);
+                    Ax = new(25, 7);
+                    SJ = new(25, 7, (1 << 24) - 1);
+                    Bx = new(17, 15);
+                    SBx = new(17, 15, (1 << 16) - 1);
+                    VB = new(6, 16);
+                    VC = new(10, 22);
                     break;
                 default:
                     throw new ArgumentException();

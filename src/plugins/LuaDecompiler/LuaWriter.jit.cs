@@ -37,17 +37,19 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case JitOperand.ISTC:
                     {
+                        var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
                         builder.WriteFormat("{0} = {1}; if {1}",
                             TranslateIsSet(chunk, code.A, attr.AType),
-                            TranslateNotSet(chunk, (int)cd, attr.CDType)
+                            val
                             );
                         break;
                     }
                 case JitOperand.ISFC:
                     {
+                        var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
                         builder.WriteFormat("{0} = {1}; if not {1}",
                             TranslateIsSet(chunk, code.A, attr.AType),
-                            TranslateNotSet(chunk, (int)cd, attr.CDType)
+                            val
                             );
                         break;
                     }
@@ -97,77 +99,97 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.NOT:
                 case JitOperand.UNM:
                 case JitOperand.LEN:
-                    builder.WriteFormat("{0} = {1}{2}", 
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, (int)cd, attr.CDType)
+                    {
+                        var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1}{2}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            TranslateOperation(code.Operand),
+                            val
                         );
+                    }
                     break;
                 case JitOperand.ADDVN:
                 case JitOperand.SUBVN:
                 case JitOperand.MULVN:
                 case JitOperand.DIVVN:
                 case JitOperand.MODVN:
-                    builder.WriteFormat("{0} = {1} {2} {3}",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, (int)cd, attr.BType),
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, code.B, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, (int)cd, attr.BType);
+                        var c = TranslateNotSet(chunk, code.B, attr.CDType);
+                        builder.WriteFormat("{0} = {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            TranslateOperation(code.Operand),
+                            c);
+                    }
                     break;
                 case JitOperand.ADDVV:
                 case JitOperand.SUBVV:
                 case JitOperand.MULVV:
                 case JitOperand.DIVVV:
                 case JitOperand.MODVV:
-                    builder.WriteFormat("{0} = {1} {2} {3}",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, code.B, attr.BType),
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, (int)cd, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, attr.BType);
+                        var c = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            TranslateOperation(code.Operand),
+                            c);
+                    }
                     break;
                 case JitOperand.ADDNV:
                 case JitOperand.SUBNV:
                 case JitOperand.MULNV:
                 case JitOperand.DIVNV:
                 case JitOperand.MODNV:
-                    builder.WriteFormat("{0} = {1} {2} {3}",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, (int)cd, attr.CDType),
-                        TranslateOperation(code.Operand),
-                        TranslateNotSet(chunk, code.B, attr.BType));
+                    {
+                        var b = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        var c = TranslateNotSet(chunk, code.B, attr.BType);
+                        builder.WriteFormat("{0} = {1} {2} {3}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            TranslateOperation(code.Operand),
+                            c);
+                    }
                     break;
                 case JitOperand.POW:
-                    builder.WriteFormat("{0} = {1} ^ {2} (pow)",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, code.B, attr.BType),
-                        TranslateNotSet(chunk, (int)cd, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, attr.BType);
+                        var c = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1} ^ {2} (pow)",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            c);
+                    }
                     break;
                 case JitOperand.CAT:
                     {
-                        builder.Write(TranslateIsSet(chunk, code.A, attr.AType))
-                            .Write(" = ");
-                        var count = (int)cd - code.B;
-                        for (int i = 0; i <= count; i++)
+                        var begin = code.B;
+                        var count = (int)cd - code.B + 1;
+                        var args = new string[count];
+                        for (int i = 0; i < count; i++)
                         {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write(TranslateNotSet(chunk, code.B + i, JitOperandFormat.VAR));
+                            args[i] = TranslateNotSet(chunk, begin + i, JitOperandFormat.VAR);
                         }
+                        builder.WriteFormat("{0} = {1}",
+                            TranslateIsSet(chunk, code.A, attr.AType), 
+                            string.Join(", ", args));
                     }
                     break;
                 
                 case JitOperand.KNIL:
                     {
-                        for (var i = code.A; i <= cd; i++)
+                        var begin = code.A;
+                        var count = cd - begin + 1;
+                        for (var i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
                                 builder.Write(", ");
                             }
                             builder.Write(
-                                TranslateIsSet(chunk, i, JitOperandFormat.VAR)
+                                TranslateIsSet(chunk, begin + i, JitOperandFormat.VAR)
                              );
                         }
                         builder.Write(" = nil");
@@ -183,9 +205,12 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.USETS:
                 case JitOperand.USETN:
                 case JitOperand.USETP:
-                    builder.WriteFormat("{0} = {1}",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, (int)cd, attr.CDType));
+                    {
+                        var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            val);
+                    }
                     break;
                 case JitOperand.UCLO:
                     builder.Write("nil uvs >= ").Write(TranslateValue(chunk, code.A, attr.AType))
@@ -219,105 +244,120 @@ namespace ZoDream.LuaDecompiler
                     }
                     break;
                 case JitOperand.TNEW:
-                    builder.Write(TranslateIsSet(chunk, code.A, attr.AType))
-                        .Write(" = new table( array: ")
-                        .Write(cd & 0b0000011111111111)
-                        .Write(", dict: ").Write(Math.Pow(2, cd >> 11)).Write(')');
+                    builder.WriteFormat("{0}  = new table(array: {1}, dict: {2})", 
+                        TranslateIsSet(chunk, code.A, attr.AType),
+                        cd & 0b0000011111111111,
+                        Math.Pow(2, cd >> 11));
                     break;
                 case JitOperand.TDUP:
-                    builder.Write(TranslateIsSet(chunk, code.A, attr.AType))
-                        .Write(" = copy ")
-                        .Write(TranslateNotSet(chunk, (int)cd, attr.CDType));
+                    {
+                        var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = copy {1}", 
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            val);
+                    }
                     break;
                 
                 case JitOperand.TGETV:
-                    builder.WriteFormat("{0} = {1}[{2}]",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateValue(chunk, code.B, attr.BType),
-                        TranslateValue(chunk, (int)cd, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, attr.BType);
+                        var c = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b, 
+                            c
+                            );
+                    }
                     break;
                 case JitOperand.TGETS:
-                    builder.WriteFormat("{0} = {1}.{2}",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateNotSet(chunk, code.B, attr.BType),
-                        TranslateValue(chunk, (int)cd, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, attr.BType);
+                        builder.WriteFormat("{0} = {1}.{2}",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            TranslateValue(chunk, (int)cd, attr.CDType));
+                    }
                     break;
                 case JitOperand.TGETB:
-                    builder.WriteFormat("{0} = {1}[{2}]",
-                      TranslateIsSet(chunk, code.A, attr.AType),
-                      TranslateValue(chunk, (int)cd, attr.BType),
-                      TranslateValue(chunk, code.B, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, (int)cd, attr.BType);
+                        builder.WriteFormat("{0} = {1}[{2}]",
+                              TranslateIsSet(chunk, code.A, attr.AType),
+                              b,
+                              TranslateValue(chunk, code.B, attr.CDType));
+                    }
                     break;
                 case JitOperand.TGETR:
-                    builder.WriteFormat("{0} = {1}[{2}]",
-                        TranslateIsSet(chunk, code.A, attr.AType),
-                        TranslateValue(chunk, code.B, attr.BType),
-                        TranslateValue(chunk, (int)cd, attr.CDType));
+                    {
+                        var b = TranslateNotSet(chunk, code.B, attr.BType);
+                        var c = TranslateNotSet(chunk, (int)cd, attr.CDType);
+                        builder.WriteFormat("{0} = {1}[{2}]",
+                            TranslateIsSet(chunk, code.A, attr.AType),
+                            b,
+                            c);
+                    }
                     break;
                 case JitOperand.TSETV:
                 case JitOperand.TSETB:
                 case JitOperand.TSETR:
-                    builder.WriteFormat("{0}[{1}] = {2}",
-                        TranslateValue(chunk, code.B, attr.BType),
-                        TranslateValue(chunk, (int)cd, attr.CDType),
-                        TranslateNotSet(chunk, code.A, attr.AType));
+                    {
+                        builder.WriteFormat("{0}[{1}] = {2}",
+                            TranslateNotSet(chunk, code.B, attr.BType),
+                            TranslateNotSet(chunk, (int)cd, attr.CDType),
+                            TranslateNotSet(chunk, code.A, attr.AType));
+                    }
                     break;
                 case JitOperand.TSETS:
                     builder.WriteFormat("{0}.{1} = {2}",
-                        TranslateValue(chunk, code.B, attr.BType),
-                        TranslateValue(chunk, (int)cd, attr.CDType),
+                        TranslateNotSet(chunk, code.B, attr.BType),
+                        TranslateNotSet(chunk, (int)cd, attr.CDType),
                         TranslateNotSet(chunk, code.A, attr.AType));
                     break;
                 case JitOperand.TSETM:
-                    builder.Write("for i = 0, MULTRES, 1 do ")
-                        .Write(TranslateValue(chunk, code.A - 1, JitOperandFormat.VAR))
-                        .Write('[').Write(cd)
-                        .Write(" + i] = slot(").Write(code.A).Write(" + i)");
+                    builder.WriteFormat("for i = 0, MULTRES, 1 do {0}[{1} + i] = slot({2} + i)",
+                        TranslateNotSet(chunk, code.A - 1, JitOperandFormat.VAR),
+                        cd,
+                        code.A);
                     break;
                 case JitOperand.CALLM:
                     {
                         var fn = TranslateNotSet(chunk, code.A, JitOperandFormat.VAR);
-                        for (int i = 0; i < code.B - 1; i++)
+                        var begin = code.A + 1;
+                        var count = (int)cd;
+                        var args = new string[count];
+                        for (int i = 0; i < count; i++)
                         {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write(TranslateIsSet(chunk, code.A + i, JitOperandFormat.DST));
+                            args[i] = TranslateNotSet(chunk, begin + i, JitOperandFormat.VAR);
                         }
-                        builder.Write(" = ").Write(fn)
-                            .Write('(');
-                        for (int i = 0; i < cd; i++)
-                        {
-                            if (i > 0)
-                            {
-                                builder.Write(", ");
-                            }
-                            builder.Write(TranslateNotSet(chunk, code.A + i + 1, JitOperandFormat.VAR));
-                        }
-                        builder.Write(", ...MULTRES)");
-                        break;
-                    }
-                case JitOperand.CALL:
-                    {
-                        var fn = TranslateNotSet(chunk, code.A, JitOperandFormat.VAR);
-                        if (cd > 1)
-                        {
-                            builder.Write(TranslateIsSet(chunk, code.A, JitOperandFormat.DST));
-                            builder.Write(" = ");
-                        }
-                        builder.Write(fn)
-                            .Write('(');
-                        var count = code.B - 1;
+                        begin = code.A;
+                        count = code.B - 1;
                         for (int i = 0; i < count; i++)
                         {
                             if (i > 0)
                             {
                                 builder.Write(", ");
                             }
-                            builder.Write(TranslateNotSet(chunk, code.A + i + 1, JitOperandFormat.VAR));
+                            builder.Write(TranslateIsSet(chunk, begin + i, JitOperandFormat.DST));
                         }
-                        builder.Write(')');
+                        builder.WriteFormat(" = {0}({1}, ...MULTRES)", fn, string.Join(", ", args));
+                        break;
+                    }
+                case JitOperand.CALL:
+                    {
+                        var fn = TranslateNotSet(chunk, code.A, JitOperandFormat.VAR);
+                        var begin = code.A + 1;
+                        var count = code.B - 1;
+                        var args = new string[count];
+                        for (int i = 0; i < count; i++)
+                        {
+                            args[i] = TranslateNotSet(chunk, begin + i, JitOperandFormat.VAR);
+                        }
+                        if (cd > 1)
+                        {
+                            builder.Write(TranslateIsSet(chunk, code.A, JitOperandFormat.DST));
+                            builder.Write(" = ");
+                        }
+                        builder.WriteFormat("{0}({1})", fn, string.Join(", ", args));
                         break;
                     }
                 case JitOperand.CALLMT:
@@ -541,7 +581,7 @@ namespace ZoDream.LuaDecompiler
 
         private string TranslateIsSet(LuaChunk chunk, int value, JitOperandFormat format)
         {
-            var res = TranslateValue(chunk, value, format);
+            var res = TranslateName(chunk, value, format);
             Remove(res);
             if (format == JitOperandFormat.DST && TryGetLocal(chunk, value, out var fn))
             {

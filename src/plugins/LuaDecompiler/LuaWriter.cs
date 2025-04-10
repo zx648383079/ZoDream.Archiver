@@ -9,7 +9,7 @@ namespace ZoDream.LuaDecompiler
 {
     public partial class LuaWriter(LuaBytecode data) : ILanguageWriter, IDisassembler
     {
-
+        private LuaVersion Version => data.Header.Version;
 
         public void Write(Stream output)
         {
