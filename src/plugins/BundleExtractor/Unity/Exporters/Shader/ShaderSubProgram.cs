@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -54,29 +55,29 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //TODO
         }
 
-        public string Export()
+        public void Write(ICodeWriter writer)
         {
-            var sb = new StringBuilder();
             if (m_Keywords.Length > 0)
             {
-                sb.Append("Keywords { ");
+                writer.Write("Keywords { ");
                 foreach (string keyword in m_Keywords)
                 {
-                    sb.Append($"\"{keyword}\" ");
+                    writer.Write($"\"{keyword}\" ");
                 }
-                sb.Append("}\n");
+                writer.Write("}")
+                    .WriteLine(true);
             }
             if (m_LocalKeywords != null && m_LocalKeywords.Length > 0)
             {
-                sb.Append("Local Keywords { ");
+                writer.Write("Local Keywords { ");
                 foreach (string keyword in m_LocalKeywords)
                 {
-                    sb.Append($"\"{keyword}\" ");
+                    writer.Write($"\"{keyword}\" ");
                 }
-                sb.Append("}\n");
+                writer.Write("}").WriteLine(true);
             }
 
-            sb.Append('"');
+            writer.Write('"');
             if (m_ProgramCode.Length > 0)
             {
                 switch (m_ProgramType)
@@ -89,7 +90,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     case ShaderGpuProgramType.GLCore32:
                     case ShaderGpuProgramType.GLCore41:
                     case ShaderGpuProgramType.GLCore43:
-                        sb.Append(Encoding.UTF8.GetString(m_ProgramCode));
+                        writer.Write(m_ProgramCode);
                         break;
                     case ShaderGpuProgramType.DX9VertexSM20:
                     case ShaderGpuProgramType.DX9VertexSM30:
@@ -98,7 +99,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         {
                             /*var shaderBytecode = new ShaderBytecode(m_ProgramCode);
                             sb.Append(shaderBytecode.Disassemble());*/
-                            sb.Append("// shader disassembly not supported on DXBC");
+                            writer.Write("// shader disassembly not supported on DXBC");
                             break;
                         }
                     case ShaderGpuProgramType.DX10Level9Vertex:
@@ -121,7 +122,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             Buffer.BlockCopy(m_ProgramCode, start, buff, 0, buff.Length);
                             var shaderBytecode = new ShaderBytecode(buff);
                             sb.Append(shaderBytecode.Disassemble());*/
-                            sb.Append("// shader disassembly not supported on DXBC");
+                            writer.Write("// shader disassembly not supported on DXBC");
                             break;
                         }
                     case ShaderGpuProgramType.MetalVS:
@@ -136,17 +137,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             }
                             var entryName = reader.ReadStringZeroTerm();
                             var buff = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
-                            sb.Append(Encoding.UTF8.GetString(buff));
+                            writer.Write(buff);
                         }
                         break;
                     case ShaderGpuProgramType.SPIRV:
                         try
                         {
-                            sb.Append(SpirVShader.Convert(m_ProgramCode));
+                            SpirVShader.Convert(m_ProgramCode, writer);
                         }
                         catch (Exception e)
                         {
-                            sb.Append($"// disassembly error {e.Message}\n");
+                            writer.Write($"// disassembly error {e.Message}").WriteLine(true);
                         }
                         break;
                     case ShaderGpuProgramType.ConsoleVS:
@@ -154,15 +155,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     case ShaderGpuProgramType.ConsoleHS:
                     case ShaderGpuProgramType.ConsoleDS:
                     case ShaderGpuProgramType.ConsoleGS:
-                        sb.Append(Encoding.UTF8.GetString(m_ProgramCode));
+                        writer.Write(m_ProgramCode);
                         break;
                     default:
-                        sb.Append($"//shader disassembly not supported on {m_ProgramType}");
+                        writer.Write($"//shader disassembly not supported on {m_ProgramType}");
                         break;
                 }
             }
-            sb.Append('"');
-            return sb.ToString();
+            writer.Write('"').WriteLine(true);
         }
     }
 }

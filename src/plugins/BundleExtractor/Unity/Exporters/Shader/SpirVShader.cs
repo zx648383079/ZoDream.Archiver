@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Text;
 using ZoDream.ShaderDecompiler;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Language;
@@ -8,10 +7,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal static class SpirVShader
     {
-        public static string Convert(byte[] m_ProgramCode)
+        public static void Convert(byte[] m_ProgramCode, ICodeWriter builder)
         {
-            var sb = new StringBuilder();
-            using var builder = new CodeWriter(sb);
             using (var ms = new MemoryStream(m_ProgramCode))
             {
                 using var reader = new BinaryReader(ms);
@@ -43,7 +40,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                 }
             }
-            return sb.ToString();
         }
 
     }

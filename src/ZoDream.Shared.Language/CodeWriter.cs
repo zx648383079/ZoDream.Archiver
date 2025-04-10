@@ -124,17 +124,29 @@ namespace ZoDream.Shared.Language
 
         public ICodeWriter WriteIndent()
         {
-            if (Indent > 0)
-            {
-                Write(IndentChar, Indent * (IndentChar == ' ' ? 4 : 1));
-            }
-            return this;
+            return WriteIndent(Indent, false);
         }
 
         public ICodeWriter WriteIndent(int indent)
         {
-            Indent = Math.Max(indent, 0);
-            return WriteIndent();
+            return WriteIndent(indent, true);
+        }
+
+        public ICodeWriter WriteIndent(int indent, bool sync)
+        {
+            if (indent < 0)
+            {
+                indent = 0;
+            }
+            if (indent > 0)
+            {
+                Write(IndentChar, indent * (IndentChar == ' ' ? 4 : 1));
+            }
+            if (sync)
+            {
+                Indent = indent;
+            }
+            return this;
         }
 
         public ICodeWriter WriteLine(string text)
@@ -159,9 +171,26 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
+        public ICodeWriter WriteIndentLine(bool incOne = true)
+        {
+            WriteLine();
+            WriteIndent(Indent + (incOne ? 1 : 0), true);
+            return this;
+        }
+
+        public ICodeWriter WriteOutdentLine()
+        {
+            return WriteLine().WriteOutdent();
+        }
+
         public ICodeWriter WriteOutdent()
         {
-            return WriteIndent(Indent - 1);
+            return WriteIndent(Indent - 1, true);
+        }
+
+        public ICodeWriter WriteIncIndent()
+        {
+            return WriteIndent(Indent + 1, true);
         }
 
         public ICodeWriter Write(object? val)
@@ -170,11 +199,7 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
-        public ICodeWriter WriteIncIndent()
-        {
-            Indent++;
-            return WriteIndent();
-        }
+
 
         public void Flush()
         {

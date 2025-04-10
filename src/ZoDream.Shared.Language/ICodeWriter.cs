@@ -6,7 +6,7 @@ namespace ZoDream.Shared.Language
     public interface ICodeWriter : IDisposable
     {
         /// <summary>
-        /// 当前的行缩进
+        /// 当前的行缩进，原则上保存进入方法前输入换行加缩进，方法执行后需要保存原样已经有了换行加缩进
         /// </summary>
         public int Indent { get; }
 
@@ -68,6 +68,17 @@ namespace ZoDream.Shared.Language
         /// <returns></returns>
         public ICodeWriter WriteLine(bool autoIndent);
         /// <summary>
+        /// 写换行符，同时增加一个行缩进并写入
+        /// </summary>
+        /// <param name="incOne">是否增加1个行缩进</param>
+        /// <returns></returns>
+        public ICodeWriter WriteIndentLine(bool incOne = true);
+        /// <summary>
+        /// 写换行符，同时减少1个单位行缩进
+        /// </summary>
+        /// <returns></returns>
+        public ICodeWriter WriteOutdentLine();
+        /// <summary>
         /// 写入当前行缩进， 不改变当前行缩进
         /// </summary>
         public ICodeWriter WriteIndent();
@@ -81,6 +92,13 @@ namespace ZoDream.Shared.Language
         /// </summary>
         /// <param name="indent"></param>
         public ICodeWriter WriteIndent(int indent);
+        /// <summary>
+        /// 写入行缩进
+        /// </summary>
+        /// <param name="indent"></param>
+        /// <param name="sync">是否把当前的行缩进修改</param>
+        /// <returns></returns>
+        public ICodeWriter WriteIndent(int indent, bool sync);
         /// <summary>
         /// 减少1个单位行缩进
         /// </summary>

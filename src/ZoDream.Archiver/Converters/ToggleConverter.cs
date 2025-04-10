@@ -1,4 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using System;
 using System.Linq;
@@ -9,7 +10,16 @@ namespace ZoDream.Archiver.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            return IsVisible(value, parameter) ? Visibility.Visible : Visibility.Collapsed;
+            var res = IsVisible(value, parameter);
+            if (targetType == typeof(Visibility))
+            {
+                return res ? Visibility.Visible : Visibility.Collapsed;
+            }
+            if (targetType == typeof(ListViewSelectionMode))
+            {
+                return res ? ListViewSelectionMode.Extended : ListViewSelectionMode.Single;
+            }
+            return res;
         }
 
         private static bool IsVisible(object value, object parameter)

@@ -49,6 +49,11 @@
                 Command="{Binding ViewCommand}"
                 Icon="View"
                 Label="View" />
+            <AppBarToggleButton IsChecked="{Binding IsMultipleSelect, Mode=TwoWay}" Label="Multiple Select">
+                <AppBarToggleButton.Icon>
+                    <FontIcon Glyph="&#xE762;" />
+                </AppBarToggleButton.Icon>
+            </AppBarToggleButton>
             <AppBarButton Command="{Binding DeleteCommand}" />
             <AppBarButton
                 Command="{Binding SettingCommand}"
@@ -59,8 +64,9 @@
             Grid.Row="1"
             AllowDrop="True"
             ItemsSource="{Binding FileItems}"
-            SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+            SelectionMode="{Binding IsMultipleSelect, Converter={StaticResource ToggleCvt}}">
             <ivy:Interaction.Behaviors>
+                <bhv:MultiSelectableItemsControlBehavior SelectedItems="{Binding SelectedItems, Mode=TwoWay}" />
                 <bhv:DragFileBehavior Command="{Binding DragCommand}" />
             </ivy:Interaction.Behaviors>
             <ListView.ItemTemplate>

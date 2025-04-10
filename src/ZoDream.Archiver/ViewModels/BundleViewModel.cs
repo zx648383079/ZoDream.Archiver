@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Input;
+﻿using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,12 +51,20 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _fileItems, value);
         }
 
-        private EntryViewModel? _selectedItem;
+        private EntryViewModel[]? _selectedItems;
 
-        public EntryViewModel? SelectedItem {
-            get => _selectedItem;
-            set => Set(ref _selectedItem, value);
+        public EntryViewModel[]? SelectedItems {
+            get => _selectedItems;
+            set => Set(ref _selectedItems, value);
         }
+
+        private bool _isMultipleSelect;
+
+        public bool IsMultipleSelect {
+            get => _isMultipleSelect;
+            set => Set(ref _isMultipleSelect, value);
+        }
+
 
         public ICommand AddCommand { get; private set; }
         public ICommand AddFolderCommand { get; private set; }
@@ -218,12 +227,15 @@ namespace ZoDream.Archiver.ViewModels
 
         private void TapDelete(object? _)
         {
-            if (SelectedItem is null)
+            if (SelectedItems is null)
             {
                 return;
             }
-            FileItems.Remove(SelectedItem);
-            SelectedItem = null;
+            foreach (var item in SelectedItems)
+            {
+                FileItems.Remove(item);
+            }
+            SelectedItems = null;
         }
 
 

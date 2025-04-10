@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Language;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -31,17 +32,24 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
         }
 
-        public string Export(string shader)
+        public void Write(string shader, ICodeWriter writer)
         {
-            var evaluator = new MatchEvaluator(match => {
+            var match = GPUIndexRegex().Match(shader);
+            var begin = 0;
+            while (match is not null && match.Success)
+            {
+                writer.Write(shader[begin..match.Index]);
                 var index = int.Parse(match.Groups[1].Value);
                 var subProgramWrap = m_SubProgramWraps[index];
                 var subProgram = subProgramWrap.GenShaderSubProgram();
-                var subProgramsStr = subProgram.Export();
-                return subProgramsStr;
-            });
-            shader = GPUIndexRegex().Replace(shader, evaluator);
-            return shader;
+                subProgram.Write(writer);
+                begin = match.Index + match.Value.Length;
+                match = match.NextMatch();
+            }
+            if (begin < shader.Length)
+            {
+                writer.Write(shader[begin..]);
+            }
         }
 
         [GeneratedRegex("GpuProgramIndex (.+)")]

@@ -58,7 +58,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return false;
             }
             var i = 1;
-            while (buffer[i++] < 0x80)
+            while (buffer[i++] < 0x80 && i < 10)
             {
             }
             return length > i && buffer[i] == 0xA;

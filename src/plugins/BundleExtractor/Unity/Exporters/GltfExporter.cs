@@ -589,9 +589,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var hasUv = mesh.m_UV0?.Length > 0;
             var vStep = ComputeStep(mesh.m_Vertices.Length, mesh.m_VertexCount, 3, 4);
             var uStep = ComputeStep(mesh.m_UV0?.Length??0, mesh.m_VertexCount, 4, 2, 3);
-            var nStep = ComputeStep(mesh.m_Normals.Length, mesh.m_VertexCount, 3, 4);
-            var cStep = ComputeStep(mesh.m_Colors.Length, mesh.m_VertexCount, 3, 4);
+            var nStep = ComputeStep(mesh.m_Normals?.Length??0, mesh.m_VertexCount, 3, 4);
+            var cStep = ComputeStep(mesh.m_Colors?.Length??0, mesh.m_VertexCount, 3, 4);
             var hasColor = mesh.m_Colors?.Length > 0;
+            var hasNormal = mesh.m_Normals?.Length > 0;
             int firstSubMesh = 0;
             if (meshR is not null && meshR.m_StaticBatchInfo?.subMeshCount > 0)
             {
@@ -639,16 +640,23 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             mesh.m_Vertices[v3 * vStep + 1],
                             mesh.m_Vertices[v3 * vStep + 2]);
 
-                    var n1 = new Vector3(-mesh.m_Normals[v1 * nStep],
+                    var n1 = Vector3.Zero;
+                    if (hasNormal)
+                    {
+                        n1 = new Vector3(-mesh.m_Normals[v1 * nStep],
                             mesh.m_Normals[v1 * nStep + 1],
                             mesh.m_Normals[v1 * nStep + 2]);
+                    }
 
                     if (!faceVertexCache.ContainsKey(v1))
                     {
                         faceVertexCache.Add(v1, faceVertexCount++);
                         positionItems.AddRange(p1.AsArray());
-                        normalItems.AddRange(n1.AsArray());
-                        if (hasColor)
+                        if (hasNormal)
+                        {
+                            normalItems.AddRange(n1.AsArray());
+                        }
+                        if (hasColor) 
                         {
                             colorItems.AddRange(mesh.m_Colors[v1 * cStep],
                                 mesh.m_Colors[v1 * cStep + 1],
@@ -679,12 +687,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         faceVertexCache.Add(v2, faceVertexCount++);
                         positionItems.AddRange(p2.AsArray());
-
-                        normalItems.AddRange(
-                            -mesh.m_Normals[v2 * nStep],
-                            mesh.m_Normals[v2 * nStep + 1],
-                            mesh.m_Normals[v2 * nStep + 2]
-                         );
+                        if (hasNormal)
+                        {
+                            normalItems.AddRange(
+                                -mesh.m_Normals[v2 * nStep],
+                                mesh.m_Normals[v2 * nStep + 1],
+                                mesh.m_Normals[v2 * nStep + 2]
+                            );
+                        }
+                       
                         if (hasColor)
                         {
                             colorItems.AddRange(mesh.m_Colors[v2 * cStep],
@@ -713,12 +724,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         faceVertexCache.Add(v3, faceVertexCount++);
                         positionItems.AddRange(p3.AsArray());
-
-                        normalItems.AddRange(
-                            -mesh.m_Normals[v3 * nStep],
-                            mesh.m_Normals[v3 * nStep + 1],
-                            mesh.m_Normals[v3 * nStep + 2]
-                         );
+                        if (hasNormal)
+                        {
+                            normalItems.AddRange(
+                                -mesh.m_Normals[v3 * nStep],
+                                mesh.m_Normals[v3 * nStep + 1],
+                                mesh.m_Normals[v3 * nStep + 2]
+                             );
+                        }
+                    
                         if (hasColor)
                         {
                             colorItems.AddRange(mesh.m_Colors[v3 * cStep],
@@ -744,7 +758,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         }
                     }
 
-                    if (ObjReader.CheckWindingCorrect(p1, p2, p3, n1))
+                    if (hasNormal && ObjReader.CheckWindingCorrect(p1, p2, p3, n1))
                     {
                         indicesItems.AddRange(
                             faceVertexCache[v1],
