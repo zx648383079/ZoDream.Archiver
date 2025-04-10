@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Language;
@@ -19,23 +18,27 @@ namespace ZoDream.LuaDecompiler
 
         public void Decompile(ICodeWriter writer, IInstruction instruction)
         {
+            if (instruction is LuaChunk chunk)
+            {
+                Translate(writer, chunk, chunk.CurrentOpcode);
+            }
         }
 
         public void Decompile(ICodeWriter writer)
         {
-            writer.WriteLine(";")
-                .Write("; Disassemble of ").WriteLine()
-                .WriteLine(";")
-                .Write(";  Source file: ").WriteLine("N/A")
-                .WriteLine(";")
-                .WriteLine("; Flags:")
-                .Write(";    Stripped: ").WriteLine(data.Header.Flags?.IsStripped == true ? "Yes" : "No")
-                .Write(";    Endianness: ").WriteLine(data.Header.Endianness == EndianType.BigEndian ? "Big" : "Little")
-                .Write(";    FFI: ").WriteLine(data.Header.Flags?.HasFFI == true ? "Present" : "Not present")
-                .WriteLine(";")
+            writer.WriteLine("--")
+                .Write("-- Disassemble of ").WriteLine()
+                .WriteLine("--")
+                .Write("-- Source file: ").WriteLine("N/A")
+                .WriteLine("--")
+                .WriteLine("-- Flags:")
+                .Write("--    Stripped: ").WriteLine(data.Header.Flags?.IsStripped == true ? "Yes" : "No")
+                .Write("--    Endianness: ").WriteLine(data.Header.Endianness == EndianType.BigEndian ? "Big" : "Little")
+                .Write("--    FFI: ").WriteLine(data.Header.Flags?.HasFFI == true ? "Present" : "Not present")
+                .WriteLine("--")
                 .WriteLine();
 
-            writer.Write("main ");
+            writer.Write("-- main ");
             Decompile(writer, data.MainChunk);
         }
 
@@ -48,7 +51,7 @@ namespace ZoDream.LuaDecompiler
                 chunk.Flags?.IsVariadic == true ? "+" : string.Empty,
                 chunk.UpValueCount, chunk.MaxStack).WriteLine();
 
-            writer.WriteIndent().WriteLine(";;;; constant tables ;;;;");
+            writer.WriteIndent().WriteLine("--[[ -- constant tables --");
             for (int i = 0; i < chunk.ConstantItems.Length; i++)
             {
                 var item = chunk.ConstantItems[i];
@@ -58,23 +61,32 @@ namespace ZoDream.LuaDecompiler
                 }
                 Translate(writer, i, (LuaConstantTable)item.Value);
             }
-            writer.WriteIndent().WriteLine(";;;; instructions ;;;;");
+            writer.WriteIndent().WriteLine("--]]");
+            writer.WriteIndent().WriteLine("-- instructions --");
             while (chunk.MoveNext())
             {
-                writer.WriteIndent();
-                var item = chunk.CurrentOpcode;
-                switch (item)
-                {
-                    case JitOperandCode jit:
-                        Translate(writer, chunk, jit);
-                        break;
-                    case OperandCode code:
-                        Translate(writer, chunk, code);
-                        break;
-                }
-                writer.WriteLine($"        ;[{chunk.CurrentIndex}] {item}");
+                Translate(writer, chunk, chunk.CurrentOpcode);
             }
             RemoveTemporary();
+        }
+
+        private void Translate(ICodeWriter writer, LuaChunk chunk, ILanguageOpcode item)
+        {
+            writer.WriteIndent();
+            switch (item)
+            {
+                case JitOperandCode jit:
+                    Translate(writer, chunk, jit);
+                    break;
+                case OperandCode code:
+                    Translate(writer, chunk, code);
+                    break;
+            }
+            writer.WriteLine(
+#if DEBUG
+                $"        -- [{chunk.CurrentIndex}] {item}"
+#endif
+                );
         }
 
         private void Translate(ICodeWriter writer, int index, LuaConstantTable table)
@@ -87,29 +99,24 @@ namespace ZoDream.LuaDecompiler
                 {
                     continue;
                 }
-                writer.Write("#").Write(i).Write(": ").Write(Translate(item)).Write(",");
+                writer.Write("#").Write(i).Write(": ").Write(TranslateConstant(item)).Write(",");
             }
             foreach (var item in table.HashItems)
             {
-                writer.Write("[").Write(Translate(item.Item1))
-                    .Write("] = ").Write(Translate(item.Item2)).Write(",");
+                writer.Write("[").Write(TranslateConstant(item.Item1))
+                    .Write("] = ").Write(TranslateConstant(item.Item2)).Write(",");
             }
             writer.Write(']').WriteLine();
         }
 
-        private string? Translate(LuaConstant item)
-        {
-            return item.Type switch
-            {
-                LuaConstantType.Null => "nil",
-                LuaConstantType.Bool => (bool)item.Value == true ? "true" : "false",
-                _ => (string)item.Value,
-            };
-        }
 
         public IEnumerable<IInstruction> Disassemble()
         {
-            throw new System.NotImplementedException();
+            var chunk = data.MainChunk;
+            while (chunk.MoveNext())
+            {
+                yield return chunk;
+            }
         }
     }
 }

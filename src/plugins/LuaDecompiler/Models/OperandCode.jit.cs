@@ -2,7 +2,7 @@
 
 namespace ZoDream.LuaDecompiler.Models
 {
-    public class JitOperandCode(JitOperand op, byte a) : ILanguageOpcode
+    public class JitOperandCode(JitOperand op, byte a) : ILanguageOpcode, IInstructionOperand
     {
         public JitOperand Operand { get; private set; } = op;
 

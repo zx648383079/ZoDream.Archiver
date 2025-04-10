@@ -234,7 +234,7 @@ namespace ZoDream.LuaDecompiler
                         }
                         // TODO 判断输入参数名
                         builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args)).WriteLine()
-                            .WriteIncIndent().WriteFormat(";{0} {1} FNEW {2} {3};",
+                            .WriteIncIndent().WriteFormat("-- {0} {1} FNEW {2} {3};",
                                     chunk.CurrentIndex,
                                     chunk.DebugInfo.LineNoItems.Length > chunk.CurrentIndex ?
                                     chunk.DebugInfo.LineNoItems[chunk.CurrentIndex] : 0,
@@ -536,7 +536,7 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case JitOperand.JMP:
                     // TODO 暂时无法确定位置
-                    builder.WriteFormat("    goto {0}", TranslateValue(chunk, (int)cd, JitOperandFormat.JMP));
+                    builder.WriteFormat("    goto {0}", TranslateValue(chunk, (int)(cd - 0x8000), JitOperandFormat.JMP));
                     break;
                 case JitOperand.FUNCF:
                     builder.Write("Fixed-arg function with frame size ")
@@ -654,7 +654,8 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.JMP)
             {
-                return $"{1 + chunk.CurrentIndex + value}";
+                var pc = value + 1;
+                return (pc >= 0 ? "+" : string.Empty) + pc.ToString();// $"{1 + chunk.CurrentIndex + value}";
             }
             if (format is JitOperandFormat.LIT or JitOperandFormat.SLIT)
             {

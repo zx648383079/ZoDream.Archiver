@@ -24,7 +24,7 @@ namespace ZoDream.LuaDecompiler.Models
         public OperandFieldExtractor VC { get; private set; } = new();
         #endregion
 
-        public bool IsK(int field) => field >= _rkOffset;
+        public bool IsK(int field) => _rkOffset > 0 && field >= _rkOffset;
 
         public int DecodeK(int field) => field - _rkOffset;
 

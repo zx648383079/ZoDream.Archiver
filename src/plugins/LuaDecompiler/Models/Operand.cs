@@ -13,8 +13,8 @@
         LOADTRUE,
         LOADNIL,
 
-        GETGLOBAL, // 5.1
-        SETGLOBAL, // 5.1
+        GETGLOBAL, // <= 5.1
+        SETGLOBAL, // <= 5.1
 
         GETUPVAL,
         SETUPVAL,

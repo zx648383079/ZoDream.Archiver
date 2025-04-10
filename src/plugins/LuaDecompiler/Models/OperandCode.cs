@@ -2,7 +2,7 @@
 
 namespace ZoDream.LuaDecompiler.Models
 {
-    public class OperandCode(Operand op, int code, OperandExtractor extractor) : ILanguageOpcode
+    public class OperandCode(Operand op, int code, OperandExtractor extractor) : ILanguageOpcode, IInstructionOperand
     {
         public Operand Operand => op;
 
@@ -17,7 +17,7 @@ namespace ZoDream.LuaDecompiler.Models
         public int SC => C - extractor.C.Max / 2;
         public int SJ => extractor.SJ.Extract(code);
 
-        public bool K => extractor.K.Extract(code) != 0;
+        public int K => extractor.K.Extract(code);
 
         public int Ax => extractor.Ax.Extract(code);
         public int Bx => extractor.Bx.Extract(code);

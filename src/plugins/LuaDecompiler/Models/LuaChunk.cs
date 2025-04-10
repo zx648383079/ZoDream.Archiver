@@ -2,7 +2,7 @@
 
 namespace ZoDream.LuaDecompiler.Models
 {
-    public class LuaChunk : ILanguageChunk
+    public class LuaChunk : ILanguageChunk, IInstruction
     {
         public string Name { get; internal set; } = string.Empty;
 
@@ -28,6 +28,11 @@ namespace ZoDream.LuaDecompiler.Models
         public int CurrentIndex { get; private set; } = -1;
         public ILanguageOpcode CurrentOpcode => OpcodeItems[CurrentIndex];
         public bool CanMoveNext => CurrentIndex < OpcodeItems.Length - 1;
+
+        public IInstructionOperand[] OperandItems => [(IInstructionOperand)CurrentOpcode];
+
+        public string Mnemonic => CurrentOpcode.ToString();
+
         public bool MoveNext()
         {
             if (!CanMoveNext)
