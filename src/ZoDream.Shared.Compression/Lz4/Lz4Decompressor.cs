@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.Shared.Compression.Lz4
 {
@@ -20,27 +22,36 @@ namespace ZoDream.Shared.Compression.Lz4
 
         public int Decompress(byte[] input, int inputLength, byte[] output, int outputLength)
         {
-            var inputPos = 0;
+            return Decompress(input, 0, inputLength, output, outputLength);
+        }
+        public int Decompress(byte[] input, int inputIndex, int inputLength, 
+            byte[] output, int outputLength)
+        {
+            return Decompress(new MemoryStream(input, inputIndex, inputLength), output, outputLength);
+        }
+
+        public int Decompress(Stream input,
+            byte[] output, int outputLength)
+        {
             var outputPos = 0;
             do
             {
-                var (encCount, litCount) = GetLiteralToken(input, ref inputPos);
+                var (encCount, litCount) = GetLiteralToken(input);
 
                 //Copy literal chunk
-                litCount = GetLength(litCount, input, ref inputPos);
-                Array.Copy(input, inputPos, output, outputPos, litCount);
-                inputPos += litCount;
+                litCount = GetLength(litCount, input);
+                input.ReadExactly(output, outputPos, litCount);
                 outputPos += litCount;
 
-                if (inputPos >= inputLength)
+                if (input.Position >= input.Length)
                 {
                     break;
                 }
 
                 //Copy compressed chunk
-                int back = GetChunkEnd(input, ref inputPos);
+                int back = GetChunkEnd(input);
 
-                encCount = GetLength(encCount, input, ref inputPos) + 4;
+                encCount = GetLength(encCount, input) + 4;
 
                 int encPos = outputPos - back;
                 if (encCount <= back)
@@ -55,33 +66,41 @@ namespace ZoDream.Shared.Compression.Lz4
                         output[outputPos++] = output[encPos++];
                     }
                 }
-            } while (inputPos < inputLength && outputPos < outputLength);
-
+            } while (input.Position < input.Length && outputPos < outputLength);
+            Debug.Assert(outputPos == outputLength);
             return outputPos;
         }
 
         public void Decompress(Stream input, Stream output)
         {
-            var length = (int)(input.Length - input.Position);
-            var buffer = ArrayPool<byte>.Shared.Rent(length);
-            var outputBuffer = ArrayPool<byte>.Shared.Rent((int)unCompressedSize);
+            if (output is ArrayMemoryStream ms)
+            {
+                ms.Position = Decompress(input, ms.GetBuffer(), (int)Math.Min(unCompressedSize, ms.Length));
+                return;
+            }
+            var buffer = ArrayPool<byte>.Shared.Rent((int)unCompressedSize);
             try
             {
-                input.ReadExactly(buffer, 0, length);
-                var res = Decompress(buffer, length, outputBuffer, (int)unCompressedSize);
-                output.Write(outputBuffer, 0, res);
+                var res = Decompress(input, buffer, (int)unCompressedSize);
+                output.Write(buffer, 0, res);
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(outputBuffer);
                 ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
-        protected virtual (int encCount, int litCount) GetLiteralToken(byte[] input, ref int inputPos) => ((input[inputPos] >> 0) & 0xf, (input[inputPos++] >> 4) & 0xf);
-        protected virtual int GetChunkEnd(byte[] input, ref int inputPos) => input[inputPos++] << 0 | input[inputPos++] << 8;
-        protected virtual int GetLength(int length, 
-            byte[] input, ref int inputPos)
+        protected virtual (int encCount, int litCount) GetLiteralToken(Stream input)
+        {
+            var b = (byte)input.ReadByte();
+            return ((b >> 0) & 0xf, (b >> 4) & 0xf);
+        }
+        protected virtual int GetChunkEnd(Stream input)
+        {
+            return input.ReadByte() << 0 | input.ReadByte() << 8;
+        }
+        protected virtual int GetLength(int length,
+            Stream input)
         {
             byte sum;
 
@@ -89,7 +108,7 @@ namespace ZoDream.Shared.Compression.Lz4
             {
                 do
                 {
-                    length += sum = input[inputPos++];
+                    length += sum = (byte)input.ReadByte();
                 } while (sum == 0xff);
             }
             return length;

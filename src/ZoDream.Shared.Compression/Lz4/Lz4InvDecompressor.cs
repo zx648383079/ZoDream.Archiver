@@ -1,8 +1,17 @@
-﻿namespace ZoDream.Shared.Compression.Lz4
+﻿using System.IO;
+
+namespace ZoDream.Shared.Compression.Lz4
 {
     public class Lz4InvDecompressor(long unCompressedSize) : Lz4Decompressor(unCompressedSize)
     {
-        protected override (int encCount, int litCount) GetLiteralToken(byte[] input, ref int inputPos) => ((input[inputPos] >> 4) & 0xf, (input[inputPos++] >> 0) & 0xf);
-        protected override int GetChunkEnd(byte[] input, ref int inputPos) => input[inputPos++] << 8 | input[inputPos++] << 0;
+        protected override (int encCount, int litCount) GetLiteralToken(Stream input)
+        {
+            var b = (byte)input.ReadByte();
+            return ((b >> 4) & 0xf, (b >> 0) & 0xf);
+        }
+        protected override int GetChunkEnd(Stream input)
+        {
+            return input.ReadByte() << 8 | input.ReadByte() << 0;
+        }
     }
 }

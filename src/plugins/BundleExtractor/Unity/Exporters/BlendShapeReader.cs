@@ -96,7 +96,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         internal static bool IsSupport(Stream input)
         {
-            input.Seek(4, SeekOrigin.End);
+            input.Seek(- 4, SeekOrigin.End);
             var buffer = input.ReadBytes(4);
             input.Position = 0;
             return buffer.Equal([0x18, 0xC0, 0xE3, 0x1]);

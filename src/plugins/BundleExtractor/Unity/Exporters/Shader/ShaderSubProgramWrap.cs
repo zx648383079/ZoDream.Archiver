@@ -1,28 +1,27 @@
-﻿using System.IO;
-using ZoDream.Shared.Bundle;
+﻿using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class ShaderSubProgramWrap
     {
-        private byte[] buffer;
-        private ShaderSubProgramEntry entry;
+        private readonly ShaderSubProgram subProgram;
+        private readonly ShaderSubProgramEntry entry;
 
         public ShaderSubProgramWrap(IBundleBinaryReader reader, ShaderSubProgramEntry paramEntry)
         {
             entry = paramEntry;
-            buffer = new byte[entry.Length];
-            reader.BaseStream.ReadExactly(buffer, 0, entry.Length);
+            var pos = reader.Position;
+            subProgram = new ShaderSubProgram(new BundleBinaryReader(
+                new PartialStream(reader.BaseStream, pos, entry.Length),
+                reader
+                ));
+            reader.Position = pos + entry.Length;
         }
 
         public ShaderSubProgram GenShaderSubProgram()
         {
-            ShaderSubProgram shaderSubProgram = null;
-            using (var reader = new BundleBinaryReader(new MemoryStream(buffer), leaveOpen: false))
-            {
-                shaderSubProgram = new ShaderSubProgram(reader);
-            }
-            return shaderSubProgram;
+            return subProgram;
         }
     }
 }

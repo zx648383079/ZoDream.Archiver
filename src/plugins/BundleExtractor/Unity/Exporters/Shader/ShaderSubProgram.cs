@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
+using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Language;
@@ -9,38 +10,49 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class ShaderSubProgram
     {
-        private int m_Version;
+        private readonly UnityVersion _version;
         public ShaderGpuProgramType m_ProgramType;
         public string[] m_Keywords;
         public string[] m_LocalKeywords;
         public byte[] m_ProgramCode;
 
-        private static int i = 0;
+        private readonly bool _hasError;
         public ShaderSubProgram(IBundleBinaryReader reader)
         {
-            //LoadGpuProgramFromData
-            //201509030 - Unity 5.3
-            //201510240 - Unity 5.4
-            //201608170 - Unity 5.5
-            //201609010 - Unity 5.6, 2017.1 & 2017.2
-            //201708220 - Unity 2017.3, Unity 2017.4 & Unity 2018.1
-            //201802150 - Unity 2018.2 & Unity 2018.3
-            //201806140 - Unity 2019.1~2021.1
-            //202012090 - Unity 2021.2
-            m_Version = reader.ReadInt32();
+            _version = reader.Get<UnityVersion>();
+            var versionNo = reader.ReadInt32();
+            Debug.Assert(GetExpectedProgramVersion(_version) == versionNo);
             m_ProgramType = (ShaderGpuProgramType)reader.ReadInt32();
-            reader.BaseStream.Position += 12;
-            if (m_Version >= 201608170)
+            var statsALU = reader.ReadInt32();
+            var statsTEX = reader.ReadInt32();
+            var statsFlow = reader.ReadInt32();
+            if (_version.GreaterThanOrEquals(5, 5))
             {
-                reader.BaseStream.Position += 4;
+                var statsTempRegister = reader.ReadInt32();
             }
             var m_KeywordsSize = reader.ReadInt32();
-            m_Keywords = new string[m_KeywordsSize];
-            for (int i = 0; i < m_KeywordsSize; i++)
+            if (m_KeywordsSize > 500)
             {
-                m_Keywords[i] = reader.ReadAlignedString();
+                _hasError = true;
+                // TODO 遇到不合规的
+                return;
             }
-            if (m_Version >= 201806140 && m_Version < 202012090)
+            try
+            {
+                m_Keywords = new string[m_KeywordsSize];
+                for (int i = 0; i < m_KeywordsSize; i++)
+                {
+                    m_Keywords[i] = reader.ReadAlignedString();
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                m_Keywords = [];
+                _hasError = true;
+                // TODO 遇到不合规的
+                return;
+            }
+            if (_version.LessThan(2021, 2) && _version.GreaterThanOrEquals(2019))
             {
                 var m_LocalKeywordsSize = reader.ReadInt32();
                 m_LocalKeywords = new string[m_LocalKeywordsSize];
@@ -52,11 +64,23 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             m_ProgramCode = reader.ReadArray((r, _) => r.ReadByte());
             reader.AlignStream();
 
-            //TODO
+            var sourceMap = reader.ReadInt32();
+            var bindCount = reader.ReadInt32();
+            for (int i = 0; i < bindCount; i++)
+            {
+                var source = reader.ReadUInt32();
+                var target = reader.ReadUInt32();
+                sourceMap |= 1 << (int)source;
+            }
         }
 
         public void Write(ICodeWriter writer)
         {
+            if (_hasError)
+            {
+                writer.Write("// has some error, don't disassemble").WriteLine(true);
+                return;
+            }
             if (m_Keywords.Length > 0)
             {
                 writer.Write("Keywords { ");
@@ -143,7 +167,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     case ShaderGpuProgramType.SPIRV:
                         try
                         {
-                            SpirVShader.Convert(m_ProgramCode, writer);
+                            SpirVShader.Convert(m_ProgramCode, _version, writer);
                         }
                         catch (Exception e)
                         {
@@ -163,6 +187,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
             }
             writer.Write('"').WriteLine(true);
+        }
+
+        private static int GetExpectedProgramVersion(UnityVersion version)
+        {
+            return version switch
+            {
+                _ when version.Equals(5, 3) => 201509030,
+                _ when version.Equals(5, 4) => 201510240,
+                _ when version.Equals(5, 5) => 201608170,
+                _ when version.LessThan(2017, 3) => 201609010,
+                _ when version.LessThan(2018, 2) => 201708220,
+                _ when version.LessThan(2019) => 201802150,
+                _ when version.LessThan(2021, 2) => 201806140,
+                _ => 202012090,
+            };
         }
     }
 }

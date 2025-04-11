@@ -191,7 +191,7 @@ namespace ZoDream.ShaderDecompiler.SpirV
             int varyingWordStart = 0;
             SpvInstructionOperand? varyingOperand = null;
 
-            while (currentWord < Words.Count)
+            while (currentWord < Words.Count && Instruction.Operands.Length > currentOperand)
             {
                 var operand = Instruction.Operands[currentOperand];
                 operand.Type.ReadValue(Words, currentWord, out object value, out int wordsUsed);

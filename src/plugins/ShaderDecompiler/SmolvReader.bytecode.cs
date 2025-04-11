@@ -22,7 +22,9 @@ namespace ZoDream.ShaderDecompiler
             var magic = reader.ReadUInt32(); // HeaderMagic
             Debug.Assert(magic == Signature);
             var data = new SpvBytecode();
-            data.Header.Version = reader.ReadUInt32();
+            var version = reader.ReadUInt32();
+            var smolVersion = version >> 24;
+            data.Header.Version = version & 0x00FFFFFF;
             data.Header.Generator = reader.ReadUInt32();
             data.Header.Bound = reader.ReadUInt32();
             data.Header.Reserved = reader.ReadUInt32();
@@ -31,20 +33,33 @@ namespace ZoDream.ShaderDecompiler
             {
                 throw new Exception("Invalid SMOL-V shader header");
             }
-            data.MainChunk.OpcodeItems = ReadOperand(reader).ToArray();
+            data.MainChunk.OpcodeItems = ReadOperand(reader, (int)smolVersion).ToArray();
             return data;
         }
 
-        private IEnumerable<SpvOperandCode> ReadOperand(BinaryReader input)
+        private static void ThrowDecodeException()
         {
+            throw new Exception("Unable to decode SMOL-V shader");
+        }
+
+        private IEnumerable<SpvOperandCode> ReadOperand(BinaryReader input, int version)
+        {
+            var beforeZeroVersion = version == 0;
+            var knownOpsCount = version switch
+            {
+                0 => (int)SmvOperand.ModuleProcessed + 1,
+                1 => (int)SmvOperand.GroupNonUniformQuadSwap + 1,
+                _ => 0,
+            };
             int prevResult = 0;
             int prevDecorate = 0;
+            uint val;
             while (input.BaseStream.Position < input.BaseStream.Length)
             {
                 // read length + opcode
                 if (!ReadLengthOp(input, out uint instrLen, out SmvOperand op))
                 {
-                    throw new Exception("Unable to decode SMOL-V shader");
+                    ThrowDecodeException();
                 }
                 var words = new List<uint>((int)instrLen);
                 bool wasSwizzle = op == SmvOperand.VectorShuffleCompact;
@@ -55,27 +70,28 @@ namespace ZoDream.ShaderDecompiler
                 words.Add((instrLen << 16) | (uint)op);
 
                 uint ioffs = 1;
+                var isVerify = op >= 0 && (int)op < knownOpsCount;
                 // read type as varint, if we have it
                 var opCode = SmvOperandCode.Get(op);
-                if (opCode.HasType != 0)
+                if (isVerify && opCode.HasType != 0)
                 {
-                    if (!ReadVarint(input, out uint value))
+                    if (!ReadVarint(input, out val))
                     {
-                        throw new Exception("Unable to decode SMOL-V shader");
+                        ThrowDecodeException();
                     }
-                    words.Add(value);
+                    words.Add(val);
                     ioffs++;
                 }
 
                 // read result as delta + varint, if we have it
-                if (opCode.HasResult != 0)
+                if (isVerify && opCode.HasResult != 0)
                 {
-                    if (!ReadVarint(input, out uint value))
+                    if (!ReadVarint(input, out val))
                     {
-                        throw new Exception("Unable to decode SMOL-V shader");
+                        ThrowDecodeException();
                     }
 
-                    int zds = prevResult + ZigDecode(value);
+                    int zds = prevResult + ZigDecode(val);
                     prevResult = zds;
                     words.Add((uint)zds);
                     ioffs++;
@@ -84,34 +100,119 @@ namespace ZoDream.ShaderDecompiler
                 // Decorate: IDs relative to previous decorate
                 if (op == SmvOperand.Decorate || op == SmvOperand.MemberDecorate)
                 {
-                    if (!ReadVarint(input, out uint value))
+                    if (!ReadVarint(input, out val))
                     {
-                        throw new Exception("Unable to decode SMOL-V shader");
+                        ThrowDecodeException();
                     }
 
-                    int zds = prevDecorate + unchecked((int)value);
+                    int zds = prevDecorate + (beforeZeroVersion ? (int)val : ZigDecode(val));
                     prevDecorate = zds;
                     words.Add((uint)zds);
                     ioffs++;
                 }
 
-                // Read this many IDs, that are relative to result ID
-                int relativeCount = opCode.DeltaFromResult;
-                bool inverted = false;
-                if (relativeCount < 0)
+                if (op == SmvOperand.MemberDecorate && !beforeZeroVersion)
                 {
-                    inverted = true;
-                    relativeCount = -relativeCount;
+                    if (input.BaseStream.Position >= input.BaseStream.Length)
+                    {
+                        ThrowDecodeException();
+                    }
+                    int count = input.ReadByte();
+                    int prevIndex = 0;
+                    int prevOffset = 0;
+                    for (int m = 0; m < count; ++m)
+                    {
+                        // read member index
+                        if (!ReadVarint(input, out var memberIndex))
+                        {
+                            ThrowDecodeException();
+                        }
+                        memberIndex += (uint)prevIndex;
+                        prevIndex = (int)memberIndex;
+
+                        // decoration (and length if not common/known)
+                        if (!ReadVarint(input, out var memberDec))
+                        {
+                            ThrowDecodeException();
+                        }
+                        var knownExtraOps = DecorationExtraOps((int)memberDec);
+                        uint memberLen;
+                        if (knownExtraOps == -1)
+                        {
+                            if (!ReadVarint(input, out memberLen))
+                            {
+                                ThrowDecodeException();
+                            }
+                            memberLen += 4;
+                        }
+                        else
+                        {
+                            memberLen = 4 + (uint)knownExtraOps;
+                        }
+
+                        // write SPIR-V op+length (unless it's first member decoration, in which case it was written before)
+                        if (m != 0)
+                        {
+                            words.Add((memberLen << 16) | (uint)op);
+                            words.Add((uint)prevDecorate);
+                        }
+                        words.Add(memberIndex);
+                        words.Add(memberDec);
+                        // Special case for Offset decorations
+                        if (memberDec == 35) // Offset
+                        {
+                            if (memberLen != 5)
+                            {
+                                ThrowDecodeException();
+                            }
+                            if (!ReadVarint(input, out val))
+                            {
+                                ThrowDecodeException();
+                            }
+                            val += (uint)prevOffset;
+                            words.Add(val);
+                            prevOffset = (int)val;
+                        }
+                        else
+                        {
+                            for (var i = 4; i < memberLen; ++i)
+                            {
+                                if (!ReadVarint(input, out val))
+                                {
+                                    ThrowDecodeException();
+                                }
+                                words.Add(val);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                // Read this many IDs, that are relative to result ID
+                int relativeCount = isVerify ? opCode.DeltaFromResult : 0;
+                bool zigDecodeVals = true;
+                if (beforeZeroVersion)
+                {
+                    if (op != SmvOperand.ControlBarrier
+                        && op != SmvOperand.MemoryBarrier 
+                        && op != SmvOperand.LoopMerge && op != SmvOperand.SelectionMerge 
+                        && op != SmvOperand.Branch && op != SmvOperand.BranchConditional 
+                        && op != SmvOperand.MemoryNamedBarrier)
+                    {
+                        zigDecodeVals = false;
+                    }
                 }
                 for (int i = 0; i < relativeCount && ioffs < instrLen; ++i, ++ioffs)
                 {
-                    if (!ReadVarint(input, out uint value))
+                    if (!ReadVarint(input, out val))
                     {
-                        throw new Exception("Unable to decode SMOL-V shader");
+                        ThrowDecodeException();
                     }
-
-                    int zd = inverted ? ZigDecode(value) : unchecked((int)value);
-                    words.Add((uint)(prevResult - zd));
+                    if (zigDecodeVals)
+                    {
+                        val = (uint)ZigDecode(val);
+                    }
+                    words.Add((uint)prevResult - val);
                 }
 
                 if (wasSwizzle && instrLen <= 9)
@@ -119,7 +220,7 @@ namespace ZoDream.ShaderDecompiler
                     uint swizzle = input.ReadByte();
                     if (instrLen > 5)
                     {
-                        words.Add(swizzle >> 6);
+                        words.Add((swizzle >> 6) & 3);
                     }
                     if (instrLen > 6)
                     {
@@ -134,16 +235,16 @@ namespace ZoDream.ShaderDecompiler
                         words.Add(swizzle & 3);
                     }
                 }
-                else if (opCode.VarRest != 0)
+                else if (isVerify && opCode.VarRest != 0)
                 {
                     // read rest of words with variable encoding
                     for (; ioffs < instrLen; ++ioffs)
                     {
-                        if (!ReadVarint(input, out uint value))
+                        if (!ReadVarint(input, out val))
                         {
-                            throw new Exception("Unable to decode SMOL-V shader");
+                            ThrowDecodeException();
                         }
-                        words.Add(value);
+                        words.Add(val);
                     }
                 }
                 else
@@ -153,10 +254,9 @@ namespace ZoDream.ShaderDecompiler
                     {
                         if (input.BaseStream.Position + 4 > input.BaseStream.Length)
                         {
-                            throw new Exception("Unable to decode SMOL-V shader");
+                            ThrowDecodeException();
                         }
-                        var val = input.ReadUInt32();
-                        words.Add(val);
+                        words.Add(input.ReadUInt32());
                     }
                 }
                 yield return new SpvOperandCode((SpvOperand)(int)op, [..words]);
@@ -170,16 +270,15 @@ namespace ZoDream.ShaderDecompiler
             while (input.BaseStream.Position < input.BaseStream.Length)
             {
                 byte b = input.ReadByte();
-                v |= unchecked((uint)(b & 127) << shift);
+                v |= unchecked((uint)(b & 0x7F) << shift);
                 shift += 7;
-                if ((b & 128) == 0)
+                if ((b & 0x80) == 0)
                 {
                     break;
                 }
             }
 
             value = v;
-            // @TODO: report failures
             return true;
         }
 

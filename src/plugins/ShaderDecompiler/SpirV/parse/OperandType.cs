@@ -198,14 +198,14 @@ namespace ZoDream.ShaderDecompiler.SpirV
                         resultItems[j] = pValue;
                     }
                 }
-                value = new ValueEnumOperandValue<T>((T)(object)words[index], resultItems);
+                value = new ValueEnumOperandValue<T>((T)(object)(int)words[index], resultItems);
             }
 
             wordsUsed = wordsUsedForParameters + 1;
             return true;
         }
 
-        private readonly U parameterFactory_ = new U();
+        private readonly U parameterFactory_ = new();
     }
 
     public class IdScope : OperandType

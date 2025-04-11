@@ -37,6 +37,10 @@ namespace ZoDream.ShaderDecompiler
         {
             var data = new SpvBytecode();
             data.Header.Version = input.ReadUInt32();
+            if (data.Header.Version is not Version10 and not Version11 and not Version12)
+            {
+                throw new Exception("Invalid version number");
+            }
             data.Header.Generator = input.ReadUInt32();
             data.Header.Bound = input.ReadUInt32();
             data.Header.Reserved = input.ReadUInt32();

@@ -1,5 +1,4 @@
-﻿using K4os.Compression.LZ4;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,6 +6,8 @@ using System.Linq;
 using System.Text;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Compression.Lz4;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Language;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -32,10 +33,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             sw.Write(NoteHeader).WriteLine();
             if (shader.m_SubProgramBlob != null) //5.3 - 5.4
             {
-                var decompressedBytes = new byte[shader.decompressedSize];
-                LZ4Codec.Decode(shader.m_SubProgramBlob, decompressedBytes);
-                using var blobReader = new BundleBinaryReader(
-                    new MemoryStream(decompressedBytes), leaveOpen: false);
+                var uncompressedSize = (int)shader.decompressedSize;
+                using var ms = new ArrayMemoryStream(uncompressedSize);
+                new Lz4Decompressor(shader.decompressedSize)
+                        .Decompress(
+                        shader.m_SubProgramBlob,
+                        shader.m_SubProgramBlob.Length, ms.GetBuffer(), uncompressedSize);
+                using var blobReader = new BundleBinaryReader(ms, leaveOpen: false);
                 blobReader.Add(shader.AssetFile.UnityVersion);
                 var program = new ShaderProgram(blobReader);
                 program.Read(blobReader, 0);
@@ -59,12 +63,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 for (var j = 0; j < shader.offsets[i].Length; j++)
                 {
-                    var offset = shader.offsets[i][j];
-                    var compressedLength = shader.compressedLengths[i][j];
-                    var decompressedLength = shader.decompressedLengths[i][j];
-                    var decompressedBytes = new byte[decompressedLength];
-                    LZ4Codec.Decode(shader.compressedBlob, (int)offset, (int)compressedLength, decompressedBytes, 0, (int)decompressedLength);
-                    using var blobReader = new BundleBinaryReader(new MemoryStream(decompressedBytes), leaveOpen: false);
+                    var offset = (int)shader.offsets[i][j];
+                    var compressedLength = (int)shader.compressedLengths[i][j];
+                    var decompressedLength = (int)shader.decompressedLengths[i][j];
+                    using var ms = new ArrayMemoryStream(decompressedLength);
+                    new Lz4Decompressor(decompressedLength)
+                        .Decompress(
+                            shader.compressedBlob,
+                            offset,
+                            compressedLength,
+                            ms.GetBuffer(),
+                            decompressedLength);
+                    using var blobReader = new BundleBinaryReader(ms, leaveOpen: false);
                     blobReader.Add(shader.AssetFile.UnityVersion);
                     if (j == 0)
                     {
@@ -89,7 +99,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 ConvertSerializedSubShader(writer, m_SubShader, platforms, shaderPrograms);
             }
-            writer.WriteOutdentLine();
+            
             if (!string.IsNullOrEmpty(m_ParsedForm.m_FallbackName))
             {
                 writer.Write($"Fallback \"{m_ParsedForm.m_FallbackName}\"")
@@ -102,7 +112,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     .WriteLine(true);
             }
 
-            writer.Write("}").WriteLine(true);
+            writer.WriteOutdentLine().Write("}").WriteLine(true);
         }
 
         private static void ConvertSerializedSubShader(ICodeWriter writer, SerializedSubShader m_SubShader, ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
@@ -215,8 +225,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             writer.Write("\" {").WriteIndentLine();
 
-            ShaderSubProgramWrap subProgramWrap = shaderProgram.m_SubProgramWraps[getBlobIndex(serializedSubProgram)];
-            ShaderSubProgram subProgram = subProgramWrap.GenShaderSubProgram();
+            var subProgramWrap = shaderProgram.m_SubProgramWraps[getBlobIndex(serializedSubProgram)];
+            var subProgram = subProgramWrap.GenShaderSubProgram();
             subProgram.Write(writer);
 
             writer.WriteOutdentLine().Write("}").WriteLine(true);
