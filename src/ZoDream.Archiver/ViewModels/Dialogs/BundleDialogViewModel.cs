@@ -98,6 +98,87 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _password, value);
         }
 
+        private string _dependencySource = string.Empty;
+
+        public string DependencySource {
+            get => _dependencySource;
+            set => Set(ref _dependencySource, value);
+        }
+
+        private bool _enabledImage;
+
+        public bool EnabledImage {
+            get => _enabledImage;
+            set => Set(ref _enabledImage, value);
+        }
+
+        private bool _enabledVideo;
+
+        public bool EnabledVideo {
+            get => _enabledVideo;
+            set => Set(ref _enabledVideo, value);
+        }
+
+        private bool _enabledAudio;
+
+        public bool EnabledAudio {
+            get => _enabledAudio;
+            set => Set(ref _enabledAudio, value);
+        }
+
+        private bool _enabledShader;
+
+        public bool EnabledShader {
+            get => _enabledShader;
+            set => Set(ref _enabledShader, value);
+        }
+
+        private bool _enabledLua;
+
+        public bool EnabledLua {
+            get => _enabledLua;
+            set => Set(ref _enabledLua, value);
+        }
+
+        private bool _enabledJson;
+
+        public bool EnabledJson {
+            get => _enabledJson;
+            set => Set(ref _enabledJson, value);
+        }
+
+
+        private bool _enabledSpine;
+
+        public bool EnabledSpine {
+            get => _enabledSpine;
+            set => Set(ref _enabledSpine, value);
+        }
+
+        private bool _enabledModel;
+
+        public bool EnabledModel {
+            get => _enabledModel;
+            set => Set(ref _enabledModel, value);
+        }
+
+        public string[] ModelFormatItems { get; private set; } = ["gltf", "glb", "fbx"];
+
+        private string _modelFormat;
+
+        public string ModelFormat {
+            get => _modelFormat;
+            set => Set(ref _modelFormat, value);
+        }
+
+        private int _maxBatchCount = 100;
+
+        public int MaxBatchCount {
+            get => _maxBatchCount;
+            set => Set(ref _maxBatchCount, value);
+        }
+
+
         private Visibility _isEncrypted = Visibility.Collapsed;
 
         public Visibility IsEncrypted {
@@ -109,7 +190,21 @@ namespace ZoDream.Archiver.ViewModels
         public bool IsValid => !string.IsNullOrWhiteSpace(FileName);
 
         public ICommand OpenCommand { get; private set; }
+        public ICommand OpenDependencyCommand { get; private set; }
         public ICommand FolderCommand { get; private set; }
+
+        private async void TapOpenDependency(object? _)
+        {
+            var picker = new FileSavePicker();
+            picker.FileTypeChoices.Add("依赖文件", [".bin"]);
+            App.ViewModel.InitializePicker(picker);
+            var res = await picker.PickSaveFileAsync();
+            if (res is null)
+            {
+                return;
+            }
+            DependencySource = res.Path;
+        }
 
         private async void TapFolder(object? _)
         {
@@ -180,6 +275,20 @@ namespace ZoDream.Archiver.ViewModels
                 FileName = o.OutputFolder;
                 ExtractMode = o.FileMode;
             }
+            if (options is IBundleExtractOptions b)
+            {
+                DependencySource = b.DependencySource;
+                EnabledAudio = b.EnabledAudio;
+                EnabledImage = b.EnabledImage;
+                EnabledLua = b.EnabledLua;
+                EnabledModel = b.EnabledModel;
+                EnabledShader = b.EnabledShader;
+                EnabledSpine = b.EnabledSpine;
+                EnabledVideo = b.EnabledVideo;
+                EnabledJson = b.EnabledJson;
+                ModelFormat = b.ModelFormat;
+                MaxBatchCount = b.MaxBatchCount;
+            }
         }
 
         /// <summary>
@@ -193,6 +302,17 @@ namespace ZoDream.Archiver.ViewModels
                 o.Password = Password;
                 o.OutputFolder = FileName;
                 o.FileMode = ExtractMode;
+                o.EnabledVideo = EnabledAudio;
+                o.EnabledAudio = EnabledImage;
+                o.EnabledLua = EnabledLua;
+                o.EnabledModel = EnabledModel;
+                o.EnabledShader = EnabledShader;
+                o.ModelFormat = ModelFormat;
+                o.EnabledImage = EnabledImage;
+                o.EnabledSpine = EnabledSpine;
+                o.EnabledJson = EnabledJson;
+                o.DependencySource = DependencySource;
+                o.MaxBatchCount = MaxBatchCount;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))
             {

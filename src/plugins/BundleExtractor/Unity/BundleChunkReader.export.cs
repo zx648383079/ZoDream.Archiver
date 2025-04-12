@@ -82,8 +82,26 @@ namespace ZoDream.BundleExtractor
             };
         }
 
+        private bool IsExclude(UIObject obj)
+        {
+            return obj switch
+            {
+                GameObject or Mesh or AnimationClip or Animator => Options?.EnabledModel != true,
+                Shader => Options?.EnabledShader != true,
+                Texture2D or Texture or Sprite => Options?.EnabledImage != true,
+                AudioClip => Options?.EnabledAudio != true,
+                VideoClip => Options?.EnabledVideo != true,
+                TextAsset => Options?.EnabledLua != true && Options?.EnabledSpine != true && Options?.EnabledJson != true,
+                _ => false,
+            };
+        }
+
         private IFileExporter? TryParse(UIObject obj)
         {
+            if (IsExclude(obj))
+            {
+                return null;
+            }
             IMultipartExporter? instance;
             if (obj is GameObject or Mesh or Animator or AnimationClip)
             {

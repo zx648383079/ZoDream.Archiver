@@ -18,64 +18,140 @@
     <ContentDialog.Resources>
         <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
     </ContentDialog.Resources>
-    <ScrollViewer>
-        <StackPanel>
-            <TextBlock Text="Destination Path" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding FileName, Mode=TwoWay}" />
-                <Button
-                    Grid.Column="1"
-                    Command="{Binding OpenCommand}"
-                    Content="&#xE8DA;"
-                    Style="{StaticResource IconBtn}" />
-            </Grid>
-
-            <ComboBox
-                Header="Same File"
-                ItemsSource="{Binding TypeItems}"
-                SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
-
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <ComboBox
-                    Header="Game Engine"
-                    ItemsSource="{Binding EngineItems}"
-                    SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
+    <Pivot>
+        <PivotItem Header="基本">
+            <StackPanel>
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Destination Path" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding OpenCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
 
                 <ComboBox
-                    Grid.Column="1"
-                    Header="Platform"
-                    ItemsSource="{Binding PlatformItems}"
-                    SelectedIndex="{Binding PlatformIndex, Mode=TwoWay}" />
-            </Grid>
+                    Header="Same File"
+                    ItemsSource="{Binding TypeItems}"
+                    SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
 
-            <TextBlock Style="{StaticResource InputHeaderTb}" Text="Entrance Folder" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding Entrance, Mode=TwoWay}" />
-                <Button
-                    Grid.Column="1"
-                    Command="{Binding FolderCommand}"
-                    Content="&#xE8DA;"
-                    Style="{StaticResource IconBtn}" />
-            </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Header="Game Engine"
+                        ItemsSource="{Binding EngineItems}"
+                        SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
 
-            <TextBox
-                Header="Package Name"
-                InputScope="Url"
-                PlaceholderText="cn.zodream.xx"
-                Text="{Binding ApplicationId, Mode=TwoWay}" />
-            <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />
-        </StackPanel>
-    </ScrollViewer>
+                    <ComboBox
+                        Grid.Column="1"
+                        Header="Platform"
+                        ItemsSource="{Binding PlatformItems}"
+                        SelectedIndex="{Binding PlatformIndex, Mode=TwoWay}" />
+                </Grid>
+
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Entrance Folder" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding Entrance, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding FolderCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+
+                <TextBox
+                    Header="Package Name"
+                    InputScope="Url"
+                    PlaceholderText="cn.zodream.xx"
+                    Text="{Binding ApplicationId, Mode=TwoWay}" />
+                <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />
+            </StackPanel>
+        </PivotItem>
+        <PivotItem Header="高级">
+            <StackPanel>
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Dependency Path" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding DependencySource, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding OpenDependencyCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ToggleSwitch Header="Image" IsOn="{Binding EnabledImage, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="1"
+                        Header="Audio"
+                        IsOn="{Binding EnabledAudio, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="2"
+                        Header="Video"
+                        IsOn="{Binding EnabledVideo, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Header="Shader"
+                        IsOn="{Binding EnabledShader, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Header="Lua"
+                        IsOn="{Binding EnabledLua, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Header="Json"
+                        IsOn="{Binding EnabledJson, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="2"
+                        Header="Spine"
+                        IsOn="{Binding EnabledSpine, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="3"
+                        Header="Model"
+                        IsOn="{Binding EnabledModel, Mode=TwoWay}" />
+                    <ComboBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Header="3D格式"
+                        ItemsSource="{Binding ModelFormatItems}"
+                        SelectedItem="{Binding ModelFormat, Mode=TwoWay}"
+                        Visibility="{Binding EnabledModel, Converter={StaticResource ToggleCvt}}" />
+                    <NumberBox
+                        Grid.Row="4"
+                        Header="最大批处理数"
+                        Minimum="1"
+                        Value="{Binding MaxBatchCount, Mode=TwoWay}" />
+                </Grid>
+            </StackPanel>
+        </PivotItem>
+    </Pivot>
 </ContentDialog>

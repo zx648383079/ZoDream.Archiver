@@ -21,6 +21,7 @@ namespace ZoDream.Shared.Bundle
 
         public bool EnabledShader { get; set; } = true;
         public bool EnabledLua { get; set; } = true;
+        public bool EnabledJson { get; set; } = true;
         /// <summary>
         /// 包括 live2d
         /// </summary>
