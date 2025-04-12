@@ -32,6 +32,18 @@ namespace ZoDream.Shared.Interfaces
         public bool TryGet<T>(string key, [NotNullWhen(true)] out T? instance);
 
         public Task<T?> AskAsync<T>();
+        /// <summary>
+        /// 判断存档点是否存在
+        /// </summary>
+        /// <param name="hashCode"></param>
+        /// <returns></returns>
+        public uint CheckPoint(ulong hashCode);
+        /// <summary>
+        /// 保存存档点
+        /// </summary>
+        /// <param name="hashCode"></param>
+        /// <param name="progress"></param>
+        public void SavePoint(ulong hashCode, uint progress);
     }
 
     public interface IEntryExplorer: IDisposable

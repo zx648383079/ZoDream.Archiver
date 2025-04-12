@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Hashing;
 using System.Text;
 
 namespace ZoDream.Shared.Bundle
@@ -29,7 +28,7 @@ namespace ZoDream.Shared.Bundle
 
         private readonly BinaryWriter? _writer;
 
-        private readonly HashSet<string> _fileItems = [];
+        private readonly HashSet<ulong> _fileItems = [];
 
         public void AddDependency(string fileName, string dependencyFileName)
         {
@@ -37,6 +36,12 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
+            var hash = BundleSource.ToHashCode(fileName);
+            if (_fileItems.Contains(hash))
+            {
+                return;
+            }
+            _writer.Write(dependencyFileName);
         }
 
         public void AddDependencyEntry(string fileName, long dependencyEntryId)
@@ -107,9 +112,5 @@ namespace ZoDream.Shared.Bundle
             _writer?.Dispose();
         }
 
-        private static ulong Hash(string text)
-        {
-            return XxHash64.HashToUInt64(Encoding.UTF8.GetBytes(text));
-        }
     }
 }

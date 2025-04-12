@@ -3,13 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
+using System.IO.Hashing;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
     public class BundleSource(IEnumerable<string> fileItems) : IBundleSource
     {
+
+        public BundleSource(IEnumerable<string> fileItems, IEntryService service)
+            : this(fileItems)
+        {
+            _service = service;
+        }
+
+        private readonly IEntryService? _service;
+        private readonly ulong _hasCode = ToHashCode(fileItems);
         private IBundleFilter? _filter;
 
         /// <summary>
@@ -34,7 +46,7 @@ namespace ZoDream.Shared.Bundle
 
         public void Breakpoint()
         {
-
+            _service?.SavePoint(_hasCode, 0);
         }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
@@ -243,6 +255,16 @@ namespace ZoDream.Shared.Bundle
                 }
             }
             return count;
+        }
+
+        public static ulong ToHashCode(string fileName)
+        {
+            return XxHash64.HashToUInt64(Encoding.UTF8.GetBytes(fileName));
+        }
+
+        public static ulong ToHashCode(IEnumerable<string> items)
+        {
+            return ToHashCode(string.Join('|', items.Order()));
         }
     }
 

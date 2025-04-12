@@ -169,6 +169,15 @@ namespace ZoDream.Archiver.ViewModels
             return (T)instance;
         }
 
+        public uint CheckPoint(ulong hashCode)
+        {
+            return 0;
+        }
+        public void SavePoint(ulong hashCode, uint progress)
+        {
+
+        }
+
         public void Dispose()
         {
             foreach (var item in _instanceItems)
