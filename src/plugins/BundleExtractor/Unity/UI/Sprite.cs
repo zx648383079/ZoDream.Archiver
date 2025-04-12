@@ -6,7 +6,6 @@ using System.Linq;
 using System.Numerics;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Collections;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -89,7 +88,22 @@ namespace ZoDream.BundleExtractor.Unity.UI
             GetImage(this)?.SaveAs(fileName);
         }
 
-
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            if (m_SpriteAtlas != null && m_SpriteAtlas.TryGet(out var atlas))
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_SpriteAtlas.m_PathID);
+                if (atlas.m_RenderDataMap.TryGetValue(m_RenderDataKey, out var spriteAtlasData))
+                {
+                    builder?.AddDependencyEntry(_reader.FullPath, FileID, spriteAtlasData.texture.m_PathID);
+                }
+            }
+            else
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_RD.texture.m_PathID);
+            }
+            
+        }
 
         #region CutImage
         public static SKImage? GetImage(Sprite m_Sprite)

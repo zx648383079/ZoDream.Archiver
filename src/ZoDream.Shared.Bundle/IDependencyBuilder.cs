@@ -29,6 +29,7 @@ namespace ZoDream.Shared.Bundle
         /// <param name="entryId"></param>
         /// <param name="dependencyEntryId"></param>
         public void AddDependencyEntry(string fileName, long entryId, long dependencyEntryId);
+        public void AddDependencyEntry(string fileName, long entryId, string dependencyEntryName);
         /// <summary>
         /// 文件中的名称资源依赖另一个名称资源
         /// </summary>

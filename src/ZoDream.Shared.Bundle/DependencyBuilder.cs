@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.IO.Hashing;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -17,9 +15,11 @@ namespace ZoDream.Shared.Bundle
             
         }
         public DependencyBuilder(string fullPath)
-            : this(File.Create(fullPath))
         {
-            
+            if (!string.IsNullOrWhiteSpace(fullPath))
+            {
+                _writer = new BinaryWriter(File.Create(fullPath), Encoding.UTF8);
+            }
         }
 
         public DependencyBuilder(Stream output)
@@ -29,41 +29,87 @@ namespace ZoDream.Shared.Bundle
 
         private readonly BinaryWriter? _writer;
 
+        private readonly HashSet<string> _fileItems = [];
+
         public void AddDependency(string fileName, string dependencyFileName)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void AddDependencyEntry(string fileName, long dependencyEntryId)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void AddDependencyEntry(string fileName, long entryId, long dependencyEntryId)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
-
+        public void AddDependencyEntry(string fileName, long entryId, string dependencyEntryName)
+        {
+            if (_writer is null)
+            {
+                return;
+            }
+        }
         public void AddDependencyEntry(string fileName, string entryName, string dependencyEntryName)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void AddDependencyEntry(string fileName, string dependencyEntryName)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void AddEntry(string fileName, long entryId)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void AddEntry(string fileName, string entryName)
         {
+            if (_writer is null)
+            {
+                return;
+            }
         }
 
         public void Flush()
         {
+            if (_writer is null)
+            {
+                return;
+            }
+            _writer.Flush();
         }
 
         public void Dispose()
         {
             _writer?.Dispose();
+        }
+
+        private static ulong Hash(string text)
+        {
+            return XxHash64.HashToUInt64(Encoding.UTF8.GetBytes(text));
         }
     }
 }

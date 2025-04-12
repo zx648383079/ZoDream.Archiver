@@ -37,5 +37,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             m_IsVariant = reader.ReadBoolean();
             reader.AlignStream();
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            foreach (var item in m_PackedSprites)
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, item.m_PathID);
+            }
+        }
     }
 }

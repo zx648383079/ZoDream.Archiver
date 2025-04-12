@@ -16,13 +16,13 @@ namespace ZoDream.LuaDecompiler
                 case Operand.MOVE:
                     {
                         var key = TranslateValue(chunk, code.B, OperandFormat.REGISTER);
-                        if (Contains(key))
+                        if (_envItems.ContainsKey(key))
                         {
-                            Rename(key, TranslateName(chunk, code.A, OperandFormat.REGISTER));
+                            _envItems.Rename(key, TranslateName(chunk, code.A, OperandFormat.REGISTER));
                             break;
                         }
                         var val = TranslateNotSet(chunk, code.B, OperandFormat.REGISTER);
-                        Add(TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
+                        _envItems.Add(TranslateIsSet(chunk, code.A, OperandFormat.REGISTER),
                             val);
                         //builder.WriteFormat("{0} = {1}",
                         //    TranslateName(chunk, code.A, OperandFormat.REGISTER),
@@ -107,7 +107,7 @@ namespace ZoDream.LuaDecompiler
                         );
                     break;
                 case Operand.GETGLOBAL:
-                    Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
+                    _envItems.Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
                         TranslateName(chunk, code.Bx, OperandFormat.CONSTANT_STRING));
                     //builder.WriteFormat("{0} = _G[{1}]",
                     //    TranslateName(chunk, code.A, OperandFormat.REGISTER),
@@ -365,7 +365,6 @@ namespace ZoDream.LuaDecompiler
                     break;
                 case Operand.CLOSURE:
                     {
-                        RemoveTemporary();
                         var fn = TranslateValue(chunk, code.A, OperandFormat.REGISTER);
                         if (TryMoveNext(chunk, Version <= LuaVersion.Lua51
                             ? Operand.SETGLOBAL : Operand.SETTABUP, out var next))
@@ -402,8 +401,8 @@ namespace ZoDream.LuaDecompiler
                             args[i] = TranslateNotSet(sub, begin + i, OperandFormat.REGISTER);
                         }
                         // TODO 判断输入参数名
-                        builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args)).WriteLine()
-                            .WriteIncIndent().WriteFormat("-- {0} {1} FNEW {2};",
+                        builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args))
+                            .WriteIndentLine().WriteFormat("-- {0} {1} FNEW {2};",
                                     chunk.CurrentIndex,
                                     chunk.DebugInfo.LineNoItems.Length > chunk.CurrentIndex ?
                                     chunk.DebugInfo.LineNoItems[chunk.CurrentIndex] : 0,
@@ -441,7 +440,7 @@ namespace ZoDream.LuaDecompiler
                             OperandFormat.REGISTER_K : OperandFormat.CONSTANT_STRING;
                         if (target.Equals("_env", StringComparison.OrdinalIgnoreCase))
                         {
-                            Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
+                            _envItems.Add(TranslateName(chunk, code.A, OperandFormat.REGISTER), 
                                 TranslateName(chunk, code.C, cType));
                             break;
                         }
@@ -745,7 +744,7 @@ namespace ZoDream.LuaDecompiler
         private string TranslateIsSet(LuaChunk chunk, int value, OperandFormat format)
         {
             var res = TranslateValue(chunk, value, format);
-            Remove(res);
+            _envItems.Remove(res);
             if (format == OperandFormat.REGISTER && TryGetLocal(chunk, value, out var fn))
             {
                 return fn;
@@ -759,7 +758,7 @@ namespace ZoDream.LuaDecompiler
             var res = TranslateValue(chunk, value, format);
             if (format is OperandFormat.REGISTER)
             {
-                if (TryGet(res, out var fn))
+                if (_envItems.TryGetValue(res, out var fn))
                 {
                     return fn;
                 }

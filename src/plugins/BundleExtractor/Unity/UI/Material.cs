@@ -71,5 +71,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             //vector m_BuildTextureStacks 2020 and up
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Shader.m_PathID);
+        }
     }
 }

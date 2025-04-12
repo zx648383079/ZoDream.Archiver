@@ -6,7 +6,7 @@ using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
-    internal class Texture2DArray(UIReader reader) : Texture(reader)
+    internal sealed class Texture2DArray(UIReader reader) : Texture(reader)
     {
         public int m_Width;
         public int m_Height;
@@ -56,7 +56,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             TextureList = [];
         }
-    }
 
-    
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            if (!string.IsNullOrEmpty(m_StreamData?.path))
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_StreamData.path);
+            }
+        }
+    }
 }

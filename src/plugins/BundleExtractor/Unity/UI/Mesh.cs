@@ -777,7 +777,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 _ => throw new ArgumentOutOfRangeException(),
             };
         }
-
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            if (!string.IsNullOrEmpty(m_StreamData?.path))
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_StreamData.path);
+            }
+        }
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (m_VertexCount < 0 || m_Vertices == null || m_Vertices.Length == 0)

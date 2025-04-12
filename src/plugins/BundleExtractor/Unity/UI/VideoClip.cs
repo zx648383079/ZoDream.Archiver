@@ -75,6 +75,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
         }
 
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            if (!string.IsNullOrEmpty(m_ExternalResources.m_Source))
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_ExternalResources.m_Source);
+            }
+        }
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (!LocationStorage.TryCreate(fileName, Path.GetExtension(m_OriginalPath), mode, out fileName))

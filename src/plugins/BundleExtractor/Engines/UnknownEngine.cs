@@ -13,7 +13,7 @@ namespace ZoDream.BundleExtractor.Engines
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
-            return new DependencyBuilder();
+            return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
         }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
@@ -21,6 +21,10 @@ namespace ZoDream.BundleExtractor.Engines
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
+        {
+            return false;
+        }
+        public bool IsExclude(IBundleOptions options, string fileName)
         {
             return false;
         }

@@ -33,17 +33,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     _exporter = new LuaExporter(asset);
                     return;
                 }
-                if (VertexMapReader.IsSupport(buffer, len))
-                {
-                    if (BlendShapeReader.IsSupport(asset.Script))
-                    {
-                        // blend shape
-                        new BlendShapeReader().Read(asset.Script);
-                    } else if (asset.Name.Contains("_obj")) {
-                        // vertex
-                        new VertexMapReader().Read(asset.Script);
-                    }
-                }
+                // 识别暂无处理方法
+                //if (VertexMapReader.IsSupport(buffer, len))
+                //{
+                //    if (BlendShapeReader.IsSupport(asset.Script))
+                //    {
+                //        // blend shape
+                //        new BlendShapeReader().Read(asset.Script);
+                //    } else if (asset.Name.Contains("_obj")) {
+                //        // vertex
+                //        new VertexMapReader().Read(asset.Script);
+                //    }
+                //}
             }
             finally
             {
@@ -71,7 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             if (string.IsNullOrWhiteSpace(_extension))
             {
-                _extension = Path.GetExtension(fileName);
+                _extension = Path.GetExtension(fileName) ?? ".txt";
             }
             if (!LocationStorage.TryCreate(fileName, _extension, mode, out fileName))
             {
@@ -87,7 +88,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return false;
             }
-            input.Seek(1, SeekOrigin.End);
+            input.Seek(-1, SeekOrigin.End);
             var last = input.ReadByte();
             input.Position = 0;
             return begin switch

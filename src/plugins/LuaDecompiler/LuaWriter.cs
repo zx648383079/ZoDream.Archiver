@@ -67,7 +67,7 @@ namespace ZoDream.LuaDecompiler
             {
                 Translate(writer, chunk, chunk.CurrentOpcode);
             }
-            RemoveTemporary();
+            _envItems.RemoveStartWith("slot");
         }
 
         private void Translate(ICodeWriter writer, LuaChunk chunk, ILanguageOpcode item)

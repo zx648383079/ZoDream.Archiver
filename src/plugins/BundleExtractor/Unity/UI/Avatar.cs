@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Numerics;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.UI

@@ -11,5 +11,11 @@ namespace ZoDream.BundleExtractor.Unity.UI
             base.Read(reader);
             m_GameObject = new PPtr<GameObject>(_reader);
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_GameObject.m_PathID);
+        }
     }
 }

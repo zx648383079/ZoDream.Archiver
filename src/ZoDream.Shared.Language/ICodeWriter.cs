@@ -79,26 +79,18 @@ namespace ZoDream.Shared.Language
         /// <returns></returns>
         public ICodeWriter WriteOutdentLine();
         /// <summary>
-        /// 写入当前行缩进， 不改变当前行缩进
+        /// 写入当前行缩进， 
         /// </summary>
-        public ICodeWriter WriteIndent();
-        /// <summary>
-        /// 增加一个行缩进, 并写入
-        /// </summary>
+        /// <param name="incOne">是否增加1个行缩进</param>
         /// <returns></returns>
-        public ICodeWriter WriteIncIndent();
-        /// <summary>
-        /// 把行缩进修改为并写人
-        /// </summary>
-        /// <param name="indent"></param>
-        public ICodeWriter WriteIndent(int indent);
+        public ICodeWriter WriteIndent(bool incOne = false);
         /// <summary>
         /// 写入行缩进
         /// </summary>
         /// <param name="indent"></param>
         /// <param name="sync">是否把当前的行缩进修改</param>
         /// <returns></returns>
-        public ICodeWriter WriteIndent(int indent, bool sync);
+        public ICodeWriter WriteIndent(int indent, bool sync = true);
         /// <summary>
         /// 减少1个单位行缩进
         /// </summary>

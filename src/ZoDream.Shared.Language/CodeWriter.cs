@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -106,6 +105,12 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
+        public ICodeWriter Write(object? val)
+        {
+            writer.Write(val);
+            return this;
+        }
+
         public ICodeWriter Write(char val, int repeatCount)
         {
             return Write(new string(val, repeatCount));
@@ -122,32 +127,7 @@ namespace ZoDream.Shared.Language
             return Write(buffer, 0, buffer.Length);
         }
 
-        public ICodeWriter WriteIndent()
-        {
-            return WriteIndent(Indent, false);
-        }
 
-        public ICodeWriter WriteIndent(int indent)
-        {
-            return WriteIndent(indent, true);
-        }
-
-        public ICodeWriter WriteIndent(int indent, bool sync)
-        {
-            if (indent < 0)
-            {
-                indent = 0;
-            }
-            if (indent > 0)
-            {
-                Write(IndentChar, indent * (IndentChar == ' ' ? 4 : 1));
-            }
-            if (sync)
-            {
-                Indent = indent;
-            }
-            return this;
-        }
 
         public ICodeWriter WriteLine(string text)
         {
@@ -174,7 +154,7 @@ namespace ZoDream.Shared.Language
         public ICodeWriter WriteIndentLine(bool incOne = true)
         {
             WriteLine();
-            WriteIndent(Indent + (incOne ? 1 : 0), true);
+            WriteIndent(incOne);
             return this;
         }
 
@@ -188,17 +168,28 @@ namespace ZoDream.Shared.Language
             return WriteIndent(Indent - 1, true);
         }
 
-        public ICodeWriter WriteIncIndent()
+        public ICodeWriter WriteIndent(bool incOne = false)
         {
-            return WriteIndent(Indent + 1, true);
+            return WriteIndent(Indent + (incOne ? 1 : 0), true);
         }
 
-        public ICodeWriter Write(object? val)
+
+        public ICodeWriter WriteIndent(int indent, bool sync = true)
         {
-            writer.Write(val);
+            if (indent < 0)
+            {
+                indent = 0;
+            }
+            if (indent > 0)
+            {
+                Write(IndentChar, indent * (IndentChar == ' ' ? 4 : 1));
+            }
+            if (sync)
+            {
+                Indent = indent;
+            }
             return this;
         }
-
 
 
         public void Flush()

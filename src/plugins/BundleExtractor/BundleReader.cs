@@ -6,15 +6,22 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    public class BundleReader(BundleSource fileItems, 
-        IBundleOptions options, BundleScheme scheme) : IBundleReader
+    public class BundleReader(IBundleSource fileItems, 
+        IBundleOptions options, BundleScheme scheme) : IBundleReader, IBundleFilter
     {
+
+        private IBundleEngine? _engine;
+
+        public bool IsExclude(string fileName)
+        {
+            return _engine?.IsExclude(options, fileName) == true;
+        }
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
             // 从配置获取引擎
-            var engine = scheme.Get<IBundleEngine>(options);
-            if (engine is null)
+            _engine = scheme.Get<IBundleEngine>(options);
+            if (_engine is null)
             {
                 return;
             }
@@ -28,9 +35,8 @@ namespace ZoDream.BundleExtractor
 
             //    });
             var logger = scheme.Service.Get<ILogger>();
-            
             logger.Info("Analyzing ...");
-            fileItems.Analyze(token);
+            fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
             var progress = 0;
             logger.Progress(progress, fileItems.Count);
@@ -38,18 +44,18 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
-            var builder = engine.GetBuilder(options);
+            var builder = _engine.GetBuilder(options);
             scheme.Service.Add(builder);
             var temporary = scheme.Service.Get<ITemporaryStorage>();
-            foreach (var items in engine.EnumerateChunk(fileItems, options))
+            foreach (var items in _engine.EnumerateChunk(fileItems, options))
             {
                 if (token.IsCancellationRequested)
                 {
-                    return;
+                    break;
                 }
                 try
                 {
-                    using var chunk = engine.OpenRead(items, options);
+                    using var chunk = _engine.OpenRead(items, options);
                     chunk?.ExtractTo(folder, mode, token);
                 }
                 catch (Exception ex)
@@ -60,8 +66,10 @@ namespace ZoDream.BundleExtractor
                 builder?.Flush();
                 progress += items.Index;
                 logger.Progress(progress, fileItems.Count);
+                fileItems.Breakpoint();
             }
             builder?.Dispose();
+            _engine = null;
         }
         /// <summary>
         /// 局部配置初始化
@@ -86,9 +94,6 @@ namespace ZoDream.BundleExtractor
 
         public void Dispose()
         {
-            var service = scheme;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
     }
 }

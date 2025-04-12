@@ -193,6 +193,7 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
+            // TODO 判断是否存在历史记录，询问是否继续
             var picker = new BundleDialog();
             var model = picker.ViewModel;
             model.Load(_scheme, _options);
@@ -203,6 +204,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             model.Unload(_options);
+            
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();

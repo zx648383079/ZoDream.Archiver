@@ -26,7 +26,7 @@ namespace ZoDream.BundleExtractor.Engines
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
-            return new DependencyBuilder();
+            return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
         }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {
@@ -99,6 +99,29 @@ namespace ZoDream.BundleExtractor.Engines
                 }
                 instance.TryAdd(cab, new DependencyEntry(path, offset, dependencies));
             }
+        }
+
+        public bool IsExclude(IBundleOptions options, string fileName)
+        {
+            if (!string.IsNullOrWhiteSpace(options.Entrance) &&
+                fileName.StartsWith(options.Entrance))
+            {
+                if (options.Platform == AndroidPlatformScheme.PlatformName)
+                {
+                    return !fileName.StartsWith(Path.Combine(options.Entrance,
+                        "assets"));
+                }
+            }
+            var i = fileName.LastIndexOf('.');
+            if (i < 0)
+            {
+                return false;
+            }
+            return fileName[(i + 1)..].ToLower() switch
+            {
+                "xml" or "dex" or "so" or "kotlin_metadata" or "dylib" => true,
+                _ => false
+            };
         }
     }
 }

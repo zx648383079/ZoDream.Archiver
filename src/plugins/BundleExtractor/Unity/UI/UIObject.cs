@@ -69,7 +69,13 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 _reader.Data.ByteStart, 
                 _reader.Data.ByteSize);
         }
-
         
+        /// <summary>
+        /// 建立关联关系
+        /// </summary>
+        /// <param name="builder"></param>
+        public virtual void Associated(IDependencyBuilder? builder)
+        {
+        }
     }
 }

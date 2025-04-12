@@ -66,7 +66,7 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.GGET:
                     if (attr.CDType == JitOperandFormat.STR)
                     {
-                        Add(TranslateValue(chunk, code.A, attr.AType), chunk.ConstantItems[cd].Value.ToString());
+                        _envItems.Add(TranslateValue(chunk, code.A, attr.AType), chunk.ConstantItems[cd].Value.ToString());
                         break;
                     }
                     builder.WriteFormat("{0} = _env[{1}]",
@@ -82,13 +82,13 @@ namespace ZoDream.LuaDecompiler
                 case JitOperand.MOV:
                     {
                         var key = TranslateValue(chunk, (int)cd, attr.CDType);
-                        if (Contains(TranslateValue(chunk, (int)cd, attr.CDType)))
+                        if (_envItems.ContainsKey(TranslateValue(chunk, (int)cd, attr.CDType)))
                         {
-                            Rename(key, TranslateValue(chunk, code.A, attr.AType));
+                            _envItems.Rename(key, TranslateValue(chunk, code.A, attr.AType));
                             break;
                         }
                         var val = TranslateNotSet(chunk, (int)cd, attr.CDType);
-                        Add(TranslateIsSet(chunk, code.A, attr.AType),
+                        _envItems.Add(TranslateIsSet(chunk, code.A, attr.AType),
                             val);
                         // TODO 
                         //builder.WriteFormat("{0} = {1}",
@@ -233,8 +233,8 @@ namespace ZoDream.LuaDecompiler
                             args[i] = TranslateNotSet(sub, i, JitOperandFormat.VAR);
                         }
                         // TODO 判断输入参数名
-                        builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args)).WriteLine()
-                            .WriteIncIndent().WriteFormat("-- {0} {1} FNEW {2} {3};",
+                        builder.WriteFormat("function {0}({1})", fn, string.Join(", ", args))
+                            .WriteIndentLine().WriteFormat("-- {0} {1} FNEW {2} {3};",
                                     chunk.CurrentIndex,
                                     chunk.DebugInfo.LineNoItems.Length > chunk.CurrentIndex ?
                                     chunk.DebugInfo.LineNoItems[chunk.CurrentIndex] : 0,
@@ -582,7 +582,7 @@ namespace ZoDream.LuaDecompiler
         private string TranslateIsSet(LuaChunk chunk, int value, JitOperandFormat format)
         {
             var res = TranslateName(chunk, value, format);
-            Remove(res);
+            _envItems.Remove(res);
             if (format == JitOperandFormat.DST && TryGetLocal(chunk, value, out var fn))
             {
                 return fn;
@@ -597,7 +597,7 @@ namespace ZoDream.LuaDecompiler
             var res = TranslateValue(chunk, value, format);
             if (format == JitOperandFormat.VAR)
             {
-                if (TryGet(res, out var fn))
+                if (_envItems.TryGetValue(res, out var fn))
                 {
                     return fn;
                 }

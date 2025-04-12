@@ -140,5 +140,6 @@ namespace ZoDream.BundleExtractor.Unity.UI
         }
 
         public bool IsNull => m_PathID == 0 || m_FileID < 0;
+
     }
 }

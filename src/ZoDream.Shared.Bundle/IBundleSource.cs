@@ -14,6 +14,11 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         /// <returns></returns>
         public int Analyze(CancellationToken token = default);
+        public int Analyze(IBundleFilter filter, CancellationToken token = default);
+        /// <summary>
+        /// 标记当前任务执行到这里了，实现断点续
+        /// </summary>
+        public void Breakpoint();
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems);
         public IEnumerable<string> GetDirectories(params string[] searchPatternItems);

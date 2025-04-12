@@ -104,7 +104,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             return null;
         }
-
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            foreach (var item in m_Components)
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, item.m_PathID);
+            }
+        }
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             // TODO fbx

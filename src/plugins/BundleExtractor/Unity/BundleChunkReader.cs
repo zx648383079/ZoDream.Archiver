@@ -119,43 +119,21 @@ namespace ZoDream.BundleExtractor
                 }
                 LoadFile(_importItems[i], token);
             }
-            Logger.Info("Read assets...");
-            ReadAssets(token);
+            var onlyDependencyTask = _options is IBundleExtractOptions o && o.OnlyDependencyTask;
+            Logger.Info(onlyDependencyTask ? "Build dependencies ... " : "Read assets...");
+            ReadAssets(onlyDependencyTask, token);
+            if (onlyDependencyTask)
+            {
+                return;
+            }
             Logger.Info("Process assets...");
             ProcessAssets(token);
             Logger.Info("Export assets...");
             ExportAssets(folder, mode, token);
         }
 
-        private bool IsExcludeFile(string fileName)
-        {
-            if (!string.IsNullOrWhiteSpace(_options.Entrance) && 
-                fileName.StartsWith(_options.Entrance))
-            {
-                if (_options.Platform == AndroidPlatformScheme.PlatformName)
-                {
-                    return !fileName.StartsWith(Path.Combine(_options.Entrance, 
-                        "assets"));
-                }
-            }
-            var i = fileName.LastIndexOf('.');
-            if (i < 0)
-            {
-                return false;
-            }
-            return fileName[(i + 1)..].ToLower() switch
-            {
-                "xml" or "dex" or "so" or "kotlin_metadata" or "dylib" => true,
-                _ => false
-            };
-        }
-        
         private void LoadFile(string fullName, CancellationToken token)
         {
-            if (IsExcludeFile(fullName))
-            {
-                return;
-            }
             var reader = _service.Get<IBundleStorage>().OpenRead(fullName);
             if (reader is null || reader.Length == 0)
             {

@@ -49,5 +49,16 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Mesh.m_PathID);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_RootBone.m_PathID);
+            foreach (var item in m_Bones)
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, item.m_PathID);
+            }
+        }
     }
 }

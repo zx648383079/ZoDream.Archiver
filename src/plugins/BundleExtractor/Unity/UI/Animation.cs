@@ -18,5 +18,14 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 m_Animations.Add(new PPtr<AnimationClip>(_reader));
             }
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            foreach (var item in m_Animations)
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, item.m_PathID);
+            }
+        }
     }
 }

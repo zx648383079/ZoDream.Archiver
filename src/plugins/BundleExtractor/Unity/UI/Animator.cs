@@ -77,7 +77,12 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 reader.AlignStream();
             }
         }
-
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Avatar.m_PathID);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Controller.m_PathID);
+        }
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             // TODO

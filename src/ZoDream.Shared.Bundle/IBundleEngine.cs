@@ -4,6 +4,13 @@ namespace ZoDream.Shared.Bundle
 {
     public interface IBundleEngine: IBundleLoader
     {
+        /// <summary>
+        /// 排除一个文件
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public bool IsExclude(IBundleOptions options, string fileName);
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options);
 

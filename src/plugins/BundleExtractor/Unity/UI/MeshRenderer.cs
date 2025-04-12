@@ -11,5 +11,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
             base.Read(reader);
             m_AdditionalVertexStreams = new PPtr<Mesh>(reader);
         }
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_AdditionalVertexStreams.m_PathID);
+        }
     }
 }

@@ -10,6 +10,8 @@ namespace ZoDream.Shared.Bundle
 {
     public class BundleSource(IEnumerable<string> fileItems) : IBundleSource
     {
+        private IBundleFilter? _filter;
+
         /// <summary>
         /// 获取文件的数量，必须先调用 Analyze 方法
         /// </summary>
@@ -22,6 +24,17 @@ namespace ZoDream.Shared.Bundle
         public int Analyze(CancellationToken token = default)
         {
             return Count = FileCount(fileItems, token);
+        }
+
+        public int Analyze(IBundleFilter filter, CancellationToken token = default)
+        {
+            _filter = filter;
+            return Analyze(token);
+        }
+
+        public void Breakpoint()
+        {
+
         }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
@@ -74,6 +87,10 @@ namespace ZoDream.Shared.Bundle
                 };
                 foreach (var it in res)
                 {
+                    if (_filter?.IsExclude(it) == true)
+                    {
+                        continue;
+                    }
                     yield return it;
                 }
             }
@@ -113,6 +130,10 @@ namespace ZoDream.Shared.Bundle
                 };
                 foreach (var it in res)
                 {
+                    if (_filter?.IsExclude(it) == true)
+                    {
+                        continue;
+                    }
                     items.Add(it);
                     if (items.Count >= maxFileCount)
                     {

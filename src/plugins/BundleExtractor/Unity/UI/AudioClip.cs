@@ -1,12 +1,9 @@
 ﻿using System.IO;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.Exporters;
-using ZoDream.FModExporter;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Media;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.UI
 {
@@ -89,12 +86,21 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
             if (!string.IsNullOrEmpty(m_Source))
             {
-                m_AudioData = new PartialStream(_reader.OpenResource(m_Source), m_Offset, m_Size);
+                m_AudioData = _reader.OpenResource(m_Source, m_Offset, m_Size);
             } else
             {
                 m_AudioData = new PartialStream(reader.BaseStream, m_Size);
             }
             
+        }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            if (!string.IsNullOrEmpty(m_Source))
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Source);
+            }
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)

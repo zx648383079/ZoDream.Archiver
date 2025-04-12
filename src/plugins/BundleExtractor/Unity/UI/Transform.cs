@@ -27,5 +27,15 @@ namespace ZoDream.BundleExtractor.Unity.UI
             }
             m_Father = new PPtr<Transform>(reader);
         }
+
+        public override void Associated(IDependencyBuilder? builder)
+        {
+            base.Associated(builder);
+            builder?.AddDependencyEntry(_reader.FullPath, FileID, m_Father.m_PathID);
+            foreach (var child in m_Children)
+            {
+                builder?.AddDependencyEntry(_reader.FullPath, FileID, child.m_PathID);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace ZoDream.BundleExtractor
     {
         private void ProcessAssets(CancellationToken token)
         {
-            var builder = _service.Get<IDependencyBuilder>();
+            
             foreach (var assetsFile in _assetItems)
             {
                 foreach (var obj in assetsFile.Children)
@@ -23,12 +23,10 @@ namespace ZoDream.BundleExtractor
                         Logger.Info("Processing assets has been cancelled !!");
                         return;
                     }
-                    builder?.AddEntry(assetsFile.FullPath, obj.FileID);
                     if (obj is GameObject m_GameObject)
                     {
                         foreach (var pPtr in m_GameObject.m_Components)
                         {
-                            builder?.AddDependencyEntry(assetsFile.FullPath, obj.FileID, pPtr.m_PathID);
                             if (pPtr.TryGet(out var m_Component))
                             {
                                 switch (m_Component)
@@ -70,12 +68,10 @@ namespace ZoDream.BundleExtractor
                                 if (m_Sprite.m_SpriteAtlas.IsNull)
                                 {
                                     m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
-                                    builder?.AddDependency(m_Sprite.AssetFile.FullPath, m_SpriteAtlas.AssetFile.FullPath);
                                 }
                                 else if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.m_IsVariant)
                                 {
                                     m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
-                                    builder?.AddDependency(m_Sprite.AssetFile.FullPath, m_SpriteAtlas.AssetFile.FullPath);
                                 }
                             }
                         }
@@ -84,9 +80,10 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        private void ReadAssets(CancellationToken token)
+        private void ReadAssets(bool onlyDependencyTask, CancellationToken token)
         {
             var scanner = _service.Get<IBundleElementScanner>();
+            var builder = onlyDependencyTask ? _service.Get<IDependencyBuilder>() : null;
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.ObjectMetaItems)
@@ -98,6 +95,7 @@ namespace ZoDream.BundleExtractor
                     }
                     try
                     {
+                        builder?.AddEntry(asset.FullPath, obj.FileID);
                         var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                         reader.Add(scanner);
                         UIObject res = reader.Type switch
@@ -145,6 +143,10 @@ namespace ZoDream.BundleExtractor
                             && scanner.TryRead(reader, l))
                         {}
                         asset.AddChild(res);
+                        if (onlyDependencyTask) 
+                        {
+                            res.Associated(builder);
+                        }
                     }
                     catch (Exception e)
                     {

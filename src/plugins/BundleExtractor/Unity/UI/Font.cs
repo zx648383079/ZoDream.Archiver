@@ -128,7 +128,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 return;
             }
             var extension = ".ttf";
-            if (m_FontData[0] == 79 && m_FontData[1] == 84 && m_FontData[2] == 84 && m_FontData[3] == 79)
+            if (m_FontData.StartsWith([79, 84, 84, 79]))
             {
                 extension = ".otf";
             }
