@@ -36,7 +36,7 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            var hash = BundleSource.ToHashCode(fileName);
+            var hash = BundleStorage.ToHashCode(fileName);
             if (_fileItems.Contains(hash))
             {
                 return;

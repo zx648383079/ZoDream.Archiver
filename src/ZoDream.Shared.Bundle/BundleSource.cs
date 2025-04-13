@@ -84,10 +84,16 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
+            var index = 0;
+            var begin = 0;
             foreach (var item in _entryItems)
             {
                 if (File.Exists(item))
                 {
+                    if (index++ < begin)
+                    {
+                        continue;
+                    }
                     yield return new BundleChunk(item);
                     continue;
                 }
@@ -104,6 +110,10 @@ namespace ZoDream.Shared.Bundle
                 foreach (var it in res)
                 {
                     if (_filter?.IsExclude(it) == true)
+                    {
+                        continue;
+                    }
+                    if (index++ < begin)
                     {
                         continue;
                     }

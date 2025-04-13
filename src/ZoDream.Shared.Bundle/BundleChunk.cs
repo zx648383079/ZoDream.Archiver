@@ -51,7 +51,7 @@ namespace ZoDream.Shared.Bundle
                     return _count;
                 }
                 _count = 0;
-                _count = BundleSource.FileCount([Root], _globPattern);
+                _count = BundleStorage.FileCount([Root], _globPattern);
                 return _count;
             }
         }
@@ -101,7 +101,7 @@ namespace ZoDream.Shared.Bundle
                     {
                         return false;
                     }
-                    return BundleSource.IsMatch(entry.FileName, _globPattern);
+                    return BundleStorage.IsMatch(entry.FileName, _globPattern);
                 }
             };
             foreach (var item in res)

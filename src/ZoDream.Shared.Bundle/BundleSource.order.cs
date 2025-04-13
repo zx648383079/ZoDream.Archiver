@@ -80,7 +80,7 @@ namespace ZoDream.Shared.Bundle
                     }
                     items.Add(it);
                 }
-                _cacheItems[i] = [..items];
+                _cacheItems[i] = [..items.Order()];
                 Count += items.Count;
             }
             return Count;
@@ -169,7 +169,7 @@ namespace ZoDream.Shared.Bundle
         {
             var index = 0;
             var begin = 0;
-            var excludeItems = new HashSet<string>();
+            var excludeItems = new HashSet<int>();
             for (int i = 0; i < _cacheItems.Length; i++)
             {
                 if (_cacheItems[i].Length == 0)
@@ -186,7 +186,7 @@ namespace ZoDream.Shared.Bundle
                 while (offset < _cacheItems[i].Length)
                 {
                     var item = _cacheItems[i][offset ++];
-                    if (excludeItems.Contains(item))
+                    if (excludeItems.Contains(item.GetHashCode()))
                     {
                         continue;
                     }
@@ -198,7 +198,7 @@ namespace ZoDream.Shared.Bundle
                     yield return new BundleChunk(_entryItems[i], [item, ..items]);
                     foreach (var it in items)
                     {
-                        excludeItems.Add(item);
+                        excludeItems.Add(item.GetHashCode());
                     }
                 }
                 index = end;

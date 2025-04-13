@@ -41,7 +41,7 @@ namespace ZoDream.Shared.Bundle
         }
         public static int FileCount(IEnumerable<string> items, 
             string pattern,
-            IBundleFilter? filter = null,
+            IBundleFilter? filter,
             CancellationToken token = default)
         {
             var options = new EnumerationOptions()
