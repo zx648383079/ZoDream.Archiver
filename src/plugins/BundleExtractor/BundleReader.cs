@@ -38,7 +38,7 @@ namespace ZoDream.BundleExtractor
             logger.Info("Analyzing ...");
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
-            var progress = 0;
+            var progress = 0; // TODO 使用断点
             logger.Progress(progress, fileItems.Count);
             if (fileItems.Count == 0)
             {

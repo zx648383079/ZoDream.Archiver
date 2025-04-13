@@ -36,14 +36,16 @@ namespace ZoDream.Shared.Interfaces
         /// 判断存档点是否存在
         /// </summary>
         /// <param name="hashCode"></param>
+        /// <param name="record"></param>
         /// <returns></returns>
-        public uint CheckPoint(ulong hashCode);
+        public bool TryLoadPoint(int hashCode, out uint record);
+        public bool CheckPoint(int hashCode);
         /// <summary>
         /// 保存存档点
         /// </summary>
         /// <param name="hashCode"></param>
-        /// <param name="progress"></param>
-        public void SavePoint(ulong hashCode, uint progress);
+        /// <param name="record"></param>
+        public void SavePoint(int hashCode, uint record);
     }
 
     public interface IEntryExplorer: IDisposable

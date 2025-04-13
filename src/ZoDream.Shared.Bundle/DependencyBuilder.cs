@@ -28,7 +28,7 @@ namespace ZoDream.Shared.Bundle
 
         private readonly BinaryWriter? _writer;
 
-        private readonly HashSet<ulong> _fileItems = [];
+        private readonly HashSet<int> _fileItems = [];
 
         public void AddDependency(string fileName, string dependencyFileName)
         {

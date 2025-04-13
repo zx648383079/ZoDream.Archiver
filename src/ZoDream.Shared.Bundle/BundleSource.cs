@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
-using System.IO.Hashing;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 
@@ -21,8 +19,9 @@ namespace ZoDream.Shared.Bundle
         }
 
         private readonly IEntryService? _service;
-        private readonly ulong _hasCode = ToHashCode(fileItems);
+        private readonly int _hasCode = ToHashCode(fileItems);
         private IBundleFilter? _filter;
+        private uint _recordIndex;
 
         /// <summary>
         /// 获取文件的数量，必须先调用 Analyze 方法
@@ -35,6 +34,7 @@ namespace ZoDream.Shared.Bundle
         /// <returns></returns>
         public int Analyze(CancellationToken token = default)
         {
+            _service?.TryLoadPoint(_hasCode, out _recordIndex);
             return Count = FileCount(fileItems, token);
         }
 
@@ -46,7 +46,7 @@ namespace ZoDream.Shared.Bundle
 
         public void Breakpoint()
         {
-            _service?.SavePoint(_hasCode, 0);
+            _service?.SavePoint(_hasCode, _recordIndex);
         }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
@@ -183,6 +183,11 @@ namespace ZoDream.Shared.Bundle
             return fileItems.GetEnumerator();
         }
 
+        public override int GetHashCode()
+        {
+            return _hasCode;
+        }
+
         internal static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
         {
             if (patternItems.Length == 0)
@@ -257,14 +262,19 @@ namespace ZoDream.Shared.Bundle
             return count;
         }
 
-        public static ulong ToHashCode(string fileName)
+        public static int ToHashCode(string fileName)
         {
-            return XxHash64.HashToUInt64(Encoding.UTF8.GetBytes(fileName));
+            return fileName.GetHashCode();
         }
 
-        public static ulong ToHashCode(IEnumerable<string> items)
+        public static int ToHashCode(IEnumerable<string> items)
         {
-            return ToHashCode(string.Join('|', items.Order()));
+            var hash = new HashCode();
+            foreach (string item in items.Order())
+            {
+                hash.Add(item);
+            }
+            return hash.ToHashCode();
         }
     }
 

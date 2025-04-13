@@ -169,13 +169,19 @@ namespace ZoDream.Archiver.ViewModels
             return (T)instance;
         }
 
-        public uint CheckPoint(ulong hashCode)
+        public bool CheckPoint(int hashCode)
         {
-            return 0;
+            return TryLoadPoint(hashCode, out _);
         }
-        public void SavePoint(ulong hashCode, uint progress)
+        public void SavePoint(int hashCode, uint record)
         {
+            App.ViewModel.Setting.Set($"_h_{hashCode}", record);
+        }
 
+        public bool TryLoadPoint(int hashCode, out uint record)
+        {
+            record = App.ViewModel.Setting.Get<uint>($"_h_{hashCode}");
+            return record > 0;
         }
 
         public void Dispose()

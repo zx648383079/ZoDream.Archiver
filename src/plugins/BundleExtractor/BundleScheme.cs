@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor
         {
             var source = fileItems is BundleSource s ? s : new BundleSource(fileItems);
             var option = options is IBundleOptions o ? o : new BundleOptions(options);
-            Load(source, option);
+            LoadEnvironment(source, option);
             if (string.IsNullOrWhiteSpace(option.Platform) 
                 || string.IsNullOrWhiteSpace(option.Engine))
             {
@@ -23,11 +23,11 @@ namespace ZoDream.BundleExtractor
         public IBundleOptions? TryLoad(IEnumerable<string> fileItems)
         {
             var option = new BundleOptions();
-            Load(fileItems is BundleSource s ? s : new BundleSource(fileItems), option);
+            LoadEnvironment(fileItems is BundleSource s ? s : new BundleSource(fileItems), option);
             return option;
         }
 
-        public void Load(IBundleSource fileItems, IBundleOptions option)
+        public void LoadEnvironment(IBundleSource fileItems, IBundleOptions option)
         {
             if (!string.IsNullOrWhiteSpace(option.Package))
             {

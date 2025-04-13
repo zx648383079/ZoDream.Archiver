@@ -1,5 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Input;
+﻿using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -193,6 +192,12 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
+            var source = new BundleSource(fileItems, _service);
+            if (_service.CheckPoint(source.GetHashCode()) 
+                && !await _app.ConfirmAsync("是否继续上次任务？"))
+            {
+                _service.SavePoint(source.GetHashCode(), 0);
+            }
             // TODO 判断是否存在历史记录，询问是否继续
             var picker = new BundleDialog();
             var model = picker.ViewModel;
@@ -210,7 +215,7 @@ namespace ZoDream.Archiver.ViewModels
                 var watch = new Stopwatch();
                 watch.Start();
                 IBundleReader? reader;
-                reader = _scheme.Load(fileItems, _options);
+                reader = _scheme.Load(source, _options);
                 try
                 {
                     reader?.ExtractTo(model.FileName, model.ExtractMode, token);
