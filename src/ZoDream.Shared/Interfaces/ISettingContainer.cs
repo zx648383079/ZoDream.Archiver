@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Interfaces
 {
@@ -21,5 +22,7 @@ namespace ZoDream.Shared.Interfaces
         public bool Exist(string key);
 
         public Task SaveAsync();
+
+        public void Delete(Func<string, bool> whereKey);
     }
 }

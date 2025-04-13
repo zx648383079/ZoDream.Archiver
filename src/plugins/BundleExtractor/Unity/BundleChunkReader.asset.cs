@@ -80,6 +80,20 @@ namespace ZoDream.BundleExtractor
             }
         }
 
+        private bool IsExclude(ElementIDType type)
+        {
+            return type switch
+            {
+                ElementIDType.GameObject or ElementIDType.Mesh or ElementIDType.AnimationClip or ElementIDType.Animator => Options?.EnabledModel != true,
+                ElementIDType.Shader => Options?.EnabledShader != true,
+                ElementIDType.Texture2D or ElementIDType.Texture or ElementIDType.Sprite or ElementIDType.SpriteAtlas => Options?.EnabledImage != true,
+                ElementIDType.AudioClip => Options?.EnabledAudio != true,
+                ElementIDType.VideoClip => Options?.EnabledVideo != true,
+                ElementIDType.TextAsset => Options?.EnabledLua != true && Options?.EnabledSpine != true && Options?.EnabledJson != true,
+                _ => false,
+            };
+        }
+
         private void ReadAssets(bool onlyDependencyTask, CancellationToken token)
         {
             var scanner = _service.Get<IBundleElementScanner>();
@@ -92,6 +106,10 @@ namespace ZoDream.BundleExtractor
                     {
                         Logger.Info("Reading assets has been cancelled !!");
                         return;
+                    }
+                    if (!onlyDependencyTask && IsExclude((ElementIDType)obj.ClassID))
+                    {
+                        continue;
                     }
                     try
                     {

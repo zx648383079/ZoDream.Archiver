@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
@@ -9,8 +8,13 @@ using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
-    public class BundleSource(IEnumerable<string> fileItems) : IBundleSource
+    public class BundleSource : IBundleSource
     {
+        public BundleSource(IEnumerable<string> fileItems)
+        {
+            _entryItems = [.. fileItems.Order()];
+            _hasCode = BundleStorage.ToHashCode(_entryItems);
+        }
 
         public BundleSource(IEnumerable<string> fileItems, IEntryService service)
             : this(fileItems)
@@ -19,8 +23,9 @@ namespace ZoDream.Shared.Bundle
         }
 
         private readonly IEntryService? _service;
-        private readonly int _hasCode = ToHashCode(fileItems);
+        private readonly int _hasCode;
         private IBundleFilter? _filter;
+        private readonly string[] _entryItems;
         private uint _recordIndex;
 
         /// <summary>
@@ -35,7 +40,7 @@ namespace ZoDream.Shared.Bundle
         public int Analyze(CancellationToken token = default)
         {
             _service?.TryLoadPoint(_hasCode, out _recordIndex);
-            return Count = FileCount(fileItems, token);
+            return Count = BundleStorage.FileCount(_entryItems, token);
         }
 
         public int Analyze(IBundleFilter filter, CancellationToken token = default)
@@ -51,66 +56,22 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
-            return Glob(searchPatternItems, SearchTarget.Files);
+            return BundleStorage.Glob(_entryItems, searchPatternItems, SearchTarget.Files);
         }
 
         public IEnumerable<string> GetDirectories(params string[] searchPatternItems)
         {
-            return Glob(searchPatternItems, SearchTarget.Directories);
+            return BundleStorage.Glob(_entryItems, searchPatternItems, SearchTarget.Directories);
         }
 
         public IEnumerable<string> Glob(params string[] searchPatternItems)
         {
-            return Glob(searchPatternItems, SearchTarget.Both);
-        }
-        public IEnumerable<string> Glob(string[] searchPatternItems, SearchTarget target)
-        {
-            var options = new EnumerationOptions()
-            {
-                RecurseSubdirectories = true,
-                MatchType = MatchType.Win32,
-                AttributesToSkip = FileAttributes.None,
-                IgnoreInaccessible = false
-            };
-            foreach (var item in fileItems)
-            {
-                if (File.Exists(item))
-                {
-                    if (target == SearchTarget.Files && IsMatch(Path.GetFileName(item), searchPatternItems))
-                    {
-                        yield return item;
-                    }
-                    continue;
-                }
-                var res = new FileSystemEnumerable<string>(item, delegate (ref FileSystemEntry entry)
-                {
-                    return entry.ToSpecifiedFullPath();
-                }, options)
-                {
-                    ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
-                    {
-                        if ((target == SearchTarget.Files && entry.IsDirectory) 
-                        || (target == SearchTarget.Directories && !entry.IsDirectory))
-                        {
-                            return false;
-                        }
-                        return IsMatch(entry.FileName, searchPatternItems);
-                    }
-                };
-                foreach (var it in res)
-                {
-                    if (_filter?.IsExclude(it) == true)
-                    {
-                        continue;
-                    }
-                    yield return it;
-                }
-            }
+            return BundleStorage.Glob(_entryItems, searchPatternItems, SearchTarget.Both);
         }
 
         public IEnumerable<IBundleChunk> EnumerateChunk()
         {
-            return fileItems.Select(i => new BundleChunk(i));
+            return _entryItems.Select(i => new BundleChunk(i));
         }
 
         public IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount)
@@ -123,7 +84,7 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            foreach (var item in fileItems)
+            foreach (var item in _entryItems)
             {
                 if (File.Exists(item))
                 {
@@ -175,12 +136,15 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerator<string> GetEnumerator()
         {
-            return fileItems.GetEnumerator();
+            foreach (var item in _entryItems)
+            {
+                yield return item;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return fileItems.GetEnumerator();
+            return _entryItems.GetEnumerator();
         }
 
         public override int GetHashCode()
@@ -188,94 +152,7 @@ namespace ZoDream.Shared.Bundle
             return _hasCode;
         }
 
-        internal static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
-        {
-            if (patternItems.Length == 0)
-            {
-                return true;
-            }
-            foreach (var item in patternItems)
-            {
-                if (FileSystemName.MatchesSimpleExpression(item, name, true))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
-        internal static bool IsMatch(ReadOnlySpan<char> name, string pattern)
-        {
-            return string.IsNullOrEmpty(pattern) || FileSystemName.MatchesSimpleExpression(pattern, name, true);
-        }
-
-        /// <summary>
-        /// 获取所有文件的数量
-        /// </summary>
-        /// <param name="items"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public static int FileCount(IEnumerable<string> items, CancellationToken token = default)
-        {
-            return FileCount(items, string.Empty, token);
-        }
-        public static int FileCount(IEnumerable<string> items, string pattern, CancellationToken token = default)
-        {
-            var options = new EnumerationOptions()
-            {
-                RecurseSubdirectories = true,
-                MatchType = MatchType.Win32,
-                AttributesToSkip = FileAttributes.None,
-                IgnoreInaccessible = false
-            };
-            var count = 0;
-            foreach (var item in items)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    break;
-                }
-                if (File.Exists(item))
-                {
-                    count++;
-                    continue;
-                }
-                var res = new FileSystemEnumerable<byte>(item, delegate (ref FileSystemEntry entry)
-                {
-                    return 1;
-                }, options)
-                {
-                    ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
-                    {
-                        return !entry.IsDirectory && IsMatch(entry.FileName, pattern);
-                    }
-                };
-                foreach (var _ in res)
-                {
-                    count++;
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-            }
-            return count;
-        }
-
-        public static int ToHashCode(string fileName)
-        {
-            return fileName.GetHashCode();
-        }
-
-        public static int ToHashCode(IEnumerable<string> items)
-        {
-            var hash = new HashCode();
-            foreach (string item in items.Order())
-            {
-                hash.Add(item);
-            }
-            return hash.ToHashCode();
-        }
     }
 
     public enum SearchTarget

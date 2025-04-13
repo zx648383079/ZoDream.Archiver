@@ -3,7 +3,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Bundle
 {
-    public class BundleStorage : IBundleStorage
+    public partial class BundleStorage : IBundleStorage
     {
         public Stream Open(string fullPath)
         {

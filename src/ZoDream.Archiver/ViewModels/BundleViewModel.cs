@@ -209,7 +209,6 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             model.Unload(_options);
-            
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();

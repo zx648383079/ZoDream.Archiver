@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using ZoDream.Shared.Interfaces;
@@ -101,6 +99,19 @@ namespace ZoDream.Archiver.ViewModels
         public bool Exist(object key)
         {
             return Exist(key.ToString());
+        }
+
+        public void Delete(Func<string, bool> whereKey)
+        {
+            if (Container is null)
+            {
+                return;
+            }
+            var keys = Container.Values.Keys.Where(whereKey).ToArray();
+            foreach (var key in keys)
+            {
+                Container.Values.Remove(key);
+            }
         }
     }
 }

@@ -98,6 +98,7 @@ namespace ZoDream.Archiver.ViewModels
         {
             ITemporaryStorage storage = string.IsNullOrWhiteSpace(TemporaryFolder) ? new TemporaryStorage() : new Shared.IO.TemporaryStorage(TemporaryFolder);
             await storage.ClearAsync();
+            App.ViewModel.Setting.Delete(key => key.StartsWith('_'));
             App.ViewModel.Success("清除缓存完成");
         }
 
