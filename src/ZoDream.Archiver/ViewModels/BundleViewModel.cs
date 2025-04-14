@@ -192,12 +192,6 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
-            var source = new BundleSource(fileItems);
-            if (_service.CheckPoint(source.GetHashCode()) 
-                && !await _app.ConfirmAsync("是否继续上次任务？"))
-            {
-                _service.SavePoint(source.GetHashCode(), 0);
-            }
             // TODO 判断是否存在历史记录，询问是否继续
             var picker = new BundleDialog();
             var model = picker.ViewModel;
@@ -209,6 +203,12 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             model.Unload(_options);
+            var source = new BundleSource(fileItems);
+            if (_service.CheckPoint(source.GetHashCode())
+                && !await _app.ConfirmAsync("是否继续上次任务？"))
+            {
+                _service.SavePoint(source.GetHashCode(), 0);
+            }
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
                 var watch = new Stopwatch();

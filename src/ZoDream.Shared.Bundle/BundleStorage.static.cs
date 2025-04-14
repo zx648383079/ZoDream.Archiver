@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
+using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace ZoDream.Shared.Bundle
@@ -132,10 +134,7 @@ namespace ZoDream.Shared.Bundle
             }
             return count;
         }
-        public static int ToHashCode(string fileName)
-        {
-            return fileName.GetHashCode();
-        }
+
         public static IEnumerable<string> Glob(
             IEnumerable<string> fileItems,
             string[] searchPatternItems,
@@ -200,14 +199,25 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public static int ToHashCode(IEnumerable<string> items)
+        public static int ToHashCode(string[] items)
         {
-            var hash = new HashCode();
-            foreach (string item in items)
+            var buffer = BitConverter.GetBytes(items.Length);
+            for (int i = items.Length - 1; i >= 0; i--)
             {
-                hash.Add(item);
+                var item = items[i];
+                buffer[2] ^= (byte)(item.Length % 256);
+                var buf = Encoding.UTF8.GetBytes(item);
+                for (var j = 0; j < buf.Length; j++)
+                {
+                    buffer[(j * 3 + i) % buffer.Length] ^= buf[j];
+                }
             }
-            return hash.ToHashCode();
+            return BitConverter.ToInt32(buffer);
+        }
+
+        public static int ToHashCode(string value)
+        {
+            return ToHashCode([value]);
         }
     }
 }

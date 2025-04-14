@@ -37,6 +37,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 // TODO 遇到不合规的
                 return;
             }
+            var pos = reader.Position;
+            reader.Position++;
+            if (reader.ReadByte() != 0)
+            {
+                _hasError = true;
+                // TODO 遇到不合规的
+                return;
+            }
+            reader.Position = pos;
             try
             {
                 m_Keywords = new string[m_KeywordsSize];
