@@ -35,11 +35,11 @@ namespace ZoDream.Shared.Bundle
         /// <param name="items"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static int FileCount(IEnumerable<string> items, CancellationToken token = default)
+        public static uint FileCount(IEnumerable<string> items, CancellationToken token = default)
         {
             return FileCount(items, string.Empty, token);
         }
-        public static int FileCount(IEnumerable<string> items, 
+        public static uint FileCount(IEnumerable<string> items, 
             string pattern,
             IBundleFilter? filter,
             CancellationToken token = default)
@@ -51,7 +51,7 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            var count = 0;
+            var count = 0u;
             foreach (var item in items)
             {
                 if (token.IsCancellationRequested)
@@ -88,7 +88,7 @@ namespace ZoDream.Shared.Bundle
             }
             return count;
         }
-        public static int FileCount(IEnumerable<string> items,
+        public static uint FileCount(IEnumerable<string> items,
             string pattern,
             CancellationToken token = default)
         {
@@ -99,7 +99,7 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            var count = 0;
+            var count = 0u;
             foreach (var item in items)
             {
                 if (token.IsCancellationRequested)

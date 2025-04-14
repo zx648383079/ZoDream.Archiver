@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
 using System.Threading;
-using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -19,32 +18,25 @@ namespace ZoDream.Shared.Bundle
             _hasCode = BundleStorage.ToHashCode(_entryItems);
         }
 
-        public BundleOrderSource(IEnumerable<string> fileItems, IEntryService service)
-            : this(fileItems)
-        {
-            _service = service;
-        }
-
-        private readonly IEntryService? _service;
         private readonly int _hasCode;
         private IBundleFilter? _filter;
-        private uint _recordIndex;
 
         private readonly string[] _entryItems;
         private readonly string[][] _cacheItems;
 
+        public uint Index { get; set; }
+
         /// <summary>
         /// 获取文件的数量，必须先调用 Analyze 方法
         /// </summary>
-        public int Count { get; private set; }
+        public uint Count { get; set; }
 
         /// <summary>
         /// 重新计算文件的数量
         /// </summary>
         /// <returns></returns>
-        public int Analyze(CancellationToken token = default)
+        public uint Analyze(CancellationToken token = default)
         {
-            _service?.TryLoadPoint(_hasCode, out _recordIndex);
             var options = new EnumerationOptions()
             {
                 RecurseSubdirectories = true,
@@ -81,21 +73,17 @@ namespace ZoDream.Shared.Bundle
                     items.Add(it);
                 }
                 _cacheItems[i] = [..items.Order()];
-                Count += items.Count;
+                Count += (uint)items.Count;
             }
             return Count;
         }
 
-        public int Analyze(IBundleFilter filter, CancellationToken token = default)
+        public uint Analyze(IBundleFilter filter, CancellationToken token = default)
         {
             _filter = filter;
             return Analyze(token);
         }
 
-        public void Breakpoint()
-        {
-            _service?.SavePoint(_hasCode, _recordIndex);
-        }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
@@ -138,27 +126,28 @@ namespace ZoDream.Shared.Bundle
         public IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount)
         {
             var items = new List<string>();
-            var index = 0;
-            var begin = 0;
+            var index = 0u;
+            var begin = Index;
             for (int i = 0; i < _cacheItems.Length; i++)
             {
                 if (_cacheItems[i].Length == 0)
                 {
                     continue;
                 }
-                var end = i + _cacheItems[i].Length;
+                var end = index + (uint)_cacheItems[i].Length;
                 if (end < begin)
                 {
                     index = end;
                     continue;
                 }
-                var offset = Math.Max(begin - index, 0);
+                var offset = (int)Math.Max(begin - index, 0);
                 while (offset < _cacheItems[i].Length)
                 {
                     var count = Math.Min(_cacheItems[i].Length - offset, maxFileCount - items.Count);
                     items.AddRange(_cacheItems[i].Skip(offset).Take(count));
-                    yield return new BundleChunk(_entryItems[i], [.. items]);
                     offset += items.Count;
+                    Index = index + (uint)offset;
+                    yield return new BundleChunk(_entryItems[i], [.. items]);
                     items.Clear();
                 }
                 index = end;
@@ -167,8 +156,8 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
         {
-            var index = 0;
-            var begin = 0;
+            var index = 0u;
+            var begin = Index;
             var excludeItems = new HashSet<int>();
             for (int i = 0; i < _cacheItems.Length; i++)
             {
@@ -176,7 +165,7 @@ namespace ZoDream.Shared.Bundle
                 {
                     continue;
                 }
-                var end = i + _cacheItems[i].Length;
+                var end = index + (uint)_cacheItems[i].Length;
                 if (end < begin)
                 {
                     index = end;
@@ -190,6 +179,7 @@ namespace ZoDream.Shared.Bundle
                     {
                         continue;
                     }
+                    Index = index + offset;
                     if (!dependencies.TryGet(item, out var items))
                     {
                         yield return new BundleChunk(_entryItems[i], [item]);

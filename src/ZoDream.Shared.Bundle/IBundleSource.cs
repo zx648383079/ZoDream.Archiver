@@ -6,19 +6,19 @@ namespace ZoDream.Shared.Bundle
     public interface IBundleSource: IEnumerable<string>
     {
         /// <summary>
+        /// 当前执行的位置
+        /// </summary>
+        public uint Index { get; set; }
+        /// <summary>
         /// 获取文件的数量，必须先调用 Analyze 方法
         /// </summary>
-        public int Count { get; }
+        public uint Count { get; }
         /// <summary>
         /// 重新计算文件的数量
         /// </summary>
         /// <returns></returns>
-        public int Analyze(CancellationToken token = default);
-        public int Analyze(IBundleFilter filter, CancellationToken token = default);
-        /// <summary>
-        /// 标记当前任务执行到这里了，实现断点续
-        /// </summary>
-        public void Breakpoint();
+        public uint Analyze(CancellationToken token = default);
+        public uint Analyze(IBundleFilter filter, CancellationToken token = default);
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems);
         public IEnumerable<string> GetDirectories(params string[] searchPatternItems);

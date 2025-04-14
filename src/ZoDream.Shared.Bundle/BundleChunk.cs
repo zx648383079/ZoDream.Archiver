@@ -51,7 +51,7 @@ namespace ZoDream.Shared.Bundle
                     return _count;
                 }
                 _count = 0;
-                _count = BundleStorage.FileCount([Root], _globPattern);
+                _count = (int)BundleStorage.FileCount([Root], _globPattern);
                 return _count;
             }
         }

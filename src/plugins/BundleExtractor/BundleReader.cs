@@ -38,7 +38,13 @@ namespace ZoDream.BundleExtractor
             logger.Info("Analyzing ...");
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
-            var progress = 0; // TODO 使用断点
+            var service = scheme.Service;
+            var progress = 0;
+            if (service.TryLoadPoint(fileItems.GetHashCode(), out var record))
+            {
+                fileItems.Index = record;
+                progress = (int)record;
+            }
             logger.Progress(progress, fileItems.Count);
             if (fileItems.Count == 0)
             {
@@ -66,7 +72,7 @@ namespace ZoDream.BundleExtractor
                 builder?.Flush();
                 progress += items.Index;
                 logger.Progress(progress, fileItems.Count);
-                fileItems.Breakpoint();
+                service?.SavePoint(fileItems.GetHashCode(), fileItems.Index);
             }
             builder?.Dispose();
             _engine = null;

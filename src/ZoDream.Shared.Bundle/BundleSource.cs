@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
 using System.Threading;
-using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -16,43 +15,32 @@ namespace ZoDream.Shared.Bundle
             _hasCode = BundleStorage.ToHashCode(_entryItems);
         }
 
-        public BundleSource(IEnumerable<string> fileItems, IEntryService service)
-            : this(fileItems)
-        {
-            _service = service;
-        }
-
-        private readonly IEntryService? _service;
         private readonly int _hasCode;
         private IBundleFilter? _filter;
         private readonly string[] _entryItems;
-        private uint _recordIndex;
+
+        public uint Index { get; set; }
 
         /// <summary>
         /// 获取文件的数量，必须先调用 Analyze 方法
         /// </summary>
-        public int Count { get; private set; }
+        public uint Count { get; private set; }
 
         /// <summary>
         /// 重新计算文件的数量
         /// </summary>
         /// <returns></returns>
-        public int Analyze(CancellationToken token = default)
+        public uint Analyze(CancellationToken token = default)
         {
-            _service?.TryLoadPoint(_hasCode, out _recordIndex);
             return Count = BundleStorage.FileCount(_entryItems, token);
         }
 
-        public int Analyze(IBundleFilter filter, CancellationToken token = default)
+        public uint Analyze(IBundleFilter filter, CancellationToken token = default)
         {
             _filter = filter;
             return Analyze(token);
         }
 
-        public void Breakpoint()
-        {
-            _service?.SavePoint(_hasCode, _recordIndex);
-        }
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
@@ -84,8 +72,8 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            var index = 0;
-            var begin = 0;
+            var index = 0u;
+            var begin = Index;
             foreach (var item in _entryItems)
             {
                 if (File.Exists(item))
@@ -94,6 +82,7 @@ namespace ZoDream.Shared.Bundle
                     {
                         continue;
                     }
+                    Index = index;
                     yield return new BundleChunk(item);
                     continue;
                 }
@@ -120,12 +109,14 @@ namespace ZoDream.Shared.Bundle
                     items.Add(it);
                     if (items.Count >= maxFileCount)
                     {
+                        Index = index;
                         yield return new BundleChunk(item, [.. items]);
                         items.Clear();
                     }
                 }
                 if (items.Count > 0)
                 {
+                    Index = index;
                     yield return new BundleChunk(item, [.. items]);
                     items.Clear();
                 }

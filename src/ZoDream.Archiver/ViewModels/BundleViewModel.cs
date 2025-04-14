@@ -192,7 +192,7 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
-            var source = new BundleSource(fileItems, _service);
+            var source = new BundleSource(fileItems);
             if (_service.CheckPoint(source.GetHashCode()) 
                 && !await _app.ConfirmAsync("是否继续上次任务？"))
             {
