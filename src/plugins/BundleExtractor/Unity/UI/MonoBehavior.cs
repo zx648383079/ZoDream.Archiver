@@ -1,5 +1,4 @@
 ﻿using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -14,6 +13,8 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public UnityVersion Version => _reader.Version;
 
+        public IBundleBinaryReader Reader => _reader;
+
         public override void Read(IBundleBinaryReader reader)
         {
             base.Read(reader);
@@ -23,36 +24,7 @@ namespace ZoDream.BundleExtractor.Unity.UI
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (m_Script is null || !m_Script.TryGet(out var script))
-            {
-                return;
-            }
-            switch (script.m_ClassName)
-            {
-                case "CubismMoc":
-                    new CubismExporter(_reader).SaveAs(fileName, mode);
-                    break;
-                case "CubismPhysicsController":
-                    break;
-                case "CubismExpressionData":
-                    break;
-                case "CubismFadeMotionData":
-                    break;
-                case "CubismFadeMotionList":
-                    break;
-                case "CubismEyeBlinkParameter":
-                    break;
-                case "CubismMouthParameter":
-                    break;
-                case "CubismParameter":
-                    break;
-                case "CubismPart":
-                    break;
-                case "CubismDisplayInfoParameterName":
-                    break;
-                case "CubismDisplayInfoPartName":
-                    break;
-            }
+            
         }
     }
 }

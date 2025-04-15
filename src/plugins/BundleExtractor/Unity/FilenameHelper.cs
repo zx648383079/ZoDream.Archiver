@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity
 {
@@ -13,38 +14,19 @@ namespace ZoDream.BundleExtractor.Unity
         /// <returns></returns>
         public static string Create(string fullPath, string name)
         {
-            var (path, entryName) = Split(fullPath);
+            fullPath = BundleStorage.Separate(fullPath, out var entryName);
             if (string.IsNullOrWhiteSpace(name))
             {
                 name = entryName;
             }
             if (string.IsNullOrWhiteSpace(name))
             {
-                return path;
+                return fullPath;
             }
-            var folder = Path.GetDirectoryName(path);
+            var folder = Path.GetDirectoryName(fullPath);
             return Path.Combine(folder!, name);
         }
-        public static (string, string) Split(string fullPath)
-        {
-            var i = fullPath.LastIndexOf('#');
-            if (i >= 0)
-            {
-                return (fullPath[..i], fullPath[(i + 1)..]);
-            }
-            return (fullPath, string.Empty);
-        }
 
-        /// <summary>
-        /// 合成文件内部的子部分
-        /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="entryName"></param>
-        /// <returns></returns>
-        public static string Combine(string fullPath, string entryName)
-        {
-            return $"{fullPath}#{entryName}";
-        }
         /// <summary>
         /// 根据
         /// </summary>
@@ -53,11 +35,11 @@ namespace ZoDream.BundleExtractor.Unity
         /// <returns></returns>
         public static string CombineBrother(string fullPath, string brotherName)
         {
-            var i = fullPath.LastIndexOf('#');
+            fullPath = BundleStorage.Separate(fullPath, out var entryName);
             string? folder;
-            if (i >= 0)
+            if (!string.IsNullOrEmpty(entryName))
             {
-                folder = Path.GetDirectoryName(fullPath[(i + 1)..]);
+                folder = Path.GetDirectoryName(entryName);
             } else
             {
                 folder = Path.GetDirectoryName(fullPath);
@@ -71,12 +53,12 @@ namespace ZoDream.BundleExtractor.Unity
 
         public static string GetFileName(string fullPath)
         {
-            var i = fullPath.LastIndexOf('#');
-            if (i < 0)
+            fullPath = BundleStorage.Separate(fullPath, out var entryName);
+            if (string.IsNullOrEmpty(entryName))
             {
                 return Path.GetFileName(fullPath);
             }
-            return Path.GetFileName(fullPath[(i + 1)..]);
+            return Path.GetFileName(entryName);
         }
 
         public static string GetExtension(string fileName)

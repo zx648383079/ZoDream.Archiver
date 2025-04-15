@@ -7,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
     internal class AssemblyLoader
     {
         public bool IsLoaded { get; private set; }
-        private Dictionary<string, ModuleDefinition> _moduleItems = [];
+        private readonly Dictionary<string, ModuleDefinition> _moduleItems = [];
 
         public void Load(string path)
         {

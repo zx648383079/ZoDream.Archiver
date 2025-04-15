@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -218,6 +217,43 @@ namespace ZoDream.Shared.Bundle
         public static int ToHashCode(string value)
         {
             return ToHashCode([value]);
+        }
+
+        /// <summary>
+        /// 生成一个文件内部的子路径虚拟路径
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="entry"></param>
+        /// <returns></returns>
+        public static string Combine(string source, string entry)
+        {
+            return $"{source}#{entry}";
+        }
+        /// <summary>
+        /// 获取真实路径
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public static string Separate(string fullPath)
+        {
+            return Separate(fullPath, out _);
+        }
+        /// <summary>
+        /// 获取真实路径
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <param name="entry">内部子文件的文件名</param>
+        /// <returns></returns>
+        public static string Separate(string fullPath, out string entry)
+        {
+            var i = fullPath.LastIndexOf('#');
+            if (i >= 0)
+            {
+                entry = fullPath[(i + 1)..];
+                return fullPath[..i];
+            }
+            entry = string.Empty;
+            return fullPath;
         }
     }
 }

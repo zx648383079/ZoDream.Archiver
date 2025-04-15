@@ -44,6 +44,10 @@ namespace ZoDream.Shared.Bundle
         public long ReadInt64();
         public sbyte ReadSByte();
         public float ReadSingle();
+        /// <summary>
+        /// 前读取 leb128 的长度，再读取字符
+        /// </summary>
+        /// <returns></returns>
         public string ReadString();
         public ushort ReadUInt16();
         public uint ReadUInt32();

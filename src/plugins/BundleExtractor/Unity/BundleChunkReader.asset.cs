@@ -94,10 +94,10 @@ namespace ZoDream.BundleExtractor
             };
         }
 
-        private void ReadAssets(bool onlyDependencyTask, CancellationToken token)
+        private void ReadAssets(CancellationToken token)
         {
             var scanner = _service.Get<IBundleElementScanner>();
-            var builder = onlyDependencyTask ? _service.Get<IDependencyBuilder>() : null;
+            
             foreach (var asset in _assetItems)
             {
                 foreach (var obj in asset.ObjectMetaItems)
@@ -107,13 +107,13 @@ namespace ZoDream.BundleExtractor
                         Logger.Info("Reading assets has been cancelled !!");
                         return;
                     }
-                    if (!onlyDependencyTask && IsExclude((ElementIDType)obj.ClassID))
+                    if (_dependency is null && IsExclude((ElementIDType)obj.ClassID))
                     {
                         continue;
                     }
                     try
                     {
-                        builder?.AddEntry(asset.FullPath, obj.FileID);
+                        _dependency?.AddEntry(asset.FullPath, obj.FileID);
                         var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                         reader.Add(scanner);
                         UIObject res = reader.Type switch
@@ -161,15 +161,15 @@ namespace ZoDream.BundleExtractor
                             && scanner.TryRead(reader, l))
                         {}
                         asset.AddChild(res);
-                        if (onlyDependencyTask) 
+                        if (_dependency is not null) 
                         {
-                            res.Associated(builder);
+                            res.Associated(_dependency);
                         }
                     }
                     catch (Exception e)
                     {
-                        var (fullPath, entryName) = FileNameHelper.Split(asset.FullPath);
 #if DEBUG
+                        var fullPath = BundleStorage.Separate(asset.FullPath, out var entryName);
                         var sb = new StringBuilder();
                         sb.AppendLine("Unable to load object")
                             .AppendLine($"Assets {entryName}")

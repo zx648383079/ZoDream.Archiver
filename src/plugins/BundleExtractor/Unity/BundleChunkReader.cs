@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -26,12 +25,15 @@ namespace ZoDream.BundleExtractor
             _options = options;
             _service = service;
             _scheme = service.Get<UnityBundleScheme>() ?? new();
+            var onlyDependencyTask = _options is IBundleExtractOptions o && o.OnlyDependencyTask;
+            _dependency = onlyDependencyTask ? _service.Get<IDependencyBuilder>() : null;
         }
 
         private readonly IBundleChunk _fileItems;
         private readonly IBundleOptions _options;
         private readonly IEntryService _service;
         private readonly UnityBundleScheme _scheme;
+        private readonly IDependencyBuilder? _dependency;
 
         private readonly List<ISerializedFile> _assetItems = [];
         private readonly ConcurrentDictionary<string, int> _assetIndexItems = [];
@@ -119,10 +121,9 @@ namespace ZoDream.BundleExtractor
                 }
                 LoadFile(_importItems[i], token);
             }
-            var onlyDependencyTask = _options is IBundleExtractOptions o && o.OnlyDependencyTask;
-            Logger.Info(onlyDependencyTask ? "Build dependencies ... " : "Read assets...");
-            ReadAssets(onlyDependencyTask, token);
-            if (onlyDependencyTask)
+            Logger.Info(_dependency is not null ? "Build dependencies ... " : "Read assets...");
+            ReadAssets(token);
+            if (_dependency is not null)
             {
                 return;
             }
@@ -186,6 +187,7 @@ namespace ZoDream.BundleExtractor
             }
             if (reader is null)
             {
+                _dependency?.AddEntry(fullName, name);
                 _resourceItems.TryAdd(name, stream.BaseStream);
                 // stream.Dispose();
                 return;
@@ -208,7 +210,7 @@ namespace ZoDream.BundleExtractor
                 var ms = temporary.Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-                LoadFile(ms, FileNameHelper.Combine(fullName, item.Name), token);
+                LoadFile(ms, BundleStorage.Combine(fullName, item.Name), token);
             }
             stream.BaseStream.Dispose();
             stream.Dispose();

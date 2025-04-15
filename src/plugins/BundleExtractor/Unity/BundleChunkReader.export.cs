@@ -17,6 +17,7 @@ namespace ZoDream.BundleExtractor
             {typeof(TextAsset), typeof(RawExporter)},
             {typeof(AudioClip), typeof(FsbExporter)},
             {typeof(Shader), typeof(ShaderExporter) },
+            {typeof(MonoBehavior), typeof(BehaviorExporter) },
             {typeof(GameObject), typeof(GltfExporter)},
             {typeof(Mesh), typeof(GltfExporter)},
             {typeof(Animator), typeof(GltfExporter)},
