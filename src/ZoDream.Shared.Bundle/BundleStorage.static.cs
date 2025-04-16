@@ -255,5 +255,37 @@ namespace ZoDream.Shared.Bundle
             entry = string.Empty;
             return fullPath;
         }
+
+        public static IEnumerable<IBundleEntrySource> LoadEntry(Stream input)
+        {
+            var reader = new BinaryReader(input);
+            while (input.Position < input.Length)
+            {
+                var item = new BundleEntrySource(reader.ReadString());
+                var count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    item.Add(new BundleEntry(reader.ReadString()));
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    var id = reader.ReadInt64();
+                    var type = reader.ReadInt32();
+                    item.Add(new BundleEntry(id, reader.ReadString(), type));
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    reader.ReadInt64();
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    reader.ReadString();
+                }
+                yield return item;
+            }
+        }
     }
 }

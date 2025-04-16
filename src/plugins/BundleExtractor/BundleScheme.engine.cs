@@ -1,4 +1,6 @@
-﻿using ZoDream.Shared.Bundle;
+﻿using System;
+using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor
 {
@@ -8,5 +10,10 @@ namespace ZoDream.BundleExtractor
 
         public string[] EngineNames => GetNames(_engineItems);
 
+
+        public static string FormatEntryType(int type)
+        {
+            return Enum.GetName((ElementIDType)type);
+        }
     }
 }

@@ -3,17 +3,14 @@ using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Windows.UI.ApplicationSettings;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Media;
-using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels

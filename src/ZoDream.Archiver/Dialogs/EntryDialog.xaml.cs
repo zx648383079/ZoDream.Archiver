@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using ZoDream.Archiver.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -6,13 +6,13 @@ using ZoDream.Archiver.ViewModels;
 
 namespace ZoDream.Archiver.Dialogs
 {
-    public sealed partial class ExtractDialog : ContentDialog
+    public sealed partial class EntryDialog : ContentDialog
     {
-        public ExtractDialog()
+        public EntryDialog()
         {
             this.InitializeComponent();
         }
 
-        public ExtractDialogViewModel ViewModel => (ExtractDialogViewModel)DataContext;
+        public EntryDialogViewModel ViewModel => (EntryDialogViewModel)DataContext;
     }
 }

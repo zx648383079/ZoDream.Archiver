@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
+using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -31,10 +32,14 @@ namespace ZoDream.Archiver.ViewModels
             });
         }
 
-        private void Logger_OnLog(string message, Shared.Models.LogLevel level)
+        private void Logger_OnLog(string message, LogLevel level)
         {
+            if (level == LogLevel.Warn)
+            {
+                return;
+            }
             _messageRefreshToken.Cancel();
-            if (level == Shared.Models.LogLevel.Info)
+            if (level == LogLevel.Info)
             {
                 _lastInfoMessage = message;
             }
@@ -42,7 +47,7 @@ namespace ZoDream.Archiver.ViewModels
                 Message = message;
             });
             // 错误信息只允许显示一次
-            if (level == Shared.Models.LogLevel.Info)
+            if (level == LogLevel.Info)
             {
                 return;
             }

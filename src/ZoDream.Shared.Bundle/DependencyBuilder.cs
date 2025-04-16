@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ZoDream.Shared.Bundle
@@ -178,8 +179,7 @@ namespace ZoDream.Shared.Bundle
             {
                 _items.Add(fileName, item = new());
             }
-            item.Add(entryId);
-            item.Add(entryName);
+            item.Add(entryId, entryName, entryType);
         }
 
         public void AddEntry(string fileName, string entryName)
@@ -228,13 +228,88 @@ namespace ZoDream.Shared.Bundle
             _writer?.Dispose();
         }
 
+        public IDependencyDictionary ToDictionary()
+        {
+            var res = new DependencyDictionary();
+            foreach (var item in _items)
+            {
+                var items = new List<string>();
+                foreach (var target in _items)
+                {
+                    if (item.Key == target.Key)
+                    {
+                        continue;
+                    }
+                    if (item.Value.Contains(target.Value) || target.Value.Contains(item.Value))
+                    {
+                        items.Add(target.Key);
+                    }
+                }
+                res.Add(item.Key, [..items]);
+            }
+            return res;
+        }
+
+        public static DependencyBuilder Load(Stream input)
+        {
+            var builder = new DependencyBuilder();
+            var reader = new BinaryReader(input);
+            while (input.Position < input.Length)
+            {
+                var fileName = reader.ReadString();
+                var item = new DependencyEntry();
+                item.Read(reader);
+                builder._items.TryAdd(fileName, item);
+            }
+            return builder;
+        }
+
+        private struct DependencyIdEntry(long id, string name, int type)
+        {
+            public long Id = id;
+            public int Type = type;
+            public string Name = name;
+        }
 
         private class DependencyEntry
         {
-            private readonly HashSet<long> _children = [];
-            private readonly HashSet<string> _children2 = [];
+            private readonly List<DependencyIdEntry> _children = [];
+            private readonly HashSet<string> _partItems = [];
             private readonly HashSet<long> _linked = [];
-            private readonly HashSet<string> _linked2 = [];
+            private readonly HashSet<string> _linkedPart = [];
+
+            public bool Contains(DependencyEntry target)
+            {
+                if (this == target)
+                {
+                    return false;
+                }
+                foreach (var item in target._linkedPart)
+                {
+                    if (Contains(item))
+                    {
+                        return true;
+                    }
+                }
+                foreach (var item in target._linked)
+                {
+                    if (Contains(item))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public bool Contains(string child)
+            {
+                return _partItems.Contains(child);
+            }
+
+            public bool Contains(long child)
+            {
+                return _children.Where(i => i.Id == child).Any();
+            }
 
             public void Add(string child)
             {
@@ -242,7 +317,7 @@ namespace ZoDream.Shared.Bundle
                 {
                     return;
                 }
-                _children2.Add(child);
+                _partItems.Add(child);
             }
 
             public void Add(long child)
@@ -251,7 +326,16 @@ namespace ZoDream.Shared.Bundle
                 {
                     return;
                 }
-                _children.Add(child);
+                _children.Add(new(child, string.Empty, 0));
+            }
+
+            public void Add(long child, string name, int type)
+            {
+                if (child == 0 && string.IsNullOrWhiteSpace(name))
+                {
+                    return;
+                }
+                _children.Add(new(child, name, type));
             }
 
             public void AddLink(string link)
@@ -260,11 +344,11 @@ namespace ZoDream.Shared.Bundle
                 {
                     return;
                 }
-                if (_children2.Contains(link))
+                if (Contains(link))
                 {
                     return;
                 }
-                _linked2.Add(link);
+                _linkedPart.Add(link);
             }
 
             public void AddLink(long link)
@@ -273,7 +357,7 @@ namespace ZoDream.Shared.Bundle
                 {
                     return;
                 }
-                if (_children.Contains(link))
+                if (Contains(link))
                 {
                     return;
                 }
@@ -282,25 +366,53 @@ namespace ZoDream.Shared.Bundle
 
             public void Write(BinaryWriter writer)
             {
-                writer.Write(_children.Count);
-                foreach (var item in _children)
+                writer.Write(_partItems.Count);
+                foreach (var item in _partItems)
                 {
                     writer.Write(item);
                 }
-                writer.Write(_children2.Count);
-                foreach (var item in _children2)
+                writer.Write(_children.Count);
+                foreach (var item in _children)
                 {
-                    writer.Write(item);
+                    writer.Write(item.Id);
+                    writer.Write(item.Type);
+                    writer.Write(item.Name);
                 }
                 writer.Write(_linked.Count);
                 foreach (var item in _linked)
                 {
                     writer.Write(item);
                 }
-                writer.Write(_linked2.Count);
-                foreach (var item in _linked2)
+                writer.Write(_linkedPart.Count);
+                foreach (var item in _linkedPart)
                 {
                     writer.Write(item);
+                }
+            }
+
+            public void Read(BinaryReader reader)
+            {
+                var count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    Add(reader.ReadString());
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    var id = reader.ReadInt64();
+                    var type = reader.ReadInt32();
+                    Add(id, reader.ReadString(), type);
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    AddLink(reader.ReadInt64());
+                }
+                count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                {
+                    AddLink(reader.ReadString());
                 }
             }
         }

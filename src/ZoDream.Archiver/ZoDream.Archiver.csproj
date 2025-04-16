@@ -27,6 +27,7 @@
     <None Remove="Dialogs\BundlePropertyDialog.xaml" />
     <None Remove="Dialogs\CompressDialog.xaml" />
     <None Remove="Dialogs\ConfirmDialog.xaml" />
+    <None Remove="Dialogs\EntryDialog.xaml" />
     <None Remove="Dialogs\ExtractDialog.xaml" />
     <None Remove="Dialogs\PasswordDialog.xaml" />
     <None Remove="Dialogs\ProgressDialog.xaml" />
@@ -93,6 +94,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\EntryDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Themes\EntryStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

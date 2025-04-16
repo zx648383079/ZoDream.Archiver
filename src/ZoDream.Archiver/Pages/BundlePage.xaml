@@ -65,6 +65,13 @@
                 Icon="Setting"
                 Label="Setting"
                 ToolTipService.ToolTip="System settings" />
+            <CommandBar.SecondaryCommands>
+                <AppBarButton
+                    Command="{Binding ExplorerCommand}"
+                    Icon="Link"
+                    Label="资源目录"
+                    ToolTipService.ToolTip="根据依赖文件生成资源索引" />
+            </CommandBar.SecondaryCommands>
         </CommandBar>
         <ListView
             Grid.Row="1"

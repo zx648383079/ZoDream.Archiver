@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ZoDream.BundleExtractor.Engines;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 

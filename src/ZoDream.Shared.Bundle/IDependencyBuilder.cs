@@ -62,5 +62,7 @@ namespace ZoDream.Shared.Bundle
         /// 执行部分写入
         /// </summary>
         public void Flush();
+
+        public IDependencyDictionary ToDictionary();
     }
 }

@@ -33,6 +33,7 @@ namespace ZoDream.Archiver.ViewModels
             ViewCommand = new RelayCommand(TapView);
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
+            ExplorerCommand = new RelayCommand(TapExplorer);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -74,6 +75,24 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand ViewCommand { get; private set; }
 
         public ICommand SettingCommand { get; private set; }
+
+        public ICommand ExplorerCommand {  get; private set; }
+
+        private async void TapExplorer(object? _)
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".bin");
+            picker.FileTypeFilter.Add(".json");
+            App.ViewModel.InitializePicker(picker);
+            var res = await picker.PickSingleFileAsync();
+            if (res is null)
+            {
+                return;
+            }
+            var dialog = new EntryDialog();
+            dialog.ViewModel.Load(res.Path);
+            await _app.OpenDialogAsync(dialog);
+        }
 
         private async void TapSetting(object? _)
         {

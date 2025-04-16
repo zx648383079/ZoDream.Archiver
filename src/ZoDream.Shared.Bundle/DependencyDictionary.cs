@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using ZoDream.Shared.Bundle;
 
-namespace ZoDream.BundleExtractor.Models
+namespace ZoDream.Shared.Bundle
 {
     public class DependencyEntry(string fileName, long offset, IList<string> dependencies) : IDependencyEntry
     {
@@ -24,8 +23,6 @@ namespace ZoDream.BundleExtractor.Models
             }
         }
     }
-
-    
 
     public class DependencyDictionary: Dictionary<string, IDependencyEntry>, IDependencyDictionary
     {
