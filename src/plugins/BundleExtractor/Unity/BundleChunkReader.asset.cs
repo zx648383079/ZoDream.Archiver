@@ -162,7 +162,7 @@ namespace ZoDream.BundleExtractor
                         if (_dependency is not null) 
                         {
                             _dependency.AddEntry(asset.FullPath, obj.FileID,
-                                res.Name, Enum.GetName(reader.Type));
+                                res.Name, obj.ClassID);
                             res.Associated(_dependency);
                         }
                     }

@@ -16,7 +16,12 @@ namespace ZoDream.Archiver.ViewModels
         {
             OpenCommand = new RelayCommand(TapOpen);
             FolderCommand = new RelayCommand(TapFolder);
+            OpenDependencyCommand = new RelayCommand(TapOpenDependency);
+            CreateDependencyCommand = new RelayCommand(TapCreateDependency);
         }
+
+
+        private bool _isCreateDependencyTask = false;
 
         private string[] _typeItems = ["覆盖", "跳过", "重命名"];
 
@@ -164,7 +169,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string[] ModelFormatItems { get; private set; } = ["gltf", "glb", "fbx"];
 
-        private string _modelFormat;
+        private string _modelFormat = "gltf";
 
         public string ModelFormat {
             get => _modelFormat;
@@ -191,12 +196,13 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand OpenCommand { get; private set; }
         public ICommand OpenDependencyCommand { get; private set; }
+        public ICommand CreateDependencyCommand { get; private set; }
         public ICommand FolderCommand { get; private set; }
-
-        private async void TapOpenDependency(object? _)
+        private async void TapCreateDependency(object? _)
         {
             var picker = new FileSavePicker();
             picker.FileTypeChoices.Add("依赖文件", [".bin"]);
+            picker.SuggestedFileName = "dependencies";
             App.ViewModel.InitializePicker(picker);
             var res = await picker.PickSaveFileAsync();
             if (res is null)
@@ -204,6 +210,21 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             DependencySource = res.Path;
+            _isCreateDependencyTask = true;
+        }
+        private async void TapOpenDependency(object? _)
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".bin");
+            picker.FileTypeFilter.Add(".json");
+            App.ViewModel.InitializePicker(picker);
+            var res = await picker.PickSingleFileAsync();
+            if (res is null)
+            {
+                return;
+            }
+            DependencySource = res.Path;
+            _isCreateDependencyTask = false;
         }
 
         private async void TapFolder(object? _)
@@ -313,6 +334,7 @@ namespace ZoDream.Archiver.ViewModels
                 o.EnabledJson = EnabledJson;
                 o.DependencySource = DependencySource;
                 o.MaxBatchCount = MaxBatchCount;
+                o.OnlyDependencyTask = _isCreateDependencyTask;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))
             {

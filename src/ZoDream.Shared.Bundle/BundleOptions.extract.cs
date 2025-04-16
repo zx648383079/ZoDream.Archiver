@@ -30,16 +30,9 @@ namespace ZoDream.Shared.Bundle
         public string ModelFormat { get; set; } = "glb";
 
         #region 依赖关系
-        private string _dependencySource = string.Empty;
-        public string DependencySource { 
-            get => _dependencySource; 
-            set {
-                _dependencySource = value;
-                OnlyDependencyTask = !string.IsNullOrWhiteSpace(value) && 
-                    !File.Exists(value);
-            } 
-        }
-        public bool OnlyDependencyTask { get; private set; }
+
+        public string DependencySource { get; set; } = string.Empty;
+        public bool OnlyDependencyTask { get; set; }
         #endregion
 
     }

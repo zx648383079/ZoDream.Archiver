@@ -69,7 +69,9 @@ namespace ZoDream.BundleExtractor.Unity.UI
                 foreach (var pptr in m_Transform.m_Children)
                 {
                     if (pptr.TryGet(out var child))
+                    {
                         meshes.Add(HasMesh(child, meshes));
+                    }
                 }
 
                 return meshes.Any(x => x == true);

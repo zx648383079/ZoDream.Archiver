@@ -34,13 +34,14 @@ namespace ZoDream.BundleExtractor
             //    }, items => {
 
             //    });
+            var onlyDependencyTask = options is IBundleExtractOptions o && o.OnlyDependencyTask;
             var logger = scheme.Service.Get<ILogger>();
             logger.Info("Analyzing ...");
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
             var service = scheme.Service;
             var progress = 0;
-            if (service.TryLoadPoint(fileItems.GetHashCode(), out var record))
+            if (!onlyDependencyTask && service.TryLoadPoint(fileItems.GetHashCode(), out var record))
             {
                 fileItems.Index = record;
                 progress = (int)record;
@@ -72,7 +73,10 @@ namespace ZoDream.BundleExtractor
                 builder?.Flush();
                 progress += items.Index;
                 logger.Progress(progress, fileItems.Count);
-                service?.SavePoint(fileItems.GetHashCode(), fileItems.Index);
+                if (!onlyDependencyTask)
+                {
+                    service?.SavePoint(fileItems.GetHashCode(), fileItems.Index);
+                }
             }
             builder?.Dispose();
             _engine = null;

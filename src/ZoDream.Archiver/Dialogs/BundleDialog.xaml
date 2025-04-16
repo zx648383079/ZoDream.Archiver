@@ -86,13 +86,21 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <TextBox Text="{Binding DependencySource, Mode=TwoWay}" />
                     <Button
                         Grid.Column="1"
                         Command="{Binding OpenDependencyCommand}"
-                        Content="&#xE8DA;"
-                        Style="{StaticResource IconBtn}" />
+                        Content="&#xE8E5;"
+                        Style="{StaticResource IconBtn}"
+                        ToolTipService.ToolTip="载入依赖文件" />
+                    <Button
+                        Grid.Column="2"
+                        Command="{Binding CreateDependencyCommand}"
+                        Content="&#xE8F4;"
+                        Style="{StaticResource IconBtn}"
+                        ToolTipService.ToolTip="创建依赖文件" />
                 </Grid>
                 <Grid>
                     <Grid.ColumnDefinitions>

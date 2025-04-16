@@ -204,7 +204,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             model.Unload(_options);
             var source = new BundleSource(fileItems);
-            if (_service.CheckPoint(source.GetHashCode())
+            if (!_options.OnlyDependencyTask && _service.CheckPoint(source.GetHashCode())
                 && !await _app.ConfirmAsync("是否继续上次任务？"))
             {
                 _service.SavePoint(source.GetHashCode(), 0);

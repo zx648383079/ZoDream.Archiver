@@ -17,7 +17,7 @@ namespace ZoDream.Shared.Bundle
         /// <param name="entryId"></param>
         /// <param name="entryName"></param>
         /// <param name="entryType"></param>
-        public void AddEntry(string fileName, long entryId, string entryName, string entryType);
+        public void AddEntry(string fileName, long entryId, string entryName, int entryType);
         /// <summary>
         /// 文件包含名称的资源
         /// </summary>

@@ -163,7 +163,7 @@ namespace ZoDream.Shared.Bundle
             item.Add(entryId);
         }
 
-        public void AddEntry(string fileName, long entryId, string entryName, string entryType)
+        public void AddEntry(string fileName, long entryId, string entryName, int entryType)
         {
             if (_writer is null)
             {
@@ -219,6 +219,7 @@ namespace ZoDream.Shared.Bundle
                 _writer.Write(item.Key);
                 item.Value.Write(_writer);
             }
+            _items.Clear();
             _writer.Flush();
         }
 
@@ -237,16 +238,28 @@ namespace ZoDream.Shared.Bundle
 
             public void Add(string child)
             {
+                if (string.IsNullOrWhiteSpace(child))
+                {
+                    return;
+                }
                 _children2.Add(child);
             }
 
             public void Add(long child)
             {
+                if (child == 0)
+                {
+                    return;
+                }
                 _children.Add(child);
             }
 
             public void AddLink(string link)
             {
+                if (string.IsNullOrWhiteSpace(link))
+                {
+                    return;
+                }
                 if (_children2.Contains(link))
                 {
                     return;
@@ -256,6 +269,10 @@ namespace ZoDream.Shared.Bundle
 
             public void AddLink(long link)
             {
+                if (link == 0)
+                {
+                    return;
+                }
                 if (_children.Contains(link))
                 {
                     return;
