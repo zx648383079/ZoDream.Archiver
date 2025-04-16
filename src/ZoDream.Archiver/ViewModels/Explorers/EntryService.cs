@@ -191,6 +191,7 @@ namespace ZoDream.Archiver.ViewModels
                 if (item.Value is IDisposable c)
                 {
                     c.Dispose();
+                    _instanceItems.TryRemove(item);
                 }
             }
         }

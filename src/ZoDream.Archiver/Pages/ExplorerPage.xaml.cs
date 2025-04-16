@@ -30,5 +30,17 @@ namespace ZoDream.Archiver.Pages
         }
 
         public ExplorerViewModel ViewModel => (ExplorerViewModel)DataContext;
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            ViewModel.LoadAsync(e.Parameter);
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            ViewModel.UnloadAsync();
+        }
     }
 }

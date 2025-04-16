@@ -21,11 +21,36 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
         {
-            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+            if (options is not IBundleExtractOptions o)
+            {
+                return fileItems.EnumerateChunk(100);
+            }
+            if (o.OnlyDependencyTask || string.IsNullOrWhiteSpace(o.DependencySource))
+            {
+                return fileItems.EnumerateChunk(Math.Max(o.MaxBatchCount, 1));
+            }
+            if (!service.TryGet<IDependencyDictionary>(out var dict))
+            {
+                if (o.DependencySource.EndsWith(".json"))
+                {
+                    dict = LoadDependency(o.DependencySource);
+                } else
+                {
+                    using var builder = DependencyBuilder.Load(o.DependencySource);
+                    dict = builder.ToDictionary();
+                    if (dict is DependencyDictionary s)
+                    {
+                        s.FileName = o.DependencySource;
+                    }
+                }
+                service.Add(dict);
+            }
+            return fileItems.EnumerateChunk(dict);
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
-            return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
+
+            return new DependencyBuilder(options is IBundleExtractOptions o && o.OnlyDependencyTask ? o.DependencySource : string.Empty);
         }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
         {

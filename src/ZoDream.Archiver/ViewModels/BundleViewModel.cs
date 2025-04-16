@@ -279,6 +279,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public void UnloadAsync()
         {
+            _service.Dispose();
             _scheme?.Dispose();
         }
     }

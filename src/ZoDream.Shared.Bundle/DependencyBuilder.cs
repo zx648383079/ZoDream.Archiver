@@ -250,6 +250,12 @@ namespace ZoDream.Shared.Bundle
             return res;
         }
 
+        public static DependencyBuilder Load(string fileName)
+        {
+            using var fs = File.OpenRead(fileName);
+            return Load(fs);
+        }
+
         public static DependencyBuilder Load(Stream input)
         {
             var builder = new DependencyBuilder();

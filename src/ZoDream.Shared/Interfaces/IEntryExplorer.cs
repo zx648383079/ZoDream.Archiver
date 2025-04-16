@@ -19,7 +19,7 @@ namespace ZoDream.Shared.Interfaces
         
     }
 
-    public interface IEntryService
+    public interface IEntryService : IDisposable
     {
         public void Add<T>(T instance);
         public void Add(string key, object? instance);
