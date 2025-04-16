@@ -13,7 +13,7 @@ using ZoDream.Shared.Logging;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    internal partial class AppViewModel
+    internal partial class AppViewModel: IDisposable
     {
         public AppViewModel()
         {
@@ -73,6 +73,11 @@ namespace ZoDream.Archiver.ViewModels
         public async Task InitializeAsync()
         {
             await Setting.LoadAsync();
+        }
+
+        public void Dispose()
+        {
+            Logger.Dispose();
         }
     }
 }

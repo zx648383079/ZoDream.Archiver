@@ -163,6 +163,25 @@ namespace ZoDream.Shared.Bundle
             item.Add(entryId);
         }
 
+        public void AddEntry(string fileName, long entryId, string entryName, string entryType)
+        {
+            if (_writer is null)
+            {
+                return;
+            }
+            fileName = BundleStorage.Separate(fileName, out var entry);
+            if (!string.IsNullOrEmpty(entry))
+            {
+                AddVerifyEntry(fileName, entry);
+            }
+            if (!_items.TryGetValue(fileName, out var item))
+            {
+                _items.Add(fileName, item = new());
+            }
+            item.Add(entryId);
+            item.Add(entryName);
+        }
+
         public void AddEntry(string fileName, string entryName)
         {
             if (_writer is null)

@@ -1,8 +1,9 @@
-﻿using ZoDream.Shared.Models;
+﻿using System;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Interfaces
 {
-    public interface ILogger
+    public interface ILogger : IDisposable
     {
 
         public void Log(LogLevel level, string message);

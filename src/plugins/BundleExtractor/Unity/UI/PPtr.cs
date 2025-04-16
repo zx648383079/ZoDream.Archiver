@@ -85,7 +85,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
                 }
             }
-
+            if (!IsNull)
+            {
+                assetsFile.Logger?.Warning($"Need: [{m_FileID}]{m_PathID}");
+            }
             result = null;
             return false;
         }
@@ -104,7 +107,10 @@ namespace ZoDream.BundleExtractor.Unity.UI
                     }
                 }
             }
-
+            if (!IsNull)
+            {
+                assetsFile.Logger?.Warning($"Need: [{m_FileID}]{m_PathID}");
+            }
             result = null;
             return false;
         }

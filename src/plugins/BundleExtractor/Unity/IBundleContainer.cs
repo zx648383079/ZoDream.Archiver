@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Unity
 {
     internal interface IBundleContainer
     {
+        public ILogger? Logger { get; }
         public IBundleExtractOptions Options { get; }
         /// <summary>
         /// 添加一个不需要导出

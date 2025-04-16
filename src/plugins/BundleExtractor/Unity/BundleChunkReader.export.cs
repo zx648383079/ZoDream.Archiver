@@ -35,7 +35,7 @@ namespace ZoDream.BundleExtractor
                 {
                     if (token.IsCancellationRequested)
                     {
-                        Logger.Info("Exporting assets has been cancelled !!");
+                        Logger?.Info("Exporting assets has been cancelled !!");
                         return;
                     }
                     if (IsExclude(obj.FileID))
@@ -56,8 +56,8 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-                        Logger.Debug(asset.FullPath);
-                        Logger.Error(e.Message);
+                        Logger?.Debug(asset.FullPath);
+                        Logger?.Error(e.Message);
                     }
                 }
                 if (token.IsCancellationRequested)

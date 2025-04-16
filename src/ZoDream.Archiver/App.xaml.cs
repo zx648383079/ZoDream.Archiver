@@ -29,6 +29,9 @@ namespace ZoDream.Archiver
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
+            m_window.Closed += (_, _) => {
+                ViewModel.Dispose();
+            };
             m_window.Activate();
         }
 

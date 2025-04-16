@@ -11,6 +11,14 @@ namespace ZoDream.Shared.Bundle
         /// <param name="entryId"></param>
         public void AddEntry(string fileName, long entryId);
         /// <summary>
+        /// 文件包含编号的资源
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="entryId"></param>
+        /// <param name="entryName"></param>
+        /// <param name="entryType"></param>
+        public void AddEntry(string fileName, long entryId, string entryName, string entryType);
+        /// <summary>
         /// 文件包含名称的资源
         /// </summary>
         /// <param name="fileName"></param>

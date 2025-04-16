@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
@@ -20,7 +19,7 @@ namespace ZoDream.BundleExtractor
                 {
                     if (token.IsCancellationRequested)
                     {
-                        Logger.Info("Processing assets has been cancelled !!");
+                        Logger?.Info("Processing assets has been cancelled !!");
                         return;
                     }
                     if (obj is GameObject m_GameObject)
@@ -104,7 +103,7 @@ namespace ZoDream.BundleExtractor
                 {
                     if (token.IsCancellationRequested)
                     {
-                        Logger.Info("Reading assets has been cancelled !!");
+                        Logger?.Info("Reading assets has been cancelled !!");
                         return;
                     }
                     if (_dependency is null && IsExclude((ElementIDType)obj.ClassID))
@@ -113,7 +112,6 @@ namespace ZoDream.BundleExtractor
                     }
                     try
                     {
-                        _dependency?.AddEntry(asset.FullPath, obj.FileID);
                         var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                         reader.Add(scanner);
                         UIObject res = reader.Type switch
@@ -163,6 +161,8 @@ namespace ZoDream.BundleExtractor
                         asset.AddChild(res);
                         if (_dependency is not null) 
                         {
+                            _dependency.AddEntry(asset.FullPath, obj.FileID,
+                                res.Name, Enum.GetName(reader.Type));
                             res.Associated(_dependency);
                         }
                     }
@@ -181,7 +181,7 @@ namespace ZoDream.BundleExtractor
 #endif
                         //Logger.Error(sb.ToString());
                         //Logger.Error("Unable to load object");
-                        Logger.Error(e.Message);
+                        Logger?.Error(e.Message);
                     }
                 }
             }

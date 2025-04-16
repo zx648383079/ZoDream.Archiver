@@ -59,6 +59,9 @@ namespace ZoDream.Shared.Logging
             OnProgress?.Invoke(current, total, message);
         }
 
+        public void Dispose()
+        {
+        }
     }
 
     public delegate void LogEventHandler(string message, LogLevel level);

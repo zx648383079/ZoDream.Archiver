@@ -181,6 +181,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public static OrderedDictionary ReadType(TypeTree m_Types, 
             IBundleBinaryReader reader)
         {
+            reader.Position = 0; // 回到开始
             var obj = new OrderedDictionary();
             var m_Nodes = m_Types.Nodes;
             for (int i = 1; i < m_Nodes.Count; i++)

@@ -45,6 +45,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         private readonly List<FileIdentifier> _dependencyItems = [];
 
         public IBundleContainer? Container { get; set; }
+
+        public ILogger? Logger => Container?.Logger;
         public string FullPath { get; private set; }
         public SerializedType[] TypeItems => _metadata.Types;
         public FormatVersion Version => _header.Version;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -45,7 +46,7 @@ namespace ZoDream.BundleExtractor
         private readonly HashSet<long> _excludeItems = [];
 
         public ISerializedFile? this[int index] => _assetItems[index];
-        public ILogger Logger => _service.Get<ILogger>();
+        public ILogger? Logger => _service.Get<ILogger>();
 
         public IBundleExtractOptions Options => (IBundleExtractOptions)_options;
         /// <summary>
@@ -112,7 +113,7 @@ namespace ZoDream.BundleExtractor
                 _importItems.Add(item);
                 _importFileHash.Add(Path.GetFileName(item));
             }
-            Logger.Info("Load file...");
+            Logger?.Info("Load file...");
             for (int i = 0; i < _importItems.Count; i++)
             {
                 if (token.IsCancellationRequested)
@@ -121,15 +122,15 @@ namespace ZoDream.BundleExtractor
                 }
                 LoadFile(_importItems[i], token);
             }
-            Logger.Info(_dependency is not null ? "Build dependencies ... " : "Read assets...");
+            Logger?.Info(_dependency is not null ? "Build dependencies ... " : "Read assets...");
             ReadAssets(token);
             if (_dependency is not null)
             {
                 return;
             }
-            Logger.Info("Process assets...");
+            Logger?.Info("Process assets...");
             ProcessAssets(token);
-            Logger.Info("Export assets...");
+            Logger?.Info("Export assets...");
             ExportAssets(folder, mode, token);
         }
 
@@ -148,7 +149,7 @@ namespace ZoDream.BundleExtractor
             catch (Exception e)
             {
                 // Logger.Debug(fullName);
-                Logger.Error(e.Message);
+                Logger?.Error(e.Message);
             }
         }
 
@@ -167,7 +168,7 @@ namespace ZoDream.BundleExtractor
             catch (Exception e)
             {
                 // Logger.Debug(fullName);
-                Logger.Error(e.Message);
+                Logger?.Error(e.Message);
             }
         }
         private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
@@ -244,6 +245,7 @@ namespace ZoDream.BundleExtractor
                 _service.Get<ITemporaryStorage>().Add(stream);
                 return stream;
             }
+            Logger?.Warning($"Need: {fileName}");
             return new EmptyStream();
         }
 

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
@@ -10,12 +8,13 @@ namespace ZoDream.Shared.Logging
 {
     public class FileLogger : ILogger
     {
-        public LogLevel Level => LogLevel.Debug;
-
-        public FileLogger()
+        public FileLogger(Stream output, LogLevel level = LogLevel.Debug)
         {
-
+            _writer = new StreamWriter(output, Encoding.UTF8);
+            Level = level;
         }
+        private readonly StreamWriter _writer;
+        public LogLevel Level { get; private set; }
 
         public void Error(string message)
         {
@@ -53,7 +52,7 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-
+            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}");
         }
 
         public void Progress(long current, long total)
@@ -66,5 +65,9 @@ namespace ZoDream.Shared.Logging
 
         }
 
+        public void Dispose()
+        {
+            _writer.Dispose();
+        }
     }
 }

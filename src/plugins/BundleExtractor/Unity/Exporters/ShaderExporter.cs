@@ -87,7 +87,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             ConvertSerializedShader(writer, shader.m_ParsedForm, shader.platforms, shaderPrograms);
         }
 
-        private static void ConvertSerializedShader(ICodeWriter writer, SerializedShader m_ParsedForm, ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
+        private static void ConvertSerializedShader(ICodeWriter writer, 
+            SerializedShader m_ParsedForm, ShaderCompilerPlatform[] platforms, 
+            ShaderProgram[] shaderPrograms)
         {
 
             writer.WriteFormat("Shader \"{0}\" {{", m_ParsedForm.m_Name)
@@ -115,7 +117,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WriteOutdentLine().Write("}").WriteLine(true);
         }
 
-        private static void ConvertSerializedSubShader(ICodeWriter writer, SerializedSubShader m_SubShader, ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
+        private static void ConvertSerializedSubShader(ICodeWriter writer, 
+            SerializedSubShader m_SubShader, ShaderCompilerPlatform[] platforms, 
+            ShaderProgram[] shaderPrograms)
         {
             writer.Write("SubShader {")
                 .WriteIndentLine();
@@ -150,7 +154,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return flatList.ToArray();
         }
 
-        private static void ConvertPrograms(ICodeWriter writer, SerializedProgram program, string programType, ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
+        private static void ConvertPrograms(ICodeWriter writer, SerializedProgram program, string programType, 
+            ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
         {
             if (program?.m_SubPrograms?.Count > 0)
             {
@@ -167,7 +172,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
         }
 
-        private static void ConvertSerializedPass(ICodeWriter writer, SerializedPass m_Passe, ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
+        private static void ConvertSerializedPass(ICodeWriter writer, SerializedPass m_Passe, 
+            ShaderCompilerPlatform[] platforms, 
+            ShaderProgram[] shaderPrograms)
         {
             switch (m_Passe.m_Type)
             {

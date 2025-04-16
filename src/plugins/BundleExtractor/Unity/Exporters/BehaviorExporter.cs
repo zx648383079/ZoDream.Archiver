@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 case "CubismMoc":
                     new CubismExporter(behavior).SaveAs(fileName, mode);
-                    break;
+                    return;
                 case "CubismPhysicsController":
                     break;
                 case "CubismExpressionData":
@@ -52,7 +52,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var type = behavior.ToType();
             if (type == null)
             {
-                var m_Type = ConvertToTypeTree(behavior, behavior.Reader.Get<AssemblyLoader>());
+                var loader = behavior.Reader.Get<AssemblyLoader>();
+                if (loader is null)
+                {
+                    return;
+                }
+                var m_Type = ConvertToTypeTree(behavior, loader);
                 type = behavior.ToType(m_Type);
             }
             

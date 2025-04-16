@@ -4,12 +4,15 @@ using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Unity
 {
     internal interface ISerializedFile : IDisposable
     {
         public string FullPath { get; }
+
+        public ILogger? Logger { get; }
         public IBundleContainer? Container { get; }
 
         public FormatVersion Version { get; }
