@@ -5,6 +5,7 @@ using System.Threading;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor
 {
@@ -114,6 +115,10 @@ namespace ZoDream.BundleExtractor
                     {
                         var reader = new UIReader(asset.Create(obj), obj, asset, _options);
                         reader.Add(scanner);
+                        //if (obj.FileID == 421139779080335220)
+                        //{
+                        //    reader.BaseStream.SaveAs("F:\\apk\\zmxs\\pose.bin");
+                        //}
                         UIObject res = reader.Type switch
                         {
                             ElementIDType.Animation => new Animation(reader),
@@ -187,5 +192,32 @@ namespace ZoDream.BundleExtractor
             }
         }
 
+
+        public T? ConvertTo<T>(UIReader reader)
+        {
+            var ctor = typeof(T).GetConstructor([reader.GetType()]);
+            if (ctor == null)
+            {
+                return default;
+            }
+            reader.BaseStream.Position = 0;
+            var res = ctor.Invoke([reader]);
+            if (res == null)
+            {
+                return default;
+            }
+            var scanner = _service.Get<IBundleElementScanner>();
+            if (reader.SerializedType.OldType is not null &&
+                            reader.SerializedType.OldType.Nodes.Count > 0 &&
+                            res is IElementTypeLoader tl)
+            {
+                tl.Read(reader, reader.SerializedType.OldType);
+            }
+            else if (
+                res is IElementLoader l
+                && scanner.TryRead(reader, l))
+            { }
+            return (T)res;
+        }
     }
 }

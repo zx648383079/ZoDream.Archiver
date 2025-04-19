@@ -209,7 +209,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 _ when version.LessThan(2018, 2) => 201708220,
                 _ when version.LessThan(2019) => 201802150,
                 _ when version.LessThan(2021, 2) => 201806140,
-                _ => 202012090,
+                _ when version.LessThan(2022, 3) => 202012090,
+                _ => 202310270,
             };
         }
     }

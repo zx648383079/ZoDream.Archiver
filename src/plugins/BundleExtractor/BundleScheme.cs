@@ -1,6 +1,6 @@
-﻿using ZoDream.Shared.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor
 {
@@ -46,5 +46,6 @@ namespace ZoDream.BundleExtractor
                 TryGet<IBundleEngine>(fileItems, option);
             }
         }
+
     }
 }

@@ -72,9 +72,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 instance.m_PositionCurves = [];
                 instance.m_ScaleCurves = [];
 
-
-                
-
                 int numFCurves = reader.ReadInt32();
                 instance.m_FloatCurves = [];
                 for (int i = 0; i < numFCurves; i++)
@@ -117,6 +114,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         {
             var version = reader.Get<UnityVersion>();
             instance.ReadBase(reader, () => {
+                var m_MeshCompression = 0;
                 if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
                 {
                     if (version.GreaterThanOrEquals(2019)) //2019 and up
@@ -131,7 +129,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         var m_VariableBoneCountWeights = reader.ReadArray(r => r.ReadUInt32());
                     }
 
-                    var m_MeshCompression = reader.ReadByte();
+                    m_MeshCompression = reader.ReadByte();
                     if (version.GreaterThanOrEquals(4))
                     {
                         if (version.LessThan(5))
@@ -256,7 +254,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     if (version.LessThan(2018, 2)) //2018.2 down
                     {
                         var skinNum = reader.ReadInt32();
-                        instance.m_Skin = new List<BoneWeights4>();
+                        instance.m_Skin = [];
                         for (int s = 0; s < skinNum; s++)
                         {
                             instance.m_Skin.Add(new BoneWeights4(reader));
@@ -269,6 +267,13 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     }
 
                     instance.m_VertexData = new VertexData(reader);
+                    reader.AlignStream();
+                }
+
+                
+                if (version.GreaterThanOrEquals(2022, 3) && m_MeshCompression > 0)
+                {
+                    reader.Position += 44; // TODO 不知道是什么
                 }
 
                 if (version.GreaterThanOrEquals(2, 6) && !instance.m_CollisionMeshBaked) //2.6.0 and later

@@ -121,6 +121,13 @@ namespace ZoDream.Archiver.ViewModels
             {
                 _options.MaxBatchCount = 100;
             }
+            var history = _app.Setting.Get<string>(SettingNames.BundleHistory);
+            if (!string.IsNullOrWhiteSpace(history))
+            {
+                var args = history.Split(';');
+                _options.Engine = args[0];
+                _options.Platform = args[1];
+            }
         }
 
         private async void TapView(object? _)
@@ -222,6 +229,7 @@ namespace ZoDream.Archiver.ViewModels
                 return;
             }
             model.Unload(_options);
+            _app.Setting.Set(SettingNames.BundleHistory, $"{_options.Engine};{_options.Platform}");
             var source = new BundleSource(fileItems);
             if (!_options.OnlyDependencyTask && _service.CheckPoint(source.GetHashCode())
                 && !await _app.ConfirmAsync("是否继续上次任务？"))

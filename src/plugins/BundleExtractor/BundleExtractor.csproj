@@ -31,6 +31,7 @@
 	  <ProjectReference Include="..\KhronosExporter\KhronosExporter.csproj" />
 	  <ProjectReference Include="..\LuaDecompiler\LuaDecompiler.csproj" />
 	  <ProjectReference Include="..\ShaderDecompiler\ShaderDecompiler.csproj" />
+	  <ProjectReference Include="..\UnityEngine\UnityEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

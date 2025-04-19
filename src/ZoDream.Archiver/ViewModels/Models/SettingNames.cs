@@ -9,5 +9,6 @@
         TemporaryPath,
         ModelFormat,
         MaxBatchCount,
+        BundleHistory,
     }
 }

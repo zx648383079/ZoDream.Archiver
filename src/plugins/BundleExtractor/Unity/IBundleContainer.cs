@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
@@ -35,5 +36,12 @@ namespace ZoDream.BundleExtractor.Unity
         /// <param name="source"></param>
         /// <returns></returns>
         public Stream OpenResource(string fileName, ISerializedFile source);
+        /// <summary>
+        /// 转换为
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public T? ConvertTo<T>(UIReader reader);
     }
 }

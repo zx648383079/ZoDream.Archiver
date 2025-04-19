@@ -20,7 +20,6 @@ namespace ZoDream.Archiver.ViewModels
             CreateDependencyCommand = new RelayCommand(TapCreateDependency);
         }
 
-
         private bool _isCreateDependencyTask = false;
 
         private string[] _typeItems = ["覆盖", "跳过", "重命名"];

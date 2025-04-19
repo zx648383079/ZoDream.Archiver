@@ -172,6 +172,11 @@ namespace ZoDream.Shared.IO
             return ReadString(length);
         }
 
+        public string ReadLeb128String()
+        {
+            return base.ReadString();
+        }
+
         public uint Read7BitEncodedUInt()
         {
             var val = (uint)ReadByte();
