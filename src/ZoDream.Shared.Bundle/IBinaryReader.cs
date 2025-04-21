@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Numerics;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Bundle
@@ -74,13 +75,24 @@ namespace ZoDream.Shared.Bundle
         /// 读取 string 直到 0x0 停止
         /// </summary>
         /// <returns></returns>
-        public bool ReadStringZeroTerm(int maxLength, [NotNullWhen(true)] out string? result);
+        public bool TryReadStringZeroTerm(int maxLength, [NotNullWhen(true)] out string? result);
         public string ReadString(int length);
         public string ReadAlignedString();
+
+        public Vector2 ReadVector2();
+        public Vector3 ReadVector3();
+        public Vector4 ReadVector4();
+        public Quaternion ReadQuaternion();
+
+        public Matrix4x4 ReadMatrix();
+
         public T[] ReadArray<T>(int count, Func<IBundleBinaryReader, int, T> cb);
+        public T[] ReadArray<T>(int count, Func<IBundleBinaryReader, T> cb);
         public T[] ReadArray<T>(Func<IBundleBinaryReader, int, T> cb);
         public T[] ReadArray<T>(Func<IBundleBinaryReader, T> cb);
         public T[] ReadArray<T>(Func<T> cb);
+        public T[] ReadArray<T>(IBundleSerializer serializer);
+        public T[] ReadArray<T>(int count, IBundleSerializer serializer);
         /// <summary>
         /// 获取二维数组
         /// </summary>
@@ -88,6 +100,8 @@ namespace ZoDream.Shared.Bundle
         /// <param name="cb"></param>
         /// <returns></returns>
         public T[][] Read2DArray<T>(Func<IBundleBinaryReader, int, int, T> cb);
+        public T[][] Read2DArray<T>(Func<IBundleBinaryReader, T> cb);
+        public T[][] Read2DArray<T>(IBundleSerializer serializer);
 
         public void ReadArray(int count, Action<IBundleBinaryReader, int> cb);
         public void ReadArray(Action<IBundleBinaryReader, int> cb);

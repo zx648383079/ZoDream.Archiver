@@ -8,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class JsonExporter(UIObject data) : IFileExporter
+    internal class JsonExporter(UIObject data) : IBundleExporter
     {
         private static readonly JsonSerializerOptions Options = new()
         {

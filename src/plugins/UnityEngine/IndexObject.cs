@@ -4,13 +4,12 @@ namespace UnityEngine
 {
     public class Index
     {
-        public PPtr<Object> Object;
+        public PPtr Object;
         public ulong Size;
     }
 
-    internal sealed class IndexObject : Object
+    public sealed class IndexObject : Object
     {
-        public int Count;
-        public List<KeyValuePair<string, Index>> AssetMap;
+        public KeyValuePair<string, Index>[] AssetMap;
     }
 }

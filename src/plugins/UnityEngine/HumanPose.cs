@@ -1,10 +1,11 @@
 ﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
 
 namespace UnityEngine
 {
     public class HumanPose
     {
-        public Transform RootX { get; set; }
+        public Transform<Vector3> RootX { get; set; }
         public Vector3 LookAtPosition { get; set; }
         public Vector4 LookAtWeight { get; set; }
         public HumanGoal[] GoalArray { get; set; }

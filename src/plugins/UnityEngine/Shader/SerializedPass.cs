@@ -12,12 +12,12 @@ namespace UnityEngine
         public PassType Type;
         public SerializedShaderState State;
         public uint ProgramMask;
-        public SerializedProgram progVertex;
-        public SerializedProgram progFragment;
-        public SerializedProgram progGeometry;
-        public SerializedProgram progHull;
-        public SerializedProgram progDomain;
-        public SerializedProgram progRayTracing;
+        public SerializedProgram ProgVertex;
+        public SerializedProgram ProgFragment;
+        public SerializedProgram ProgGeometry;
+        public SerializedProgram ProgHull;
+        public SerializedProgram ProgDomain;
+        public SerializedProgram ProgRayTracing;
         public bool HasInstancingVariant;
         public string UseName;
         public string Name;

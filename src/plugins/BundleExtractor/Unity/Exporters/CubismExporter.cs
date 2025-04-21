@@ -7,7 +7,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class CubismExporter(MonoBehavior behavior) : IFileExporter
+    internal class CubismExporter(MonoBehavior behavior) : IBundleExporter
     {
         public string Name => behavior.Name;
 

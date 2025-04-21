@@ -2,7 +2,7 @@
 
 namespace ZoDream.Shared.Bundle
 {
-    public interface IFileExporter
+    public interface IBundleExporter
     {
         public string Name { get; }
         public void SaveAs(string fileName, ArchiveExtractMode mode);

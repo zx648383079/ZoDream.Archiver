@@ -1,15 +1,13 @@
-﻿using ZoDream.Shared.Bundle;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
-    public class VGPageStreamingState
+    public struct VGPageStreamingState
     {
-        public uint BulkOffset { get; set; }
-        public uint BulkSize { get; set; }
-        public uint PageSize { get; set; }
-        public uint DependenciesStart { get; set; }
-        public uint DependenciesNum { get; set; }
-        public uint Flags { get; set; }
+        public uint BulkOffset;
+        public uint BulkSize;
+        public uint PageSize;
+        public uint DependenciesStart;
+        public uint DependenciesNum;
+        public uint Flags;
 
     }
 }

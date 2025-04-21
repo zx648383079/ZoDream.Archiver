@@ -9,7 +9,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class LuaExporter(TextAsset asset) : IFileExporter
+    internal class LuaExporter(TextAsset asset) : IBundleExporter
     {
         public string Name => asset.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)

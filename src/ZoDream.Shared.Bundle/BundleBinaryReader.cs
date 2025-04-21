@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Numerics;
+using System.Reflection.PortableExecutable;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
@@ -125,6 +127,16 @@ namespace ZoDream.Shared.Bundle
             });
         }
 
+        public T[][] Read2DArray<T>(Func<IBundleBinaryReader, T> cb) 
+        {
+            return Read2DArray((r, _, _) => cb.Invoke(r));
+        }
+
+        public T[][] Read2DArray<T>(IBundleSerializer serializer)
+        {
+            return Read2DArray((r, _, _) => serializer.Deserialize<T>(r));
+        }
+
         public string ReadAlignedString()
         {
             var res = ReadString();
@@ -146,6 +158,11 @@ namespace ZoDream.Shared.Bundle
             return items;
         }
 
+        public T[] ReadArray<T>(int count, Func<IBundleBinaryReader, T> cb)
+        {
+            return ReadArray(count, (r, _) => cb.Invoke(r));
+        }
+
         public T[] ReadArray<T>(Func<IBundleBinaryReader, int, T> cb)
         {
             return ReadArray(ReadInt32(), cb);
@@ -159,6 +176,15 @@ namespace ZoDream.Shared.Bundle
             return ReadArray(ReadInt32(), (_, _) => cb.Invoke());
         }
 
+        public T[] ReadArray<T>(IBundleSerializer serializer)
+        {
+            return ReadArray(serializer.Deserialize<T>);
+        }
+
+        public T[] ReadArray<T>(int count, IBundleSerializer serializer)
+        {
+            return ReadArray(count, serializer.Deserialize<T>);
+        }
         public void ReadArray(int count, Action<IBundleBinaryReader, int> cb)
         {
             for (var i = 0; i < count; i++)
@@ -171,6 +197,37 @@ namespace ZoDream.Shared.Bundle
         {
             ReadArray(ReadInt32(), cb);
         }
+
+        public Vector2 ReadVector2()
+        {
+            return new(ReadSingle(), ReadSingle());
+        }
+        public Vector3 ReadVector3()
+        {
+            return new(ReadSingle(), ReadSingle(), ReadSingle());
+        }
+        public Vector4 ReadVector4()
+        {
+            return new(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle());
+        }
+        public Quaternion ReadQuaternion()
+        {
+            return new(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle());
+        }
+
+        public Matrix4x4 ReadMatrix()
+        {
+            var data = new Matrix4x4();
+            for (int r = 0; r < 4; r++)
+            {
+                for (int c = 0; c < 4; c++)
+                {
+                    data[r, c] = ReadSingle();
+                }
+            }
+            return data;
+        }
+
         public Stream ReadAsStream()
         {
             return ReadAsStream(ReadInt32());

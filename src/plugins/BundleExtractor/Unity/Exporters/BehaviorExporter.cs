@@ -9,7 +9,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class BehaviorExporter(MonoBehavior behavior) : IFileExporter
+    internal class BehaviorExporter(MonoBehavior behavior) : IBundleExporter
     {
         public string Name => behavior.Name;
 

@@ -1,10 +1,10 @@
 ﻿
 namespace UnityEngine
 {
-    public class LeafInfoConstant
+    public struct LeafInfoConstant
     {
-        public uint[] IDArray { get; set; }
-        public uint IndexOffset { get; set; }
+        public uint[] IDArray;
+        public uint IndexOffset;
 
     }
 }

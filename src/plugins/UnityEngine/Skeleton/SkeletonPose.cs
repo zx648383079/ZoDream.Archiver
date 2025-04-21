@@ -1,8 +1,11 @@
-﻿namespace UnityEngine
+﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
+
+namespace UnityEngine
 {
     public class SkeletonPose
     {
-        public Transform X;
+        public Transform<Vector3>[] X;
 
     }
 

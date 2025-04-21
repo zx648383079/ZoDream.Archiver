@@ -1,14 +1,7 @@
-﻿using ZoDream.Shared.Bundle;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
-    public class MotionNeighborList
+    public struct MotionNeighborList
     {
         public uint[] NeighborArray;
-
-        public MotionNeighborList(IBundleBinaryReader reader)
-        {
-            NeighborArray = reader.ReadArray(r => r.ReadUInt32());
-        }
     }
 }

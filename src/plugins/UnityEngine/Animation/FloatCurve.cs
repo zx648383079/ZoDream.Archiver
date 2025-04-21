@@ -7,7 +7,7 @@
         public string Path { get; set; }
         public NativeClassID ClassID { get; set; }
         public PPtr<MonoScript> Script { get; set; }
-        public int flags;
+        public int Flags;
 
     }
 

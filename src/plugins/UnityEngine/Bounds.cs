@@ -6,6 +6,6 @@ namespace UnityEngine
     {
         public Vector3 Center;
 
-        public Vector3 Extents;
+        public Vector3 Extent;
     }
 }

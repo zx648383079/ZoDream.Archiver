@@ -5,7 +5,7 @@ namespace UnityEngine
     {
         public byte[] Script;
         //5.3 - 5.4
-        public uint decompressedSize;
+        public uint DecompressedSize;
         public byte[] SubProgramBlob;
         //5.5 and up
         public SerializedShader ParsedForm;

@@ -4,7 +4,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal interface IMultipartExporter : IFileExporter, IDisposable
+    internal interface IMultipartExporter : IBundleExporter, IDisposable
     {
 
         public bool IsEmpty { get; }

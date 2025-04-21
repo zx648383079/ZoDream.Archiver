@@ -14,6 +14,6 @@
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public IBundleElementScanner GetScanner(IBundleOptions options);
+        public IBundleSerializer GetSerializer(IBundleOptions options);
     }
 }

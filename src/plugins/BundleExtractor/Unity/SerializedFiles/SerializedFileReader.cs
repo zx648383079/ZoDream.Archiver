@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnityEngine;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
@@ -121,6 +124,20 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             Children.Add(obj);
             _childrenDict.Add(obj.FileID, obj);
+        }
+
+        public Stream OpenResource(ResourceSource source)
+        {
+            if (string.IsNullOrWhiteSpace(source.Source))
+            {
+                return new EmptyStream();
+            }
+            var stream = Container?.OpenResource(source.Source, this);
+            if (stream is null)
+            {
+                return new EmptyStream();
+            }
+            return new PartialStream(stream, source.Offset, source.Size);
         }
 
         public void Dispose()

@@ -1,10 +1,14 @@
 ﻿namespace UnityEngine
 {
-    public sealed class PPtr<T> where T : Object
+    public class PPtr
     {
 
         public int FileID { get; set; }
 
         public long PathID { get; set; }
+    }
+    public sealed class PPtr<T> : PPtr
+        where T : Object
+    {
     }
 }

@@ -3,8 +3,8 @@ namespace UnityEngine
 {
     public struct SerializedShaderFloatValue
     {
-        public float val;
-        public string name;
+        public float Value;
+        public string Name;
     }
 
 }

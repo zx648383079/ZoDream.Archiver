@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly IBundleContainer _container;
         private bool IsBinaryFile => _container.Options?.ModelFormat == "glb";
         private readonly ModelSource _root;
-        private readonly Dictionary<string, IFileExporter> _attachItems = [];
+        private readonly Dictionary<string, IBundleExporter> _attachItems = [];
         /// <summary>
         /// mesh to node
         /// </summary>

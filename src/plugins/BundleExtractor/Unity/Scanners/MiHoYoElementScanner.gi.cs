@@ -1,90 +1,101 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.UI;
+using System.Numerics;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class MiHoYoElementScanner
+    internal sealed class MiHoYoHumanGoalConverter : BundleConverter<HumanGoal>
     {
-
-        private void GICreateInstance(IBundleBinaryReader reader,
-            HumanGoal instance)
+        public override HumanGoal Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.m_X = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_WeightT = reader.ReadSingle();
-            instance.m_WeightR = reader.ReadSingle();
-
-            instance.m_HintT = UnityReaderExtension.Parse(reader.ReadVector4());
-            instance.m_HintWeightT = reader.ReadSingle();
-
-            var m_HintR = UnityReaderExtension.Parse(reader.ReadVector4());
-            var m_HintWeightR = reader.ReadSingle();
-        }
-        private void GICreateInstance(IBundleBinaryReader reader,
-            HandPose instance)
-        {
-            instance.m_GrabX = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_DoFArray = reader.ReadArray(20, (r, _) => r.ReadSingle());
-            instance.m_Override = reader.ReadSingle();
-            instance.m_CloseOpen = reader.ReadSingle();
-            instance.m_InOut = reader.ReadSingle();
-            instance.m_Grab = reader.ReadSingle();
-        }
-        private void GICreateInstance(IBundleBinaryReader reader, HumanPose instance)
-        {
-            var version = reader.Get<UnityVersion>();
-            instance.m_RootX = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_LookAtPosition = UnityReaderExtension.Parse(reader.ReadVector4());
-            instance.m_LookAtWeight = reader.ReadVector4();
-
-            instance.m_GoalArray = [];
-            for (int i = 0; i < 4; i++)
+            var res = new HumanGoal
             {
-                var h = new HumanGoal();
-                GICreateInstance(reader, h);
-                instance.m_GoalArray.Add(h);
-            }
+                X = reader.ReadXForm4(),
+                WeightT = reader.ReadSingle(),
+                WeightR = reader.ReadSingle(),
 
-            instance.m_LeftHandPose = new();
-            GICreateInstance(reader, instance.m_LeftHandPose);
-            instance.m_RightHandPose = new();
-            GICreateInstance(reader, instance.m_RightHandPose);
+                HintT = reader.ReadVector4().AsVector3(),
+                HintWeightT = reader.ReadSingle()
+            };
 
-            instance.m_DoFArray = reader.ReadArray(0x37, (r, _) => r.ReadSingle());
+            var m_HintR = reader.ReadVector4().AsVector3();
+            var m_HintWeightR = reader.ReadSingle();
+            return res;
+        }
+    }
 
-            instance.m_TDoFArray = reader.ReadArray(0x15, (_, _) => UnityReaderExtension.Parse(reader.ReadVector4()));
+    internal sealed class MiHoYoHandPoseConverter : BundleConverter<HandPose>
+    {
+        public override HandPose? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        {
+            var res = new HandPose
+            {
+                GrabX = reader.ReadXForm4(),
+                DoFArray = reader.ReadArray(20, r => r.ReadSingle()),
+                Override = reader.ReadSingle(),
+                CloseOpen = reader.ReadSingle(),
+                InOut = reader.ReadSingle(),
+                Grab = reader.ReadSingle()
+            };
+            return res;
+        }
+    }
+
+    internal sealed class MiHoYoHumanPoseConverter : BundleConverter<HumanPose>
+    {
+        public override HumanPose? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        {
+            var res = new HumanPose();
+            var version = reader.Get<Version>();
+            res.RootX = reader.ReadXForm4();
+            res.LookAtPosition = reader.ReadVector4().AsVector3();
+            res.LookAtWeight = reader.ReadVector4();
+
+            res.GoalArray = reader.ReadArray(4, _ => serializer.Deserialize<HumanGoal>(reader));
+
+            res.LeftHandPose = serializer.Deserialize<HandPose>(reader);
+            res.RightHandPose = serializer.Deserialize<HandPose>(reader);
+
+            res.DoFArray = reader.ReadArray(0x37, r => r.ReadSingle());
+
+            res.TDoFArray = reader.ReadArray(0x15, _ => reader.ReadVector4().AsVector3());
 
             reader.Position += 4;
+            return res;
         }
-        private void GICreateInstance(IBundleBinaryReader reader,
-            Clip instance)
+    }
+
+    internal sealed class MiHoYoClipConverter : BundleConverter<Clip>
+    {
+        public override Clip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var clipOffset = reader.Position + reader.ReadInt64();
             if (clipOffset > reader.Length)
             {
                 throw new IOException("Offset outside of range");
             }
-
+            var res = new Clip();
             var pos = reader.Position;
             reader.Position = clipOffset;
 
-            instance.m_StreamedClip = new();
-            GICreateInstance(reader, instance.m_StreamedClip);
-            instance.m_DenseClip = new();
-            GICreateInstance(reader, instance.m_DenseClip);
+            res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
+            res.DenseClip = serializer.Deserialize<DenseClip>(reader); ;
 
-            instance.m_ConstantClip = new();
-            GICreateInstance(reader, instance.m_ConstantClip);
+            res.ConstantClip = serializer.Deserialize<ConstantClip>(reader);
 
-            instance.m_ACLClip = new GIACLClip();
-            instance.m_ACLClip.Read(reader);
+            res.ACLClip = serializer.Deserialize<GIACLClip>(reader);
 
             reader.Position = pos;
+            return res;
         }
-        private void GICreateInstance(IBundleBinaryReader reader,
-            StreamedClip instance)
+    }
+
+    internal sealed class MiHoYoStreamedClipConverter : BundleConverter<StreamedClip>
+    {
+        public override StreamedClip Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var streamedClipCount = (int)reader.ReadUInt64();
             var streamedClipOffset = reader.Position + reader.ReadInt64();
@@ -93,22 +104,27 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 throw new IOException("Offset outside of range");
             }
-
+            var res = new StreamedClip();
             var pos = reader.Position;
             reader.Position = streamedClipOffset;
 
-            instance.data = reader.ReadArray(streamedClipCount, (r, _) => r.ReadUInt32());
-            instance.curveCount = streamedClipCurveCount;
+            res.Data = reader.ReadArray(streamedClipCount, (r, _) => r.ReadUInt32());
+            res.CurveCount = streamedClipCurveCount;
 
             reader.Position = pos;
+            return res;
         }
-        private void GICreateInstance(IBundleBinaryReader reader,
-            DenseClip instance)
+    }
+
+    internal sealed class MiHoYoDenseClipConverter : BundleConverter<DenseClip>
+    {
+        public override DenseClip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.m_FrameCount = reader.ReadInt32();
-            instance.m_CurveCount = reader.ReadUInt32();
-            instance.m_SampleRate = reader.ReadSingle();
-            instance.m_BeginTime = reader.ReadSingle();
+            var res = new DenseClip();
+            res.FrameCount = reader.ReadInt32();
+            res.CurveCount = reader.ReadUInt32();
+            res.SampleRate = reader.ReadSingle();
+            res.BeginTime = reader.ReadSingle();
 
             var denseClipCount = (int)reader.ReadUInt64();
             var denseClipOffset = reader.Position + reader.ReadInt64();
@@ -120,12 +136,16 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var pos = reader.Position;
             reader.Position = denseClipOffset;
 
-            instance.m_SampleArray = reader.ReadArray(denseClipCount, (r, _) => r.ReadSingle());
+            res.SampleArray = reader.ReadArray(denseClipCount, (r, _) => r.ReadSingle());
 
             reader.Position = pos;
+            return res;
         }
-        private void GICreateInstance(IBundleBinaryReader reader,
-            ConstantClip instance)
+    }
+
+    internal sealed class MiHoYoConstantClipConverter : BundleConverter<ConstantClip>
+    {
+        public override ConstantClip Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var constantClipCount = (int)reader.ReadUInt64();
             var constantClipOffset = reader.Position + reader.ReadInt64();
@@ -133,37 +153,41 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 throw new IOException("Offset outside of range");
             }
-
+            var res = new ConstantClip();
             var pos = reader.Position;
             reader.Position = constantClipOffset;
 
-            instance.data = reader.ReadArray(constantClipCount, (r, _) => r.ReadSingle());
+            res.Data = reader.ReadArray(constantClipCount, (r, _) => r.ReadSingle());
 
             reader.Position = pos;
+            return res;
         }
-        private void GICreateInstance(IBundleBinaryReader reader, ClipMuscleConstant instance)
+    }
+
+    internal sealed class MiHoYoClipMuscleConstantConverter : BundleConverter<ClipMuscleConstant>
+    {
+        public override ClipMuscleConstant? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var version = reader.Get<UnityVersion>();
-            instance.m_DeltaPose = new();
-            GICreateInstance(reader, instance.m_DeltaPose);
-            instance.m_StartX = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_StopX = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_LeftFootStartX = UnityReaderExtension.Parse(reader.ReadXForm4());
-            instance.m_RightFootStartX = UnityReaderExtension.Parse(reader.ReadXForm4());
+            var res = new ClipMuscleConstant();
+            var version = reader.Get<Version>();
+            res.DeltaPose = serializer.Deserialize<HumanPose>(reader);
+            res.StartX = reader.ReadXForm4();
+            res.StopX = reader.ReadXForm4();
+            res.LeftFootStartX = reader.ReadXForm4();
+            res.RightFootStartX = reader.ReadXForm4();
 
-            instance.m_AverageSpeed = UnityReaderExtension.Parse(reader.ReadVector4());
+            res.AverageSpeed = reader.ReadVector4().AsVector3();
 
-            instance.m_Clip = new();
-            GICreateInstance(reader, instance.m_Clip);
+            res.Clip = serializer.Deserialize<Clip>(reader);
 
-            instance.m_StartTime = reader.ReadSingle();
-            instance.m_StopTime = reader.ReadSingle();
-            instance.m_OrientationOffsetY = reader.ReadSingle();
-            instance.m_Level = reader.ReadSingle();
-            instance.m_CycleOffset = reader.ReadSingle();
-            instance.m_AverageAngularSpeed = reader.ReadSingle();
+            res.StartTime = reader.ReadSingle();
+            res.StopTime = reader.ReadSingle();
+            res.OrientationOffsetY = reader.ReadSingle();
+            res.Level = reader.ReadSingle();
+            res.CycleOffset = reader.ReadSingle();
+            res.AverageAngularSpeed = reader.ReadSingle();
 
-            instance.m_IndexArray = reader.ReadArray(0xC8, (r, _) => (int)r.ReadInt16());
+            res.IndexArray = reader.ReadArray(0xC8, (r, _) => (int)r.ReadInt16());
 
             var valueArrayDeltaCount = (int)reader.ReadUInt64();
             var valueArrayDeltaOffset = reader.Position + reader.ReadInt64();
@@ -181,35 +205,32 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 throw new IOException("Offset outside of range");
             }
 
-            instance.m_Mirror = reader.ReadBoolean();
-            instance.m_LoopTime = reader.ReadBoolean();
-            instance.m_LoopBlend = reader.ReadBoolean();
-            instance.m_LoopBlendOrientation = reader.ReadBoolean();
-            instance.m_LoopBlendPositionY = reader.ReadBoolean();
-            instance.m_LoopBlendPositionXZ = reader.ReadBoolean();
-            instance.m_StartAtOrigin = reader.ReadBoolean();
-            instance.m_KeepOriginalOrientation = reader.ReadBoolean();
-            instance.m_KeepOriginalPositionY = reader.ReadBoolean();
-            instance.m_KeepOriginalPositionXZ = reader.ReadBoolean();
-            instance.m_HeightFromFeet = reader.ReadBoolean();
+            res.Mirror = reader.ReadBoolean();
+            res.LoopTime = reader.ReadBoolean();
+            res.LoopBlend = reader.ReadBoolean();
+            res.LoopBlendOrientation = reader.ReadBoolean();
+            res.LoopBlendPositionY = reader.ReadBoolean();
+            res.LoopBlendPositionXZ = reader.ReadBoolean();
+            res.StartAtOrigin = reader.ReadBoolean();
+            res.KeepOriginalOrientation = reader.ReadBoolean();
+            res.KeepOriginalPositionY = reader.ReadBoolean();
+            res.KeepOriginalPositionXZ = reader.ReadBoolean();
+            res.HeightFromFeet = reader.ReadBoolean();
             reader.AlignStream();
 
             if (valueArrayDeltaCount > 0)
             {
                 reader.Position = valueArrayDeltaOffset;
-                instance.m_ValueArrayDelta = new List<ValueDelta>();
-                for (int i = 0; i < valueArrayDeltaCount; i++)
-                {
-                    instance.m_ValueArrayDelta.Add(new ValueDelta(reader));
-                }
+                res.ValueArrayDelta = reader.ReadArray<ValueDelta>(valueArrayDeltaCount, serializer);
             }
 
             if (valueArrayReferencePoseCount > 0)
             {
                 reader.Position = valueArrayReferencePoseOffset;
-                instance.m_ValueArrayReferencePose = reader.ReadArray(valueArrayReferencePoseCount, (r, _) => r.ReadSingle());
+                res.ValueArrayReferencePose = reader.ReadArray(valueArrayReferencePoseCount, r => r.ReadSingle());
             }
-
+            return res;
         }
     }
+
 }

@@ -8,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class RawExporter : IFileExporter
+    internal class RawExporter : IBundleExporter
     {
         
         public RawExporter(TextAsset asset)
@@ -53,7 +53,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _input = asset.Script;
         }
 
-        private readonly IFileExporter? _exporter;
+        private readonly IBundleExporter? _exporter;
 
         private readonly Stream? _input;
         private string _extension = string.Empty;

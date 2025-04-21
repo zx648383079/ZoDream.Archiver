@@ -14,7 +14,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class ShaderExporter(Shader shader) : IFileExporter
+    internal class ShaderExporter(Shader shader) : IBundleExporter
     {
         private const string NoteHeader = "//////////////////////////////////////////\n" +
                                       "//\n" +

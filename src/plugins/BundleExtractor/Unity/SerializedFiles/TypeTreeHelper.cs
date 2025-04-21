@@ -196,7 +196,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public static void ReadType<T>(TypeTree m_Types, 
             IBundleBinaryReader reader, 
             T instance)
-            where T : UIObject 
+            where T : UIObject
         {
             var data = ReadType(m_Types, reader);
             ConvertType(data, instance);

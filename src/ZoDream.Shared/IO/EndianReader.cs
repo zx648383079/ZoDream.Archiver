@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using ZoDream.Shared.Models;
 
@@ -289,7 +288,7 @@ namespace ZoDream.Shared.IO
         //     Read string
         public string ReadStringZeroTerm()
         {
-            if (ReadStringZeroTerm(4096, out var result))
+            if (TryReadStringZeroTerm(4096, out var result))
             {
                 return result;
             }
@@ -299,7 +298,7 @@ namespace ZoDream.Shared.IO
 
         public string ReadStringZeroTerm(int maxLength)
         {
-            if (ReadStringZeroTerm(maxLength, out var result))
+            if (TryReadStringZeroTerm(maxLength, out var result))
             {
                 return result;
             }
@@ -320,7 +319,7 @@ namespace ZoDream.Shared.IO
         //
         // 返回结果:
         //     Whether zero term has been found
-        public bool ReadStringZeroTerm(int maxLength, [NotNullWhen(true)] out string? result)
+        public bool TryReadStringZeroTerm(int maxLength, [NotNullWhen(true)] out string? result)
         {
             Span<byte> span = stackalloc byte[maxLength];
             for (int i = 0; i < maxLength; i = checked(i + 1))

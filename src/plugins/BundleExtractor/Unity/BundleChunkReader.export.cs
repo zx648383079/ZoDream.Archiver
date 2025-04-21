@@ -97,7 +97,7 @@ namespace ZoDream.BundleExtractor
             };
         }
 
-        private IFileExporter? TryParse(UIObject obj)
+        private IBundleExporter? TryParse(UIObject obj)
         {
             if (IsExclude(obj))
             {
@@ -115,7 +115,7 @@ namespace ZoDream.BundleExtractor
             }
             if (!_exportItems.TryGetValue(obj.GetType(), out var targetType))
             {
-                return obj is IFileExporter f ? f : null;
+                return obj is IBundleExporter f ? f : null;
             }
             if (_batchItems.TryGetValue(targetType, out instance))
             {
@@ -134,7 +134,7 @@ namespace ZoDream.BundleExtractor
             }
             if (target is not IMultipartExporter m)
             {
-                return (IFileExporter)target;
+                return (IBundleExporter)target;
             }
             if (fn is null)
             {

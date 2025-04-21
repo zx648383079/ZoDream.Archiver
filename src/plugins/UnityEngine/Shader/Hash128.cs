@@ -2,7 +2,7 @@
 {
     public struct Hash128
     {
-        public byte[] bytes;
+        public byte[] Value;
     }
 
 }

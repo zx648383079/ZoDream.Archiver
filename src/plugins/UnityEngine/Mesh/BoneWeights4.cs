@@ -1,8 +1,6 @@
-﻿using ZoDream.Shared.Bundle;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
-    public class BoneWeights4
+    public struct BoneWeights4
     {
         public float[] Weight;
         public int[] BoneIndex;

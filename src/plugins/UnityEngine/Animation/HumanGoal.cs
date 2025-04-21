@@ -1,14 +1,15 @@
 ﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
 
 namespace UnityEngine
 {
-    public class HumanGoal
+    public struct HumanGoal
     {
-        public Transform X { get; set; }
-        public float WeightT { get; set; }
-        public float WeightR { get; set; }
-        public Vector3 HintT { get; set; }
-        public float HintWeightT { get; set; }
+        public Transform<Vector3> X;
+        public float WeightT;
+        public float WeightR;
+        public Vector3 HintT;
+        public float HintWeightT;
 
     }
 

@@ -1,8 +1,11 @@
-﻿namespace UnityEngine
+﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
+
+namespace UnityEngine
 {
     public class Human
     {
-        public Transform RootX;
+        public Transform<Vector3> RootX;
         public Skeleton Skeleton;
         public SkeletonPose SkeletonPose;
         public Hand LeftHand;

@@ -4,7 +4,7 @@ namespace UnityEngine
 {
     public class SerializedTagMap
     {
-        public KeyValuePair<string, string>[] tags;
+        public KeyValuePair<string, string>[] Tags;
     }
 
 }

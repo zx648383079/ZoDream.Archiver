@@ -5,7 +5,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class NormalTextureExporter(Texture2D texture) : IFileExporter
+    internal class NormalTextureExporter(Texture2D texture) : IBundleExporter
     {
         public string Name => texture.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)

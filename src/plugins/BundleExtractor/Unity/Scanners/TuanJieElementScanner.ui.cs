@@ -1,130 +1,115 @@
-﻿using System.Collections.Generic;
-using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.UI;
+﻿using System;
+using System.Numerics;
+using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Converters;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class TuanJieElementScanner
+    internal sealed class TuanJieClipMuscleConstantConverter : ClipMuscleConstantConverter
     {
-
-        private void CreateInstance(IBundleBinaryReader reader, ClipMuscleConstant instance)
+        public override ClipMuscleConstant? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var version = reader.Get<UnityVersion>();
-            instance.m_DeltaPose = new HumanPose(reader);
-            instance.m_StartX = reader.ReadXForm();
+            var res = new ClipMuscleConstant();
+            var version = reader.Get<Version>();
+            res.DeltaPose = serializer.Deserialize<HumanPose>(reader);
+            res.StartX = reader.ReadXForm();
             if (version.GreaterThanOrEquals(5, 5))//5.5 and up
             {
-                instance.m_StopX = reader.ReadXForm();
+                res.StopX = reader.ReadXForm();
             }
-            instance.m_LeftFootStartX = reader.ReadXForm();
-            instance.m_RightFootStartX = reader.ReadXForm();
+            res.LeftFootStartX = reader.ReadXForm();
+            res.RightFootStartX = reader.ReadXForm();
             if (version.LessThan(5))//5.0 down
             {
-                instance.m_MotionStartX = reader.ReadXForm();
-                instance.m_MotionStopX = reader.ReadXForm();
+                res.MotionStartX = reader.ReadXForm();
+                res.MotionStopX = reader.ReadXForm();
             }
-            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
-                UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
-            instance.m_Clip = new Clip();
-            TryRead(reader, instance.m_Clip);
-            instance.m_StartTime = reader.ReadSingle();
-            instance.m_StopTime = reader.ReadSingle();
-            instance.m_OrientationOffsetY = reader.ReadSingle();
-            instance.m_Level = reader.ReadSingle();
-            instance.m_CycleOffset = reader.ReadSingle();
-            instance.m_AverageAngularSpeed = reader.ReadSingle();
+            res.AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
+                reader.ReadVector4().AsVector3();//5.4 and up
+            res.Clip = serializer.Deserialize<Clip>(reader);
+            res.StartTime = reader.ReadSingle();
+            res.StopTime = reader.ReadSingle();
+            res.OrientationOffsetY = reader.ReadSingle();
+            res.Level = reader.ReadSingle();
+            res.CycleOffset = reader.ReadSingle();
+            res.AverageAngularSpeed = reader.ReadSingle();
 
             // 1.4.2
             reader.AlignStream();
 
-            instance.m_IndexArray = reader.ReadArray(r => r.ReadInt32());
-            instance.ReadBase(reader);
+            res.IndexArray = reader.ReadArray(r => r.ReadInt32());
+            ReadBase(res, reader, serializer, () => { });
+            return res;
         }
+    }
 
-        private void CreateInstance(IBundleBinaryReader reader,
-            AnimationClip instance)
+    internal sealed class TuanJieAnimationClipConverter : AnimationClipConverter
+    {
+        public override AnimationClip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader, () => {
-                var version = reader.Get<UnityVersion>();
-                instance.m_Compressed = reader.ReadBoolean();
+            var res = new AnimationClip();
+            ReadBase(res, reader, serializer, () => {
+                var version = reader.Get<Version>();
+                res.Compressed = reader.ReadBoolean();
                 if (version.GreaterThanOrEquals(4, 3))//4.3 and up
                 {
-                    instance.m_UseHighQualityCurve = reader.ReadBoolean();
+                    res.UseHighQualityCurve = reader.ReadBoolean();
                 }
                 reader.AlignStream();
-                int numRCurves = reader.ReadInt32();
-                instance.m_RotationCurves = [];
-                for (int i = 0; i < numRCurves; i++)
-                {
-                    instance.m_RotationCurves.Add(new QuaternionCurve(reader));
-                }
+                res.RotationCurves = reader.ReadArray<QuaternionCurve>(serializer);
 
-                int numCRCurves = reader.ReadInt32();
-                instance.m_CompressedRotationCurves = [];
-                for (int i = 0; i < numCRCurves; i++)
-                {
-                    instance.m_CompressedRotationCurves.Add(new CompressedAnimationCurve(reader));
-                }
+                res.CompressedRotationCurves = reader.ReadArray<CompressedAnimationCurve>(serializer);
+  
 
-                instance.m_EulerCurves = [];
-                instance.m_PositionCurves = [];
-                instance.m_ScaleCurves = [];
+                res.EulerCurves = [];
+                res.PositionCurves = [];
+                res.ScaleCurves = [];
 
-                int numFCurves = reader.ReadInt32();
-                instance.m_FloatCurves = [];
-                for (int i = 0; i < numFCurves; i++)
-                {
-                    instance.m_FloatCurves.Add(new FloatCurve(reader));
-                }
+                res.FloatCurves = reader.ReadArray<FloatCurve>(serializer);
 
                 if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
                 {
-                    int numPtrCurves = reader.ReadInt32();
-                    instance.m_PPtrCurves = [];
-                    for (int i = 0; i < numPtrCurves; i++)
-                    {
-                        instance.m_PPtrCurves.Add(new PPtrCurve(reader));
-                    }
+                    res.PPtrCurves = reader.ReadArray<PPtrCurve>(serializer);
                 }
 
-                instance.m_SampleRate = reader.ReadSingle();
-                instance.m_WrapMode = reader.ReadInt32();
+                res.SampleRate = reader.ReadSingle();
+                res.WrapMode = reader.ReadInt32();
                 if (version.GreaterThanOrEquals(3, 4)) //3.4 and up
                 {
-                    instance.m_Bounds = new AABB(reader);
+                    res.Bounds = serializer.Deserialize<Bounds>(reader);
                 }
                 if (version.Major >= 4)//4.0 and up
                 {
-                    instance.m_MuscleClipSize = reader.ReadUInt32();
-                    if (instance.m_MuscleClipSize > 0)
+                    res.MuscleClipSize = reader.ReadUInt32();
+                    if (res.MuscleClipSize > 0)
                     {
                         reader.ReadUInt32(); // not needed
-                        instance.m_MuscleClip = new();
-                        TryRead(reader, instance.m_MuscleClip);
-                        instance.m_StreamData = new StreamingInfo(reader);
+                        res.MuscleClip = serializer.Deserialize<ClipMuscleConstant>(reader);
+                        res.StreamData = serializer.Deserialize<ResourceSource>(reader);
                     }
                 }
             });
+            return res;
         }
-
-        private void CreateInstance(IBundleBinaryReader reader,
-            Mesh instance)
+    }
+    internal sealed class TuanJieMeshConverter : MeshConverter
+    {
+        public override Mesh? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var version = reader.Get<UnityVersion>();
-            instance.ReadBase(reader, () => {
+            var res = new Mesh();
+            var version = reader.Get<Version>();
+            ReadBase(res, reader, serializer, () => {
                 var m_MeshCompression = 0;
                 if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
                 {
                     if (version.GreaterThanOrEquals(2019)) //2019 and up
                     {
                         var m_BonesAABBSize = reader.ReadInt32();
-                        var m_BonesAABB = new List<MinMaxAABB>();
-                        for (int i = 0; i < m_BonesAABBSize; i++)
-                        {
-                            m_BonesAABB.Add(new MinMaxAABB(reader));
-                        }
+                        var m_BonesAABB = reader.ReadArray<MinMaxAABB>(serializer);
 
                         var m_VariableBoneCountWeights = reader.ReadArray(r => r.ReadUInt32());
                     }
@@ -151,33 +136,14 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         var ResourceFlags = reader.ReadUInt32();
 
                         var RootClusterPage = reader.ReadInt32();
-                        instance.m_IndexBuffer = reader.ReadArray(RootClusterPage / 4, (r, _) => r.ReadUInt32());
+                        res.IndexBuffer = reader.ReadArray(RootClusterPage / 4, (r, _) => r.ReadUInt32());
 
-                        var ImposterAtlas = reader.ReadInt32();
-                        for (int i = 0; i < ImposterAtlas; i++)
-                        {
-                            reader.ReadUInt16();
-                        }
-                        var HierarchyNodes = reader.ReadInt32();
-                        for (int i = 0; i < HierarchyNodes; i++)
-                        {
-                            new VGPackedHierarchyNode(reader);
-                        }
-                        var HierarchyRootOffsets = reader.ReadInt32();
-                        for (int i = 0; i < HierarchyRootOffsets; i++)
-                        {
-                            reader.ReadUInt32();
-                        }
-                        var PageStreamingStates = reader.ReadInt32();
-                        for (int i = 0; i < PageStreamingStates; i++)
-                        {
-                            new VGPageStreamingState(reader);
-                        }
-                        var PageDependencies = reader.ReadInt32();
-                        for (int i = 0; i < PageDependencies; i++)
-                        {
-                            reader.ReadUInt32();
-                        }
+                        var ImposterAtlas = reader.ReadArray(_ => reader.ReadUInt16());
+                        reader.ReadArray<VGPackedHierarchyNode>(serializer);
+                        var HierarchyRootOffsets = reader.ReadArray(_ => reader.ReadUInt32());
+                        var PageStreamingStates = reader.ReadArray<VGPageStreamingState>(serializer);
+              
+                        var PageDependencies = reader.ReadArray(_ => reader.ReadUInt32());
 
                     }
                     reader.AlignStream();
@@ -186,99 +152,85 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     reader.ReadInt32();
 
                     //Unity fixed it in 2017.3.1p1 and later versions
-                    if (version.GreaterThanOrEquals(2017, 3, 1, UnityVersionType.Patch, 1) && m_MeshCompression == 0)//2017.3.xfx with no compression
+                    if (version.GreaterThanOrEquals(2017, 3, 1, VersionType.Patch, 1) && m_MeshCompression == 0)//2017.3.xfx with no compression
                     {
                         var m_IndexFormat = reader.ReadInt32();
-                        instance.m_Use16BitIndices = m_IndexFormat == 0;
+                        res.Use16BitIndices = m_IndexFormat == 0;
                     }
 
                     int m_IndexBuffer_size = reader.ReadInt32();
-                    if (instance.m_Use16BitIndices)
+                    if (res.Use16BitIndices)
                     {
-                        instance.m_IndexBuffer = new uint[m_IndexBuffer_size / 2];
-                        for (int i = 0; i < m_IndexBuffer_size / 2; i++)
-                        {
-                            instance.m_IndexBuffer[i] = reader.ReadUInt16();
-                        }
+                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
                         reader.AlignStream();
                     }
                     else
                     {
-                        instance.m_IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, (r, _) => r.ReadUInt32());
+                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
                     }
                 }
 
                 if (version.LessThan(3, 5)) //3.4.2 and earlier
                 {
-                    instance.m_VertexCount = reader.ReadInt32();
-                    instance.m_Vertices = reader.ReadArray(instance.m_VertexCount * 3, (r, _) => r.ReadSingle()); //Vector3
+                    res.VertexCount = reader.ReadInt32();
+                    res.Vertices = reader.ReadArray(res.VertexCount * 3, r => r.ReadSingle()); //Vector3
 
-                    var skinNum = reader.ReadInt32();
-                    instance.m_Skin = [];
-                    for (int s = 0; s < skinNum; s++)
-                    {
-                        instance.m_Skin.Add(new BoneWeights4(reader));
-                    }
+                    res.Skin = reader.ReadArray<BoneWeights4>(serializer);
 
-                    instance.m_BindPose = reader.ReadMatrixArray();
+                    res.BindPose = reader.ReadMatrixArray();
 
-                    instance.m_UV0 = reader.ReadArray(reader.ReadInt32() * 2, (r, _) => r.ReadSingle()); //Vector2
+                    res.UV0 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
-                    instance.m_UV1 = reader.ReadArray(reader.ReadInt32() * 2, (r, _) => r.ReadSingle()); //Vector2
+                    res.UV1 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
                     if (version.LessThanOrEquals(2, 5)) //2.5 and down
                     {
                         int m_TangentSpace_size = reader.ReadInt32();
-                        instance.m_Normals = new float[m_TangentSpace_size * 3];
-                        instance.m_Tangents = new float[m_TangentSpace_size * 4];
+                        res.Normals = new float[m_TangentSpace_size * 3];
+                        res.Tangents = new float[m_TangentSpace_size * 4];
                         for (int v = 0; v < m_TangentSpace_size; v++)
                         {
-                            instance.m_Normals[v * 3] = reader.ReadSingle();
-                            instance.m_Normals[v * 3 + 1] = reader.ReadSingle();
-                            instance.m_Normals[v * 3 + 2] = reader.ReadSingle();
-                            instance.m_Tangents[v * 3] = reader.ReadSingle();
-                            instance.m_Tangents[v * 3 + 1] = reader.ReadSingle();
-                            instance.m_Tangents[v * 3 + 2] = reader.ReadSingle();
-                            instance.m_Tangents[v * 3 + 3] = reader.ReadSingle(); //handedness
+                            res.Normals[v * 3] = reader.ReadSingle();
+                            res.Normals[v * 3 + 1] = reader.ReadSingle();
+                            res.Normals[v * 3 + 2] = reader.ReadSingle();
+                            res.Tangents[v * 3] = reader.ReadSingle();
+                            res.Tangents[v * 3 + 1] = reader.ReadSingle();
+                            res.Tangents[v * 3 + 2] = reader.ReadSingle();
+                            res.Tangents[v * 3 + 3] = reader.ReadSingle(); //handedness
                         }
                     }
                     else //2.6.0 and later
                     {
-                        instance.m_Tangents = reader.ReadArray(reader.ReadInt32() * 4, (r, _) => r.ReadSingle()); //Vector4
+                        res.Tangents = reader.ReadArray(reader.ReadInt32() * 4, r => r.ReadSingle()); //Vector4
 
-                        instance.m_Normals = reader.ReadArray(reader.ReadInt32() * 3, (r, _) => r.ReadSingle()); //Vector3
+                        res.Normals = reader.ReadArray(reader.ReadInt32() * 3, r => r.ReadSingle()); //Vector3
                     }
                 }
                 else
                 {
                     if (version.LessThan(2018, 2)) //2018.2 down
                     {
-                        var skinNum = reader.ReadInt32();
-                        instance.m_Skin = [];
-                        for (int s = 0; s < skinNum; s++)
-                        {
-                            instance.m_Skin.Add(new BoneWeights4(reader));
-                        }
+                        res.Skin = reader.ReadArray<BoneWeights4>(serializer);
                     }
 
                     if (version.LessThanOrEquals(4, 2)) //4.2 and down
                     {
-                        instance.m_BindPose = reader.ReadMatrixArray();
+                        res.BindPose = reader.ReadMatrixArray();
                     }
 
-                    instance.m_VertexData = new VertexData(reader);
+                    res.VertexData = serializer.Deserialize<VertexData>(reader);
                     reader.AlignStream();
                 }
 
-                
+
                 if (version.GreaterThanOrEquals(2022, 3) && m_MeshCompression > 0)
                 {
                     reader.Position += 44; // TODO 不知道是什么
                 }
 
-                if (version.GreaterThanOrEquals(2, 6) && !instance.m_CollisionMeshBaked) //2.6.0 and later
+                if (version.GreaterThanOrEquals(2, 6) && !res.CollisionMeshBaked) //2.6.0 and later
                 {
-                    instance.m_CompressedMesh = new CompressedMesh(reader);
+                    res.CompressedMesh = serializer.Deserialize<CompressedMesh>(reader);
                 }
 
                 reader.Position += 24; //AABB m_LocalAABB
@@ -286,10 +238,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 if (version.LessThanOrEquals(3, 4, 2)) //3.4.2 and earlier
                 {
                     int m_Colors_size = reader.ReadInt32();
-                    instance.m_Colors = new float[m_Colors_size * 4];
+                    res.Colors = new float[m_Colors_size * 4];
                     for (int v = 0; v < m_Colors_size * 4; v++)
                     {
-                        instance.m_Colors[v] = (float)reader.ReadByte() / 0xFF;
+                        res.Colors[v] = (float)reader.ReadByte() / 0xFF;
                     }
 
                     int m_CollisionTriangles_size = reader.ReadInt32();
@@ -322,37 +274,52 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 }
 
             });
+            return res;
         }
-
-        private void CreateInstance(IBundleBinaryReader reader,
-            MatrixParameter instance)
+    }
+    internal sealed class TuanJieMatrixParameterConverter : MatrixParameterConverter
+    {
+        public override MatrixParameter Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader, () => {
+            var res = new MatrixParameter();
+            ReadBase(ref res, reader, serializer, () => {
                 var m_IndexInCB = reader.ReadInt32();
             });
+            return res;
         }
+    }
 
-        private void CreateInstance(IBundleBinaryReader reader,
-            ConstantBuffer instance)
+    internal sealed class TuanJieConstantBufferConverter : ConstantBufferConverter
+    {
+        public override ConstantBuffer Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader, () => {
+            var res = new ConstantBuffer();
+            ReadBase(ref res, reader, serializer, () => {
                 var m_totalParameterCount = reader.ReadInt32();
             });
+            return res;
         }
-        private void CreateInstance(IBundleBinaryReader reader,
-            VectorParameter instance)
+    }
+    internal sealed class TuanJieVectorParameterConverter : VectorParameterConverter
+    {
+        public override VectorParameter Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader, () => {
+            var res = new VectorParameter();
+            ReadBase(ref res, reader, serializer, () => {
                 var m_IndexInCB = reader.ReadInt32();
             });
+            return res;
         }
-        private void CreateInstance(IBundleBinaryReader reader,
-           Texture2D instance)
+    }
+    internal sealed class TuanJieTexture2DConverter : BundleConverter<Texture2D>
+    {
+        public override Texture2D? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader);
-            var version = reader.Get<UnityVersion>();
-            instance.m_Width = reader.ReadInt32();
-            instance.m_Height = reader.ReadInt32();
+            var res = new Texture2D();
+            UnityConverter.ReadTexture(res, reader, serializer);
+            var version = reader.Get<Version>();
+            res.Width = reader.ReadInt32();
+            res.Height = reader.ReadInt32();
             var m_CompleteImageSize = reader.ReadInt32();
             if (version.GreaterThanOrEquals(2020)) //2020.1 and up
             {
@@ -366,16 +333,16 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var m_UploadedMode = reader.ReadInt32();
             var m_DataStreamData_size = reader.ReadUInt32();
             var m_DataStreamData_path = reader.ReadAlignedString();
-            // instance.m_DataStreamData = new DataStreamingInfo(reader);
+            // res.DataStreamData = new DataStreamingInfo(reader);
 
-            instance.m_TextureFormat = (TextureFormat)reader.ReadInt32();
+            res.TextureFormat = (TextureFormat)reader.ReadInt32();
             if (version.LessThan(5, 2)) //5.2 down
             {
-                instance.m_MipMap = reader.ReadBoolean();
+                res.MipMap = reader.ReadBoolean();
             }
             else
             {
-                instance.m_MipCount = reader.ReadInt32();
+                res.MipCount = reader.ReadInt32();
             }
             if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
             {
@@ -413,8 +380,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             var m_ImageCount = reader.ReadInt32();
             var m_TextureDimension = reader.ReadInt32();
-            instance.m_TextureSettings = new GLTextureSettings();
-            reader.Get<IBundleElementScanner>().TryRead(reader, instance.m_TextureSettings);
+            res.TextureSettings = serializer.Deserialize<GLTextureSettings>(reader);
             if (version.GreaterThanOrEquals(3)) //3.0 and up
             {
                 var m_LightmapFormat = reader.ReadInt32();
@@ -428,33 +394,47 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 var m_PlatformBlob = reader.ReadArray(r => r.ReadByte());
                 reader.AlignStream();
             }
-            var image_data_size = reader.ReadInt32();
-            if (image_data_size == 0)//5.3.0 and up
+            var imageDataSize = reader.ReadInt32();
+            if (imageDataSize == 0)//5.3.0 and up
             {
-                instance.m_StreamData = new StreamingInfo(reader);
+                res.StreamData = serializer.Deserialize<ResourceSource>(reader);
             }
 
-            if (!string.IsNullOrEmpty(instance.m_StreamData?.path))
+            if (!string.IsNullOrEmpty(res.StreamData.Source))
             {
-                instance.image_data = ((UIReader)reader).OpenResource(instance.m_StreamData);
+                var container = reader.Get<ISerializedFile>();
+                if (reader.TryGet<IDependencyBuilder>(out var builder))
+                {
+                    var fileName = container.FullPath;
+                    var fileId = reader.Get<ObjectInfo>().FileID;
+                    builder.AddDependencyEntry(fileName,
+                        fileId,
+                        res.StreamData.Source);
+                }
+                res.ImageData = container.OpenResource(res.StreamData);
             }
             else
             {
-                instance.image_data = new PartialStream(reader.BaseStream, image_data_size);
+                res.ImageData = new PartialStream(reader.BaseStream, imageDataSize);
             }
+            return res;
         }
-
-        private void CreateInstance(IBundleBinaryReader reader,
-           GameObject instance)
+    }
+    internal sealed class TuanJieGameObjectConverter : GameObjectConverter
+    {
+        public override GameObject? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            instance.ReadBase(reader, () => {
-                var version = reader.Get<UnityVersion>();
+            var res = new GameObject();
+            ReadBase(res, reader, serializer, () => {
+                var version = reader.Get<Version>();
                 if (version.Build >= 13)
                 {
                     bool m_HasEditorInfo = reader.ReadBoolean();
                     reader.AlignStream();
                 }
             });
+            return res;
         }
     }
+
 }

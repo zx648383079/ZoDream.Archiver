@@ -6,7 +6,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FsbExporter(AudioClip audio) : IFileExporter
+    internal class FsbExporter(AudioClip audio) : IBundleExporter
     {
         public string Name => audio.Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)

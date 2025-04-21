@@ -320,14 +320,14 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     }
                     else
                     {
-                        instance.m_IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, (r, _) => r.ReadUInt32());
+                        instance.m_IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
                     }
                 }
 
                 if (version.LessThan(3, 5)) //3.4.2 and earlier
                 {
                     instance.m_VertexCount = reader.ReadInt32();
-                    instance.m_Vertices = reader.ReadArray(instance.m_VertexCount * 3, (r, _) => r.ReadSingle()); //Vector3
+                    instance.m_Vertices = reader.ReadArray(instance.m_VertexCount * 3, r => r.ReadSingle()); //Vector3
 
                     var skinNum = reader.ReadInt32();
                     instance.m_Skin = [];
@@ -338,9 +338,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
                     instance.m_BindPose = reader.ReadMatrixArray();
 
-                    instance.m_UV0 = reader.ReadArray(reader.ReadInt32() * 2, (r, _) => r.ReadSingle()); //Vector2
+                    instance.m_UV0 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
-                    instance.m_UV1 = reader.ReadArray(reader.ReadInt32() * 2, (r, _) => r.ReadSingle()); //Vector2
+                    instance.m_UV1 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
 
                     if (version.LessThanOrEquals(2, 5)) //2.5 and down
                     {

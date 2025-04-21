@@ -61,6 +61,12 @@ namespace ZoDream.Shared.Numerics
             return (float)(val * (180 / Math.PI));
         }
 
+
+        public static Vector4 AsVector4(this Vector3 vec, float w = 0)
+        {
+            return new(vec.X, vec.Y, vec.Z, w);
+        }
+
         /// <summary>
         ///  四元数转欧拉角
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
 
 namespace UnityEngine
 {
@@ -12,7 +13,7 @@ namespace UnityEngine
         public int[] HumanSkeletonIndexArray;
         public int[] HumanSkeletonReverseIndexArray;
         public int RootMotionBoneIndex;
-        public Transform RootMotionBoneX;
+        public Transform<Vector3> RootMotionBoneX;
         public Skeleton RootMotionSkeleton;
         public SkeletonPose RootMotionSkeletonPose;
         public int[] RootMotionSkeletonIndexArray;

@@ -1,9 +1,11 @@
-﻿
+﻿using System.Numerics;
+using ZoDream.Shared.Numerics;
+
 namespace UnityEngine
 {
     public class Collider
     {
-        public Transform X;
+        public Transform<Vector3> X;
         public uint Type;
         public uint XMotionType;
         public uint YMotionType;

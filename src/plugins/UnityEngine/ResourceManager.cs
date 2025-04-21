@@ -4,7 +4,7 @@ namespace UnityEngine
 {
     public class ResourceManager : Object
     {
-        public KeyValuePair<string, PPtr<Object>>[] Container;
+        public KeyValuePair<string, PPtr>[] Container;
 
     }
 }

@@ -71,7 +71,7 @@ namespace ZoDream.BundleExtractor
         public static IArchiveReader? OpenBundle(IBundleBinaryReader reader, IArchiveOptions? options = null)
         {
             var pos = reader.Position;
-            var found = reader.ReadStringZeroTerm(0x20, out var signature);
+            var found = reader.TryReadStringZeroTerm(0x20, out var signature);
             reader.Position = pos;
             if (!found)
             {

@@ -3,14 +3,14 @@ namespace UnityEngine
 {
     public struct SubMesh
     {
-        public uint firstByte;
-        public uint indexCount;
-        public GfxPrimitiveType topology;
-        public uint triangleCount;
-        public uint baseVertex;
-        public uint firstVertex;
-        public uint vertexCount;
-        public Bounds localAABB;
+        public uint FirstByte;
+        public uint IndexCount;
+        public GfxPrimitiveType Topology;
+        public uint TriangleCount;
+        public uint BaseVertex;
+        public uint FirstVertex;
+        public uint VertexCount;
+        public Bounds LocalAABB;
 
     }
 

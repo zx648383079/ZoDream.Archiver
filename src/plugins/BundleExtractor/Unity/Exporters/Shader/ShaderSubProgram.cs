@@ -70,7 +70,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     m_LocalKeywords[i] = reader.ReadAlignedString();
                 }
             }
-            m_ProgramCode = reader.ReadArray((r, _) => r.ReadByte());
+            m_ProgramCode = reader.ReadArray(r => r.ReadByte());
             reader.AlignStream();
 
             var sourceMap = reader.ReadInt32();

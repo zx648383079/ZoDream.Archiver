@@ -1,6 +1,4 @@
-﻿using ZoDream.Shared.Bundle;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
     public struct ChannelInfo
     {

@@ -1,5 +1,4 @@
-﻿using ZoDream.BundleExtractor.Models;
-using System;
+﻿using UnityEngine;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -83,15 +82,15 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
     }
     internal static class FormatVersionExtensions
     {
-        private static UnityVersion ToDefaultUnityVersion(this FormatVersion generation)
+        private static Version ToDefaultVersion(this FormatVersion generation)
         {
             return generation switch
             {
-                < FormatVersion.Unknown_5 => new UnityVersion(1, 2, 2),
-                FormatVersion.Unknown_5 => new UnityVersion(1, 6),
-                FormatVersion.Unknown_6 => new UnityVersion(2, 5),
-                FormatVersion.Unknown_7 => new UnityVersion(3, 0, 0, UnityVersionType.Beta, 1),
-                _ => throw new ArgumentOutOfRangeException(nameof(generation)),
+                < FormatVersion.Unknown_5 => new(1, 2, 2),
+                FormatVersion.Unknown_5 => new(1, 6),
+                FormatVersion.Unknown_6 => new(2, 5),
+                FormatVersion.Unknown_7 => new(3, 0, 0, VersionType.Beta, 1),
+                _ => throw new System.ArgumentOutOfRangeException(nameof(generation)),
             };
         }
     }

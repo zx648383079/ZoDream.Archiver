@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZoDream.BundleExtractor.Models;
+using System.IO;
+using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
@@ -33,5 +34,6 @@ namespace ZoDream.BundleExtractor.Unity
 
         public UIObject? this[long pathID] { get; }
         public void AddChild(UIObject obj);
+        public Stream OpenResource(ResourceSource source);
     }
 }

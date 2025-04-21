@@ -2,7 +2,6 @@
 using ZoDream.Shared.IO;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.BundleExtractor.Models;
 using System.Text.Json;
 
 namespace ZoDream.BundleExtractor
