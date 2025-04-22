@@ -165,7 +165,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(Mesh res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(Mesh res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             var target = reader.Get<BuildTarget>();
             var version = reader.Get<Version>();

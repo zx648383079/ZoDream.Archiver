@@ -2,8 +2,8 @@
 {
     public class AnimationClipOverride
     {
-        public PPtr<AnimationClip> OriginalClip { get; set; }
-        public PPtr<AnimationClip> OverrideClip { get; set; }
+        public IPPtr<AnimationClip> OriginalClip { get; set; }
+        public IPPtr<AnimationClip> OverrideClip { get; set; }
 
     }
 }

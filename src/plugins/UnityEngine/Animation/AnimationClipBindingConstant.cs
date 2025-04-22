@@ -3,7 +3,7 @@
     public class AnimationClipBindingConstant
     {
         public GenericBinding[] GenericBindings { get; set; }
-        public PPtr[] CurveMapping { get; set; }
+        public IPPtr<Object>[] CurveMapping { get; set; }
 
     }
 }

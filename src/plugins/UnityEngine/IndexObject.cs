@@ -4,7 +4,7 @@ namespace UnityEngine
 {
     public class Index
     {
-        public PPtr Object;
+        public IPPtr<Object> Object;
         public ulong Size;
     }
 

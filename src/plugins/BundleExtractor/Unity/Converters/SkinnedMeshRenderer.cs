@@ -6,12 +6,12 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class SkinnedMeshRendererConverter : RendererConverter<SkinnedMeshRenderer>
+    internal sealed class SkinnedMeshRendererConverter : BundleConverter<SkinnedMeshRenderer>
     {
         public override SkinnedMeshRenderer? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var res = new SkinnedMeshRenderer();
-            Read(res, reader, serializer);
+            RendererConverter.Read(res, reader, serializer);
             var version = reader.Get<Version>();
             int m_Quality = reader.ReadInt32();
             var m_UpdateWhenOffscreen = reader.ReadBoolean();
@@ -20,12 +20,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             if (version.LessThan(2, 6)) //2.6 down
             {
-                var m_DisableAnimationWhenOffscreen = serializer.Deserialize<PPtr<Animation>>(reader);
+                var m_DisableAnimationWhenOffscreen = reader.ReadPPtr<Animation>(serializer);
             }
 
-            res.Mesh = serializer.Deserialize<PPtr<Mesh>>(reader);
+            res.Mesh = reader.ReadPPtr<Mesh>(serializer);
 
-            res.Bones = reader.ReadArray(_ => serializer.Deserialize<PPtr<Transform>>(reader));
+            res.Bones = reader.ReadArray(_ => reader.ReadPPtr<Transform>(serializer));
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
 {
@@ -17,7 +18,7 @@ namespace ZoDream.BundleExtractor
             {typeof(TextAsset), typeof(RawExporter)},
             {typeof(AudioClip), typeof(FsbExporter)},
             {typeof(Shader), typeof(ShaderExporter) },
-            {typeof(MonoBehavior), typeof(BehaviorExporter) },
+            {typeof(MonoBehaviour), typeof(BehaviorExporter) },
             {typeof(GameObject), typeof(GltfExporter)},
             {typeof(Mesh), typeof(GltfExporter)},
             {typeof(Animator), typeof(GltfExporter)},
@@ -31,20 +32,22 @@ namespace ZoDream.BundleExtractor
         {
             foreach (var asset in _assetItems)
             {
-                foreach (var obj in asset.Children)
+                for (var i = 0; i < asset.Count; i++)
                 {
                     if (token.IsCancellationRequested)
                     {
                         Logger?.Info("Exporting assets has been cancelled !!");
                         return;
                     }
-                    if (IsExclude(obj.FileID))
+                    var info = asset.Get(i);
+                    if (IsExclude(info.FileID))
                     {
                         continue;
                     }
                     try
                     {
-                        var fileName = string.IsNullOrEmpty(obj.Name) ? obj.FileID.ToString() : obj.Name;
+                        var obj = asset[i];
+                        var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() : obj.Name;
                         var exporter = TryParse(obj);
                         exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
                             string.IsNullOrEmpty(exporter.Name) ? fileName : exporter.Name
@@ -83,7 +86,7 @@ namespace ZoDream.BundleExtractor
             };
         }
 
-        private bool IsExclude(UIObject obj)
+        private bool IsExclude(Object obj)
         {
             return obj switch
             {
@@ -97,7 +100,7 @@ namespace ZoDream.BundleExtractor
             };
         }
 
-        private IBundleExporter? TryParse(UIObject obj)
+        private IBundleExporter? TryParse(Object obj)
         {
             if (IsExclude(obj))
             {
@@ -144,7 +147,7 @@ namespace ZoDream.BundleExtractor
             return null;
         }
 
-        private static void TryAppend(object instance, UIObject obj)
+        private static void TryAppend(object instance, Object obj)
         {
             instance.GetType().GetMethod("Append",
                     [obj.GetType()])?.Invoke(instance, [obj]);

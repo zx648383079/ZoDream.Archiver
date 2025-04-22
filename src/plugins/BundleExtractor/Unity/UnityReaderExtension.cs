@@ -108,6 +108,18 @@ namespace ZoDream.BundleExtractor.Unity
             return reader.ReadArray(_ => reader.ReadMatrix());
         }
 
+        public static IPPtr<T> ReadPPtr<T>(this IBundleBinaryReader reader, IBundleSerializer serializer)
+            where T : Object
+        {
+            return new ObjectPPtr<T>(reader.Get<ISerializedFile>(), serializer.Deserialize<PPtr>(reader));
+        }
+
+        public static IPPtr<T>[] ReadPPtrArray<T>(this IBundleBinaryReader reader, IBundleSerializer serializer)
+            where T : Object
+        {
+            return reader.ReadArray(_ => ReadPPtr<T>(reader, serializer));
+        }
+
         public static Matrix4x4 CreateMatrix(float[] buffer)
         {
             var data = new Matrix4x4();

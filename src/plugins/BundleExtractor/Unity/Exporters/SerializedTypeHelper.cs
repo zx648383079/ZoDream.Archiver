@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.BundleExtractor.Models;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class SerializedTypeHelper(UnityVersion version)
+    internal class SerializedTypeHelper(Version version)
     {
         public void AddMonoBehavior(List<TypeTreeNode> nodes, int indent)
         {

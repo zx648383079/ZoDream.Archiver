@@ -4,8 +4,8 @@ namespace UnityEngine
 {
     public class SpriteAtlasData
     {
-        public PPtr<Texture2D> Texture;
-        public PPtr<Texture2D> AlphaTexture;
+        public IPPtr<Texture2D> Texture;
+        public IPPtr<Texture2D> AlphaTexture;
         public Vector4 TextureRect;
         public Vector2 TextureRectOffset;
         public Vector2 AtlasRectOffset;

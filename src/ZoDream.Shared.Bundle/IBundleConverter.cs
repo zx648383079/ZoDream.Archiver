@@ -14,4 +14,9 @@ namespace ZoDream.Shared.Bundle
     {
         public T? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer);
     }
+
+    public interface IBundlePipelineConverter<T>
+    {
+        public void Read(ref T instance, IBundleBinaryReader reader, IBundleSerializer serializer);
+    }
 }

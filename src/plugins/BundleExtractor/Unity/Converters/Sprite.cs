@@ -103,24 +103,24 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         #region CutImage
         public static SKImage? GetImage(Sprite m_Sprite)
         {
-            if (m_Sprite.m_SpriteAtlas != null && m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlas))
+            if (m_Sprite.SpriteAtlas != null && m_Sprite.SpriteAtlas.TryGet(out var m_SpriteAtlas))
             {
-                if (m_SpriteAtlas.m_RenderDataMap.TryGetValue(m_Sprite.m_RenderDataKey, out var spriteAtlasData) && spriteAtlasData.texture.TryGet(out var m_Texture2D))
+                if (m_SpriteAtlas.RenderDataMap.TryGetValue(m_Sprite.RenderDataKey, out var spriteAtlasData) && spriteAtlasData.Texture.TryGet(out var m_Texture2D))
                 {
-                    return CutImage(m_Sprite, m_Texture2D, spriteAtlasData.textureRect, spriteAtlasData.textureRectOffset, spriteAtlasData.downscaleMultiplier, spriteAtlasData.settingsRaw);
+                    return CutImage(m_Sprite, m_Texture2D, spriteAtlasData.TextureRect, spriteAtlasData.TextureRectOffset, spriteAtlasData.DownscaleMultiplier, spriteAtlasData.SettingsRaw);
                 }
             }
             else
             {
-                if (m_Sprite.m_RD.texture.TryGet(out var m_Texture2D))
+                if (m_Sprite.RD.Texture.TryGet(out var m_Texture2D))
                 {
-                    return CutImage(m_Sprite, m_Texture2D, m_Sprite.m_RD.textureRect, m_Sprite.m_RD.textureRectOffset, m_Sprite.m_RD.downscaleMultiplier, m_Sprite.m_RD.settingsRaw);
+                    return CutImage(m_Sprite, m_Texture2D, m_Sprite.RD.TextureRect, m_Sprite.RD.TextureRectOffset, m_Sprite.RD.DownscaleMultiplier, m_Sprite.RD.SettingsRaw);
                 }
             }
             return null;
         }
 
-        private static SKImage? CutImage(Sprite m_Sprite, Texture2D m_Texture2D, Rectf textureRect, Vector2 textureRectOffset, float downscaleMultiplier, SpriteSettings settingsRaw)
+        private static SKImage? CutImage(Sprite m_Sprite, Texture2D m_Texture2D, Vector4 textureRect, Vector2 textureRectOffset, float downscaleMultiplier, SpriteSettings settingsRaw)
         {
             var originalImage = m_Texture2D.ToImage();
             if (originalImage == null)
@@ -131,8 +131,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             SKImage? temp;
             if (downscaleMultiplier > 0f && downscaleMultiplier != 1f)
             {
-                var width = (int)(m_Texture2D.m_Width / downscaleMultiplier);
-                var height = (int)(m_Texture2D.m_Height / downscaleMultiplier);
+                var width = (int)(m_Texture2D.Width / downscaleMultiplier);
+                var height = (int)(m_Texture2D.Height / downscaleMultiplier);
                 temp = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
                 originalImage.Dispose();
                 originalImage = temp;
@@ -142,10 +142,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 return null;
             }
-            var rectX = (int)Math.Floor(textureRect.x);
-            var rectY = (int)Math.Floor(textureRect.y);
-            var rectRight = (int)Math.Ceiling(textureRect.x + textureRect.width);
-            var rectBottom = (int)Math.Ceiling(textureRect.y + textureRect.height);
+            var rectX = (int)Math.Floor(textureRect.X);
+            var rectY = (int)Math.Floor(textureRect.Y);
+            var rectRight = (int)Math.Ceiling(textureRect.X + textureRect.Z);
+            var rectBottom = (int)Math.Ceiling(textureRect.Y + textureRect.W);
             rectRight = Math.Min(rectRight, originalImage.Width);
             rectBottom = Math.Min(rectBottom, originalImage.Height);
             if (rectX != 0 || rectY != 0 || rectRight != originalImage.Width 
@@ -158,10 +158,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 isUpdated = true;
             }
             
-            if (settingsRaw.packed == 1)
+            if (settingsRaw.Packed == 1)
             {
                 //RotateAndFlip
-                switch (settingsRaw.packingRotation)
+                switch (settingsRaw.PackingRotation)
                 {
                     case SpritePackingRotation.FlipHorizontal:
                         temp = originalImage.Flip();
@@ -188,14 +188,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
 
             //Tight
-            if (settingsRaw.packingMode == SpritePackingMode.Tight)
+            if (settingsRaw.PackingMode == SpritePackingMode.Tight)
             {
                 try
                 {
-                    var triangles = GetTriangles(m_Sprite.m_RD);
+                    var triangles = GetTriangles(m_Sprite.RD);
                     var path = new SKPath();
-                    var matrix = Matrix3x2.CreateScale(m_Sprite.m_PixelsToUnits);
-                    matrix *= Matrix3x2.CreateTranslation(m_Sprite.m_Rect.width * m_Sprite.m_Pivot.X - textureRectOffset.X, m_Sprite.m_Rect.height * m_Sprite.m_Pivot.Y - textureRectOffset.Y);
+                    var matrix = Matrix3x2.CreateScale(m_Sprite.PixelsToUnits);
+                    matrix *= Matrix3x2.CreateTranslation(m_Sprite.Rect.Z * m_Sprite.Pivot.X - textureRectOffset.X, m_Sprite.Rect.W * m_Sprite.Pivot.Y - textureRectOffset.Y);
                     foreach (var item in triangles)
                     {
                         path.AddPoly(item, true);
@@ -223,16 +223,16 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
         private static SKPoint[][] GetTriangles(SpriteRenderData m_RD)
         {
-            if (m_RD.vertices != null) //5.6 down
+            if (m_RD.Vertices != null) //5.6 down
             {
-                var vertices = m_RD.vertices.Select(x => new SKPoint(x.pos.X, x.pos.Y)).ToArray();
-                var triangleCount = m_RD.indices.Length / 3;
+                var vertices = m_RD.Vertices.Select(x => new SKPoint(x.Pos.X, x.Pos.Y)).ToArray();
+                var triangleCount = m_RD.Indices.Length / 3;
                 var triangles = new SKPoint[triangleCount][];
                 for (int i = 0; i < triangleCount; i++)
                 {
-                    var first = m_RD.indices[i * 3];
-                    var second = m_RD.indices[i * 3 + 1];
-                    var third = m_RD.indices[i * 3 + 2];
+                    var first = m_RD.Indices[i * 3];
+                    var second = m_RD.Indices[i * 3 + 1];
+                    var third = m_RD.Indices[i * 3 + 2];
                     triangles[i] = [vertices[first], vertices[second], vertices[third]];
                 }
                 return triangles;
@@ -240,32 +240,32 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             else //5.6 and up
             {
                 var triangles = new List<SKPoint[]>();
-                var m_VertexData = m_RD.m_VertexData;
-                var m_Channel = m_VertexData.m_Channels[0]; //kShaderChannelVertex
-                var m_Stream = m_VertexData.m_Streams[m_Channel.stream];
-                using (var vertexReader = new EndianReader(new MemoryStream(m_VertexData.m_DataSize), EndianType.LittleEndian))
+                var m_VertexData = m_RD.VertexData;
+                var m_Channel = m_VertexData.Channels[0]; //kShaderChannelVertex
+                var m_Stream = m_VertexData.Streams[m_Channel.Stream];
+                using (var vertexReader = new EndianReader(new MemoryStream(m_VertexData.DataSize), EndianType.LittleEndian))
                 {
-                    using (var indexReader = new EndianReader(new MemoryStream(m_RD.m_IndexBuffer), EndianType.LittleEndian))
+                    using (var indexReader = new EndianReader(new MemoryStream(m_RD.IndexBuffer), EndianType.LittleEndian))
                     {
-                        foreach (var subMesh in m_RD.m_SubMeshes)
+                        foreach (var subMesh in m_RD.SubMeshes)
                         {
-                            vertexReader.BaseStream.Position = m_Stream.offset + subMesh.firstVertex * m_Stream.stride + m_Channel.offset;
+                            vertexReader.BaseStream.Position = m_Stream.Offset + subMesh.FirstVertex * m_Stream.Stride + m_Channel.Offset;
 
-                            var vertices = new SKPoint[subMesh.vertexCount];
-                            for (int v = 0; v < subMesh.vertexCount; v++)
+                            var vertices = new SKPoint[subMesh.VertexCount];
+                            for (int v = 0; v < subMesh.VertexCount; v++)
                             {
                                 vertices[v] = new SKPoint(vertexReader.ReadSingle(), vertexReader.ReadSingle()); vertexReader.ReadSingle();
-                                vertexReader.BaseStream.Position += m_Stream.stride - 12;
+                                vertexReader.BaseStream.Position += m_Stream.Stride - 12;
                             }
 
-                            indexReader.BaseStream.Position = subMesh.firstByte;
+                            indexReader.BaseStream.Position = subMesh.FirstByte;
 
-                            var triangleCount = subMesh.indexCount / 3u;
+                            var triangleCount = subMesh.IndexCount / 3u;
                             for (int i = 0; i < triangleCount; i++)
                             {
-                                var first = indexReader.ReadUInt16() - subMesh.firstVertex;
-                                var second = indexReader.ReadUInt16() - subMesh.firstVertex;
-                                var third = indexReader.ReadUInt16() - subMesh.firstVertex;
+                                var first = indexReader.ReadUInt16() - subMesh.FirstVertex;
+                                var second = indexReader.ReadUInt16() - subMesh.FirstVertex;
+                                var third = indexReader.ReadUInt16() - subMesh.FirstVertex;
                                 triangles.Add([vertices[first], vertices[second], vertices[third]]);
                             }
                         }

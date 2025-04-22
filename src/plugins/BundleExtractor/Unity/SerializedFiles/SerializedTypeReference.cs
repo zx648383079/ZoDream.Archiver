@@ -1,10 +1,4 @@
-﻿using ZoDream.BundleExtractor.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZoDream.Shared.IO;
+﻿using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -25,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
         }
 
-        protected override bool IgnoreScriptTypeForHash(FormatVersion formatVersion, UnityVersion unityVersion)
+        protected override bool IgnoreScriptTypeForHash(FormatVersion formatVersion, Version unityVersion)
         {
             return false;
         }

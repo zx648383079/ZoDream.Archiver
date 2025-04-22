@@ -2,10 +2,13 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using UnityEngine;
+using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
-using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
 {
@@ -14,64 +17,64 @@ namespace ZoDream.BundleExtractor
         private void ProcessAssets(CancellationToken token)
         {
             
-            foreach (var assetsFile in _assetItems)
+            foreach (var asset in _assetItems)
             {
-                foreach (var obj in assetsFile.Children)
+                for (var i = 0; i < asset.Count; i++)
                 {
                     if (token.IsCancellationRequested)
                     {
                         Logger?.Info("Processing assets has been cancelled !!");
                         return;
                     }
-                    if (obj is GameObject m_GameObject)
+                    if (asset[i] is GameObject m_GameObject)
                     {
-                        foreach (var pPtr in m_GameObject.m_Components)
+                        foreach (var pPtr in m_GameObject.Components)
                         {
                             if (pPtr.TryGet(out var m_Component))
                             {
                                 switch (m_Component)
                                 {
                                     case Transform m_Transform:
-                                        m_GameObject.m_Transform = m_Transform;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.Transform = m_Transform;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                     case MeshRenderer m_MeshRenderer:
-                                        m_GameObject.m_MeshRenderer = m_MeshRenderer;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.MeshRenderer = m_MeshRenderer;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                     case MeshFilter m_MeshFilter:
-                                        m_GameObject.m_MeshFilter = m_MeshFilter;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.MeshFilter = m_MeshFilter;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                     case SkinnedMeshRenderer m_SkinnedMeshRenderer:
-                                        m_GameObject.m_SkinnedMeshRenderer = m_SkinnedMeshRenderer;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.SkinnedMeshRenderer = m_SkinnedMeshRenderer;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                     case Animator m_Animator:
-                                        m_GameObject.m_Animator = m_Animator;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.Animator = m_Animator;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                     case Animation m_Animation:
-                                        m_GameObject.m_Animation = m_Animation;
-                                        TryAddExclude(pPtr.m_PathID);
+                                        m_GameObject.Animation = m_Animation;
+                                        TryAddExclude(pPtr.PathID);
                                         break;
                                 }
                             }
                         }
                     }
-                    else if (obj is SpriteAtlas m_SpriteAtlas && m_SpriteAtlas.m_RenderDataMap.Count > 0)
+                    else if (asset[i] is SpriteAtlas m_SpriteAtlas && m_SpriteAtlas.RenderDataMap.Count > 0)
                     {
-                        foreach (var m_PackedSprite in m_SpriteAtlas.m_PackedSprites)
+                        foreach (var m_PackedSprite in m_SpriteAtlas.PackedSprites)
                         {
                             if (m_PackedSprite.TryGet(out var m_Sprite))
                             {
-                                if (m_Sprite.m_SpriteAtlas.IsNull)
+                                if (m_Sprite.SpriteAtlas.IsNull)
                                 {
-                                    m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
+                                    (m_Sprite.SpriteAtlas as ObjectPPtr<SpriteAtlas>).Set(asset.Get(i), asset);
                                 }
-                                else if (m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.m_IsVariant)
+                                else if (m_Sprite.SpriteAtlas.TryGet(out var m_SpriteAtlasOld) && m_SpriteAtlasOld.IsVariant)
                                 {
-                                    m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
+                                    (m_Sprite.SpriteAtlas as ObjectPPtr<SpriteAtlas>).Set(asset.Get(i), asset);
                                 }
                             }
                         }
@@ -80,95 +83,68 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        private bool IsExclude(ElementIDType type)
+        private bool IsExclude(NativeClassID type)
         {
             return type switch
             {
-                ElementIDType.GameObject or ElementIDType.Mesh or ElementIDType.AnimationClip or ElementIDType.Animator => Options?.EnabledModel != true,
-                ElementIDType.Shader => Options?.EnabledShader != true,
-                ElementIDType.Texture2D or ElementIDType.Texture or ElementIDType.Sprite or ElementIDType.SpriteAtlas => Options?.EnabledImage != true,
-                ElementIDType.AudioClip => Options?.EnabledAudio != true,
-                ElementIDType.VideoClip => Options?.EnabledVideo != true,
-                ElementIDType.TextAsset => Options?.EnabledLua != true && Options?.EnabledSpine != true && Options?.EnabledJson != true,
+                NativeClassID.GameObject or NativeClassID.Mesh or NativeClassID.AnimationClip or NativeClassID.Animator => Options?.EnabledModel != true,
+                NativeClassID.Shader => Options?.EnabledShader != true,
+                NativeClassID.Texture2D or NativeClassID.Texture or NativeClassID.Sprite or NativeClassID.SpriteAtlas => Options?.EnabledImage != true,
+                NativeClassID.AudioClip => Options?.EnabledAudio != true,
+                NativeClassID.VideoClip => Options?.EnabledVideo != true,
+                NativeClassID.TextAsset => Options?.EnabledLua != true && Options?.EnabledSpine != true && Options?.EnabledJson != true,
                 _ => false,
             };
         }
 
         private void ReadAssets(CancellationToken token)
         {
-            var scanner = _service.Get<IBundleElementScanner>();
-            
+            var serializer = _service.Get<IBundleSerializer>();
             foreach (var asset in _assetItems)
             {
-                foreach (var obj in asset.ObjectMetaItems)
+                for (var i = 0; i < asset.Count; i ++)
                 {
                     if (token.IsCancellationRequested)
                     {
                         Logger?.Info("Reading assets has been cancelled !!");
                         return;
                     }
-                    if (_dependency is null && IsExclude((ElementIDType)obj.ClassID))
+                    var obj = asset.Get(i);
+                    if (_dependency is null && IsExclude((NativeClassID)obj.ClassID))
                     {
                         continue;
                     }
                     try
                     {
-                        var reader = new UIReader(asset.Create(obj), obj, asset, _options);
-                        reader.Add(scanner);
+                        var reader = asset.OpenRead(obj);
+                        reader.Add(asset);
+                        reader.Add(obj);
+                        //reader.Add(serializer);
                         //if (obj.FileID == 421139779080335220)
                         //{
                         //    reader.BaseStream.SaveAs("F:\\apk\\zmxs\\pose.bin");
                         //}
-                        UIObject res = reader.Type switch
+                        var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
+                        var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
+                        object? res = null;
+                        if (serializer.Converters.TryGet(targetType, out var cvt))
                         {
-                            ElementIDType.Animation => new Animation(reader),
-                            ElementIDType.AnimationClip => new AnimationClip(reader),
-                            ElementIDType.Animator => new Animator(reader),
-                            ElementIDType.AnimatorController => new AnimatorController(reader),
-                            ElementIDType.AnimatorOverrideController => new AnimatorOverrideController(reader),
-                            ElementIDType.AssetBundle => new AssetBundle(reader),
-                            ElementIDType.AudioClip => new AudioClip(reader),
-                            ElementIDType.Avatar => new Avatar(reader),
-                            ElementIDType.Font => new Font(reader),
-                            ElementIDType.GameObject => new GameObject(reader),
-                            ElementIDType.IndexObject => new IndexObject(reader),
-                            ElementIDType.Material => new Material(reader),
-                            ElementIDType.Mesh => new Mesh(reader),
-                            ElementIDType.MeshFilter => new MeshFilter(reader),
-                            ElementIDType.MeshRenderer => new MeshRenderer(reader),
-                            ElementIDType.MiHoYoBinData => new MiHoYoBinData(reader),
-                            ElementIDType.MonoBehavior => new MonoBehavior(reader),
-                            ElementIDType.MonoScript => new MonoScript(reader),
-                            ElementIDType.MovieTexture => new MovieTexture(reader),
-                            ElementIDType.PlayerSettings => new PlayerSettings(reader),
-                            ElementIDType.RectTransform => new RectTransform(reader),
-                            ElementIDType.Shader => new Shader(reader),
-                            ElementIDType.SkinnedMeshRenderer => new SkinnedMeshRenderer(reader),
-                            ElementIDType.Sprite => new Sprite(reader),
-                            ElementIDType.SpriteAtlas => new SpriteAtlas(reader),
-                            ElementIDType.TextAsset => new TextAsset(reader),
-                            ElementIDType.Texture2D => new Texture2D(reader),
-                            ElementIDType.Texture2DArray => new Texture2D(reader),
-                            ElementIDType.Transform => new Transform(reader),
-                            ElementIDType.VideoClip => new VideoClip(reader),
-                            ElementIDType.ResourceManager => new ResourceManager(reader),
-                            _ => new UIObject(reader),
-                        };
-                        if (reader.SerializedType.OldType is not null && 
-                            reader.SerializedType.OldType.Nodes.Count > 0 && 
-                            res is IElementTypeLoader tl)
+                            if (serializedType.OldType is not null &&
+                            serializedType.OldType.Nodes.Count > 0 &&
+                            cvt is IElementTypeLoader tl)
+                            {
+                                res = tl.Read(reader, targetType, serializedType.OldType);
+                            }
+                            else
+                            {
+                                res = cvt.Read(reader, targetType, serializer);
+                            }
+                        }
+                        
+                        if (res is Object o)
                         {
-                            tl.Read(reader, reader.SerializedType.OldType);
-                        } else if (
-                            res is IElementLoader l
-                            && scanner.TryRead(reader, l))
-                        {}
-                        asset.AddChild(res);
-                        if (_dependency is not null) 
-                        {
-                            _dependency.AddEntry(asset.FullPath, obj.FileID,
-                                res.Name, obj.ClassID);
-                            res.Associated(_dependency);
+                            asset[i] = o;
+                            _dependency?.AddEntry(asset.FullPath, obj.FileID, o.Name, obj.ClassID);
                         }
                     }
                     catch (Exception e)
@@ -193,31 +169,67 @@ namespace ZoDream.BundleExtractor
         }
 
 
-        public T? ConvertTo<T>(UIReader reader)
+        private static Type ConvertToClassType(NativeClassID classID)
         {
-            var ctor = typeof(T).GetConstructor([reader.GetType()]);
-            if (ctor == null)
+            return classID switch
             {
-                return default;
-            }
-            reader.BaseStream.Position = 0;
-            var res = ctor.Invoke([reader]);
-            if (res == null)
+                NativeClassID.Animation => typeof(Animation),
+                NativeClassID.AnimationClip => typeof(AnimationClip),
+                NativeClassID.Animator => typeof(Animator),
+                NativeClassID.AnimatorController => typeof(AnimatorController),
+                NativeClassID.AnimatorOverrideController => typeof(AnimatorOverrideController),
+                NativeClassID.AssetBundle => typeof(AssetBundle),
+                NativeClassID.AudioClip => typeof(AudioClip),
+                NativeClassID.Avatar => typeof(Avatar),
+                NativeClassID.Font => typeof(Font),
+                NativeClassID.GameObject => typeof(GameObject),
+                NativeClassID.IndexObject => typeof(IndexObject),
+                NativeClassID.Material => typeof(Material),
+                NativeClassID.Mesh => typeof(Mesh),
+                NativeClassID.MeshFilter => typeof(MeshFilter),
+                NativeClassID.MeshRenderer => typeof(MeshRenderer),
+                NativeClassID.MiHoYoBinData => typeof(MiHoYoBinData),
+                NativeClassID.MonoBehavior => typeof(MonoBehaviour),
+                NativeClassID.MonoScript => typeof(MonoScript),
+                NativeClassID.MovieTexture => typeof(MovieTexture),
+                NativeClassID.PlayerSettings => typeof(PlayerSettings),
+                NativeClassID.RectTransform => typeof(RectTransform),
+                NativeClassID.Shader => typeof(Shader),
+                NativeClassID.SkinnedMeshRenderer => typeof(SkinnedMeshRenderer),
+                NativeClassID.Sprite => typeof(Sprite),
+                NativeClassID.SpriteAtlas => typeof(SpriteAtlas),
+                NativeClassID.TextAsset => typeof(TextAsset),
+                NativeClassID.Texture2D => typeof(Texture2D),
+                NativeClassID.Texture2DArray => typeof(Texture2D),
+                NativeClassID.Transform => typeof(Transform),
+                NativeClassID.VideoClip => typeof(VideoClip),
+                NativeClassID.ResourceManager => typeof(ResourceManager),
+                _ => typeof(Object),
+            };
+        }
+
+        public T? ConvertTo<T>(ISerializedFile asset, ObjectInfo obj)
+        {
+            var serializer = _service.Get<IBundleSerializer>();
+            var reader = asset.OpenRead(obj);
+            reader.Add(asset);
+            reader.Add(obj);
+            var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
+            var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
+            if (serializer.Converters.TryGet(targetType, out var cvt))
             {
-                return default;
+                if (serializedType.OldType is not null &&
+                serializedType.OldType.Nodes.Count > 0 &&
+                cvt is IElementTypeLoader tl)
+                {
+                    return (T)tl.Read(reader, targetType, serializedType.OldType);
+                }
+                else
+                {
+                    return (T)cvt.Read(reader, targetType, serializer);
+                }
             }
-            var scanner = _service.Get<IBundleElementScanner>();
-            if (reader.SerializedType.OldType is not null &&
-                            reader.SerializedType.OldType.Nodes.Count > 0 &&
-                            res is IElementTypeLoader tl)
-            {
-                tl.Read(reader, reader.SerializedType.OldType);
-            }
-            else if (
-                res is IElementLoader l
-                && scanner.TryRead(reader, l))
-            { }
-            return (T)res;
+            return default;
         }
     }
 }

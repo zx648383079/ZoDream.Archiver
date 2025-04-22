@@ -17,8 +17,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
             var res = new MeshRenderer();
-            res.GameObject = serializer.Deserialize<PPtr<GameObject>>(reader);
-            res.AdditionalVertexStreams = serializer.Deserialize<PPtr<Mesh>>(reader);
+            res.GameObject = reader.ReadPPtr<GameObject>(serializer);
+            res.AdditionalVertexStreams = reader.ReadPPtr<Mesh>(serializer);
             if (reader.TryGet<IDependencyBuilder>(out var builder))
             {
                 var container = reader.Get<ISerializedFile>();

@@ -4,6 +4,6 @@ namespace UnityEngine
     public sealed class MonoBehaviour : Behaviour
     {
 
-        public PPtr<MonoScript> Script;
+        public IPPtr<MonoScript> Script;
     }
 }

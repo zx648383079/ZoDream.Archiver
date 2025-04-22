@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression.Lz4;
 using ZoDream.Shared.IO;
@@ -31,45 +31,45 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             using var fs = File.OpenWrite(fileName);
             using var sw = new CodeWriter(fs);
             sw.Write(NoteHeader).WriteLine();
-            if (shader.m_SubProgramBlob != null) //5.3 - 5.4
+            if (shader.SubProgramBlob != null) //5.3 - 5.4
             {
-                var uncompressedSize = (int)shader.decompressedSize;
+                var uncompressedSize = (int)shader.DecompressedSize;
                 using var ms = new ArrayMemoryStream(uncompressedSize);
-                new Lz4Decompressor(shader.decompressedSize)
+                new Lz4Decompressor(shader.DecompressedSize)
                         .Decompress(
-                        shader.m_SubProgramBlob,
-                        shader.m_SubProgramBlob.Length, ms.GetBuffer(), uncompressedSize);
+                        shader.SubProgramBlob,
+                        shader.SubProgramBlob.Length, ms.GetBuffer(), uncompressedSize);
                 using var blobReader = new BundleBinaryReader(ms, leaveOpen: false);
                 blobReader.Add(shader.AssetFile.UnityVersion);
                 var program = new ShaderProgram(blobReader);
                 program.Read(blobReader, 0);
-                program.Write(Encoding.UTF8.GetString(shader.m_Script), sw);
+                program.Write(Encoding.UTF8.GetString(shader.Script), sw);
                 return;
             }
 
-            if (shader.compressedBlob != null) //5.5 and up
+            if (shader.CompressedBlob != null) //5.5 and up
             {
                 ConvertSerializedShader(sw);
                 return;
             }
-            sw.Write(shader.m_Script);
+            sw.Write(shader.Script);
         }
 
         private void ConvertSerializedShader(ICodeWriter writer)
         {
-            var length = shader.platforms.Length;
+            var length = shader.Platforms.Length;
             var shaderPrograms = new ShaderProgram[length];
             for (var i = 0; i < length; i++)
             {
-                for (var j = 0; j < shader.offsets[i].Length; j++)
+                for (var j = 0; j < shader.Offsets[i].Length; j++)
                 {
-                    var offset = (int)shader.offsets[i][j];
-                    var compressedLength = (int)shader.compressedLengths[i][j];
-                    var decompressedLength = (int)shader.decompressedLengths[i][j];
+                    var offset = (int)shader.Offsets[i][j];
+                    var compressedLength = (int)shader.CompressedLengths[i][j];
+                    var decompressedLength = (int)shader.DecompressedLengths[i][j];
                     using var ms = new ArrayMemoryStream(decompressedLength);
                     new Lz4Decompressor(decompressedLength)
                         .Decompress(
-                            shader.compressedBlob,
+                            shader.CompressedBlob,
                             offset,
                             compressedLength,
                             ms.GetBuffer(),
@@ -84,7 +84,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
             }
 
-            ConvertSerializedShader(writer, shader.m_ParsedForm, shader.platforms, shaderPrograms);
+            ConvertSerializedShader(writer, shader.ParsedForm, shader.Platforms, shaderPrograms);
         }
 
         private static void ConvertSerializedShader(ICodeWriter writer, 
@@ -92,25 +92,25 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             ShaderProgram[] shaderPrograms)
         {
 
-            writer.WriteFormat("Shader \"{0}\" {{", m_ParsedForm.m_Name)
+            writer.WriteFormat("Shader \"{0}\" {{", m_ParsedForm.Name)
                 .WriteIndentLine();
 
-            ConvertSerializedProperties(writer, m_ParsedForm.m_PropInfo);
+            ConvertSerializedProperties(writer, m_ParsedForm.PropInfo);
 
-            foreach (var m_SubShader in m_ParsedForm.m_SubShaders)
+            foreach (var m_SubShader in m_ParsedForm.SubShaders)
             {
                 ConvertSerializedSubShader(writer, m_SubShader, platforms, shaderPrograms);
             }
             
-            if (!string.IsNullOrEmpty(m_ParsedForm.m_FallbackName))
+            if (!string.IsNullOrEmpty(m_ParsedForm.FallbackName))
             {
-                writer.Write($"Fallback \"{m_ParsedForm.m_FallbackName}\"")
+                writer.Write($"Fallback \"{m_ParsedForm.FallbackName}\"")
                     .WriteLine(true);
             }
 
-            if (!string.IsNullOrEmpty(m_ParsedForm.m_CustomEditorName))
+            if (!string.IsNullOrEmpty(m_ParsedForm.CustomEditorName))
             {
-                writer.Write($"CustomEditor \"{m_ParsedForm.m_CustomEditorName}\"")
+                writer.Write($"CustomEditor \"{m_ParsedForm.CustomEditorName}\"")
                     .WriteLine(true);
             }
 
@@ -123,15 +123,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             writer.Write("SubShader {")
                 .WriteIndentLine();
-            if (m_SubShader.m_LOD != 0)
+            if (m_SubShader.LOD != 0)
             {
-                writer.Write($"LOD {m_SubShader.m_LOD}")
+                writer.Write($"LOD {m_SubShader.LOD}")
                     .WriteLine(true);
             }
 
-            ConvertSerializedTagMap(writer, m_SubShader.m_Tags);
+            ConvertSerializedTagMap(writer, m_SubShader.Tags);
 
-            foreach (var m_Passe in m_SubShader.m_Passes)
+            foreach (var m_Passe in m_SubShader.Passes)
             {
                 ConvertSerializedPass(writer, m_Passe, platforms, shaderPrograms);
             }
@@ -140,11 +140,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private static SerializedPlayerSubProgram[] FlattenPlayerSubPrograms(SerializedProgram program)
         {
             var flatList = new List<SerializedPlayerSubProgram>();
-            if (program?.m_PlayerSubPrograms == null)
+            if (program?.PlayerSubPrograms == null)
             {
                 return flatList.ToArray();
             }
-            foreach (var subArray in program.m_PlayerSubPrograms)
+            foreach (var subArray in program.PlayerSubPrograms)
             {
                 if (subArray != null)
                 {
@@ -157,10 +157,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private static void ConvertPrograms(ICodeWriter writer, SerializedProgram program, string programType, 
             ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
         {
-            if (program?.m_SubPrograms?.Count > 0)
+            if (program?.SubPrograms?.Length > 0)
             {
                 writer.Write($"Program \"{programType}\" {{").WriteIndentLine();
-                ConvertSerializedSubPrograms(writer, [..program.m_SubPrograms], platforms, shaderPrograms);
+                ConvertSerializedSubPrograms(writer, [..program.SubPrograms], platforms, shaderPrograms);
                 writer.WriteOutdentLine().Write("}").WriteLine(true);
             }
             SerializedPlayerSubProgram[] flattenedPlayerSubPrograms = FlattenPlayerSubPrograms(program);
@@ -176,7 +176,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             ShaderCompilerPlatform[] platforms, 
             ShaderProgram[] shaderPrograms)
         {
-            switch (m_Passe.m_Type)
+            switch (m_Passe.Type)
             {
                 case PassType.Normal:
                     writer.Write("Pass ");
@@ -188,33 +188,33 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     writer.Write("GrabPass ");
                     break;
             }
-            if (m_Passe.m_Type == PassType.Use)
+            if (m_Passe.Type == PassType.Use)
             {
-                writer.Write($"\"{m_Passe.m_UseName}\"");
+                writer.Write($"\"{m_Passe.UseName}\"");
             }
             else
             {
                 writer.Write("{");
 
-                if (m_Passe.m_Type == PassType.Grab)
+                if (m_Passe.Type == PassType.Grab)
                 {
-                    if (!string.IsNullOrEmpty(m_Passe.m_TextureName))
+                    if (!string.IsNullOrEmpty(m_Passe.TextureName))
                     {
                         writer.WriteLine(true)
-                            .Write($"\"{m_Passe.m_TextureName}\"").WriteLine(true);
+                            .Write($"\"{m_Passe.TextureName}\"").WriteLine(true);
                     }
                 }
                 else
                 {
                     writer.WriteIndentLine();
-                    ConvertSerializedShaderState(writer, m_Passe.m_State);
+                    ConvertSerializedShaderState(writer, m_Passe.State);
 
-                    ConvertPrograms(writer, m_Passe.progVertex, "vp", platforms, shaderPrograms);
-                    ConvertPrograms(writer, m_Passe.progFragment, "fp", platforms, shaderPrograms);
-                    ConvertPrograms(writer, m_Passe.progGeometry, "gp", platforms, shaderPrograms);
-                    ConvertPrograms(writer, m_Passe.progHull, "hp", platforms, shaderPrograms);
-                    ConvertPrograms(writer, m_Passe.progDomain, "dp", platforms, shaderPrograms);
-                    ConvertPrograms(writer, m_Passe.progRayTracing, "rtp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgVertex, "vp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgFragment, "fp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgGeometry, "gp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgHull, "hp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgDomain, "dp", platforms, shaderPrograms);
+                    ConvertPrograms(writer, m_Passe.ProgRayTracing, "rtp", platforms, shaderPrograms);
                     writer.WriteOutdentLine();
                 }
                 writer.Write("}");
@@ -274,46 +274,46 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private static void ConvertSerializedPlayerSubPrograms(ICodeWriter writer, SerializedPlayerSubProgram[] m_SubPrograms,
             ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
         {
-            ConvertSubPrograms(writer, m_SubPrograms, platforms, shaderPrograms, x => x.m_BlobIndex,
-                x => x.m_GpuProgramType);
+            ConvertSubPrograms(writer, m_SubPrograms, platforms, shaderPrograms, x => x.BlobIndex,
+                x => x.GpuProgramType);
         }
 
         private static void ConvertSerializedSubPrograms(ICodeWriter writer, SerializedSubProgram[] m_SubPrograms,
             ShaderCompilerPlatform[] platforms, ShaderProgram[] shaderPrograms)
         {
-            ConvertSubPrograms(writer, m_SubPrograms, platforms, shaderPrograms, x => x.m_BlobIndex,
-                x => x.m_GpuProgramType, x => $"hw_tier{x.m_ShaderHardwareTier:00}");
+            ConvertSubPrograms(writer, m_SubPrograms, platforms, shaderPrograms, x => x.BlobIndex,
+                x => x.GpuProgramType, x => $"hw_tier{x.ShaderHardwareTier:00}");
         }
 
         private static void ConvertSerializedShaderState(ICodeWriter writer, SerializedShaderState m_State)
         {
-            if (!string.IsNullOrEmpty(m_State.m_Name))
+            if (!string.IsNullOrEmpty(m_State.Name))
             {
-                writer.Write($"Name \"{m_State.m_Name}\"").WriteLine(true);
+                writer.Write($"Name \"{m_State.Name}\"").WriteLine(true);
             }
-            if (m_State.m_LOD != 0)
+            if (m_State.LOD != 0)
             {
-                writer.Write($"LOD {m_State.m_LOD}").WriteLine(true);
+                writer.Write($"LOD {m_State.LOD}").WriteLine(true);
             }
 
-            ConvertSerializedTagMap(writer, m_State.m_Tags);
+            ConvertSerializedTagMap(writer, m_State.Tags);
 
-            ConvertSerializedShaderRTBlendState(writer, [..m_State.rtBlend], m_State.rtSeparateBlend);
+            ConvertSerializedShaderRTBlendState(writer, [..m_State.RtBlend], m_State.RtSeparateBlend);
 
-            if (m_State.alphaToMask.val > 0f)
+            if (m_State.AlphaToMask.Value > 0f)
             {
                 writer.Write("AlphaToMask On").WriteLine(true);
             }
 
-            if (m_State.zClip?.val != 1f) //ZClip On
+            if (m_State.ZClip.Value != 1f) //ZClip On
             {
                 writer.Write("ZClip Off").WriteLine(true);
             }
 
-            if (m_State.zTest.val != 4f) //ZTest LEqual
+            if (m_State.ZTest.Value != 4f) //ZTest LEqual
             {
                 writer.Write("ZTest ");
-                switch (m_State.zTest.val) //enum CompareFunction
+                switch (m_State.ZTest.Value) //enum CompareFunction
                 {
                     case 0f: //kFuncDisabled
                         writer.Write("Off");
@@ -344,15 +344,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteLine(true);
             }
 
-            if (m_State.zWrite.val != 1f) //ZWrite On
+            if (m_State.ZWrite.Value != 1f) //ZWrite On
             {
                 writer.Write("ZWrite Off").WriteLine(true);
             }
 
-            if (m_State.culling.val != 2f) //Cull Back
+            if (m_State.Culling.Value != 2f) //Cull Back
             {
                 writer.Write("Cull ");
-                switch (m_State.culling.val) //enum CullMode
+                switch (m_State.Culling.Value) //enum CullMode
                 {
                     case 0f: //kCullOff
                         writer.Write("Off");
@@ -364,79 +364,79 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteLine(true);
             }
 
-            if (m_State.offsetFactor.val != 0f || m_State.offsetUnits.val != 0f)
+            if (m_State.OffsetFactor.Value != 0f || m_State.OffsetUnits.Value != 0f)
             {
-                writer.Write($"Offset {m_State.offsetFactor.val}, {m_State.offsetUnits.val}")
+                writer.Write($"Offset {m_State.OffsetFactor.Value}, {m_State.OffsetUnits.Value}")
                     .WriteLine(true);
             }
 
-            if (m_State.stencilRef.val != 0f ||
-                m_State.stencilReadMask.val != 255f ||
-                m_State.stencilWriteMask.val != 255f ||
-                m_State.stencilOp.pass.val != 0f ||
-                m_State.stencilOp.fail.val != 0f ||
-                m_State.stencilOp.zFail.val != 0f ||
-                m_State.stencilOp.comp.val != 8f ||
-                m_State.stencilOpFront.pass.val != 0f ||
-                m_State.stencilOpFront.fail.val != 0f ||
-                m_State.stencilOpFront.zFail.val != 0f ||
-                m_State.stencilOpFront.comp.val != 8f ||
-                m_State.stencilOpBack.pass.val != 0f ||
-                m_State.stencilOpBack.fail.val != 0f ||
-                m_State.stencilOpBack.zFail.val != 0f ||
-                m_State.stencilOpBack.comp.val != 8f)
+            if (m_State.StencilRef.Value != 0f ||
+                m_State.StencilReadMask.Value != 255f ||
+                m_State.StencilWriteMask.Value != 255f ||
+                m_State.StencilOp.Pass.Value != 0f ||
+                m_State.StencilOp.Fail.Value != 0f ||
+                m_State.StencilOp.ZFail.Value != 0f ||
+                m_State.StencilOp.Comp.Value != 8f ||
+                m_State.StencilOpFront.Pass.Value != 0f ||
+                m_State.StencilOpFront.Fail.Value != 0f ||
+                m_State.StencilOpFront.ZFail.Value != 0f ||
+                m_State.StencilOpFront.Comp.Value != 8f ||
+                m_State.StencilOpBack.Pass.Value != 0f ||
+                m_State.StencilOpBack.Fail.Value != 0f ||
+                m_State.StencilOpBack.ZFail.Value != 0f ||
+                m_State.StencilOpBack.Comp.Value != 8f)
             {
                 writer.Write("Stencil {").WriteIndentLine();
-                if (m_State.stencilRef.val != 0f)
+                if (m_State.StencilRef.Value != 0f)
                 {
-                    writer.Write($"Ref {m_State.stencilRef.val}").WriteLine(true);
+                    writer.Write($"Ref {m_State.StencilRef.Value}").WriteLine(true);
                 }
-                if (m_State.stencilReadMask.val != 255f)
+                if (m_State.StencilReadMask.Value != 255f)
                 {
-                    writer.Write($"ReadMask {m_State.stencilReadMask.val}").WriteLine(true);
+                    writer.Write($"ReadMask {m_State.StencilReadMask.Value}").WriteLine(true);
                 }
-                if (m_State.stencilWriteMask.val != 255f)
+                if (m_State.StencilWriteMask.Value != 255f)
                 {
-                    writer.Write($"WriteMask {m_State.stencilWriteMask.val}").WriteLine(true);
+                    writer.Write($"WriteMask {m_State.StencilWriteMask.Value}").WriteLine(true);
                 }
-                if (m_State.stencilOp.pass.val != 0f ||
-                    m_State.stencilOp.fail.val != 0f ||
-                    m_State.stencilOp.zFail.val != 0f ||
-                    m_State.stencilOp.comp.val != 8f)
+                if (m_State.StencilOp.Pass.Value != 0f ||
+                    m_State.StencilOp.Fail.Value != 0f ||
+                    m_State.StencilOp.ZFail.Value != 0f ||
+                    m_State.StencilOp.Comp.Value != 8f)
                 {
-                    ConvertSerializedStencilOp(writer, m_State.stencilOp, "");
+                    ConvertSerializedStencilOp(writer, m_State.StencilOp, "");
                 }
-                if (m_State.stencilOpFront.pass.val != 0f ||
-                    m_State.stencilOpFront.fail.val != 0f ||
-                    m_State.stencilOpFront.zFail.val != 0f ||
-                    m_State.stencilOpFront.comp.val != 8f)
+                if (m_State.StencilOpFront.Pass.Value != 0f ||
+                    m_State.StencilOpFront.Fail.Value != 0f ||
+                    m_State.StencilOpFront.ZFail.Value != 0f ||
+                    m_State.StencilOpFront.Comp.Value != 8f)
                 {
-                    ConvertSerializedStencilOp(writer, m_State.stencilOpFront, "Front");
+                    ConvertSerializedStencilOp(writer, m_State.StencilOpFront, "Front");
                 }
-                if (m_State.stencilOpBack.pass.val != 0f ||
-                    m_State.stencilOpBack.fail.val != 0f ||
-                    m_State.stencilOpBack.zFail.val != 0f ||
-                    m_State.stencilOpBack.comp.val != 8f)
+                if (m_State.StencilOpBack.Pass.Value != 0f ||
+                    m_State.StencilOpBack.Fail.Value != 0f ||
+                    m_State.StencilOpBack.ZFail.Value != 0f ||
+                    m_State.StencilOpBack.Comp.Value != 8f)
                 {
-                    ConvertSerializedStencilOp(writer, m_State.stencilOpBack, "Back");
+                    ConvertSerializedStencilOp(writer, m_State.StencilOpBack, "Back");
                 }
                 writer.WriteOutdentLine().Write("}").WriteLine(true);
             }
 
-            if (m_State.fogMode != FogMode.Unknown ||
-                m_State.fogColor.x.val != 0f ||
-                m_State.fogColor.y.val != 0f ||
-                m_State.fogColor.z.val != 0f ||
-                m_State.fogColor.w.val != 0f ||
-                m_State.fogDensity.val != 0f ||
-                m_State.fogStart.val != 0f ||
-                m_State.fogEnd.val != 0f)
+            if (m_State.FogMode != FogMode.Unknown ||
+                m_State.FogColor.X.Value != 0f ||
+                m_State.FogColor.Y.Value != 0f ||
+                m_State.FogColor.Z.Value != 0f ||
+                m_State.FogColor.W.Value != 0f ||
+                m_State.FogDensity.Value != 0f ||
+                m_State.FogStart.Value != 0f ||
+                m_State.FogEnd.Value != 0f)
             {
                 writer.Write("Fog {").WriteIndentLine();
-                if (m_State.fogMode != FogMode.Unknown)
+                if (m_State.FogMode != FogMode.Unknown)
                 {
                     writer.Write("Mode ");
-                    switch (m_State.fogMode)
+                    switch (m_State.FogMode)
                     {
                         case FogMode.Disabled:
                             writer.Write("Off");
@@ -453,50 +453,50 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                     writer.WriteLine(true);
                 }
-                if (m_State.fogColor.x.val != 0f ||
-                    m_State.fogColor.y.val != 0f ||
-                    m_State.fogColor.z.val != 0f ||
-                    m_State.fogColor.w.val != 0f)
+                if (m_State.FogColor.X.Value != 0f ||
+                    m_State.FogColor.Y.Value != 0f ||
+                    m_State.FogColor.Z.Value != 0f ||
+                    m_State.FogColor.W.Value != 0f)
                 {
                     writer.WriteFormat("Color ({0},{1},{2},{3})",
-                        m_State.fogColor.x.val.ToString(CultureInfo.InvariantCulture),
-                        m_State.fogColor.y.val.ToString(CultureInfo.InvariantCulture),
-                        m_State.fogColor.z.val.ToString(CultureInfo.InvariantCulture),
-                        m_State.fogColor.w.val.ToString(CultureInfo.InvariantCulture))
+                        m_State.FogColor.X.Value.ToString(CultureInfo.InvariantCulture),
+                        m_State.FogColor.Y.Value.ToString(CultureInfo.InvariantCulture),
+                        m_State.FogColor.Z.Value.ToString(CultureInfo.InvariantCulture),
+                        m_State.FogColor.W.Value.ToString(CultureInfo.InvariantCulture))
                         .WriteLine(true);
                 }
-                if (m_State.fogDensity.val != 0f)
+                if (m_State.FogDensity.Value != 0f)
                 {
-                    writer.Write($"Density {m_State.fogDensity.val.ToString(CultureInfo.InvariantCulture)}").WriteLine(true);
+                    writer.Write($"Density {m_State.FogDensity.Value.ToString(CultureInfo.InvariantCulture)}").WriteLine(true);
                 }
-                if (m_State.fogStart.val != 0f ||
-                    m_State.fogEnd.val != 0f)
+                if (m_State.FogStart.Value != 0f ||
+                    m_State.FogEnd.Value != 0f)
                 {
-                    writer.Write($"Range {m_State.fogStart.val.ToString(CultureInfo.InvariantCulture)}, {m_State.fogEnd.val.ToString(CultureInfo.InvariantCulture)}").WriteLine(true);
+                    writer.Write($"Range {m_State.FogStart.Value.ToString(CultureInfo.InvariantCulture)}, {m_State.FogEnd.Value.ToString(CultureInfo.InvariantCulture)}").WriteLine(true);
                 }
                 writer.WriteOutdentLine().Write("}").WriteLine(true);
             }
 
-            if (m_State.lighting)
+            if (m_State.Lighting)
             {
-                writer.Write($"Lighting {(m_State.lighting ? "On" : "Off")}").WriteLine(true);
+                writer.Write($"Lighting {(m_State.Lighting ? "On" : "Off")}").WriteLine(true);
             }
 
-            writer.Write($"GpuProgramID {m_State.gpuProgramID}").WriteLine(true);
+            writer.Write($"GpuProgramID {m_State.GpuProgramID}").WriteLine(true);
 
         }
 
         private static void ConvertSerializedStencilOp(ICodeWriter writer, SerializedStencilOp stencilOp, string suffix)
         {
-            writer.Write($"Comp{suffix} {ConvertStencilComp(stencilOp.comp)}").WriteLine(true);
-            writer.Write($"Pass{suffix} {ConvertStencilOp(stencilOp.pass)}").WriteLine(true);
-            writer.Write($"Fail{suffix} {ConvertStencilOp(stencilOp.fail)}").WriteLine(true);
-            writer.Write($"ZFail{suffix} {ConvertStencilOp(stencilOp.zFail)}").WriteLine(true);
+            writer.Write($"Comp{suffix} {ConvertStencilComp(stencilOp.Comp)}").WriteLine(true);
+            writer.Write($"Pass{suffix} {ConvertStencilOp(stencilOp.Pass)}").WriteLine(true);
+            writer.Write($"Fail{suffix} {ConvertStencilOp(stencilOp.Fail)}").WriteLine(true);
+            writer.Write($"ZFail{suffix} {ConvertStencilOp(stencilOp.ZFail)}").WriteLine(true);
         }
 
         private static string ConvertStencilOp(SerializedShaderFloatValue op)
         {
-            return op.val switch
+            return op.Value switch
             {
                 1f => "Zero",
                 2f => "Replace",
@@ -511,7 +511,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static string ConvertStencilComp(SerializedShaderFloatValue comp)
         {
-            return comp.val switch
+            return comp.Value switch
             {
                 0f => "Disabled",
                 1f => "Never",
@@ -531,42 +531,42 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             for (var i = 0; i < rtBlend.Length; i++)
             {
                 var blend = rtBlend[i];
-                if (blend.srcBlend.val != 1f ||
-                    blend.targetBlend.val != 0f ||
-                    blend.srcBlendAlpha.val != 1f ||
-                    blend.targetBlendAlpha.val != 0f)
+                if (blend.SrcBlend.Value != 1f ||
+                    blend.TargetBlend.Value != 0f ||
+                    blend.SrcBlendAlpha.Value != 1f ||
+                    blend.TargetBlendAlpha.Value != 0f)
                 {
                     writer.Write("Blend ");
                     if (i != 0 || rtSeparateBlend)
                     {
                         writer.Write($"{i} ");
                     }
-                    writer.Write($"{ConvertBlendFactor(blend.srcBlend)} {ConvertBlendFactor(blend.targetBlend)}");
-                    if (blend.srcBlendAlpha.val != 1f ||
-                        blend.targetBlendAlpha.val != 0f)
+                    writer.Write($"{ConvertBlendFactor(blend.SrcBlend)} {ConvertBlendFactor(blend.TargetBlend)}");
+                    if (blend.SrcBlendAlpha.Value != 1f ||
+                        blend.TargetBlendAlpha.Value != 0f)
                     {
-                        writer.Write($", {ConvertBlendFactor(blend.srcBlendAlpha)} {ConvertBlendFactor(blend.targetBlendAlpha)}");
+                        writer.Write($", {ConvertBlendFactor(blend.SrcBlendAlpha)} {ConvertBlendFactor(blend.TargetBlendAlpha)}");
                     }
                     writer.WriteLine(true);
                 }
 
-                if (blend.blendOp.val != 0f ||
-                    blend.blendOpAlpha.val != 0f)
+                if (blend.BlendOp.Value != 0f ||
+                    blend.BlendOpAlpha.Value != 0f)
                 {
                     writer.Write("BlendOp ");
                     if (i != 0 || rtSeparateBlend)
                     {
                         writer.Write($"{i} ");
                     }
-                    writer.Write(ConvertBlendOp(blend.blendOp));
-                    if (blend.blendOpAlpha.val != 0f)
+                    writer.Write(ConvertBlendOp(blend.BlendOp));
+                    if (blend.BlendOpAlpha.Value != 0f)
                     {
-                        writer.Write($", {ConvertBlendOp(blend.blendOpAlpha)}");
+                        writer.Write($", {ConvertBlendOp(blend.BlendOpAlpha)}");
                     }
                     writer.WriteLine(true);
                 }
 
-                var val = (int)blend.colMask.val;
+                var val = (int)blend.ColMask.Value;
                 if (val != 0xf)
                 {
                     writer.Write("ColorMask ");
@@ -600,7 +600,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static string ConvertBlendOp(SerializedShaderFloatValue op)
         {
-            return op.val switch
+            return op.Value switch
             {
                 1f => "Sub",
                 2f => "RevSub",
@@ -628,7 +628,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static string ConvertBlendFactor(SerializedShaderFloatValue factor)
         {
-            return factor.val switch
+            return factor.Value switch
             {
                 0f => "Zero",
                 2f => "DstColor",
@@ -646,10 +646,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static void ConvertSerializedTagMap(ICodeWriter writer, SerializedTagMap m_Tags)
         {
-            if (m_Tags.tags.Count > 0)
+            if (m_Tags.Tags.Length > 0)
             {
                 writer.Write("Tags { ");
-                foreach (var pair in m_Tags.tags)
+                foreach (var pair in m_Tags.Tags)
                 {
                     writer.Write($"\"{pair.Key}\" = \"{pair.Value}\" ");
                 }
@@ -661,7 +661,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             writer.Write("Properties {")
                 .WriteIndentLine();
-            foreach (var m_Prop in m_PropInfo.m_Props)
+            foreach (var m_Prop in m_PropInfo.Props)
             {
                 ConvertSerializedProperty(writer, m_Prop);
             }
@@ -670,13 +670,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static void ConvertSerializedProperty(ICodeWriter writer, SerializedProperty m_Prop)
         {
-            foreach (var m_Attribute in m_Prop.m_Attributes)
+            foreach (var m_Attribute in m_Prop.Attributes)
             {
                 writer.Write($"[{m_Attribute}] ");
             }
             //TODO Flag
-            writer.Write($"{m_Prop.m_Name} (\"{m_Prop.m_Description}\", ");
-            switch (m_Prop.m_Type)
+            writer.Write($"{m_Prop.Name} (\"{m_Prop.Description}\", ");
+            switch (m_Prop.Type)
             {
                 case SerializedPropertyType.Color:
                     writer.Write("Color");
@@ -688,10 +688,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     writer.Write("Float");
                     break;
                 case SerializedPropertyType.Range:
-                    writer.Write($"Range({m_Prop.m_DefValue[1]}, {m_Prop.m_DefValue[2]})");
+                    writer.Write($"Range({m_Prop.DefValue[1]}, {m_Prop.DefValue[2]})");
                     break;
                 case SerializedPropertyType.Texture:
-                    switch (m_Prop.m_DefTexture.m_TexDim)
+                    switch (m_Prop.DefTexture.TexDim)
                     {
                         case TextureDimension.Any:
                             writer.Write("any");
@@ -715,21 +715,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     break;
             }
             writer.Write(") = ");
-            switch (m_Prop.m_Type)
+            switch (m_Prop.Type)
             {
                 case SerializedPropertyType.Color:
                 case SerializedPropertyType.Vector:
-                    writer.Write($"({m_Prop.m_DefValue[0]},{m_Prop.m_DefValue[1]},{m_Prop.m_DefValue[2]},{m_Prop.m_DefValue[3]})");
+                    writer.Write($"({m_Prop.DefValue[0]},{m_Prop.DefValue[1]},{m_Prop.DefValue[2]},{m_Prop.DefValue[3]})");
                     break;
                 case SerializedPropertyType.Float:
                 case SerializedPropertyType.Range:
-                    writer.Write(m_Prop.m_DefValue[0]);
+                    writer.Write(m_Prop.DefValue[0]);
                     break;
                 case SerializedPropertyType.Int:
-                    writer.Write((int)Math.Round(m_Prop.m_DefValue[0]));
+                    writer.Write((int)Math.Round(m_Prop.DefValue[0]));
                     break;
                 case SerializedPropertyType.Texture:
-                    writer.Write($"\"{m_Prop.m_DefTexture.m_DefaultName}\" {{ }}");
+                    writer.Write($"\"{m_Prop.DefTexture.DefaultName}\" {{ }}");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

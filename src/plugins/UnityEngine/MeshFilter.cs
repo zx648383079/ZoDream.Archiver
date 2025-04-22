@@ -2,6 +2,6 @@
 {
     public class MeshFilter : Component
     {
-        public PPtr<Mesh> Mesh;
+        public IPPtr<Mesh> Mesh;
     }
 }

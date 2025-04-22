@@ -15,7 +15,7 @@ namespace UnityEngine
         public bool IsPolygon;
         public KeyValuePair<Guid, long> RenderDataKey;
         public string[] AtlasTags;
-        public PPtr<SpriteAtlas> SpriteAtlas;
+        public IPPtr<SpriteAtlas> SpriteAtlas;
         public SpriteRenderData RD;
         public Vector2[][] PhysicsShape;
     }

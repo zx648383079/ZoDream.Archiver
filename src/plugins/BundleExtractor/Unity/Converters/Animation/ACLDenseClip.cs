@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(ACLDenseClip res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(ACLDenseClip res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             UnityConverter.ReadDenseClip(res, reader, serializer);
             res.ACLType = reader.ReadInt32();
@@ -23,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             Process(res);
         }
 
-        private void Process(ACLDenseClip res)
+        private static void Process(ACLDenseClip res)
         {
             if (res.ACLType == 0 || res.SampleArray is not null && res.SampleArray.Length > 0)
             {
@@ -66,7 +66,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.SampleArray = sampleArray.ToArray();
         }
 
-        private float ReadCurve(ACLDenseClip res, Span<byte> aclSpan, float curveFactor, ref int curveIndex)
+        private static float ReadCurve(ACLDenseClip res, Span<byte> aclSpan, float curveFactor, ref int curveIndex)
         {
             var buffer = (stackalloc byte[8]);
 

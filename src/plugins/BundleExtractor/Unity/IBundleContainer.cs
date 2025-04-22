@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using ZoDream.BundleExtractor.Unity.UI;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
@@ -42,6 +42,6 @@ namespace ZoDream.BundleExtractor.Unity
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public T? ConvertTo<T>(UIReader reader);
+        public T? ConvertTo<T>(ISerializedFile asset, ObjectInfo obj);
     }
 }

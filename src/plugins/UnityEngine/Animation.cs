@@ -6,7 +6,7 @@
 
         public Bounds LocalBounds { get; set; }
 
-        public PPtr<AnimationClip> Clip { get; set; }
-        public PPtr<AnimationClip>[] Clips { get; set; }
+        public IPPtr<AnimationClip> Clip { get; set; }
+        public IPPtr<AnimationClip>[] Clips { get; set; }
     }
 }

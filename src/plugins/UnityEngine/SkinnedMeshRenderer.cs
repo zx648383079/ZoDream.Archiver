@@ -2,10 +2,10 @@
 {
     public class SkinnedMeshRenderer : Renderer
     {
-        public PPtr<Mesh> Mesh;
-        public PPtr<Transform>[] Bones;
+        public IPPtr<Mesh> Mesh;
+        public IPPtr<Transform>[] Bones;
         public float[] BlendShapeWeights;
-        public PPtr<Transform> RootBone;
+        public IPPtr<Transform> RootBone;
         public Bounds AABB;
         public bool DirtyAABB;
     }

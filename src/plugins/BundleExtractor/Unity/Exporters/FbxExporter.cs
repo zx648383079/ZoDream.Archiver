@@ -5,8 +5,8 @@ using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using UnityEngine;
 using ZoDream.AutodeskExporter;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
@@ -37,10 +37,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 Name = obj.Name;
             }
-            if (obj.m_Animator != null)
+            if (obj.Animator != null)
             {
-                InitWithAnimator(obj.m_Animator);
-                CollectAnimationClip(obj.m_Animator);
+                InitWithAnimator(obj.Animator);
+                CollectAnimationClip(obj.Animator);
             }
             else
             {
@@ -100,18 +100,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void InitWithAnimator(Animator m_Animator)
         {
-            if (m_Animator.m_Avatar.TryGet(out var m_Avatar))
+            if (m_Animator.Avatar.TryGet(out var m_Avatar))
             {
                 _avatar = m_Avatar;
             }
-            container.TryAddExclude(m_Animator.m_GameObject.m_PathID);
-            m_Animator.m_GameObject.TryGet(out var m_GameObject);
-            InitWithGameObject(m_GameObject, m_Animator.m_HasTransformHierarchy);
+            container.TryAddExclude(m_Animator.GameObject.PathID);
+            m_Animator.GameObject.TryGet(out var m_GameObject);
+            InitWithGameObject(m_GameObject, m_Animator.HasTransformHierarchy);
         }
 
         private void InitWithGameObject(GameObject m_GameObject, bool hasTransformHierarchy = true)
         {
-            var m_Transform = m_GameObject.m_Transform;
+            var m_Transform = m_GameObject.Transform;
             if (!hasTransformHierarchy)
             {
                 ConvertTransforms(m_Transform, null);
@@ -121,7 +121,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 var frameList = new List<FbxImportedFrame>();
                 var tempTransform = m_Transform;
-                while (tempTransform.m_Father.TryGet(out var m_Father))
+                while (tempTransform.Father.TryGet(out var m_Father))
                 {
                     frameList.Add(ConvertTransform(m_Father));
                     tempTransform = m_Father;
@@ -151,21 +151,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void ConvertMeshRenderer(Transform m_Transform)
         {
-            m_Transform.m_GameObject.TryGet(out var m_GameObject);
+            m_Transform.GameObject.TryGet(out var m_GameObject);
 
-            if (m_GameObject.m_MeshRenderer != null)
+            if (m_GameObject.MeshRenderer != null)
             {
-                ConvertMeshRenderer(m_GameObject.m_MeshRenderer);
+                ConvertMeshRenderer(m_GameObject.MeshRenderer);
             }
 
-            if (m_GameObject.m_SkinnedMeshRenderer != null)
+            if (m_GameObject.SkinnedMeshRenderer != null)
             {
-                ConvertMeshRenderer(m_GameObject.m_SkinnedMeshRenderer);
+                ConvertMeshRenderer(m_GameObject.SkinnedMeshRenderer);
             }
 
-            if (m_GameObject.m_Animation != null)
+            if (m_GameObject.Animation != null)
             {
-                foreach (var animation in m_GameObject.m_Animation.m_Animations)
+                foreach (var animation in m_GameObject.Animation.Animations)
                 {
                     if (animation.TryGet(out var animationClip))
                     {
@@ -178,7 +178,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
             }
 
-            foreach (var pptr in m_Transform.m_Children)
+            foreach (var pptr in m_Transform.Children)
             {
                 if (pptr.TryGet(out var child))
                 {
@@ -189,15 +189,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void CollectAnimationClip(Animator m_Animator)
         {
-            if (m_Animator.m_Controller.TryGet(out var m_Controller))
+            if (m_Animator.Controller.TryGet(out var m_Controller))
             {
                 switch (m_Controller)
                 {
                     case AnimatorOverrideController m_AnimatorOverrideController:
                         {
-                            if (m_AnimatorOverrideController.m_Controller.TryGet<AnimatorController>(out var m_AnimatorController))
+                            if (m_AnimatorOverrideController.Controller.TryGet<AnimatorController>(out var m_AnimatorController))
                             {
-                                foreach (var pptr in m_AnimatorController.m_AnimationClips)
+                                foreach (var pptr in m_AnimatorController.AnimationClips)
                                 {
                                     if (pptr.TryGet(out var m_AnimationClip))
                                     {
@@ -210,7 +210,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                     case AnimatorController m_AnimatorController:
                         {
-                            foreach (var pptr in m_AnimatorController.m_AnimationClips)
+                            foreach (var pptr in m_AnimatorController.AnimationClips)
                             {
                                 if (pptr.TryGet(out var m_AnimationClip))
                                 {
@@ -229,11 +229,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return frame;
             }
-            frame = new FbxImportedFrame(trans.m_Children.Count);
+            frame = new FbxImportedFrame(trans.Children.Length);
             _transformDictionary.Add(trans, frame);
-            trans.m_GameObject.TryGet(out var m_GameObject);
-            frame.Name = m_GameObject.m_Name;
-            SetFrame(frame, trans.m_LocalPosition, trans.m_LocalRotation, trans.m_LocalScale);
+            trans.GameObject.TryGet(out var m_GameObject);
+            frame.Name = m_GameObject.Name;
+            SetFrame(frame, trans.LocalPosition, trans.LocalRotation, trans.LocalScale);
             return frame;
         }
 
@@ -266,7 +266,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 parent.AddChild(frame);
             }
-            foreach (var pptr in trans.m_Children)
+            foreach (var pptr in trans.Children)
             {
                 if (pptr.TryGet(out var child))
                 {
@@ -275,7 +275,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
         }
 
-        private void ConvertMeshRenderer(UIRenderer meshR)
+        private void ConvertMeshRenderer(Renderer meshR)
         {
             var mesh = GetMesh(meshR);
             if (mesh == null)
@@ -287,63 +287,63 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 Name = mesh.Name;
             }
             var iMesh = new FbxImportedMesh();
-            meshR.m_GameObject.TryGet(out var m_GameObject2);
-            iMesh.Path = GetTransformPath(m_GameObject2.m_Transform);
+            meshR.GameObject.TryGet(out var m_GameObject2);
+            iMesh.Path = GetTransformPath(m_GameObject2.Transform);
             iMesh.SubmeshList = new List<FbxImportedSubmesh>();
             var subHashSet = new HashSet<int>();
             var combine = false;
             int firstSubMesh = 0;
-            if (meshR.m_StaticBatchInfo?.subMeshCount > 0)
+            if (meshR.StaticBatchInfo.SubMeshCount > 0)
             {
-                firstSubMesh = meshR.m_StaticBatchInfo.firstSubMesh;
-                var finalSubMesh = meshR.m_StaticBatchInfo.firstSubMesh + meshR.m_StaticBatchInfo.subMeshCount;
-                for (int i = meshR.m_StaticBatchInfo.firstSubMesh; i < finalSubMesh; i++)
+                firstSubMesh = meshR.StaticBatchInfo.FirstSubMesh;
+                var finalSubMesh = meshR.StaticBatchInfo.FirstSubMesh + meshR.StaticBatchInfo.SubMeshCount;
+                for (int i = meshR.StaticBatchInfo.FirstSubMesh; i < finalSubMesh; i++)
                 {
                     subHashSet.Add(i);
                 }
                 combine = true;
             }
-            else if (meshR.m_SubsetIndices?.Length > 0)
+            else if (meshR.SubsetIndices?.Length > 0)
             {
-                firstSubMesh = (int)meshR.m_SubsetIndices.Min(x => x);
-                foreach (var index in meshR.m_SubsetIndices)
+                firstSubMesh = (int)meshR.SubsetIndices.Min(x => x);
+                foreach (var index in meshR.SubsetIndices)
                 {
                     subHashSet.Add((int)index);
                 }
                 combine = true;
             }
 
-            iMesh.hasNormal = mesh.m_Normals?.Length > 0;
+            iMesh.hasNormal = mesh.Normals?.Length > 0;
             iMesh.hasUV = new bool[8];
             for (int uv = 0; uv < 8; uv++)
             {
                 iMesh.hasUV[uv] = mesh.GetUV(uv)?.Length > 0;
             }
-            iMesh.hasTangent = mesh.m_Tangents != null && mesh.m_Tangents.Length == mesh.m_VertexCount * 4;
-            iMesh.hasColor = mesh.m_Colors?.Length > 0;
+            iMesh.hasTangent = mesh.Tangents != null && mesh.Tangents.Length == mesh.VertexCount * 4;
+            iMesh.hasColor = mesh.Colors?.Length > 0;
 
             int firstFace = 0;
-            for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
+            for (int i = 0; i < mesh.SubMeshes.Length; i++)
             {
-                int numFaces = (int)mesh.m_SubMeshes[i].indexCount / 3;
+                int numFaces = (int)mesh.SubMeshes[i].IndexCount / 3;
                 if (subHashSet.Count > 0 && !subHashSet.Contains(i))
                 {
                     firstFace += numFaces;
                     continue;
                 }
-                var submesh = mesh.m_SubMeshes[i];
+                var submesh = mesh.SubMeshes[i];
                 var iSubmesh = new FbxImportedSubmesh();
                 Material mat = null;
-                if (i - firstSubMesh < meshR.m_Materials.Count)
+                if (i - firstSubMesh < meshR.Materials.Length)
                 {
-                    if (meshR.m_Materials[i - firstSubMesh].TryGet(out var m_Material))
+                    if (meshR.Materials[i - firstSubMesh].TryGet(out var m_Material))
                     {
                         mat = m_Material;
                     }
                 }
                 FbxImportedMaterial iMat = ConvertMaterial(mat);
                 iSubmesh.Material = iMat.Name;
-                iSubmesh.BaseVertex = (int)mesh.m_SubMeshes[i].firstVertex;
+                iSubmesh.BaseVertex = (int)mesh.SubMeshes[i].FirstVertex;
 
                 //Face
                 iSubmesh.FaceList = new List<FbxImportedFace>(numFaces);
@@ -352,9 +352,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     var face = new FbxImportedFace();
                     face.VertexIndices = new int[3];
-                    face.VertexIndices[0] = (int)(mesh.m_Indices[f * 3 + 2] - submesh.firstVertex);
-                    face.VertexIndices[1] = (int)(mesh.m_Indices[f * 3 + 1] - submesh.firstVertex);
-                    face.VertexIndices[2] = (int)(mesh.m_Indices[f * 3] - submesh.firstVertex);
+                    face.VertexIndices[0] = (int)(mesh.Indices[f * 3 + 2] - submesh.FirstVertex);
+                    face.VertexIndices[1] = (int)(mesh.Indices[f * 3 + 1] - submesh.FirstVertex);
+                    face.VertexIndices[2] = (int)(mesh.Indices[f * 3] - submesh.FirstVertex);
                     iSubmesh.FaceList.Add(face);
                 }
                 firstFace = end;
@@ -363,29 +363,29 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
 
             // Shared vertex list
-            iMesh.VertexList = new List<FbxImportedVertex>((int)mesh.m_VertexCount);
-            for (var j = 0; j < mesh.m_VertexCount; j++)
+            iMesh.VertexList = new List<FbxImportedVertex>((int)mesh.VertexCount);
+            for (var j = 0; j < mesh.VertexCount; j++)
             {
                 var iVertex = new FbxImportedVertex();
                 //Vertices
                 int c = 3;
-                if (mesh.m_Vertices.Length == mesh.m_VertexCount * 4)
+                if (mesh.Vertices.Length == mesh.VertexCount * 4)
                 {
                     c = 4;
                 }
-                iVertex.Vertex = new Vector3(-mesh.m_Vertices[j * c], mesh.m_Vertices[j * c + 1], mesh.m_Vertices[j * c + 2]);
+                iVertex.Vertex = new Vector3(-mesh.Vertices[j * c], mesh.Vertices[j * c + 1], mesh.Vertices[j * c + 2]);
                 //Normals
                 if (iMesh.hasNormal)
                 {
-                    if (mesh.m_Normals.Length == mesh.m_VertexCount * 3)
+                    if (mesh.Normals.Length == mesh.VertexCount * 3)
                     {
                         c = 3;
                     }
-                    else if (mesh.m_Normals.Length == mesh.m_VertexCount * 4)
+                    else if (mesh.Normals.Length == mesh.VertexCount * 4)
                     {
                         c = 4;
                     }
-                    iVertex.Normal = new Vector3(-mesh.m_Normals[j * c], mesh.m_Normals[j * c + 1], mesh.m_Normals[j * c + 2]);
+                    iVertex.Normal = new Vector3(-mesh.Normals[j * c], mesh.Normals[j * c + 1], mesh.Normals[j * c + 2]);
                 }
                 //UV
                 iVertex.UV = new float[8][];
@@ -394,11 +394,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     if (iMesh.hasUV[uv])
                     {
                         var m_UV = mesh.GetUV(uv);
-                        if (m_UV.Length == mesh.m_VertexCount * 2)
+                        if (m_UV.Length == mesh.VertexCount * 2)
                         {
                             c = 2;
                         }
-                        else if (m_UV.Length == mesh.m_VertexCount * 3)
+                        else if (m_UV.Length == mesh.VertexCount * 3)
                         {
                             c = 3;
                         }
@@ -408,30 +408,30 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 //Tangent
                 if (iMesh.hasTangent)
                 {
-                    iVertex.Tangent = new Vector4(-mesh.m_Tangents[j * 4], mesh.m_Tangents[j * 4 + 1], mesh.m_Tangents[j * 4 + 2], mesh.m_Tangents[j * 4 + 3]);
+                    iVertex.Tangent = new Vector4(-mesh.Tangents[j * 4], mesh.Tangents[j * 4 + 1], mesh.Tangents[j * 4 + 2], mesh.Tangents[j * 4 + 3]);
                 }
                 //Colors
                 if (iMesh.hasColor)
                 {
-                    if (mesh.m_Colors.Length == mesh.m_VertexCount * 3)
+                    if (mesh.Colors.Length == mesh.VertexCount * 3)
                     {
-                        iVertex.Color = new(mesh.m_Colors[j * 3], mesh.m_Colors[j * 3 + 1], mesh.m_Colors[j * 3 + 2], 1.0f);
+                        iVertex.Color = new(mesh.Colors[j * 3], mesh.Colors[j * 3 + 1], mesh.Colors[j * 3 + 2], 1.0f);
                     }
                     else
                     {
-                        iVertex.Color = new(mesh.m_Colors[j * 4], mesh.m_Colors[j * 4 + 1], mesh.m_Colors[j * 4 + 2], mesh.m_Colors[j * 4 + 3]);
+                        iVertex.Color = new(mesh.Colors[j * 4], mesh.Colors[j * 4 + 1], mesh.Colors[j * 4 + 2], mesh.Colors[j * 4 + 3]);
                     }
                 }
                 //BoneInfluence
-                if (mesh.m_Skin?.Count > 0)
+                if (mesh.Skin?.Length > 0)
                 {
-                    var inf = mesh.m_Skin[j];
+                    var inf = mesh.Skin[j];
                     iVertex.BoneIndices = new int[4];
                     iVertex.Weights = new float[4];
                     for (var k = 0; k < 4; k++)
                     {
-                        iVertex.BoneIndices[k] = inf.boneIndex[k];
-                        iVertex.Weights[k] = inf.weight[k];
+                        iVertex.BoneIndices[k] = inf.BoneIndex[k];
+                        iVertex.Weights[k] = inf.Weight[k];
                     }
                 }
                 iMesh.VertexList.Add(iVertex);
@@ -446,22 +446,22 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                  * 2 - m_BoneNameHashes
                  */
                 var boneType = 0;
-                if (sMesh.m_Bones.Count > 0)
+                if (sMesh.Bones.Length > 0)
                 {
-                    if (sMesh.m_Bones.Count == mesh.m_BindPose.Length)
+                    if (sMesh.Bones.Length == mesh.BindPose.Length)
                     {
-                        var verifiedBoneCount = sMesh.m_Bones.Count(x => x.TryGet(out _));
+                        var verifiedBoneCount = sMesh.Bones.Count(x => x.TryGet(out _));
                         if (verifiedBoneCount > 0)
                         {
                             boneType = 1;
                         }
-                        if (verifiedBoneCount != sMesh.m_Bones.Count)
+                        if (verifiedBoneCount != sMesh.Bones.Length)
                         {
                             //尝试使用m_BoneNameHashes 4.3 and up
-                            if (mesh.m_BindPose.Length > 0 && (mesh.m_BindPose.Length == mesh.m_BoneNameHashes?.Length))
+                            if (mesh.BindPose.Length > 0 && (mesh.BindPose.Length == mesh.BoneNameHashes?.Length))
                             {
                                 //有效bone数量是否大于SkinnedMeshRenderer
-                                var verifiedBoneCount2 = mesh.m_BoneNameHashes.Count(x => FixBonePath(GetPathFromHash(x)) != null);
+                                var verifiedBoneCount2 = mesh.BoneNameHashes.Count(x => FixBonePath(GetPathFromHash(x)) != null);
                                 if (verifiedBoneCount2 > verifiedBoneCount)
                                 {
                                     boneType = 2;
@@ -473,9 +473,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 if (boneType == 0)
                 {
                     //尝试使用m_BoneNameHashes 4.3 and up
-                    if (mesh.m_BindPose.Length > 0 && (mesh.m_BindPose.Length == mesh.m_BoneNameHashes?.Length))
+                    if (mesh.BindPose.Length > 0 && (mesh.BindPose.Length == mesh.BoneNameHashes?.Length))
                     {
-                        var verifiedBoneCount = mesh.m_BoneNameHashes.Count(x => FixBonePath(GetPathFromHash(x)) != null);
+                        var verifiedBoneCount = mesh.BoneNameHashes.Count(x => FixBonePath(GetPathFromHash(x)) != null);
                         if (verifiedBoneCount > 0)
                         {
                             boneType = 2;
@@ -485,84 +485,84 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                 if (boneType == 1)
                 {
-                    var boneCount = sMesh.m_Bones.Count;
+                    var boneCount = sMesh.Bones.Length;
                     iMesh.BoneList = new List<FbxImportedBone>(boneCount);
                     for (int i = 0; i < boneCount; i++)
                     {
                         var bone = new FbxImportedBone();
-                        if (sMesh.m_Bones[i].TryGet(out var m_Transform))
+                        if (sMesh.Bones[i].TryGet(out var m_Transform))
                         {
                             bone.Path = GetTransformPath(m_Transform);
                         }
                         var convert = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
-                        bone.Matrix = convert * mesh.m_BindPose[i] * convert;
+                        bone.Matrix = convert * mesh.BindPose[i] * convert;
                         iMesh.BoneList.Add(bone);
                     }
                 }
                 else if (boneType == 2)
                 {
-                    var boneCount = mesh.m_BindPose.Length;
+                    var boneCount = mesh.BindPose.Length;
                     iMesh.BoneList = new List<FbxImportedBone>(boneCount);
                     for (int i = 0; i < boneCount; i++)
                     {
                         var bone = new FbxImportedBone();
-                        var boneHash = mesh.m_BoneNameHashes[i];
+                        var boneHash = mesh.BoneNameHashes[i];
                         var path = GetPathFromHash(boneHash);
                         bone.Path = FixBonePath(path);
                         var convert = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
-                        bone.Matrix = convert * mesh.m_BindPose[i] * convert;
+                        bone.Matrix = convert * mesh.BindPose[i] * convert;
                         iMesh.BoneList.Add(bone);
                     }
                 }
 
                 //Morphs
-                if (mesh.m_Shapes?.channels?.Count > 0)
+                if (mesh.Shapes?.Channels?.Length > 0)
                 {
                     var morph = new FbxImportedMorph();
                     MorphList.Add(morph);
                     morph.Path = iMesh.Path;
-                    morph.Channels = new List<FbxImportedMorphChannel>(mesh.m_Shapes.channels.Count);
-                    for (int i = 0; i < mesh.m_Shapes.channels.Count; i++)
+                    morph.Channels = new List<FbxImportedMorphChannel>(mesh.Shapes.Channels.Length);
+                    for (int i = 0; i < mesh.Shapes.Channels.Length; i++)
                     {
                         var channel = new FbxImportedMorphChannel();
                         morph.Channels.Add(channel);
-                        var shapeChannel = mesh.m_Shapes.channels[i];
+                        var shapeChannel = mesh.Shapes.Channels[i];
 
-                        var blendShapeName = "blendShape." + shapeChannel.name;
+                        var blendShapeName = "blendShape." + shapeChannel.Name;
                         var bytes = Encoding.UTF8.GetBytes(blendShapeName);
                         _morphChannelNames[Crc32.HashToUInt32(bytes)] = blendShapeName;
 
-                        channel.Name = shapeChannel.name.Split('.').Last();
-                        channel.KeyframeList = new List<FbxImportedMorphKeyframe>(shapeChannel.frameCount);
-                        var frameEnd = shapeChannel.frameIndex + shapeChannel.frameCount;
-                        for (int frameIdx = shapeChannel.frameIndex; frameIdx < frameEnd; frameIdx++)
+                        channel.Name = shapeChannel.Name.Split('.').Last();
+                        channel.KeyframeList = new List<FbxImportedMorphKeyframe>(shapeChannel.FrameCount);
+                        var frameEnd = shapeChannel.FrameIndex + shapeChannel.FrameCount;
+                        for (int frameIdx = shapeChannel.FrameIndex; frameIdx < frameEnd; frameIdx++)
                         {
                             var keyframe = new FbxImportedMorphKeyframe();
                             channel.KeyframeList.Add(keyframe);
-                            keyframe.Weight = mesh.m_Shapes.fullWeights[frameIdx];
-                            var shape = mesh.m_Shapes.shapes[frameIdx];
-                            keyframe.hasNormals = shape.hasNormals;
-                            keyframe.hasTangents = shape.hasTangents;
-                            keyframe.VertexList = new List<FbxImportedMorphVertex>((int)shape.vertexCount);
-                            var vertexEnd = shape.firstVertex + shape.vertexCount;
-                            for (uint j = shape.firstVertex; j < vertexEnd; j++)
+                            keyframe.Weight = mesh.Shapes.FullWeights[frameIdx];
+                            var shape = mesh.Shapes.Shapes[frameIdx];
+                            keyframe.hasNormals = shape.HasNormals;
+                            keyframe.hasTangents = shape.HasTangents;
+                            keyframe.VertexList = new List<FbxImportedMorphVertex>((int)shape.VertexCount);
+                            var vertexEnd = shape.FirstVertex + shape.VertexCount;
+                            for (uint j = shape.FirstVertex; j < vertexEnd; j++)
                             {
                                 var destVertex = new FbxImportedMorphVertex();
                                 keyframe.VertexList.Add(destVertex);
-                                var morphVertex = mesh.m_Shapes.vertices[(int)j];
-                                destVertex.Index = morphVertex.index;
-                                var sourceVertex = iMesh.VertexList[(int)morphVertex.index];
+                                var morphVertex = mesh.Shapes.Vertices[(int)j];
+                                destVertex.Index = morphVertex.Index;
+                                var sourceVertex = iMesh.VertexList[(int)morphVertex.Index];
                                 destVertex.Vertex = new FbxImportedVertex();
-                                var morphPos = morphVertex.vertex;
+                                var morphPos = morphVertex.Vertex;
                                 destVertex.Vertex.Vertex = sourceVertex.Vertex + new Vector3(-morphPos.X, morphPos.Y, morphPos.Z);
-                                if (shape.hasNormals)
+                                if (shape.HasNormals)
                                 {
-                                    var morphNormal = morphVertex.normal;
+                                    var morphNormal = morphVertex.Normal;
                                     destVertex.Vertex.Normal = new Vector3(-morphNormal.X, morphNormal.Y, morphNormal.Z);
                                 }
-                                if (shape.hasTangents)
+                                if (shape.HasTangents)
                                 {
-                                    var morphTangent = morphVertex.tangent;
+                                    var morphTangent = morphVertex.Tangent;
                                     destVertex.Vertex.Tangent = new Vector4(-morphTangent.X, morphTangent.Y, morphTangent.Z, 0);
                                 }
                             }
@@ -574,8 +574,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //TODO combine mesh
             if (combine)
             {
-                meshR.m_GameObject.TryGet(out var m_GameObject);
-                var frame = RootFrame.FindChild(m_GameObject.m_Name);
+                meshR.GameObject.TryGet(out var m_GameObject);
+                var frame = RootFrame.FindChild(m_GameObject.Name);
                 if (frame != null)
                 {
                     frame.LocalPosition = RootFrame.LocalPosition;
@@ -592,21 +592,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             MeshList.Add(iMesh);
         }
 
-        private static Mesh GetMesh(UIRenderer meshR)
+        private static Mesh GetMesh(Renderer meshR)
         {
             if (meshR is SkinnedMeshRenderer sMesh)
             {
-                if (sMesh.m_Mesh.TryGet(out var m_Mesh))
+                if (sMesh.Mesh.TryGet(out var m_Mesh))
                 {
                     return m_Mesh;
                 }
             }
             else
             {
-                meshR.m_GameObject.TryGet(out var m_GameObject);
-                if (m_GameObject.m_MeshFilter != null)
+                meshR.GameObject.TryGet(out var m_GameObject);
+                if (m_GameObject.MeshFilter != null)
                 {
-                    if (m_GameObject.m_MeshFilter.m_Mesh.TryGet(out var m_Mesh))
+                    if (m_GameObject.MeshFilter.Mesh.TryGet(out var m_Mesh))
                     {
                         return m_Mesh;
                     }
@@ -642,13 +642,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         internal static string GetTransformPathByFather(Transform transform)
         {
-            transform.m_GameObject.TryGet(out var m_GameObject);
-            if (transform.m_Father.TryGet(out var father))
+            transform.GameObject.TryGet(out var m_GameObject);
+            if (transform.Father.TryGet(out var father))
             {
-                return GetTransformPathByFather(father) + "/" + m_GameObject.m_Name;
+                return GetTransformPathByFather(father) + "/" + m_GameObject.Name;
             }
 
-            return m_GameObject.m_Name;
+            return m_GameObject.Name;
         }
 
         private FbxImportedMaterial ConvertMaterial(Material mat)
@@ -656,13 +656,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             FbxImportedMaterial iMat;
             if (mat != null)
             {
-                iMat = FbxImportedHelpers.FindMaterial(mat.m_Name, MaterialList);
+                iMat = FbxImportedHelpers.FindMaterial(mat.Name, MaterialList);
                 if (iMat != null)
                 {
                     return iMat;
                 }
                 iMat = new FbxImportedMaterial();
-                iMat.Name = mat.m_Name;
+                iMat.Name = mat.Name;
                 //default values
                 iMat.Diffuse = new(0.8f, 0.8f, 0.8f, 1);
                 iMat.Ambient = new(0.2f, 0.2f, 0.2f, 1);
@@ -671,7 +671,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 iMat.Reflection = new(0, 0, 0, 1);
                 iMat.Shininess = 20f;
                 iMat.Transparency = 0f;
-                foreach (var col in mat.m_SavedProperties.m_Colors)
+                foreach (var col in mat.SavedProperties.Colors)
                 {
                     switch (col.Key)
                     {
@@ -693,7 +693,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                 }
 
-                foreach (var flt in mat.m_SavedProperties.m_Floats)
+                foreach (var flt in mat.SavedProperties.Floats)
                 {
                     switch (flt.Key)
                     {
@@ -708,9 +708,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                 //textures
                 iMat.Textures = [];
-                foreach (var texEnv in mat.m_SavedProperties.m_TexEnvs)
+                foreach (var texEnv in mat.SavedProperties.TexEnvs)
                 {
-                    if (!texEnv.Value.m_Texture.TryGet<Texture2D>(out var m_Texture2D)) //TODO other Texture
+                    if (!texEnv.Value.Texture.TryGet<Texture2D>(out var m_Texture2D)) //TODO other Texture
                     {
                         continue;
                     }
@@ -735,11 +735,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         texture.Name = textureName;
                     }
-                    //else if (FbxImportedHelpers.FindTexture(m_Texture2D.m_Name + ext, TextureList) != null) //已有相同名字的图片
+                    //else if (FbxImportedHelpers.FindTexture(m_Texture2D.Name + ext, TextureList) != null) //已有相同名字的图片
                     //{
                     //    for (int i = 1; ; i++)
                     //    {
-                    //        var name = m_Texture2D.m_Name + $" ({i}){ext}";
+                    //        var name = m_Texture2D.Name + $" ({i}){ext}";
                     //        if (FbxImportedHelpers.FindTexture(name, TextureList) == null)
                     //        {
                     //            texture.Name = name;
@@ -750,12 +750,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     //}
                     else
                     {
-                        texture.Name = m_Texture2D.m_Name + ext;
+                        texture.Name = m_Texture2D.Name + ext;
                         _textureNameDictionary.Add(m_Texture2D, texture.Name);
                     }
 
-                    texture.Offset = texEnv.Value.m_Offset;
-                    texture.Scale = texEnv.Value.m_Scale;
+                    texture.Offset = texEnv.Value.Offset;
+                    texture.Scale = texEnv.Value.Scale;
                     ConvertTexture2D(m_Texture2D, texture.Name);
                 }
 
@@ -791,7 +791,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             foreach (var animationClip in _animationClipHashSet)
             {
                 var iAnim = new FbxImportedKeyframedAnimation();
-                var name = animationClip.m_Name;
+                var name = animationClip.Name;
                 if (AnimationList.Exists(x => x.Name == name))
                 {
                     for (int i = 1; ; i++)
@@ -805,17 +805,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                 }
                 iAnim.Name = name;
-                iAnim.SampleRate = animationClip.m_SampleRate;
+                iAnim.SampleRate = animationClip.SampleRate;
                 iAnim.TrackList = [];
                 AnimationList.Add(iAnim);
-                if (animationClip.m_Legacy)
+                if (animationClip.Legacy)
                 {
-                    foreach (var m_CompressedRotationCurve in animationClip.m_CompressedRotationCurves)
+                    foreach (var m_CompressedRotationCurve in animationClip.CompressedRotationCurves)
                     {
-                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_CompressedRotationCurve.m_Path));
+                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_CompressedRotationCurve.Path));
 
-                        var numKeys = m_CompressedRotationCurve.m_Times.m_NumItems;
-                        var data = m_CompressedRotationCurve.m_Times.UnpackInts();
+                        var numKeys = m_CompressedRotationCurve.Times.NumItems;
+                        var data = m_CompressedRotationCurve.Times.UnpackInts();
                         var times = new float[numKeys];
                         int t = 0;
                         for (int i = 0; i < numKeys; i++)
@@ -823,7 +823,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             t += data[i];
                             times[i] = t * 0.01f;
                         }
-                        var quats = m_CompressedRotationCurve.m_Values.UnpackQuats();
+                        var quats = m_CompressedRotationCurve.Values.UnpackQuats();
 
                         for (int i = 0; i < numKeys; i++)
                         {
@@ -832,54 +832,54 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             track.Rotations.Add(new FbxImportedKeyframe<Vector3>(times[i], value));
                         }
                     }
-                    foreach (var m_RotationCurve in animationClip.m_RotationCurves)
+                    foreach (var m_RotationCurve in animationClip.RotationCurves)
                     {
-                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_RotationCurve.path));
-                        foreach (var m_Curve in m_RotationCurve.curve.m_Curve)
+                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_RotationCurve.Path));
+                        foreach (var m_Curve in m_RotationCurve.Curve.Curve)
                         {
-                            var value = FbxContext.ToEuler(new Quaternion(m_Curve.value.X, -m_Curve.value.Y, -m_Curve.value.Z, m_Curve.value.W));
-                            track.Rotations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.time, value));
+                            var value = FbxContext.ToEuler(new Quaternion(m_Curve.Value.X, -m_Curve.Value.Y, -m_Curve.Value.Z, m_Curve.Value.W));
+                            track.Rotations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.Time, value));
                         }
                     }
-                    foreach (var m_PositionCurve in animationClip.m_PositionCurves)
+                    foreach (var m_PositionCurve in animationClip.PositionCurves)
                     {
-                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_PositionCurve.path));
-                        foreach (var m_Curve in m_PositionCurve.curve.m_Curve)
+                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_PositionCurve.Path));
+                        foreach (var m_Curve in m_PositionCurve.Curve.Curve)
                         {
-                            track.Translations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.time, new Vector3(-m_Curve.value.X, m_Curve.value.Y, m_Curve.value.Z)));
+                            track.Translations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.Time, new Vector3(-m_Curve.Value.X, m_Curve.Value.Y, m_Curve.Value.Z)));
                         }
                     }
-                    foreach (var m_ScaleCurve in animationClip.m_ScaleCurves)
+                    foreach (var m_ScaleCurve in animationClip.ScaleCurves)
                     {
-                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_ScaleCurve.path));
-                        foreach (var m_Curve in m_ScaleCurve.curve.m_Curve)
+                        var track = iAnim.FindTrack(FixBonePath(animationClip, m_ScaleCurve.Path));
+                        foreach (var m_Curve in m_ScaleCurve.Curve.Curve)
                         {
-                            track.Scalings.Add(new FbxImportedKeyframe<Vector3>(m_Curve.time, new Vector3(m_Curve.value.X, m_Curve.value.Y, m_Curve.value.Z)));
+                            track.Scalings.Add(new FbxImportedKeyframe<Vector3>(m_Curve.Time, m_Curve.Value));
                         }
                     }
-                    if (animationClip.m_EulerCurves != null)
+                    if (animationClip.EulerCurves != null)
                     {
-                        foreach (var m_EulerCurve in animationClip.m_EulerCurves)
+                        foreach (var m_EulerCurve in animationClip.EulerCurves)
                         {
-                            var track = iAnim.FindTrack(FixBonePath(animationClip, m_EulerCurve.path));
-                            foreach (var m_Curve in m_EulerCurve.curve.m_Curve)
+                            var track = iAnim.FindTrack(FixBonePath(animationClip, m_EulerCurve.Path));
+                            foreach (var m_Curve in m_EulerCurve.Curve.Curve)
                             {
-                                track.Rotations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.time, new Vector3(m_Curve.value.X, -m_Curve.value.Y, -m_Curve.value.Z)));
+                                track.Rotations.Add(new FbxImportedKeyframe<Vector3>(m_Curve.Time, new Vector3(m_Curve.Value.X, -m_Curve.Value.Y, -m_Curve.Value.Z)));
                             }
                         }
                     }
-                    foreach (var m_FloatCurve in animationClip.m_FloatCurves)
+                    foreach (var m_FloatCurve in animationClip.FloatCurves)
                     {
-                        if (m_FloatCurve.classID == ElementIDType.SkinnedMeshRenderer) //BlendShape
+                        if (m_FloatCurve.ClassID == NativeClassID.SkinnedMeshRenderer) //BlendShape
                         {
-                            var channelName = m_FloatCurve.attribute;
+                            var channelName = m_FloatCurve.Attribute;
                             int dotPos = channelName.IndexOf('.');
                             if (dotPos >= 0)
                             {
                                 channelName = channelName.Substring(dotPos + 1);
                             }
 
-                            var path = FixBonePath(animationClip, m_FloatCurve.path);
+                            var path = FixBonePath(animationClip, m_FloatCurve.Path);
                             if (string.IsNullOrEmpty(path))
                             {
                                 path = GetPathByChannelName(channelName);
@@ -887,18 +887,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             var track = iAnim.FindTrack(path);
                             track.BlendShape = new FbxImportedBlendShape();
                             track.BlendShape.ChannelName = channelName;
-                            foreach (var m_Curve in m_FloatCurve.curve.m_Curve)
+                            foreach (var m_Curve in m_FloatCurve.Curve.Curve)
                             {
-                                track.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(m_Curve.time, m_Curve.value));
+                                track.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(m_Curve.Time, m_Curve.Value));
                             }
                         }
                     }
                 }
                 else
                 {
-                    var m_Clip = animationClip.m_MuscleClip.m_Clip;
-                    var streamedFrames = m_Clip.m_StreamedClip.ReadData();
-                    var m_ClipBindingConstant = animationClip.m_ClipBindingConstant ?? m_Clip.ConvertValueArrayToGenericBinding();
+                    var m_Clip = animationClip.MuscleClip.Clip;
+                    var streamedFrames = m_Clip.StreamedClip.ReadData();
+                    var m_ClipBindingConstant = animationClip.ClipBindingConstant ?? m_Clip.ConvertValueArrayToGenericBinding();
                     for (int frameIndex = 1; frameIndex < streamedFrames.Count - 1; frameIndex++)
                     {
                         var frame = streamedFrames[frameIndex];
@@ -908,31 +908,31 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             ReadCurveData(iAnim, m_ClipBindingConstant, frame.keyList[curveIndex].index, frame.time, streamedValues, 0, ref curveIndex);
                         }
                     }
-                    var m_DenseClip = m_Clip.m_DenseClip;
-                    var streamCount = m_Clip.m_StreamedClip.curveCount;
-                    for (int frameIndex = 0; frameIndex < m_DenseClip.m_FrameCount; frameIndex++)
+                    var m_DenseClip = m_Clip.DenseClip;
+                    var streamCount = m_Clip.StreamedClip.CurveCount;
+                    for (int frameIndex = 0; frameIndex < m_DenseClip.FrameCount; frameIndex++)
                     {
-                        var time = m_DenseClip.m_BeginTime + frameIndex / m_DenseClip.m_SampleRate;
-                        var frameOffset = frameIndex * m_DenseClip.m_CurveCount;
-                        for (int curveIndex = 0; curveIndex < m_DenseClip.m_CurveCount;)
+                        var time = m_DenseClip.BeginTime + frameIndex / m_DenseClip.SampleRate;
+                        var frameOffset = frameIndex * m_DenseClip.CurveCount;
+                        for (int curveIndex = 0; curveIndex < m_DenseClip.CurveCount;)
                         {
                             var index = streamCount + curveIndex;
-                            ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time, m_DenseClip.m_SampleArray, (int)frameOffset, ref curveIndex);
+                            ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time, m_DenseClip.SampleArray, (int)frameOffset, ref curveIndex);
                         }
                     }
-                    if (m_Clip.m_ConstantClip != null)
+                    if (m_Clip.ConstantClip != null)
                     {
-                        var m_ConstantClip = m_Clip.m_ConstantClip;
-                        var denseCount = m_Clip.m_DenseClip.m_CurveCount;
+                        var m_ConstantClip = m_Clip.ConstantClip.Value;
+                        var denseCount = m_Clip.DenseClip.CurveCount;
                         var time2 = 0.0f;
                         for (int i = 0; i < 2; i++)
                         {
-                            for (int curveIndex = 0; curveIndex < m_ConstantClip.data.Length;)
+                            for (int curveIndex = 0; curveIndex < m_ConstantClip.Data.Length;)
                             {
                                 var index = streamCount + denseCount + curveIndex;
-                                ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time2, m_ConstantClip.data, 0, ref curveIndex);
+                                ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time2, m_ConstantClip.Data, 0, ref curveIndex);
                             }
-                            time2 = animationClip.m_MuscleClip.m_StopTime;
+                            time2 = animationClip.MuscleClip.StopTime;
                         }
                     }
                 }
@@ -942,7 +942,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private void ReadCurveData(FbxImportedKeyframedAnimation iAnim, AnimationClipBindingConstant m_ClipBindingConstant, int index, float time, float[] data, int offset, ref int curveIndex)
         {
             var binding = m_ClipBindingConstant.FindBinding(index);
-            if (binding.typeID == ElementIDType.SkinnedMeshRenderer) //BlendShape
+            if (binding.typeID == NativeClassID.SkinnedMeshRenderer) //BlendShape
             {
                 var channelName = GetChannelNameFromHash(binding.attribute);
                 if (string.IsNullOrEmpty(channelName))
@@ -966,7 +966,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 bTrack.BlendShape.ChannelName = channelName;
                 bTrack.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(time, data[curveIndex++ + offset]));
             }
-            else if (binding.typeID == ElementIDType.Transform)
+            else if (binding.typeID == NativeClassID.Transform)
             {
                 var path = FixBonePath(GetPathFromHash(binding.path));
                 var track = iAnim.FindTrack(path);
@@ -1044,7 +1044,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 bytes = Encoding.UTF8.GetBytes(name);
                 _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
             }
-            foreach (var pptr in m_Transform.m_Children)
+            foreach (var pptr in m_Transform.Children)
             {
                 if (pptr.TryGet(out var child))
                 {
@@ -1060,7 +1060,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 throw new Exception("Transform hierarchy has been optimized, but can't find Avatar to deoptimize.");
             // 1. Figure out the skeletonPaths from the unstripped avatar
             var skeletonPaths = new List<string>();
-            foreach (var id in _avatar.m_Avatar.m_AvatarSkeleton.m_ID)
+            foreach (var id in _avatar.Value.AvatarSkeleton.ID)
             {
                 var path = _avatar.FindBonePath(id);
                 skeletonPaths.Add(path);
@@ -1084,16 +1084,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     var parentFramePath = path.Substring(0, path.LastIndexOf('/'));
                     parentFrame = RootFrame.FindRelativeFrameWithPath(parentFramePath);
                 }
-                var skeletonPose = _avatar.m_Avatar.m_DefaultPose;
-                var xform = skeletonPose.m_X[i];
+                var skeletonPose = _avatar.Value.DefaultPose;
+                var xform = skeletonPose.X[i];
                 var frame = RootFrame.FindChild(transformName);
                 if (frame != null)
                 {
-                    SetFrame(frame, xform.T, xform.Q, xform.S);
+                    SetFrame(frame, xform.Translation, xform.Rotation, xform.Scale);
                 }
                 else
                 {
-                    frame = CreateFrame(transformName, xform.T, xform.Q, xform.S);
+                    frame = CreateFrame(transformName, xform.Translation, xform.Rotation, xform.Scale);
                 }
                 parentFrame.AddChild(frame);
             }

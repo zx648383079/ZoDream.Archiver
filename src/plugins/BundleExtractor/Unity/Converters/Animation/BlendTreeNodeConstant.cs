@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(BlendTreeNodeConstant res, IBundleBinaryReader reader, 
+        public static void ReadBase(BlendTreeNodeConstant res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
@@ -60,7 +60,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             res.Duration = reader.ReadSingle();
 
-            
+            cb.Invoke();
         }
     }
 }

@@ -1,17 +1,17 @@
-﻿using Mono.Cecil;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
-using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using Object = UnityEngine.Object;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -30,21 +30,17 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             _metadata.Read(reader.BaseStream, _header);
             CombineFormats(_header.Version, _metadata);
             _dependencyItems.AddRange(_metadata.Externals);
-            //for (var i = 0; i < _metadata.Object.Length; i++)
-            //{
-            //    var objectInfo = _metadata.Object[i];
-            //    reader.BaseStream.Position = _header.DataOffset + objectInfo.ByteStart;
-            //    var objectData = new byte[objectInfo.ByteSize];
-            //    reader.BaseStream.ReadExactly(objectData);
-            //    objectInfo.ObjectData = objectData;
-            //}
+            _children = new Object?[_metadata.Object.Length];
         }
 
         private readonly IArchiveOptions? _options;
         private readonly IBundleBinaryReader _reader;
         private readonly SerializedFileHeader _header = new();
         private readonly SerializedFileMetadata _metadata = new();
-        private readonly Dictionary<long, UIObject> _childrenDict = [];
+        /// <summary>
+        /// 跟 _metadata.Object 一一对应
+        /// </summary>
+        private readonly Object?[] _children;
         private readonly List<FileIdentifier> _dependencyItems = [];
 
         public IBundleContainer? Container { get; set; }
@@ -52,16 +48,36 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public ILogger? Logger => Container?.Logger;
         public string FullPath { get; private set; }
         public SerializedType[] TypeItems => _metadata.Types;
-        public FormatVersion Version => _header.Version;
-        public UnityVersion UnityVersion => _metadata.UnityVersion;
-        public List<UIObject> Children { get; private set; } = [];
+        public FormatVersion Format => _header.Version;
+        public Version Version => _metadata.Version;
 
         public BuildTarget Platform => _metadata.TargetPlatform;
 
-        public IEnumerable<string> Dependencies => _dependencyItems.Select(i => i.PathName);
-        public IEnumerable<ObjectInfo> ObjectMetaItems => _metadata.Object;
+        public int Count => _metadata.Object.Length;
 
-        public UIObject? this[long pathID] => _childrenDict.TryGetValue(pathID, out var res) ? res : null;
+        public IEnumerable<string> Dependencies => _dependencyItems.Select(i => i.PathName);
+
+        public Object? this[int index] 
+        {
+            get => index >= 0 && index < Count ? _children[index] : null;
+            set {
+                if (index >= 0 && index < Count)
+                {
+                    _children[index] = value;
+                }
+            }
+        }
+
+        public int IndexOf(long pathID)
+        {
+            return Array.FindIndex(_metadata.Object, item => item.FileID == pathID);
+        }
+
+        public ObjectInfo Get(int index)
+        {
+            Debug.Assert(index >= 0 && index < Count);
+            return _metadata.Object[index];
+        }
 
         public string GetDependency(int index)
         {
@@ -82,7 +98,13 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return _dependencyItems.FindIndex(x => x.PathName.Equals(dependency, StringComparison.OrdinalIgnoreCase));
         }
 
-        public IBundleBinaryReader Create(ObjectInfo info)
+        public IBundleBinaryReader OpenRead(int index)
+        {
+            Debug.Assert(index >= 0 && index < Count);
+            return OpenRead(_metadata.Object[index]);
+        }
+
+        public IBundleBinaryReader OpenRead(ObjectInfo info)
         {
             var swapEndian = SerializedFileHeader.HasEndian(_header.Version) ?
                 _header.Endian : _metadata.SwapEndian;
@@ -120,11 +142,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             //HasTypeTree = metadata.EnableTypeTree;
         }
 
-        public void AddChild(UIObject obj)
-        {
-            Children.Add(obj);
-            _childrenDict.Add(obj.FileID, obj);
-        }
 
         public Stream OpenResource(ResourceSource source)
         {
@@ -142,7 +159,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public void Dispose()
         {
-            _childrenDict.Clear();
             if (_options?.LeaveStreamOpen == false)
             {
                 _reader.LeaveStreamOpen = false;
@@ -165,5 +181,56 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             throw new NotImplementedException();
         }
 
+        public bool TryGet<T>(PPtr ptr, [NotNullWhen(true)] out T? instance)
+        {
+            if (TryGetResource(ptr.FileID, out var sourceFile))
+            {
+                var i = sourceFile.IndexOf(ptr.PathID);
+                if (i >= 0)
+                {
+                    if (sourceFile[i] is T variable)
+                    {
+                        instance = variable;
+                        return true;
+                    }
+                    instance = Container!.ConvertTo<T>(sourceFile, sourceFile.Get(i));
+                    return instance is not null;
+                }
+            }
+            if (ptr.PathID != 0 && ptr.FileID >= 0)
+            {
+                Logger?.Warning($"Need: [{ptr.FileID}]{ptr.PathID}");
+            }
+            instance = default;
+            return false;
+        }
+
+        private bool TryGetResource(int fileId, [NotNullWhen(true)] out ISerializedFile? result)
+        {
+            if (fileId == 0)
+            {
+                result = this;
+                return true;
+            }
+            result = null;
+            if (fileId > 0 && fileId - 1 < Dependencies.Count())
+            {
+                var assetsManager = Container;
+                if (assetsManager is null)
+                {
+                    return false;
+                }
+                var index = assetsManager.IndexOf(GetDependency(fileId - 1));
+
+                if (index >= 0)
+                {
+                    result = assetsManager[index];
+                    return result is not null;
+                }
+            }
+            return false;
+        }
+
+     
     }
 }

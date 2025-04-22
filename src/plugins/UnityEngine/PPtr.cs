@@ -1,14 +1,25 @@
-﻿namespace UnityEngine
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace UnityEngine
 {
-    public class PPtr
+    public struct PPtr
     {
+        public int FileID;
 
-        public int FileID { get; set; }
-
-        public long PathID { get; set; }
+        public long PathID;
     }
-    public sealed class PPtr<T> : PPtr
+    public interface IPPtr<T>
         where T : Object
     {
+        public PPtr Value { get; }
+
+        public int FileID { get; }
+
+        public long PathID { get; }
+
+        public bool IsNull { get; }
+
+        public bool TryGet([NotNullWhen(true)] out T? instance);
+        public bool TryGet<K>([NotNullWhen(true)] out K? instance);
     }
 }

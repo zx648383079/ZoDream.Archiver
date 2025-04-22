@@ -6,6 +6,7 @@ using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using UnityEngine;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.KhronosExporter;
@@ -249,7 +250,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 // parent.AddChild(frame);
             }
-            foreach (var pptr in trans.m_Children)
+            foreach (var pptr in trans.Children)
             {
                 if (pptr.TryGet(out var child))
                 {
@@ -258,7 +259,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
         }
 
-        private int AddMeshRenderer(UIRenderer meshR, int meshParent = -1)
+        private int AddMeshRenderer(Renderer meshR, int meshParent = -1)
         {
             var mesh = GetMesh(meshR);
             if (mesh == null)

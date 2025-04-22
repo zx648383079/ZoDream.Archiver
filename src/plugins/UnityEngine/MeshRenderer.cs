@@ -4,6 +4,6 @@ namespace UnityEngine
     public class MeshRenderer : Renderer
     {
 
-        public PPtr<Mesh> AdditionalVertexStreams;
+        public IPPtr<Mesh> AdditionalVertexStreams;
     }
 }

@@ -8,14 +8,17 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public override TexEnv? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var res = new TexEnv
-            {
-                Texture = serializer.Deserialize<PPtr<Texture>>(reader),
-                Scale = reader.ReadVector2(),
-                Offset = reader.ReadVector2()
-            };
+            var res = new TexEnv();
+            ReadBase(res, reader, serializer, () => { });
             return res;
         }
-    }
 
+        public static void ReadBase(TexEnv res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        {
+            res.Texture = reader.ReadPPtr<Texture>(serializer);
+            res.Scale = reader.ReadVector2();
+            res.Offset = reader.ReadVector2();
+            cb.Invoke();
+        }
+    }
 }

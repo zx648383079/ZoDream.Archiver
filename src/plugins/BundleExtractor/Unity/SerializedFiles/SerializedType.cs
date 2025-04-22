@@ -1,4 +1,4 @@
-﻿using ZoDream.BundleExtractor.Models;
+﻿using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -7,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
     {
         public int[] TypeDependencies { get; set; } = [];
 
-        protected override bool IgnoreScriptTypeForHash(FormatVersion formatVersion, UnityVersion unityVersion)
+        protected override bool IgnoreScriptTypeForHash(FormatVersion formatVersion, Version unityVersion)
         {
             //This code is most likely correct, but not guaranteed.
             //Reverse engineering it was painful, and it's possible that mistakes were made.
@@ -20,6 +20,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         }
 
 
-        private static UnityVersion WriteIDHashForScriptTypeVersion { get; } = new UnityVersion(2018, 3, 0, UnityVersionType.Alpha, 1);
+        private static Version WriteIDHashForScriptTypeVersion { get; } = new(2018, 3, 0, VersionType.Alpha, 1);
     }
 }

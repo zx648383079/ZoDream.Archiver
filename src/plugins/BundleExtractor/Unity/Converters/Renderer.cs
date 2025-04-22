@@ -18,11 +18,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         }
     }
 
-    internal abstract class RendererConverter<T> : BundleConverter<T>
-        where T : Renderer
+    internal static class RendererConverter
     {
 
-        public void ReadBase(T res, IBundleBinaryReader reader, IBundleSerializer serializer)
+        public static void ReadBase(Renderer res, IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var target = reader.Get<BuildTarget>();
             if (target == BuildTarget.NoTarget)
@@ -31,11 +30,16 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabParentObject = serializer.Deserialize<PPtr>(reader);
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
-            res.GameObject = serializer.Deserialize<PPtr<GameObject>>(reader);
+            res.GameObject = reader.ReadPPtr<GameObject>(serializer);
         }
 
-        public void Read(T res, IBundleBinaryReader reader, IBundleSerializer serializer)
+        public static void Read(Renderer res, IBundleBinaryReader reader, IBundleSerializer serializer)
         {
+            if (serializer.Converters.TryGet<Renderer>(out var cvt) && cvt is IBundlePipelineConverter<Renderer> c)
+            {
+                c.Read(ref res, reader, serializer);
+                return;
+            }
             ReadBase(res, reader, serializer);
 
             var version = reader.Get<Version>();
@@ -109,7 +113,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_LightmapTilingOffsetDynamic = reader.ReadVector4();
             }
 
-            res.Materials = reader.ReadArray(_ => serializer.Deserialize<PPtr<Material>>(reader));
+            res.Materials = reader.ReadArray(_ => reader.ReadPPtr<Material>(serializer));
 
             if (version.Major < 3) //3.0 down
             {
@@ -126,14 +130,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     res.SubsetIndices = reader.ReadArray(r => r.ReadUInt32());
                 }
 
-                var m_StaticBatchRoot = serializer.Deserialize<PPtr<Transform>>(reader);
+                var m_StaticBatchRoot = reader.ReadPPtr<Transform>(serializer);
             }
 
 
             if (version.GreaterThanOrEquals(5, 4)) //5.4 and up
             {
-                var m_ProbeAnchor = serializer.Deserialize<PPtr<Transform>>(reader);
-                var m_LightProbeVolumeOverride = serializer.Deserialize<PPtr<GameObject>>(reader);
+                var m_ProbeAnchor = reader.ReadPPtr<Transform>(serializer);
+                var m_LightProbeVolumeOverride = reader.ReadPPtr<GameObject>(serializer);
             }
             else if (version.GreaterThanOrEquals(3, 5)) //3.5 - 5.3
             {
@@ -145,7 +149,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     var m_ReflectionProbeUsage = reader.ReadInt32();
                 }
 
-                var m_LightProbeAnchor = serializer.Deserialize<PPtr<Transform>>(reader); //5.0 and up m_ProbeAnchor
+                var m_LightProbeAnchor = reader.ReadPPtr<Transform>(serializer); //5.0 and up m_ProbeAnchor
             }
 
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up

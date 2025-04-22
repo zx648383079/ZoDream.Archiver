@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using ZoDream.BundleExtractor.Models;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Language;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class ShaderSubProgram
     {
-        private readonly UnityVersion _version;
+        private readonly Version _version;
         public ShaderGpuProgramType m_ProgramType;
         public string[] m_Keywords;
         public string[] m_LocalKeywords;
@@ -19,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly bool _hasError;
         public ShaderSubProgram(IBundleBinaryReader reader)
         {
-            _version = reader.Get<UnityVersion>();
+            _version = reader.Get<Version>();
             var versionNo = reader.ReadInt32();
             Debug.Assert(GetExpectedProgramVersion(_version) == versionNo);
             m_ProgramType = (ShaderGpuProgramType)reader.ReadInt32();
@@ -198,7 +198,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.Write('"').WriteLine(true);
         }
 
-        private static int GetExpectedProgramVersion(UnityVersion version)
+        private static int GetExpectedProgramVersion(Version version)
         {
             return version switch
             {

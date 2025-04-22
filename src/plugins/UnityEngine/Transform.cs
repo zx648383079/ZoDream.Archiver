@@ -7,8 +7,8 @@ namespace UnityEngine
         public Quaternion LocalRotation;
         public Vector3 LocalPosition;
         public Vector3 LocalScale;
-        public PPtr<Transform>[] Children;
-        public PPtr<Transform> Father;
+        public IPPtr<Transform>[] Children;
+        public IPPtr<Transform> Father;
     }
 
 

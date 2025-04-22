@@ -4,8 +4,8 @@ namespace UnityEngine
 {
     public class SpriteRenderData
     {
-        public PPtr<Texture2D> Texture;
-        public PPtr<Texture2D> AlphaTexture;
+        public IPPtr<Texture2D> Texture;
+        public IPPtr<Texture2D> AlphaTexture;
         public SecondarySpriteTexture[] SecondaryTextures;
         public SubMesh[] SubMeshes;
         public byte[] IndexBuffer;

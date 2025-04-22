@@ -5,6 +5,6 @@ namespace UnityEngine
     public class MovieTexture : Texture
     {
         public Stream MovieData;
-        public PPtr<AudioClip> AudioClip;
+        public IPPtr<AudioClip> AudioClip;
     }
 }

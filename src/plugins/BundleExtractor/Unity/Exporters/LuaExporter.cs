@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.LuaDecompiler;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;

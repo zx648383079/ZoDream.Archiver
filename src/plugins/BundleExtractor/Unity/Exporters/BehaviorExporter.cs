@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Exporters.Cecil;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
@@ -67,15 +68,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
 
 
-        public static TypeTree ConvertToTypeTree(MonoBehavior m_MonoBehavior, 
+        public static TypeTree ConvertToTypeTree(MonoBehaviour m_MonoBehavior, 
             AssemblyLoader assemblyLoader)
         {
             var m_Type = new TypeTree();
             var helper = new SerializedTypeHelper(m_MonoBehavior.Version);
             helper.AddMonoBehavior(m_Type.Nodes, 0);
-            if (m_MonoBehavior.m_Script.TryGet(out var m_Script))
+            if (m_MonoBehavior.Script.TryGet(out var m_Script))
             {
-                var typeDef = assemblyLoader.GetTypeDefinition(m_Script.m_AssemblyName, string.IsNullOrEmpty(m_Script.m_Namespace) ? m_Script.m_ClassName : $"{m_Script.m_Namespace}.{m_Script.m_ClassName}");
+                var typeDef = assemblyLoader.GetTypeDefinition(m_Script.AssemblyName, string.IsNullOrEmpty(m_Script.m_Namespace) ? m_Script.m_ClassName : $"{m_Script.m_Namespace}.{m_Script.m_ClassName}");
                 if (typeDef != null)
                 {
                     var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, helper, 1);

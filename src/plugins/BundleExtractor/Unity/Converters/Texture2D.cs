@@ -20,13 +20,22 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public override GLTextureSettings Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
+            var res = new GLTextureSettings();
+            ReadBase(ref res, reader, serializer, () => { });
+            return res;
+        }
+
+        public static void ReadBase(ref GLTextureSettings res, 
+            IBundleBinaryReader reader, 
+            IBundleSerializer serializer,
+            Action cb)
+        {
             var version = reader.Get<Version>();
-            var res = new GLTextureSettings
-            {
-                FilterMode = reader.ReadInt32(),
-                Aniso = reader.ReadInt32(),
-                MipBias = reader.ReadSingle()
-            };
+
+            res.FilterMode = reader.ReadInt32();
+            res.Aniso = reader.ReadInt32();
+            res.MipBias = reader.ReadSingle();
+            cb.Invoke();
             if (version.Major >= 2017)//2017.x and up
             {
                 res.WrapMode = reader.ReadInt32(); //m_WrapU
@@ -37,13 +46,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 res.WrapMode = reader.ReadInt32();
             }
-            return res;
         }
     }
 
     internal sealed class Texture2DConverter : BundleConverter<Texture2D>, IBundleExporter, IElementTypeLoader
     {
-        public Texture2D? Read(IBundleBinaryReader reader, TypeTree typeMaps)
+        public object? Read(IBundleBinaryReader reader, Type targetType, TypeTree typeMaps)
         {
             var res = new Texture2D();
             TypeTreeHelper.ReadType(typeMaps, reader, res);

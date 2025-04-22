@@ -2,7 +2,7 @@
 {
     public abstract class Renderer : Component
     {
-        public PPtr<Material>[] Materials;
+        public IPPtr<Material>[] Materials;
         public StaticBatchInfo StaticBatchInfo;
         public uint[] SubsetIndices;
     }

@@ -1,6 +1,5 @@
-﻿using ZoDream.BundleExtractor.Models;
+﻿using UnityEngine;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -49,7 +48,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public byte[] OldTypeHash { get; set; } = [];
 
         public void Read(IBundleBinaryReader reader,
-            UnityVersion unityVersion,
+            Version unityVersion,
             bool hasTypeTree)
         {
             var version = reader.Get<FormatVersion>();
@@ -100,7 +99,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         protected abstract void ReadTypeDependencies(IBundleBinaryReader reader);
 
-        protected abstract bool IgnoreScriptTypeForHash(FormatVersion formatVersion, UnityVersion unityVersion);
+        protected abstract bool IgnoreScriptTypeForHash(FormatVersion formatVersion, Version unityVersion);
 
         public override string ToString()
         {

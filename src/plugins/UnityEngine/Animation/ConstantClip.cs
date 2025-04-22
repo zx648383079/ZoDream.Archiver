@@ -2,6 +2,6 @@
 {
     public struct ConstantClip
     {
-        public float[] Data { get; set; }
+        public float[] Data;
     }
 }

@@ -1,4 +1,5 @@
-﻿using ZoDream.BundleExtractor.Unity.SerializedFiles;
+﻿using System;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -9,6 +10,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     internal interface IElementTypeLoader
     {
 
-        public void Read(IBundleBinaryReader reader, TypeTree typeMaps);
+        public object? Read(IBundleBinaryReader reader, Type target, TypeTree typeMaps);
     }
 }

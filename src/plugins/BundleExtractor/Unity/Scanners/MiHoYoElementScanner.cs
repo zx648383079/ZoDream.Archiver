@@ -2,12 +2,14 @@
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
@@ -880,12 +882,12 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader, Texture2D instance)
         {
             instance.ReadBase(reader);
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             var hash = Convert.ToHexString(reader.Get<SerializedType>().OldTypeHash);
             var hasGNFTexture = hash == "1D52BB98AA5F54C67C22C39E8B2E400F";
             var hasExternalMipRelativeOffset = hash is "1D52BB98AA5F54C67C22C39E8B2E400F" or "5390A985F58D5524F95DB240E8789704";
-            instance.m_Width = reader.ReadInt32();
-            instance.m_Height = reader.ReadInt32();
+            instance.Width = reader.ReadInt32();
+            instance.Height = reader.ReadInt32();
             var m_CompleteImageSize = reader.ReadInt32();
             if (version.GreaterThanOrEquals(2020)) //2020.1 and up
             {
@@ -965,10 +967,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 {
                     var m_externalMipRelativeOffset = reader.ReadUInt32();
                 }
-                instance.m_StreamData = new StreamingInfo(reader);
+                instance.StreamData = new StreamingInfo(reader);
             }
 
-            if (!string.IsNullOrEmpty(instance.m_StreamData?.path))
+            if (!string.IsNullOrEmpty(instance.StreamData?.path))
             {
                 instance.image_data = ((UIReader)reader).OpenResource(instance.m_StreamData);
             }

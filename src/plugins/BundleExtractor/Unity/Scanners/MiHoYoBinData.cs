@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -12,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         Bytes,
         JSON
     }
-    internal sealed class MiHoYoBinData(UIReader reader) : UIObject(reader), IBundleExporter
+    internal sealed class MiHoYoBinData(Reader reader) : UIObject(reader), IBundleExporter
     {
         private static Regex ASCII = new("[^\u0020-\u007E]", RegexOptions.Compiled);
 

@@ -8,7 +8,7 @@ namespace UnityEngine
 {
     public class AssetBundle : Object
     {
-        public PPtr<Object>[] PreloadTable;
+        public IPPtr<Object>[] PreloadTable;
         public KeyValuePair<string, AssetInfo>[] Container;
     }
 
@@ -16,6 +16,6 @@ namespace UnityEngine
     {
         public int PreloadIndex;
         public int PreloadSize;
-        public PPtr<Object> Asset;
+        public IPPtr<Object> Asset;
     }
 }

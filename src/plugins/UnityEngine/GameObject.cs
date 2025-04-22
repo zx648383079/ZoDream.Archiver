@@ -3,7 +3,7 @@ namespace UnityEngine
 {
     public class GameObject : Object
     {
-        public PPtr<Component>[] Components;
+        public IPPtr<Component>[] Components;
 
         public Transform Transform;
         public MeshRenderer MeshRenderer;

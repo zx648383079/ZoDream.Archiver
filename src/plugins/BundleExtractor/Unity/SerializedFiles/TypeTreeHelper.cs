@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Text;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Converters;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -196,7 +195,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public static void ReadType<T>(TypeTree m_Types, 
             IBundleBinaryReader reader, 
             T instance)
-            where T : UIObject
+            where T : UnityEngine.Object
         {
             var data = ReadType(m_Types, reader);
             ConvertType(data, instance);
@@ -209,6 +208,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             foreach (string key in data.Keys)
             {
                 var fieldName = key.Trim().Replace(' ', '_');
+                if (fieldName.StartsWith("m_"))
+                {
+                    fieldName = StringConverter.Studly(fieldName[2..]);
+                }
                 var obj = data[key];
                 if (obj is null)
                 {

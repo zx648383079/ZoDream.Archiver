@@ -4,7 +4,7 @@ namespace UnityEngine
 {
     public class TexEnv
     {
-        public PPtr<Texture> Texture;
+        public IPPtr<Texture> Texture;
         public Vector2 Scale;
         public Vector2 Offset;
 

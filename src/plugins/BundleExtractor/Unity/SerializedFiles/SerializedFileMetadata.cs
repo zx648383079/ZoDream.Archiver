@@ -1,14 +1,13 @@
-﻿using ZoDream.BundleExtractor.Models;
-using System.IO;
-using ZoDream.Shared.IO;
+﻿using System.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Bundle;
+using UnityEngine;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     public class SerializedFileMetadata
     {
-        public UnityVersion UnityVersion { get; set; }
+        public Version Version { get; set; }
         public BuildTarget TargetPlatform { get; set; }
         public bool EnableTypeTree { get; set; }
         public SerializedType[] Types { get; set; } = [];
@@ -98,8 +97,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             if (HasSignature(generation))
             {
                 string signature = reader.ReadStringZeroTerm();
-                UnityVersion = UnityVersion.Parse(signature);
-                reader.Add(UnityVersion);
+                Version = Version.Parse(signature);
+                reader.Add(Version);
             }
             if (HasPlatform(generation))
             {
@@ -111,7 +110,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             Types = reader.ReadArray(() =>
             {
                 var o = new SerializedType();
-                o.Read(reader, UnityVersion, EnableTypeTree);
+                o.Read(reader, Version, EnableTypeTree);
                 return o;
             });
 
@@ -150,7 +149,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 RefTypes = reader.ReadArray(() =>
                 {
                     var o = new SerializedTypeReference();
-                    o.Read(reader, UnityVersion, EnableTypeTree);
+                    o.Read(reader, Version, EnableTypeTree);
                     return o;
                 });
             }
