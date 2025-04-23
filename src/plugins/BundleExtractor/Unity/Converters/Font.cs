@@ -27,9 +27,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             if (version.GreaterThanOrEquals(5, 5))//5.5 and up
             {
                 var m_LineSpacing = reader.ReadSingle();
-                var m_DefaultMaterial = serializer.Deserialize<PPtr<Material>>(reader);
+                var m_DefaultMaterial = reader.ReadPPtr<Material>(serializer);
                 var m_FontSize = reader.ReadSingle();
-                var m_Texture = serializer.Deserialize<PPtr<Texture>>(reader);
+                var m_Texture = reader.ReadPPtr<Texture>(serializer);
                 int m_AsciiStartOffset = reader.ReadInt32();
                 var m_Tracking = reader.ReadSingle();
                 var m_CharacterSpacing = reader.ReadInt32();
@@ -81,7 +81,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 }
 
                 int m_ConvertCase = reader.ReadInt32();
-                var m_DefaultMaterial = serializer.Deserialize<PPtr<Material>>(reader);
+                var m_DefaultMaterial = reader.ReadPPtr<Material>(serializer);
 
                 int m_CharacterRects_size = reader.ReadInt32();
                 for (int i = 0; i < m_CharacterRects_size; i++)
@@ -106,7 +106,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     }
                 }
 
-                var m_Texture = serializer.Deserialize<PPtr<Texture>>(reader);
+                var m_Texture = reader.ReadPPtr<Texture>(serializer);
 
                 int m_KerningValues_size = reader.ReadInt32();
                 for (int i = 0; i < m_KerningValues_size; i++)

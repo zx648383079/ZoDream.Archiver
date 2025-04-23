@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.FModExporter;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
@@ -25,8 +25,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //{
             //    return;
             //}
-            audio.m_AudioData.Position = 0;
-            using var reader = new FModReader(audio.m_AudioData, Path.GetFileName(fileName), null);
+            audio.AudioData.Position = 0;
+            using var reader = new FModReader(audio.AudioData, Path.GetFileName(fileName), null);
             reader.ExtractToDirectory(Path.GetDirectoryName(fileName), mode);
             // using var fs = File.Create(fileName);
             //Audio.Decode(audio.m_AudioData, m_CompressionFormat switch
@@ -49,38 +49,38 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             if (audio.IsOldVersion)
             {
-                switch (audio.m_Type)
+                switch (audio.Type)
                 {
-                    case FMODSoundType.ACC:
+                    case AudioType.ACC:
                         return ".m4a";
-                    case FMODSoundType.AIFF:
+                    case AudioType.AIFF:
                         return ".aif";
-                    case FMODSoundType.IT:
+                    case AudioType.IT:
                         return ".it";
-                    case FMODSoundType.MOD:
+                    case AudioType.MOD:
                         return ".mod";
-                    case FMODSoundType.MPEG:
+                    case AudioType.MPEG:
                         return ".mp3";
-                    case FMODSoundType.OGGVORBIS:
+                    case AudioType.OGGVORBIS:
                         return ".ogg";
-                    case FMODSoundType.S3M:
+                    case AudioType.S3M:
                         return ".s3m";
-                    case FMODSoundType.WAV:
+                    case AudioType.WAV:
                         return ".wav";
-                    case FMODSoundType.XM:
+                    case AudioType.XM:
                         return ".xm";
-                    case FMODSoundType.XMA:
+                    case AudioType.XMA:
                         return ".wav";
-                    case FMODSoundType.VAG:
+                    case AudioType.VAG:
                         return ".vag";
-                    case FMODSoundType.AUDIOQUEUE:
+                    case AudioType.AUDIOQUEUE:
                         return ".fsb";
                 }
 
             }
             else
             {
-                switch (audio.m_CompressionFormat)
+                switch (audio.CompressionFormat)
                 {
                     case AudioCompressionFormat.PCM:
                         return ".fsb";
@@ -112,15 +112,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             get {
                 if (audio.IsOldVersion)
                 {
-                    return audio.m_Type switch
+                    return audio.Type switch
                     {
-                        FMODSoundType.AIFF or FMODSoundType.IT or FMODSoundType.MOD or FMODSoundType.S3M or FMODSoundType.XM or FMODSoundType.XMA or FMODSoundType.AUDIOQUEUE => true,
+                        AudioType.AIFF or AudioType.IT or AudioType.MOD or AudioType.S3M or AudioType.XM or AudioType.XMA or AudioType.AUDIOQUEUE => true,
                         _ => false,
                     };
                 }
                 else
                 {
-                    return audio.m_CompressionFormat switch
+                    return audio.CompressionFormat switch
                     {
                         AudioCompressionFormat.PCM or AudioCompressionFormat.Vorbis or AudioCompressionFormat.ADPCM or AudioCompressionFormat.MP3 or AudioCompressionFormat.XMA => true,
                         _ => false,

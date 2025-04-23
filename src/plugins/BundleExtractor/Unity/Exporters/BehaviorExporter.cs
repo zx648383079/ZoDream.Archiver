@@ -3,20 +3,19 @@ using System.Text.Json;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Exporters.Cecil;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class BehaviorExporter(MonoBehavior behavior) : IBundleExporter
+    internal class BehaviorExporter(MonoBehaviour behavior) : IBundleExporter
     {
         public string Name => behavior.Name;
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (behavior.m_Script is null || !behavior.m_Script.TryGet(out var script))
+            if (behavior.Script is null || !behavior.Script.TryGet(out var script))
             {
                 return;
             }
@@ -24,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            switch (script.m_ClassName)
+            switch (script.ClassName)
             {
                 case "CubismMoc":
                     new CubismExporter(behavior).SaveAs(fileName, mode);

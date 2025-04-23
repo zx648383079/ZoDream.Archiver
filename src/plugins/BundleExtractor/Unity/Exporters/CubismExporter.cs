@@ -1,5 +1,5 @@
 ﻿using System.Collections.Specialized;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -7,7 +7,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class CubismExporter(MonoBehavior behavior) : IBundleExporter
+    internal class CubismExporter(MonoBehaviour behavior) : IBundleExporter
     {
         public string Name => behavior.Name;
 
@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
         }
 
-        public static OrderedDictionary ParseMonoBehavior(MonoBehavior m_MonoBehaviour,
+        public static OrderedDictionary ParseMonoBehavior(MonoBehaviour m_MonoBehaviour,
             CubismMonoBehaviorType cubismMonoBehaviorType,
             AssemblyLoader assemblyLoader)
         {
@@ -77,8 +77,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             if (m_Type.Nodes.FindIndex(x => x.Name.Equals(fieldName, System.StringComparison.CurrentCultureIgnoreCase)) < 0)
             {
-                m_MonoBehaviour.m_Script.TryGet(out var m_MonoScript);
-                var assetName = m_MonoBehaviour.m_Name != "" ? m_MonoBehaviour.m_Name : m_MonoScript.m_ClassName;
+                m_MonoBehaviour.Script.TryGet(out var m_MonoScript);
+                var assetName = m_MonoBehaviour.Name != "" ? m_MonoBehaviour.Name : m_MonoScript.ClassName;
                 return null;
             }
             orderedDict = m_MonoBehaviour.ToType(m_Type);

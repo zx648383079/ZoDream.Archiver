@@ -1,5 +1,5 @@
 ﻿using System;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters

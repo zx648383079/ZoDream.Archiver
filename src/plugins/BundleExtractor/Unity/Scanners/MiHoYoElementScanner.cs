@@ -2,10 +2,9 @@
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using UnityEngine;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -121,7 +120,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 CreateInstance2(reader, sm);
                 return true;
             }
-            if (instance is UIRenderer r)
+            if (instance is Renderer r)
             {
                 CreateInstance(reader, r);
                 return true;
@@ -163,25 +162,25 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader,
            Clip instance)
         {
-            var version = reader.Get<UnityVersion>();
-            instance.m_StreamedClip = new StreamedClip(reader);
-            instance.m_DenseClip = new();
-            TryRead(reader, instance.m_DenseClip);
+            var version = reader.Get<Version>();
+            instance.StreamedClip = new StreamedClip(reader);
+            instance.DenseClip = new();
+            TryRead(reader, instance.DenseClip);
             if (IsSRGroup)
             {
-                instance.m_ACLClip = CreateACLClip(reader);
+                instance.ACLClip = CreateACLClip(reader);
             }
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                instance.m_ConstantClip = new ConstantClip(reader);
+                instance.ConstantClip = new ConstantClip(reader);
             }
             if (IsGIGroup || IsBH3Group || IsZZZCB1)
             {
-                instance.m_ACLClip = CreateACLClip(reader);
+                instance.ACLClip = CreateACLClip(reader);
             }
             if (version.LessThan(2018, 3)) //2018.3 down
             {
-                instance.m_Binding = new ValueArrayConstant(reader);
+                instance.Binding = new ValueArrayConstant(reader);
             }
         }
 
@@ -302,27 +301,27 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
             if (hasStreamingInfo)
             {
-                instance.m_StreamData = new StreamingInfo(reader);
-                if (!string.IsNullOrEmpty(instance.m_StreamData?.path))
+                instance.StreamData = new StreamingInfo(reader);
+                if (!string.IsNullOrEmpty(instance.StreamData?.path))
                 {
-                    var aclClip = instance.m_MuscleClip.m_Clip.m_ACLClip as GIACLClip;
+                    var aclClip = instance.MuscleClip.m_Clip.m_ACLClip as GIACLClip;
 
                     var res = ((UIReader)reader).OpenResource(instance.m_StreamData);
                     using var ms = new MemoryStream();
-                    ms.Write(aclClip.m_DatabaseData);
+                    ms.Write(aclClip.DatabaseData);
 
                     //ms.Write(res.GetData());
                     res.CopyTo(ms);
                     //ms.AlignStream();
 
-                    aclClip.m_DatabaseData = ms.ToArray();
+                    aclClip.DatabaseData = ms.ToArray();
                 }
             }
         }
         private void CreateInstance(IBundleBinaryReader reader,
             Animator instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             instance.ReadBase(reader, () => {
                 if (IsGISubGroup)
                 {
@@ -344,15 +343,15 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader,
             SerializedSubProgram instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
 
-            instance.m_BlobIndex = reader.ReadUInt32();
+            instance.BlobIndex = reader.ReadUInt32();
             if (SerializedSubProgram.HasIsAdditionalBlob(reader.Get<SerializedType>()))
             {
                 var m_IsAdditionalBlob = reader.ReadBoolean();
                 reader.AlignStream();
             }
-            instance.m_Channels = new ParserBindChannels(reader);
+            instance.Channels = new ParserBindChannels(reader);
 
             if (version.GreaterThanOrEquals(2019) && version.LessThan(2021, 1) ||
                 SerializedSubProgram.HasGlobalLocalKeywordIndices(reader.Get<SerializedType>())) //2019 ~2021.1
@@ -364,26 +363,26 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             else
             {
-                instance.m_KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
+                instance.KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
                 if (version.GreaterThanOrEquals(2017)) //2017 and up
                 {
                     reader.AlignStream();
                 }
             }
 
-            instance.m_ShaderHardwareTier = reader.ReadSByte();
-            instance.m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+            instance.ShaderHardwareTier = reader.ReadSByte();
+            instance.GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
             reader.AlignStream();
 
-            if (IsGI && (instance.m_GpuProgramType == ShaderGpuProgramType.Unknown 
-                || !Enum.IsDefined(typeof(ShaderGpuProgramType), instance.m_GpuProgramType)))
+            if (IsGI && (instance.GpuProgramType == ShaderGpuProgramType.Unknown 
+                || !Enum.IsDefined(typeof(ShaderGpuProgramType), instance.GpuProgramType)))
             {
                 reader.Position -= 4;
                 var m_LocalKeywordIndices = reader.ReadArray(r => r.ReadUInt16());
                 reader.AlignStream();
 
-                instance.m_ShaderHardwareTier = reader.ReadSByte();
-                instance.m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+                instance.ShaderHardwareTier = reader.ReadSByte();
+                instance.GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
                 reader.AlignStream();
             }
             instance.ReadBase(reader);
@@ -391,7 +390,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader,
             Mesh instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             var hasVertexColorSkinning = Convert.ToHexString(reader.Get<SerializedType>().OldTypeHash) is "413A501B79022BF2DF389A82002FC81F";
             instance.ReadBase(reader, () => {
                 if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
@@ -613,40 +612,40 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 GICreateInstance(reader, instance);
                 return;
             }
-            var version = reader.Get<UnityVersion>();
-            instance.m_DeltaPose = new HumanPose(reader);
-            instance.m_StartX = reader.ReadXForm();
+            var version = reader.Get<Version>();
+            instance.DeltaPose = new HumanPose(reader);
+            instance.StartX = reader.ReadXForm();
             if (version.GreaterThanOrEquals(5, 5))//5.5 and up
             {
-                instance.m_StopX = reader.ReadXForm();
+                instance.StopX = reader.ReadXForm();
             }
-            instance.m_LeftFootStartX = reader.ReadXForm();
-            instance.m_RightFootStartX = reader.ReadXForm();
+            instance.LeftFootStartX = reader.ReadXForm();
+            instance.RightFootStartX = reader.ReadXForm();
             if (version.LessThan(5))//5.0 down
             {
-                instance.m_MotionStartX = reader.ReadXForm();
-                instance.m_MotionStopX = reader.ReadXForm();
+                instance.MotionStartX = reader.ReadXForm();
+                instance.MotionStopX = reader.ReadXForm();
             }
-            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : 
-                UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
-            instance.m_Clip = new Clip();
-            TryRead(reader, instance.m_Clip);
-            instance.m_StartTime = reader.ReadSingle();
-            instance.m_StopTime = reader.ReadSingle();
-            instance.m_OrientationOffsetY = reader.ReadSingle();
-            instance.m_Level = reader.ReadSingle();
-            instance.m_CycleOffset = reader.ReadSingle();
-            instance.m_AverageAngularSpeed = reader.ReadSingle();
+            instance.AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : 
+                reader.ReadVector4().AsVector3();//5.4 and up
+            instance.Clip = new Clip();
+            TryRead(reader, instance.Clip);
+            instance.StartTime = reader.ReadSingle();
+            instance.StopTime = reader.ReadSingle();
+            instance.OrientationOffsetY = reader.ReadSingle();
+            instance.Level = reader.ReadSingle();
+            instance.CycleOffset = reader.ReadSingle();
+            instance.AverageAngularSpeed = reader.ReadSingle();
 
             var hasShortIndexArray = Convert.ToHexString(reader.Get<SerializedType>().OldTypeHash)
                 is "E708B1872AE48FD688AC012DF4A7A178" or "055AA41C7639327940F8900103A10356";
             if (IsSR && hasShortIndexArray)
             {
-                instance.m_IndexArray = reader.ReadArray(r => (int)r.ReadInt16());
+                instance.IndexArray = reader.ReadArray(r => (int)r.ReadInt16());
             }
             else
             {
-                instance.m_IndexArray = reader.ReadArray(r => r.ReadInt32());
+                instance.IndexArray = reader.ReadArray(r => r.ReadInt32());
             }
             instance.ReadBase(reader);
         }
@@ -656,17 +655,17 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             instance.ReadBase2(reader);
             if (IsGIGroup)
             {
-                instance.m_RootBone = new PPtr<Transform>(reader);
-                instance.m_AABB = new AABB(reader);
-                instance.m_DirtyAABB = reader.ReadBoolean();
+                instance.RootBone = new PPtr<Transform>(reader);
+                instance.AABB = new AABB(reader);
+                instance.DirtyAABB = reader.ReadBoolean();
                 reader.AlignStream();
             }
         }
-        private void CreateInstance(IBundleBinaryReader reader, UIRenderer instance)
+        private void CreateInstance(IBundleBinaryReader reader, Renderer instance)
         {
             instance.ReadBase(reader);
             var isNewHeader = false;
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (version.Major < 5) //5.0 down
             {
                 var m_Enabled = reader.ReadBoolean();
@@ -800,10 +799,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 var m_ShaderLODDistanceRatio = reader.ReadSingle();
             }
             var m_MaterialsSize = reader.ReadInt32();
-            instance.m_Materials = [];
+            instance.Materials = [];
             for (int i = 0; i < m_MaterialsSize; i++)
             {
-                instance.m_Materials.Add(new PPtr<Material>(reader));
+                instance.Materials.Add(new PPtr<Material>(reader));
             }
 
             if (version.Major < 3) //3.0 down
@@ -814,11 +813,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 if (version.GreaterThanOrEquals(5, 5)) //5.5 and up
                 {
-                    instance.m_StaticBatchInfo = new StaticBatchInfo(reader);
+                    instance.StaticBatchInfo = new StaticBatchInfo(reader);
                 }
                 else
                 {
-                    instance.m_SubsetIndices = reader.ReadArray(r => r.ReadUInt32());
+                    instance.SubsetIndices = reader.ReadArray(r => r.ReadUInt32());
                 }
 
                 var m_StaticBatchRoot = new PPtr<Transform>(reader);
@@ -893,14 +892,14 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 var m_MipsStripped = reader.ReadInt32();
             }
-            instance.m_TextureFormat = (TextureFormat)reader.ReadInt32();
+            instance.TextureFormat = (TextureFormat)reader.ReadInt32();
             if (version.LessThan(5, 2)) //5.2 down
             {
-                instance.m_MipMap = reader.ReadBoolean();
+                instance.MipMap = reader.ReadBoolean();
             }
             else
             {
-                instance.m_MipCount = reader.ReadInt32();
+                instance.MipCount = reader.ReadInt32();
             }
             if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
             {
@@ -945,8 +944,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             var m_ImageCount = reader.ReadInt32();
             var m_TextureDimension = reader.ReadInt32();
-            instance.m_TextureSettings = new GLTextureSettings();
-            reader.Get<IBundleElementScanner>().TryRead(reader, instance.m_TextureSettings);
+            instance.TextureSettings = new GLTextureSettings();
+            reader.Get<IBundleElementScanner>().TryRead(reader, instance.TextureSettings);
             if (version.GreaterThanOrEquals(3)) //3.0 and up
             {
                 var m_LightmapFormat = reader.ReadInt32();

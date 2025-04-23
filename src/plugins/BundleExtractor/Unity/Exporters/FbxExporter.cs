@@ -165,7 +165,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             if (m_GameObject.Animation != null)
             {
-                foreach (var animation in m_GameObject.Animation.Animations)
+                foreach (var animation in m_GameObject.Animation.Clips)
                 {
                     if (animation.TryGet(out var animationClip))
                     {

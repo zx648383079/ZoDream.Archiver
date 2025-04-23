@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;

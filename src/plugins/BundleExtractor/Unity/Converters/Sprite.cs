@@ -59,7 +59,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
                 res.AtlasTags = reader.ReadArray(r => r.ReadAlignedString());
 
-                res.SpriteAtlas = serializer.Deserialize<PPtr<SpriteAtlas>>(reader);
+                res.SpriteAtlas = reader.ReadPPtr<SpriteAtlas>(serializer);
             }
 
             res.RD = serializer.Deserialize<SpriteRenderData>(reader);

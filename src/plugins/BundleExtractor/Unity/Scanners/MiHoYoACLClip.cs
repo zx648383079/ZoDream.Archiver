@@ -1,9 +1,9 @@
-﻿using ZoDream.BundleExtractor.Unity.UI;
+﻿using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal class MiHoYoACLClip : ACLClip, IElementLoader
+    internal class MiHoYoACLClip : ACLClip
     {
         public uint m_CurveCount;
         public uint m_ConstCurveCount;

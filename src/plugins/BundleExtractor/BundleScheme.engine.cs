@@ -1,6 +1,6 @@
 ﻿using System;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
+using UnityEngine;
 
 namespace ZoDream.BundleExtractor
 {
@@ -13,7 +13,7 @@ namespace ZoDream.BundleExtractor
 
         public static string FormatEntryType(int type)
         {
-            return Enum.GetName((ElementIDType)type);
+            return Enum.GetName((NativeClassID)type);
         }
     }
 }

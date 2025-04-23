@@ -1,14 +1,14 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ZoDream.BundleExtractor.Unity.UI;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class JsonExporter(UIObject data) : IBundleExporter
+    internal class JsonExporter(Object data) : IBundleExporter
     {
         private static readonly JsonSerializerOptions Options = new()
         {

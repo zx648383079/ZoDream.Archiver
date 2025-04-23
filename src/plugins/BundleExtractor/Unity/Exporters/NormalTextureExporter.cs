@@ -1,4 +1,5 @@
-﻿using ZoDream.BundleExtractor.Unity.UI;
+﻿using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Models;
@@ -14,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //{
             //    return;
             //}
-            using var s = texture.ToImage();
+            using var s = Texture2DConverter.ToImage(texture);
             if (s is null)
             {
                 return;

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using ZoDream.BundleExtractor.Models;
+using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -95,86 +94,86 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader,
            Clip instance)
         {
-            var version = reader.Get<UnityVersion>();
-            instance.m_StreamedClip = new StreamedClip(reader);
-            instance.m_DenseClip = new();
-            TryRead(reader, instance.m_DenseClip);
+            var version = reader.Get<Version>();
+            instance.StreamedClip = new StreamedClip(reader);
+            instance.DenseClip = new();
+            TryRead(reader, instance.DenseClip);
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
-                instance.m_ConstantClip = new ConstantClip(reader);
+                instance.ConstantClip = new ConstantClip(reader);
             }
             if (IsLoveAndDeepSpace)
             {
-                instance.m_ACLClip = new LnDACLClip();
-                instance.m_ACLClip.Read(reader);
+                instance.ACLClip = new LnDACLClip();
+                instance.ACLClip.Read(reader);
             }
             if (version.LessThan(2018, 3)) //2018.3 down
             {
-                instance.m_Binding = new ValueArrayConstant(reader);
+                instance.Binding = new ValueArrayConstant(reader);
             }
         }
         private void CreateInstance(IBundleBinaryReader reader, LayerConstant instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
 
-            instance.m_StateMachineIndex = reader.ReadUInt32();
-            instance.m_StateMachineMotionSetIndex = reader.ReadUInt32();
-            instance.m_BodyMask = new HumanPoseMask(reader);
-            instance.m_SkeletonMask = new SkeletonMask(reader);
+            instance.StateMachineIndex = reader.ReadUInt32();
+            instance.StateMachineMotionSetIndex = reader.ReadUInt32();
+            instance.BodyMask = new HumanPoseMask(reader);
+            instance.SkeletonMask = new SkeletonMask(reader);
             if (IsLoveAndDeepSpace)
             {
                 var m_GenericMask = new SkeletonMask(reader);
             }
-            instance.m_Binding = reader.ReadUInt32();
-            instance.m_LayerBlendingMode = reader.ReadInt32();
+            instance.Binding = reader.ReadUInt32();
+            instance.LayerBlendingMode = reader.ReadInt32();
             if (version.GreaterThanOrEquals(4, 2)) //4.2 and up
             {
-                instance.m_DefaultWeight = reader.ReadSingle();
+                instance.DefaultWeight = reader.ReadSingle();
             }
-            instance.m_IKPass = reader.ReadBoolean();
+            instance.IKPass = reader.ReadBoolean();
             if (version.GreaterThanOrEquals(4, 2)) //4.2 and up
             {
-                instance.m_SyncedLayerAffectsTiming = reader.ReadBoolean();
+                instance.SyncedLayerAffectsTiming = reader.ReadBoolean();
             }
             reader.AlignStream();
         }
         private void CreateInstance(IBundleBinaryReader reader, ClipMuscleConstant instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (IsLoveAndDeepSpace)
             {
-                instance.m_StartX = reader.ReadXForm();
+                instance.StartX = reader.ReadXForm();
                 if (version.GreaterThanOrEquals(5, 5))//5.5 and up
                 {
-                    instance.m_StopX = reader.ReadXForm();
+                    instance.StopX = reader.ReadXForm();
                 }
             }
             else
             {
-                instance.m_DeltaPose = new HumanPose(reader);
-                instance.m_StartX = reader.ReadXForm();
+                instance.DeltaPose = new HumanPose(reader);
+                instance.StartX = reader.ReadXForm();
                 if (version.GreaterThanOrEquals(5, 5))//5.5 and up
                 {
-                    instance.m_StopX = reader.ReadXForm();
+                    instance.StopX = reader.ReadXForm();
                 }
-                instance.m_LeftFootStartX = reader.ReadXForm();
-                instance.m_RightFootStartX = reader.ReadXForm();
+                instance.LeftFootStartX = reader.ReadXForm();
+                instance.RightFootStartX = reader.ReadXForm();
                 if (version.LessThan(5))//5.0 down
                 {
-                    instance.m_MotionStartX = reader.ReadXForm();
-                    instance.m_MotionStopX = reader.ReadXForm();
+                    instance.MotionStartX = reader.ReadXForm();
+                    instance.MotionStopX = reader.ReadXForm();
                 }
             }
-            instance.m_AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
-            instance.m_Clip = new Clip();
-            TryRead(reader, instance.m_Clip);
-            instance.m_StartTime = reader.ReadSingle();
-            instance.m_StopTime = reader.ReadSingle();
-            instance.m_OrientationOffsetY = reader.ReadSingle();
-            instance.m_Level = reader.ReadSingle();
-            instance.m_CycleOffset = reader.ReadSingle();
-            instance.m_AverageAngularSpeed = reader.ReadSingle();
-            instance.m_IndexArray = reader.ReadArray(r => r.ReadInt32());
+            instance.AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() : UnityReaderExtension.Parse(reader.ReadVector4());//5.4 and up
+            instance.Clip = new Clip();
+            TryRead(reader, instance.Clip);
+            instance.StartTime = reader.ReadSingle();
+            instance.StopTime = reader.ReadSingle();
+            instance.OrientationOffsetY = reader.ReadSingle();
+            instance.Level = reader.ReadSingle();
+            instance.CycleOffset = reader.ReadSingle();
+            instance.AverageAngularSpeed = reader.ReadSingle();
+            instance.IndexArray = reader.ReadArray(r => r.ReadInt32());
             instance.ReadBase(reader);
         }
         private void CreateInstance(IBundleBinaryReader reader, 
@@ -194,7 +193,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader, MeshBlendShape instance)
         {
             instance.ReadBase(reader);
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (!IsLoveAndDeepSpace && version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 reader.AlignStream();
@@ -297,7 +296,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader, BlendShapeData instance)
         {
             instance.ReadBase(reader);
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 if (IsLoveAndDeepSpace)
@@ -306,13 +305,13 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 }
 
                 int numChannels = reader.ReadInt32();
-                instance.channels = [];
+                instance.Channels = [];
                 for (int i = 0; i < numChannels; i++)
                 {
-                    instance.channels.Add(new MeshBlendShapeChannel(reader));
+                    instance.Channels.Add(new MeshBlendShapeChannel(reader));
                 }
 
-                instance.fullWeights = reader.ReadArray(r => r.ReadSingle());
+                instance.FullWeights = reader.ReadArray(r => r.ReadSingle());
                 if (IsLoveAndDeepSpace)
                 {
                     var varintVerticesSize = reader.ReadInt32();
@@ -326,19 +325,19 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                             var flags = value >> 0x1D;
                             var blendShapeVertex = new BlendShapeVertex
                             {
-                                index = index,
-                                vertex = (flags & 4) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
-                                normal = (flags & 2) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
-                                tangent = (flags & 1) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
+                                Index = index,
+                                Vertex = (flags & 4) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
+                                Normal = (flags & 2) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
+                                Tangent = (flags & 1) != 0 ? reader.ReadVector3Or4() : Vector3.Zero,
                             };
-                            instance.vertices.Add(blendShapeVertex);
+                            instance.Vertices.Add(blendShapeVertex);
                         }
                         reader.AlignStream();
 
-                        var stride = (uint)(varintVerticesSize / instance.vertices.Count);
-                        foreach (var shape in instance.shapes)
+                        var stride = (uint)(varintVerticesSize / instance.Vertices.Length);
+                        foreach (var shape in instance.Shapes)
                         {
-                            shape.firstVertex /= stride;
+                            shape.FirstVertex /= stride;
                         }
                     }
                 }
@@ -361,25 +360,25 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     m_OverrideKeywordAndStage.Add(new KeyValuePair<string, uint>(reader.ReadAlignedString(), reader.ReadUInt32()));
                 }
             }
-            instance.lighting = reader.ReadBoolean();
+            instance.Lighting = reader.ReadBoolean();
             reader.AlignStream();
         }
         private void CreateInstance(IBundleBinaryReader reader, 
             SerializedSubProgram instance)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (IsLoveAndDeepSpace)
             {
                 var m_CodeHash = new Hash128(reader);
             }
 
-            instance.m_BlobIndex = reader.ReadUInt32();
+            instance.BlobIndex = reader.ReadUInt32();
             if (SerializedSubProgram.HasIsAdditionalBlob(reader.Get<SerializedType>()))
             {
                 var m_IsAdditionalBlob = reader.ReadBoolean();
                 reader.AlignStream();
             }
-            instance.m_Channels = new ParserBindChannels(reader);
+            instance.Channels = new ParserBindChannels(reader);
 
             if (version.GreaterThanOrEquals(2019) && version.LessThan(2021, 1) || 
                 SerializedSubProgram.HasGlobalLocalKeywordIndices(reader.Get<SerializedType>())) //2019 ~2021.1
@@ -391,15 +390,15 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             else
             {
-                instance.m_KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
+                instance.KeywordIndices = reader.ReadArray(r => r.ReadUInt16());
                 if (version.GreaterThanOrEquals(2017)) //2017 and up
                 {
                     reader.AlignStream();
                 }
             }
 
-            instance.m_ShaderHardwareTier = reader.ReadSByte();
-            instance.m_GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
+            instance.ShaderHardwareTier = reader.ReadSByte();
+            instance.GpuProgramType = (ShaderGpuProgramType)reader.ReadSByte();
             reader.AlignStream();
 
       
@@ -408,7 +407,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         private void CreateInstance(IBundleBinaryReader reader, Material instance)
         {
             instance.ReadBase(reader);
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             if (IsLoveAndDeepSpace || (IsShiningNikki && version.Major >= 2019))
             {
                 var m_MaterialType = reader.ReadUInt32();
@@ -430,7 +429,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 var disabledShaderPasses = reader.ReadArray(r => r.ReadString());
             }
 
-            instance.m_SavedProperties = new UnityPropertySheet(reader);
+            instance.SavedProperties = new PropertySheet(reader);
         }
     }
 }
