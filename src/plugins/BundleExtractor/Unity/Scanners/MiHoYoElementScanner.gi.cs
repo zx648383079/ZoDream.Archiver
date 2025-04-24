@@ -7,9 +7,9 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal sealed class MiHoYoHumanGoalConverter : BundleConverter<HumanGoal>
+    internal partial class MiHoYoElementScanner
     {
-        public override HumanGoal Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private HumanGoal ReadGIHumanGoal(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new HumanGoal
             {
@@ -25,11 +25,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var m_HintWeightR = reader.ReadSingle();
             return res;
         }
-    }
 
-    internal sealed class MiHoYoHandPoseConverter : BundleConverter<HandPose>
-    {
-        public override HandPose? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private HandPose ReadGIHandPose(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new HandPose
             {
@@ -42,11 +39,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             };
             return res;
         }
-    }
 
-    internal sealed class MiHoYoHumanPoseConverter : BundleConverter<HumanPose>
-    {
-        public override HumanPose? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private HumanPose ReadGIHumanPose(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new HumanPose();
             var version = reader.Get<Version>();
@@ -66,11 +60,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position += 4;
             return res;
         }
-    }
 
-    internal sealed class MiHoYoClipConverter : BundleConverter<Clip>
-    {
-        public override Clip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private Clip ReadGIClip(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var clipOffset = reader.Position + reader.ReadInt64();
             if (clipOffset > reader.Length)
@@ -91,11 +82,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position = pos;
             return res;
         }
-    }
-
-    internal sealed class MiHoYoStreamedClipConverter : BundleConverter<StreamedClip>
-    {
-        public override StreamedClip Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private StreamedClip ReadGIStreamedClip(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var streamedClipCount = (int)reader.ReadUInt64();
             var streamedClipOffset = reader.Position + reader.ReadInt64();
@@ -114,11 +101,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position = pos;
             return res;
         }
-    }
-
-    internal sealed class MiHoYoDenseClipConverter : BundleConverter<DenseClip>
-    {
-        public override DenseClip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+    
+        private DenseClip ReadGIDenseClip(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new DenseClip();
             res.FrameCount = reader.ReadInt32();
@@ -141,11 +125,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position = pos;
             return res;
         }
-    }
-
-    internal sealed class MiHoYoConstantClipConverter : BundleConverter<ConstantClip>
-    {
-        public override ConstantClip Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+    
+        private ConstantClip ReadGIConstantClip(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var constantClipCount = (int)reader.ReadUInt64();
             var constantClipOffset = reader.Position + reader.ReadInt64();
@@ -162,11 +143,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position = pos;
             return res;
         }
-    }
-
-    internal sealed class MiHoYoClipMuscleConstantConverter : BundleConverter<ClipMuscleConstant>
-    {
-        public override ClipMuscleConstant? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private ClipMuscleConstant ReadGIClipMuscleConstant(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new ClipMuscleConstant();
             var version = reader.Get<Version>();

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -108,9 +109,14 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             var swapEndian = SerializedFileHeader.HasEndian(_header.Version) ?
                 _header.Endian : _metadata.SwapEndian;
-            return new BundleBinaryReader(
+            var reader = new BundleBinaryReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
                 swapEndian ? EndianType.BigEndian : EndianType.LittleEndian);
+            reader.Add(this);
+            reader.Add(info);
+            reader.Add(Version);
+            reader.Add(Platform);
+            return reader;
         }
 
         private static void CombineFormats(FormatVersion generation, SerializedFileMetadata origin)

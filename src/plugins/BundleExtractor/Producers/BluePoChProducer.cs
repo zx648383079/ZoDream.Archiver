@@ -6,9 +6,9 @@ namespace ZoDream.BundleExtractor.Producers
     public class BluePoChProducer : IBundleProducer
     {
         public string AliasName => "BLUEPOCH";
-    
 
-        public IBundleElementScanner GetScanner(IBundleOptions options)
+
+        public IBundleSerializer GetSerializer(IBundleOptions options)
         {
             return new BluePoChElementScanner(options.Package ?? string.Empty);
         }

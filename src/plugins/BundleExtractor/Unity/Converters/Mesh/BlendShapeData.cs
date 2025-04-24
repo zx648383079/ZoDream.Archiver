@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public static bool HasVarintVertices(SerializedType type) => Convert.ToHexString(type.OldTypeHash) == "70AE601CDF0C273E745D9EC1333426A4";
 
-        public void ReadBase(BlendShapeData res, IBundleBinaryReader reader, 
+        public static void ReadBase(BlendShapeData res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
@@ -26,6 +26,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 reader.AlignStream();
                 res.Vertices = reader.ReadArray<BlendShapeVertex>(serializer); //MeshBlendShapeVertex
             }
+            cb.Invoke();
         }
 
         public override BlendShapeData? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)

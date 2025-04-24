@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
@@ -9,50 +10,181 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal sealed class TuanJieClipMuscleConstantConverter : ClipMuscleConstantConverter
+
+    internal partial class TuanJieElementScanner : BundleConverter
     {
-        public override ClipMuscleConstant? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private readonly Type[] _includeItems = [
+            typeof(Mesh), typeof(ClipMuscleConstant), typeof(ConstantBuffer),
+            typeof(MatrixParameter), typeof(VectorParameter), typeof(AnimationClip),
+            typeof(Texture2D), typeof(GameObject)
+        ];
+        public override bool CanConvert(Type objectType)
         {
-            var res = new ClipMuscleConstant();
-            var version = reader.Get<Version>();
-            res.DeltaPose = serializer.Deserialize<HumanPose>(reader);
-            res.StartX = reader.ReadXForm();
-            if (version.GreaterThanOrEquals(5, 5))//5.5 and up
-            {
-                res.StopX = reader.ReadXForm();
-            }
-            res.LeftFootStartX = reader.ReadXForm();
-            res.RightFootStartX = reader.ReadXForm();
-            if (version.LessThan(5))//5.0 down
-            {
-                res.MotionStartX = reader.ReadXForm();
-                res.MotionStopX = reader.ReadXForm();
-            }
-            res.AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
-                reader.ReadVector4().AsVector3();//5.4 and up
-            res.Clip = serializer.Deserialize<Clip>(reader);
-            res.StartTime = reader.ReadSingle();
-            res.StopTime = reader.ReadSingle();
-            res.OrientationOffsetY = reader.ReadSingle();
-            res.Level = reader.ReadSingle();
-            res.CycleOffset = reader.ReadSingle();
-            res.AverageAngularSpeed = reader.ReadSingle();
+            return _includeItems.Contains(objectType);
+        }
 
-            // 1.4.2
-            reader.AlignStream();
+        public override object? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        {
+            if (objectType == typeof(Mesh))
+            {
+                return ReadMesh(reader, serializer);
+            }
+            if (objectType == typeof(ClipMuscleConstant))
+            {
+                return ReadClipMuscleConstant(reader, serializer);
+            }
+            if (objectType == typeof(ConstantBuffer))
+            {
+                return ReadConstantBuffer(reader, serializer);
+            }
+            if (objectType == typeof(MatrixParameter))
+            {
+                return ReadMatrixParameter(reader, serializer);
+            }
+            if (objectType == typeof(VectorParameter))
+            {
+                return ReadVectorParameter(reader, serializer);
+            }
+            if (objectType == typeof(AnimationClip))
+            {
+                return ReadAnimationClip(reader, serializer);
+            }
+            if (objectType == typeof(Texture2D))
+            {
+                return ReadTexture2D(reader, serializer);
+            }
+            if (objectType == typeof(GameObject))
+            {
+                return ReadGameObject(reader, serializer);
+            }
+            return null;
+        }
 
-            res.IndexArray = reader.ReadArray(r => r.ReadInt32());
-            ReadBase(res, reader, serializer, () => { });
+        private GameObject ReadGameObject(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new GameObject();
+            GameObjectConverter.ReadBase(res, reader, serializer, () => {
+                var version = reader.Get<Version>();
+                if (version.Build >= 13)
+                {
+                    bool m_HasEditorInfo = reader.ReadBoolean();
+                    reader.AlignStream();
+                }
+            });
             return res;
         }
-    }
 
-    internal sealed class TuanJieAnimationClipConverter : AnimationClipConverter
-    {
-        public override AnimationClip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        private Texture2D ReadTexture2D(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new Texture2D();
+            UnityConverter.ReadTexture(res, reader, serializer);
+            var version = reader.Get<Version>();
+            res.Width = reader.ReadInt32();
+            res.Height = reader.ReadInt32();
+            var m_CompleteImageSize = reader.ReadInt32();
+            if (version.GreaterThanOrEquals(2020)) //2020.1 and up
+            {
+                var m_MipsStripped = reader.ReadInt32();
+            }
+            // ADD
+            var m_WebStreaming = reader.ReadBoolean();
+            reader.AlignStream();
+
+            var m_PriorityLevel = reader.ReadInt32();
+            var m_UploadedMode = reader.ReadInt32();
+            var m_DataStreamData_size = reader.ReadUInt32();
+            var m_DataStreamData_path = reader.ReadAlignedString();
+            // res.DataStreamData = new DataStreamingInfo(reader);
+
+            res.TextureFormat = (TextureFormat)reader.ReadInt32();
+            if (version.LessThan(5, 2)) //5.2 down
+            {
+                res.MipMap = reader.ReadBoolean();
+            }
+            else
+            {
+                res.MipCount = reader.ReadInt32();
+            }
+            if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
+            {
+                var m_IsReadable = reader.ReadBoolean();
+
+            }
+            if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
+            {
+                var m_IsPreProcessed = reader.ReadBoolean();
+            }
+            if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up
+            {
+                var m_IgnoreMasterTextureLimit = reader.ReadBoolean();
+            }
+            if (version.GreaterThanOrEquals(2022, 2)) //2022.2 and up
+            {
+                reader.AlignStream(); //m_IgnoreMipmapLimit
+                var m_MipmapLimitGroupName = reader.ReadAlignedString();
+            }
+            if (version.GreaterThanOrEquals(3)) //3.0.0 - 5.4
+            {
+                if (version.LessThanOrEquals(5, 4))
+                {
+                    var m_ReadAllowed = reader.ReadBoolean();
+                }
+            }
+            if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
+            {
+                var m_StreamingMipmaps = reader.ReadBoolean();
+            }
+            reader.AlignStream();
+            if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
+            {
+                var m_StreamingMipmapsPriority = reader.ReadInt32();
+            }
+            var m_ImageCount = reader.ReadInt32();
+            var m_TextureDimension = reader.ReadInt32();
+            res.TextureSettings = serializer.Deserialize<GLTextureSettings>(reader);
+            if (version.GreaterThanOrEquals(3)) //3.0 and up
+            {
+                var m_LightmapFormat = reader.ReadInt32();
+            }
+            if (version.GreaterThanOrEquals(3, 5)) //3.5.0 and up
+            {
+                var m_ColorSpace = reader.ReadInt32();
+            }
+            if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
+            {
+                var m_PlatformBlob = reader.ReadArray(r => r.ReadByte());
+                reader.AlignStream();
+            }
+            var imageDataSize = reader.ReadInt32();
+            if (imageDataSize == 0)//5.3.0 and up
+            {
+                res.StreamData = serializer.Deserialize<ResourceSource>(reader);
+            }
+
+            if (!string.IsNullOrEmpty(res.StreamData.Source))
+            {
+                var container = reader.Get<ISerializedFile>();
+                if (reader.TryGet<IDependencyBuilder>(out var builder))
+                {
+                    var fileName = container.FullPath;
+                    var fileId = reader.Get<ObjectInfo>().FileID;
+                    builder.AddDependencyEntry(fileName,
+                        fileId,
+                        res.StreamData.Source);
+                }
+                res.ImageData = container.OpenResource(res.StreamData);
+            }
+            else
+            {
+                res.ImageData = new PartialStream(reader.BaseStream, imageDataSize);
+            }
+            return res;
+        }
+
+        private AnimationClip ReadAnimationClip(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new AnimationClip();
-            ReadBase(res, reader, serializer, () => {
+            AnimationClipConverter.ReadBase(res, reader, serializer, () => {
                 var version = reader.Get<Version>();
                 res.Compressed = reader.ReadBoolean();
                 if (version.GreaterThanOrEquals(4, 3))//4.3 and up
@@ -63,7 +195,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 res.RotationCurves = reader.ReadArray<QuaternionCurve>(serializer);
 
                 res.CompressedRotationCurves = reader.ReadArray<CompressedAnimationCurve>(serializer);
-  
+
 
                 res.EulerCurves = [];
                 res.PositionCurves = [];
@@ -95,14 +227,74 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             });
             return res;
         }
-    }
-    internal sealed class TuanJieMeshConverter : MeshConverter
-    {
-        public override Mesh? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+
+        private VectorParameter ReadVectorParameter(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new VectorParameter();
+            VectorParameterConverter.ReadBase(ref res, reader, serializer, () => {
+                var m_IndexInCB = reader.ReadInt32();
+            });
+            return res;
+        }
+
+        private MatrixParameter ReadMatrixParameter(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new MatrixParameter();
+            MatrixParameterConverter.ReadBase(ref res, reader, serializer, () => {
+                var m_IndexInCB = reader.ReadInt32();
+            });
+            return res;
+        }
+
+        private ConstantBuffer ReadConstantBuffer(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new ConstantBuffer();
+            ConstantBufferConverter.ReadBase(ref res, reader, serializer, () => {
+                var m_totalParameterCount = reader.ReadInt32();
+            });
+            return res;
+        }
+
+        private ClipMuscleConstant ReadClipMuscleConstant(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new ClipMuscleConstant();
+            var version = reader.Get<Version>();
+            res.DeltaPose = serializer.Deserialize<HumanPose>(reader);
+            res.StartX = reader.ReadXForm();
+            if (version.GreaterThanOrEquals(5, 5))//5.5 and up
+            {
+                res.StopX = reader.ReadXForm();
+            }
+            res.LeftFootStartX = reader.ReadXForm();
+            res.RightFootStartX = reader.ReadXForm();
+            if (version.LessThan(5))//5.0 down
+            {
+                res.MotionStartX = reader.ReadXForm();
+                res.MotionStopX = reader.ReadXForm();
+            }
+            res.AverageSpeed = version.GreaterThanOrEquals(5, 4) ? reader.ReadVector3Or4() :
+                reader.ReadVector4().AsVector3();//5.4 and up
+            res.Clip = serializer.Deserialize<Clip>(reader);
+            res.StartTime = reader.ReadSingle();
+            res.StopTime = reader.ReadSingle();
+            res.OrientationOffsetY = reader.ReadSingle();
+            res.Level = reader.ReadSingle();
+            res.CycleOffset = reader.ReadSingle();
+            res.AverageAngularSpeed = reader.ReadSingle();
+
+            // 1.4.2
+            reader.AlignStream();
+
+            res.IndexArray = reader.ReadArray(r => r.ReadInt32());
+            ClipMuscleConstantConverter.ReadBase(res, reader, serializer, () => { });
+            return res;
+        }
+
+        private Mesh ReadMesh(IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             var res = new Mesh();
             var version = reader.Get<Version>();
-            ReadBase(res, reader, serializer, () => {
+            MeshConverter.ReadBase(res, reader, serializer, () => {
                 var m_MeshCompression = 0;
                 if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
                 {
@@ -142,7 +334,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         reader.ReadArray<VGPackedHierarchyNode>(serializer);
                         var HierarchyRootOffsets = reader.ReadArray(_ => reader.ReadUInt32());
                         var PageStreamingStates = reader.ReadArray<VGPageStreamingState>(serializer);
-              
+
                         var PageDependencies = reader.ReadArray(_ => reader.ReadUInt32());
 
                     }
@@ -277,164 +469,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return res;
         }
     }
-    internal sealed class TuanJieMatrixParameterConverter : MatrixParameterConverter
-    {
-        public override MatrixParameter Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
-        {
-            var res = new MatrixParameter();
-            ReadBase(ref res, reader, serializer, () => {
-                var m_IndexInCB = reader.ReadInt32();
-            });
-            return res;
-        }
-    }
 
-    internal sealed class TuanJieConstantBufferConverter : ConstantBufferConverter
-    {
-        public override ConstantBuffer Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
-        {
-            var res = new ConstantBuffer();
-            ReadBase(ref res, reader, serializer, () => {
-                var m_totalParameterCount = reader.ReadInt32();
-            });
-            return res;
-        }
-    }
-    internal sealed class TuanJieVectorParameterConverter : VectorParameterConverter
-    {
-        public override VectorParameter Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
-        {
-            var res = new VectorParameter();
-            ReadBase(ref res, reader, serializer, () => {
-                var m_IndexInCB = reader.ReadInt32();
-            });
-            return res;
-        }
-    }
-    internal sealed class TuanJieTexture2DConverter : BundleConverter<Texture2D>
-    {
-        public override Texture2D? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
-        {
-            var res = new Texture2D();
-            UnityConverter.ReadTexture(res, reader, serializer);
-            var version = reader.Get<Version>();
-            res.Width = reader.ReadInt32();
-            res.Height = reader.ReadInt32();
-            var m_CompleteImageSize = reader.ReadInt32();
-            if (version.GreaterThanOrEquals(2020)) //2020.1 and up
-            {
-                var m_MipsStripped = reader.ReadInt32();
-            }
-            // ADD
-            var m_WebStreaming = reader.ReadBoolean();
-            reader.AlignStream();
-
-            var m_PriorityLevel = reader.ReadInt32();
-            var m_UploadedMode = reader.ReadInt32();
-            var m_DataStreamData_size = reader.ReadUInt32();
-            var m_DataStreamData_path = reader.ReadAlignedString();
-            // res.DataStreamData = new DataStreamingInfo(reader);
-
-            res.TextureFormat = (TextureFormat)reader.ReadInt32();
-            if (version.LessThan(5, 2)) //5.2 down
-            {
-                res.MipMap = reader.ReadBoolean();
-            }
-            else
-            {
-                res.MipCount = reader.ReadInt32();
-            }
-            if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and up
-            {
-                var m_IsReadable = reader.ReadBoolean();
-
-            }
-            if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
-            {
-                var m_IsPreProcessed = reader.ReadBoolean();
-            }
-            if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up
-            {
-                var m_IgnoreMasterTextureLimit = reader.ReadBoolean();
-            }
-            if (version.GreaterThanOrEquals(2022, 2)) //2022.2 and up
-            {
-                reader.AlignStream(); //m_IgnoreMipmapLimit
-                var m_MipmapLimitGroupName = reader.ReadAlignedString();
-            }
-            if (version.GreaterThanOrEquals(3)) //3.0.0 - 5.4
-            {
-                if (version.LessThanOrEquals(5, 4))
-                {
-                    var m_ReadAllowed = reader.ReadBoolean();
-                }
-            }
-            if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
-            {
-                var m_StreamingMipmaps = reader.ReadBoolean();
-            }
-            reader.AlignStream();
-            if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
-            {
-                var m_StreamingMipmapsPriority = reader.ReadInt32();
-            }
-            var m_ImageCount = reader.ReadInt32();
-            var m_TextureDimension = reader.ReadInt32();
-            res.TextureSettings = serializer.Deserialize<GLTextureSettings>(reader);
-            if (version.GreaterThanOrEquals(3)) //3.0 and up
-            {
-                var m_LightmapFormat = reader.ReadInt32();
-            }
-            if (version.GreaterThanOrEquals(3, 5)) //3.5.0 and up
-            {
-                var m_ColorSpace = reader.ReadInt32();
-            }
-            if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
-            {
-                var m_PlatformBlob = reader.ReadArray(r => r.ReadByte());
-                reader.AlignStream();
-            }
-            var imageDataSize = reader.ReadInt32();
-            if (imageDataSize == 0)//5.3.0 and up
-            {
-                res.StreamData = serializer.Deserialize<ResourceSource>(reader);
-            }
-
-            if (!string.IsNullOrEmpty(res.StreamData.Source))
-            {
-                var container = reader.Get<ISerializedFile>();
-                if (reader.TryGet<IDependencyBuilder>(out var builder))
-                {
-                    var fileName = container.FullPath;
-                    var fileId = reader.Get<ObjectInfo>().FileID;
-                    builder.AddDependencyEntry(fileName,
-                        fileId,
-                        res.StreamData.Source);
-                }
-                res.ImageData = container.OpenResource(res.StreamData);
-            }
-            else
-            {
-                res.ImageData = new PartialStream(reader.BaseStream, imageDataSize);
-            }
-            return res;
-        }
-    }
-    internal sealed class TuanJieGameObjectConverter : GameObjectConverter
-    {
-        public override GameObject? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
-        {
-            var res = new GameObject();
-            ReadBase(res, reader, serializer, () => {
-                var version = reader.Get<Version>();
-                if (version.Build >= 13)
-                {
-                    bool m_HasEditorInfo = reader.ReadBoolean();
-                    reader.AlignStream();
-                }
-            });
-            return res;
-        }
-    }
 
 }

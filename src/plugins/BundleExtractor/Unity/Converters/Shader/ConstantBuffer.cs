@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(ref ConstantBuffer res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(ref ConstantBuffer res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
 

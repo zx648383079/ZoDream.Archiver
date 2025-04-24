@@ -4,7 +4,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class BluePoChElementScanner(string package) : IBundleElementScanner, IBundleStorage
+    internal partial class BluePoChElementScanner(string package) : IBundleStorage
     {
         public bool IsReverse1999 => package.Contains("re1999");
 
@@ -23,14 +23,5 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
-        public bool TryRead(IBundleBinaryReader reader, object instance)
-        {
-            if (instance is IElementLoader l)
-            {
-                l.Read(reader);
-                return true;
-            }
-            return false;
-        }
     }
 }

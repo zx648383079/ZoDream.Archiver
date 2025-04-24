@@ -4,7 +4,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class CiPaiBundleElementScanner(string package) : IBundleElementScanner, IBundleStorage
+    internal partial class CiPaiBundleElementScanner(string package) : IBundleStorage
     {
 
         public bool IsPerpetualNovelty => package.Contains("wh");
@@ -28,14 +28,5 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
-        public bool TryRead(IBundleBinaryReader reader, object instance)
-        {
-            if (instance is IElementLoader l)
-            {
-                l.Read(reader);
-                return true;
-            }
-            return false;
-        }
     }
 }

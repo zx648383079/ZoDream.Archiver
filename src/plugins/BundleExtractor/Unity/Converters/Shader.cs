@@ -11,7 +11,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 {
     internal class ShaderConverter : BundleConverter<Shader>, IBundleExporter
     {
-        public void ReadBase(Shader res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(Shader res, IBundleBinaryReader reader, 
+            IBundleSerializer serializer, Action cb)
         {
             var target = reader.Get<BuildTarget>();
             var version = reader.Get<Version>();
@@ -51,7 +52,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_DependenciesCount = reader.ReadInt32();
                 for (int i = 0; i < m_DependenciesCount; i++)
                 {
-                    _ = serializer.Deserialize<PPtr<Shader>>(reader);
+                    _ = reader.ReadPPtr<Shader>(serializer);
                 }
 
                 if (version.GreaterThanOrEquals(2018))
@@ -60,7 +61,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     for (int i = 0; i < m_NonModifiableTexturesCount; i++)
                     {
                         var first = reader.ReadAlignedString();
-                        serializer.Deserialize<PPtr<Texture>>(reader);
+                        reader.ReadPPtr<Texture>(serializer);
                     }
                 }
 

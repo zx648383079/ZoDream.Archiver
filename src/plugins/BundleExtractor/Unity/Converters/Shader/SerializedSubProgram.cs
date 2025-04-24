@@ -29,7 +29,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 _ => false
             };
         }
-        public static bool HasIsAdditionalBlob(SerializedType type) => Convert.ToHexString(type.OldTypeHash) == "B239746E4EC6E4D6D7BA27C84178610A";
+        public static bool HasIsAdditionalBlob(SerializedType type) 
+            => Convert.ToHexString(type.OldTypeHash) == "B239746E4EC6E4D6D7BA27C84178610A";
 
         public override SerializedSubProgram? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -66,7 +67,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             ReadBase(res, reader, serializer, () => { });
             return res;
         }
-        public void ReadBase(SerializedSubProgram res, IBundleBinaryReader reader, 
+        public static void ReadBase(SerializedSubProgram res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
@@ -107,6 +108,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 var m_InstancedStructuredBuffers = reader.ReadArray(_ => serializer.Deserialize<ConstantBuffer>(reader));
             }
+            cb.Invoke();
         }
     }
 

@@ -1,12 +1,10 @@
 ﻿using System.IO;
-using ZoDream.BundleExtractor.Unity.UI;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class TuanJieElementScanner(string package, IBundleOptions options) : 
-        IBundleElementScanner, IBundleStorage,
+    internal partial class TuanJieElementScanner(string package, IBundleOptions options) : IBundleStorage,
         IBundleCodec
     {
         public bool IsFakeHeader => package.Contains("fake");
@@ -31,54 +29,5 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
-        public bool TryRead(IBundleBinaryReader reader, object instance)
-        {
-            if (instance is Mesh m)
-            {
-                CreateInstance(reader, m);
-                return true;
-            }
-            if (instance is ClipMuscleConstant cc)
-            {
-                CreateInstance(reader, cc);
-                return true;
-            }
-            if (instance is ConstantBuffer cb)
-            {
-                CreateInstance(reader, cb);
-                return true;
-            }
-            if (instance is MatrixParameter mp)
-            {
-                CreateInstance(reader, mp);
-                return true;
-            }
-            if (instance is VectorParameter vp)
-            {
-                CreateInstance(reader, vp);
-                return true;
-            }
-            if (instance is AnimationClip ac)
-            {
-                CreateInstance(reader, ac);
-                return true;
-            }
-            if (instance is Texture2D t)
-            {
-                CreateInstance(reader, t);
-                return true;
-            }
-            if (instance is GameObject g)
-            {
-                CreateInstance(reader, g);
-                return true;
-            }
-            if (instance is IElementLoader l)
-            {
-                l.Read(reader);
-                return true;
-            }
-            return false;
-        }
     }
 }

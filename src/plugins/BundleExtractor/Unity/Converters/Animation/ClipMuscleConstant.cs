@@ -9,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     internal class ClipMuscleConstantConverter : BundleConverter<ClipMuscleConstant>
     {
 
-        public void ReadBase(ClipMuscleConstant res, IBundleBinaryReader reader, 
+        public static void ReadBase(ClipMuscleConstant res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
@@ -41,6 +41,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.KeepOriginalPositionXZ = reader.ReadBoolean();
             res.HeightFromFeet = reader.ReadBoolean();
             reader.AlignStream();
+            cb.Invoke();
         }
 
         public override ClipMuscleConstant? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)

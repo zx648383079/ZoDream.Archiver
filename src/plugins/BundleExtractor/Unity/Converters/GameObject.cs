@@ -5,12 +5,11 @@ using System.Linq;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Models;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal class GameObjectConverter : BundleConverter<GameObject>, IBundleExporter
+    internal class GameObjectConverter : BundleConverter<GameObject>
     {
         public override GameObject? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -19,7 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(GameObject res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(GameObject res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             var target = reader.Get<BuildTarget>();
             var version = reader.Get<Version>();
@@ -34,7 +33,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 {
                     int first = reader.ReadInt32();
                 }
-                return serializer.Deserialize<PPtr<Component>>(reader);
+                return reader.ReadPPtr<Component>(serializer);
             });
 
             var m_Layer = reader.ReadInt32();
@@ -60,19 +59,19 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 m_Transform.GameObject.TryGet(out var m_GameObject);
 
-                if (m_GameObject.m_MeshRenderer != null)
+                if (m_GameObject.MeshRenderer != null)
                 {
-                    var mesh = GetMesh(m_GameObject.m_MeshRenderer);
+                    var mesh = GetMesh(m_GameObject.MeshRenderer);
                     meshes.Add(mesh != null);
                 }
 
-                if (m_GameObject.m_SkinnedMeshRenderer != null)
+                if (m_GameObject.SkinnedMeshRenderer != null)
                 {
-                    var mesh = GetMesh(m_GameObject.m_SkinnedMeshRenderer);
+                    var mesh = GetMesh(m_GameObject.SkinnedMeshRenderer);
                     meshes.Add(mesh != null);
                 }
 
-                foreach (var pptr in m_Transform.m_Children)
+                foreach (var pptr in m_Transform.Children)
                 {
                     if (pptr.TryGet(out var child))
                     {
@@ -101,9 +100,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             else
             {
                 if (meshR.GameObject.TryGet(out var m_GameObject) && 
-                    m_GameObject.m_MeshFilter != null)
+                    m_GameObject.MeshFilter != null)
                 {
-                    if (m_GameObject.m_MeshFilter.m_Mesh.TryGet(out var m_Mesh))
+                    if (m_GameObject.MeshFilter.Mesh.TryGet(out var m_Mesh))
                     {
                         return m_Mesh;
                     }
@@ -111,10 +110,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
 
             return null;
-        }
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
-        {
-            // TODO fbx
         }
     }
 }

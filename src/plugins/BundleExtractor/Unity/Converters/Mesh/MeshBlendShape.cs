@@ -7,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 {
     internal class MeshBlendShapeConverter : BundleConverter<MeshBlendShape>
     {
-        public void ReadBase(ref MeshBlendShape res, IBundleBinaryReader reader, 
+        public static void ReadBase(ref MeshBlendShape res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
@@ -25,6 +25,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             res.HasNormals = reader.ReadBoolean();
             res.HasTangents = reader.ReadBoolean();
+            cb.Invoke();
         }
 
         public override MeshBlendShape Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)

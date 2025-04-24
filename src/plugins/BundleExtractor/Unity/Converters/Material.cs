@@ -8,7 +8,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 {
     internal sealed class MaterialConverter : BundleConverter<Material>
     {
-        public void ReadBase(Material res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(Material res, IBundleBinaryReader reader, 
+            IBundleSerializer serializer, Action cb)
         {
             var target = reader.Get<BuildTarget>();
             var version = reader.Get<Version>();
@@ -19,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
             res.Name = reader.ReadAlignedString();
-            res.Shader = serializer.Deserialize<PPtr<Shader>>(reader);
+            res.Shader = reader.ReadPPtr<Shader>(serializer);
 
             if (version.Major == 4 && version.Minor >= 1) //4.x
             {
@@ -51,6 +52,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 var m_CustomRenderQueue = reader.ReadInt32();
             }
+            cb.Invoke();
         }
 
         public override Material? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)

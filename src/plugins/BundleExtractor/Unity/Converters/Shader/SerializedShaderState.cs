@@ -15,7 +15,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             reader.AlignStream();
             return res;
         }
-        public void ReadBase(SerializedShaderState res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(SerializedShaderState res, IBundleBinaryReader reader, 
+            IBundleSerializer serializer, Action cb)
         {
             var version = reader.Get<Version>();
 
@@ -52,7 +53,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.GpuProgramID = reader.ReadInt32();
             res.Tags = serializer.Deserialize<SerializedTagMap>(reader);
             res.LOD = reader.ReadInt32();
-            
+            cb.Invoke();
         }
     }
 

@@ -117,13 +117,6 @@ namespace ZoDream.BundleExtractor
                     try
                     {
                         var reader = asset.OpenRead(obj);
-                        reader.Add(asset);
-                        reader.Add(obj);
-                        //reader.Add(serializer);
-                        //if (obj.FileID == 421139779080335220)
-                        //{
-                        //    reader.BaseStream.SaveAs("F:\\apk\\zmxs\\pose.bin");
-                        //}
                         var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
                         var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
                         object? res = null;
@@ -212,8 +205,6 @@ namespace ZoDream.BundleExtractor
         {
             var serializer = _service.Get<IBundleSerializer>();
             var reader = asset.OpenRead(obj);
-            reader.Add(asset);
-            reader.Add(obj);
             var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
             var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
             if (serializer.Converters.TryGet(targetType, out var cvt))

@@ -13,7 +13,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void ReadBase(ref MatrixParameter res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(ref MatrixParameter res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             res.NameIndex = reader.ReadInt32();
             res.Index = reader.ReadInt32();

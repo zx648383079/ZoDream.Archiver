@@ -23,7 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        protected void ReadBase(Animator res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
+        public static void ReadBase(Animator res, IBundleBinaryReader reader, IBundleSerializer serializer, Action cb)
         {
             var target = reader.Get<BuildTarget>();
             var version = reader.Get<Version>();
@@ -33,11 +33,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabParentObject = serializer.Deserialize<PPtr>(reader);
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
-            res.GameObject = serializer.Deserialize<PPtr<GameObject>>(reader);
+            res.GameObject = reader.ReadPPtr<GameObject>(serializer);
             res.IsEnabled = reader.ReadByte();
             reader.AlignStream();
-            res.Avatar = serializer.Deserialize<PPtr<Avatar>>(reader);
-            res.Controller = serializer.Deserialize<PPtr<RuntimeAnimatorController>>(reader);
+            res.Avatar = reader.ReadPPtr<Avatar>(serializer);
+            res.Controller = reader.ReadPPtr<RuntimeAnimatorController>(serializer);
             cb.Invoke();
             
 
