@@ -1,7 +1,7 @@
 ﻿
 namespace UnityEngine
 {
-    public struct StreamedCurveKey
+    public class StreamedCurveKey
     {
         public int Index;
         public float[] Coeff;
@@ -11,14 +11,14 @@ namespace UnityEngine
         public float InSlope;
     }
 
-    public struct StreamedFrame
+    public class StreamedFrame
     {
         public float Time;
         public StreamedCurveKey[] KeyList;
     }
-    public struct StreamedClip
+    public class StreamedClip
     {
-        public uint[] Data;
+        public StreamedFrame[] Data;
         public uint CurveCount;
 
     }

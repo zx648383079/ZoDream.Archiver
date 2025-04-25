@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
@@ -9,10 +8,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public bool IsEmpty { get; }
 
-        public void Append(GameObject obj);
-        public void Append(Mesh mesh);
-        public void Append(Animator animator);
-        public void Append(AnimationClip animator);
+        public void Append(int entryId);
 
     }
 }

@@ -15,7 +15,7 @@ using Version = UnityEngine.Version;
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
     
-    internal class MeshConverter : BundleConverter<Mesh>, IBundleExporter
+    internal class MeshConverter : BundleConverter<Mesh>
     {
         public override Mesh? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -731,7 +731,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
         }
 
-        public float[] GetUV(Mesh res, int uv)
+        public static float[] GetUV(Mesh res, int uv)
         {
             return uv switch
             {

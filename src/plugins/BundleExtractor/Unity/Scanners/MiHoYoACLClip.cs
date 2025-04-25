@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
@@ -20,9 +19,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             m_ClipData = [];
         }
 
-        public override void Read(IBundleBinaryReader reader)
-        {
-        }
     }
 
 }

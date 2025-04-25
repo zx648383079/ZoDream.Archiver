@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
+using ZoDream.BundleExtractor.Producers;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -89,21 +91,30 @@ namespace ZoDream.BundleExtractor
             // 从配置获取制作者
             var producer = scheme.Get<IBundleProducer>(options);
             var service = scheme.Service;
+            service.Add(UnknownProducer.CheckKey, producer is UnknownProducer || producer is null);
             if (producer is null)
             {
-                service.Add<IBundleElementScanner>(service.Get<BundleElementScanner>());
+                service.Add<IBundleSerializer>(service.Get<BundleSerializer>());
                 service.Add<IBundleStorage>(service.Get<BundleStorage>());
                 return;
             }
-            var instance = producer.GetScanner(options);
-            service.Add<IBundleElementScanner>(instance);
-            var storage = instance is IBundleStorage s ? s : producer.GetStorage(options);
-            service.Add<IBundleStorage>(storage);
-            service.Add<IBundleCodec>(storage is IBundleCodec codec ? codec : service.Get<BundleCodec>());
+            AddProducer(service, producer);
         }
 
         public void Dispose()
         {
+        }
+
+        internal static void AddProducer(IEntryService service, 
+            IBundleProducer producer)
+        {
+            var options = service.Get<IBundleOptions>();
+            var instance = producer.GetSerializer(options);
+            service.Add(instance);
+            var last = instance.Converters.Last();
+            var storage = last is IBundleStorage s ? s : producer.GetStorage(options);
+            service.Add(storage);
+            service.Add(storage is IBundleCodec codec ? codec : service.Get<BundleCodec>());
         }
     }
 }

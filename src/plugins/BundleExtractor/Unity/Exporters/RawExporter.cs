@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.IO;
 using UnityEngine;
+using ZoDream.LuaDecompiler;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -8,29 +9,41 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class RawExporter : IBundleExporter
+    internal class RawExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        
-        public RawExporter(TextAsset asset)
+        public string FileName => resource[entryId].Name;
+
+        public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            Name = asset.Name;
+            if (resource[entryId] is not TextAsset asset) 
+            {
+                return;
+            }
             // spine 的骨骼文件也是在这里，无法具体判断
             var buffer = ArrayPool<byte>.Shared.Rent(100);
             try
             {
-                var len = asset.Script.Read(buffer, 0, buffer.Length);
+                var input = asset.Script;
+                var len = input.Read(buffer, 0, buffer.Length);
+                input.Position = 0;
                 if (buffer[0] is (byte)'[' or (byte)'{' && IsJson(asset.Script, buffer[0]))
                 {
                     if (SpineExporter.IsSupport(buffer, len))
                     {
-                        _exporter = new SpineExporter(asset);
+                        SpineExporter.SaveAs(asset, fileName, mode);
                         return;
                     }
-                    _extension = ".json";
+                    SaveAs(input, fileName, ".json", mode);
+                    return;
                 }
-                if (LuaExporter.IsSupport(buffer, len))
+                if (buffer.StartsWith(LuacReader.Signature))
                 {
-                    _exporter = new LuaExporter(asset);
+                    LuaExporter.SaveAs(new LuacReader(input), fileName, mode);
+                    return;
+                }
+                if (buffer.StartsWith(LuaJitReader.Signature))
+                {
+                    LuaExporter.SaveAs(new LuaJitReader(input), fileName, mode);
                     return;
                 }
                 // 识别暂无处理方法
@@ -45,41 +58,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 //        new VertexMapReader().Read(asset.Script);
                 //    }
                 //}
+                SaveAs(input, fileName, ".txt", mode);
             }
             finally
             {
                 ArrayPool<byte>.Shared.Return(buffer);
             }
-            _input = asset.Script;
         }
 
-        private readonly IBundleExporter? _exporter;
-
-        private readonly Stream? _input;
-        private string _extension = string.Empty;
-        public string Name { get; private set; }
-
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
+        private static void SaveAs(Stream input, string fileName, string extension, ArchiveExtractMode mode)
         {
-            if (_exporter is not null)
-            {
-                _exporter.SaveAs(fileName, mode);
-                return;
-            }
-            if (_input is null)
+            if (!LocationStorage.TryCreate(fileName, ".skel.json", mode, out fileName))
             {
                 return;
             }
-            if (string.IsNullOrWhiteSpace(_extension))
-            {
-                _extension = Path.GetExtension(fileName) ?? ".txt";
-            }
-            if (!LocationStorage.TryCreate(fileName, _extension, mode, out fileName))
-            {
-                return;
-            }
-            _input.Position = 0;
-            _input.SaveAs(fileName);
+            input.SaveAs(fileName);
         }
 
         private static bool IsJson(Stream input, byte begin)

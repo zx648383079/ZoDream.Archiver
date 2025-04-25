@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Producers
 
         public IBundleSerializer GetSerializer(IBundleOptions options)
         {
-            return new BluePoChElementScanner(options.Package ?? string.Empty);
+            return new BundleSerializer(Engines.UnityEngine.Converters);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)

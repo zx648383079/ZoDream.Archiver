@@ -1,11 +1,10 @@
 ﻿using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class MonoBehaviourConverter : BundleConverter<MonoBehaviour>, IBundleExporter
+    internal sealed class MonoBehaviourConverter : BundleConverter<MonoBehaviour>
     {
         public override MonoBehaviour? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -18,18 +17,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             var res = new MonoBehaviour
             {
-                GameObject = serializer.Deserialize<PPtr<GameObject>>(reader),
+                GameObject = reader.ReadPPtr<GameObject>(serializer),
                 IsEnabled = reader.ReadByte()
             };
             reader.AlignStream();
-            res.Script = serializer.Deserialize<PPtr<MonoScript>>(reader);
+            res.Script = reader.ReadPPtr<MonoScript>(serializer);
             res.Name = reader.ReadAlignedString();
             return res;
         }
 
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
-        {
-            
-        }
     }
 }

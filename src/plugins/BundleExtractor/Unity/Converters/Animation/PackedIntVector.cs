@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public int[] UnpackInts(PackedIntVector res)
+        public static int[] UnpackInts(PackedIntVector res)
         {
             var data = new int[res.NumItems];
             int indexPos = 0;

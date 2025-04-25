@@ -1,14 +1,11 @@
 ﻿using System;
-using System.IO;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Models;
-using ZoDream.Shared.Storage;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class FontConverter : BundleConverter<Font>, IBundleExporter
+    internal sealed class FontConverter : BundleConverter<Font>
     {
         public override Font? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -49,7 +46,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 int m_FontData_size = reader.ReadInt32();
                 if (m_FontData_size > 0)
                 {
-                    res.FontData = reader.ReadBytes(m_FontData_size);
+                    res.Data = reader.ReadAsStream(m_FontData_size);
                 }
             }
             else
@@ -126,28 +123,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 int m_FontData_size = reader.ReadInt32();
                 if (m_FontData_size > 0)
                 {
-                    res.FontData = reader.ReadBytes(m_FontData_size);
+                    res.Data = reader.ReadAsStream(m_FontData_size);
                 }
             }
             return res;
         }
 
-        public void SaveAs(Font res, string fileName, ArchiveExtractMode mode)
-        {
-            if (res.FontData is null)
-            {
-                return;
-            }
-            var extension = ".ttf";
-            if (res.FontData.StartsWith([79, 84, 84, 79]))
-            {
-                extension = ".otf";
-            }
-            if (!LocationStorage.TryCreate(fileName, extension, mode, out fileName))
-            {
-                return;
-            }
-            File.WriteAllBytes(fileName, res.FontData);
-        }
     }
 }

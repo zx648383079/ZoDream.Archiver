@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
@@ -6,6 +7,17 @@ namespace ZoDream.Shared.Bundle
 {
     public class BundleConverterCollection : Collection<IBundleConverter>, IBundleConverterCollection
     {
+        public BundleConverterCollection()
+        {
+            
+        }
+
+        public BundleConverterCollection(IList<IBundleConverter> items)
+            : base(items)
+        {
+            
+        }
+
         public bool TryGet<T>([NotNullWhen(true)] out IBundleConverter? converter)
         {
             return TryGet(typeof(T), out converter);

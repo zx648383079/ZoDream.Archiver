@@ -17,5 +17,10 @@ namespace ZoDream.Shared.Bundle
         }
 
         public abstract T? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer);
+
+        object? IBundleConverter.Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
+        {
+            return Read(reader, objectType, serializer);
+        }
     }
 }

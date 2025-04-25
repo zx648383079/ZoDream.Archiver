@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
@@ -13,6 +14,9 @@ namespace ZoDream.BundleExtractor.Engines
     public class UnityEngine(IEntryService service) : IBundleEngine
     {
         internal const string EngineName = "Unity";
+        internal static IBundleConverter[] Converters = [
+            new MeshConverter()
+        ];
         public string AliasName => EngineName;
 
         private const string Il2CppGameAssemblyName = "libil2cpp.so";

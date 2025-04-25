@@ -8,10 +8,18 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class SpineExporter(TextAsset asset) : IBundleExporter
+    internal class SpineExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        public string Name => asset.Name;
+        public string FileName => resource[entryId].Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
+        {
+            if (resource[entryId] is not TextAsset asset)
+            {
+                return;
+            }
+            SaveAs(asset, fileName, mode);
+        }
+        public static void SaveAs(TextAsset asset, string fileName, ArchiveExtractMode mode)
         {
             if (fileName.EndsWith(".skel"))
             {

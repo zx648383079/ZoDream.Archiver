@@ -11,9 +11,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         public override Clip? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var version = reader.Get<Version>();
-            var res = new Clip();
-            res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
-            res.DenseClip = serializer.Deserialize<DenseClip>(reader);
+            var res = new Clip
+            {
+                StreamedClip = serializer.Deserialize<StreamedClip>(reader),
+                DenseClip = serializer.Deserialize<DenseClip>(reader)
+            };
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 res.ConstantClip = serializer.Deserialize<ConstantClip>(reader);
@@ -25,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public AnimationClipBindingConstant ConvertValueArrayToGenericBinding(Clip res)
+        public static AnimationClipBindingConstant ConvertValueArrayToGenericBinding(Clip res)
         {
             var bindings = new AnimationClipBindingConstant();
             var genericBindings = new List<GenericBinding>();

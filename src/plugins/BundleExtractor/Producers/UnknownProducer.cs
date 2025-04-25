@@ -7,6 +7,7 @@ namespace ZoDream.BundleExtractor.Producers
 {
     public class UnknownProducer : IBundleProducer
     {
+        internal const string CheckKey = "is_unknown";
         public string AliasName => string.Empty;
         public IList<DependencyDictionary> DependencyItems { get; private set; } = [];
 
@@ -19,10 +20,7 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityE.EngineName)
             {
-                return new OtherBundleElementScanner(
-                    options.Package ?? string.Empty,
-                    options
-                );
+                return new BundleSerializer(Engines.UnityEngine.Converters);
             }
             return new BundleSerializer();
         }

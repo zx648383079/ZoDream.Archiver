@@ -1,12 +1,10 @@
 ﻿using System.IO;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(string package, IBundleOptions options) : 
-        IBundleElementScanner, IBundleStorage
+    internal partial class OtherBundleElementScanner(string package, IBundleOptions options) : IBundleStorage
     {
 
         public bool IsCounterSide => package.Contains("cs");
@@ -47,19 +45,5 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
-        public bool TryRead(IBundleBinaryReader reader, object instance)
-        {
-            if (reader.TryGet<UnityVersion>(out var version) && 
-                version.Type == UnityVersionType.TuanJie)
-            {
-                return new TuanJieElementScanner(package, options).TryRead(reader, instance);
-            }
-            if (instance is IElementLoader l)
-            {
-                l.Read(reader);
-                return true;
-            }
-            return false;
-        }
     }
 }

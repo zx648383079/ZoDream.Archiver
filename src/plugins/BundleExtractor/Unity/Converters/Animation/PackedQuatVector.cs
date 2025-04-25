@@ -19,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public Quaternion[] UnpackQuats(PackedQuatVector res)
+        public static Quaternion[] UnpackQuats(PackedQuatVector res)
         {
             var data = new Quaternion[res.NumItems];
             int indexPos = 0;

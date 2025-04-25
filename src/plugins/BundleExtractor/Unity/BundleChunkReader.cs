@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnityEngine;
+using ZoDream.BundleExtractor.Producers;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -195,6 +197,13 @@ namespace ZoDream.BundleExtractor
             if (reader is SerializedFileReader s)
             {
                 s.Container = this;
+                if (s.Version.Type == VersionType.TuanJie && 
+                    _service.TryGet<bool>(UnknownProducer.CheckKey, out var check) && check)
+                {
+                    // 切换引擎
+                    BundleReader.AddProducer(_service, new TuanJieProducer());
+                    _service.Add(UnknownProducer.CheckKey, false);
+                }
                 _assetItems.Add(s);
                 AddDependency(s.Dependencies, fullName);
                 temporary.Add(s);

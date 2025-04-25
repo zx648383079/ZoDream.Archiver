@@ -10,9 +10,9 @@ namespace ZoDream.Shared.Bundle
         public object? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer);
     }
 
-    public interface IBundleConverter<T>
+    public interface IBundleConverter<T> : IBundleConverter
     {
-        public T? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer);
+        public new T? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer);
     }
 
     public interface IBundlePipelineConverter<T>

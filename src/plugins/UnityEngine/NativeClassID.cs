@@ -79,7 +79,7 @@
         CGProgram = 109,
         BaseAnimationTrack = 110,
         Animation = 111,
-        MonoBehavior = 114,
+        MonoBehaviour = 114,
         MonoScript = 115,
         MonoManager = 116,
         Texture3D = 117,

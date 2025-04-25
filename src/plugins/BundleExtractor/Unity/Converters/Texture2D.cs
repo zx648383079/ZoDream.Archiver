@@ -1,15 +1,8 @@
-﻿using SkiaSharp;
-using System;
-using System.Buffers;
-using System.IO;
+﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Models;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Models;
-using ZoDream.Shared.Storage;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -49,7 +42,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         }
     }
 
-    internal sealed class Texture2DConverter : BundleConverter<Texture2D>, IBundleExporter, IElementTypeLoader
+    internal sealed class Texture2DConverter : BundleConverter<Texture2D>, IElementTypeLoader
     {
         public object? Read(IBundleBinaryReader reader, Type targetType, TypeTree typeMaps)
         {
@@ -169,28 +162,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void SaveAs(Texture2D res, string fileName, ArchiveExtractMode mode)
-        {
-            if (!LocationStorage.TryCreate(fileName, ".png", mode, out fileName))
-            {
-                return;
-            }
-            using var image = ToImage(res);
-            using var target = image?.Flip(false);
-            target?.SaveAs(fileName);
-        }
 
-        public static SKImage? ToImage(Texture2D res, Version version)
-        {
-            if (res.ImageData is null)
-            {
-                return null;
-            }
-            res.ImageData.Position = 0;
-            var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
-                res.Height, res.TextureFormat, version);
-            return data?.ToImage();
-        }
     }
 
     

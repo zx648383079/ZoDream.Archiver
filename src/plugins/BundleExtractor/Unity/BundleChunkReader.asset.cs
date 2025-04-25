@@ -16,7 +16,6 @@ namespace ZoDream.BundleExtractor
     {
         private void ProcessAssets(CancellationToken token)
         {
-            
             foreach (var asset in _assetItems)
             {
                 for (var i = 0; i < asset.Count; i++)
@@ -161,7 +160,6 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-
         private static Type ConvertToClassType(NativeClassID classID)
         {
             return classID switch
@@ -182,7 +180,7 @@ namespace ZoDream.BundleExtractor
                 NativeClassID.MeshFilter => typeof(MeshFilter),
                 NativeClassID.MeshRenderer => typeof(MeshRenderer),
                 NativeClassID.MiHoYoBinData => typeof(MiHoYoBinData),
-                NativeClassID.MonoBehavior => typeof(MonoBehaviour),
+                NativeClassID.MonoBehaviour => typeof(MonoBehaviour),
                 NativeClassID.MonoScript => typeof(MonoScript),
                 NativeClassID.MovieTexture => typeof(MovieTexture),
                 NativeClassID.PlayerSettings => typeof(PlayerSettings),

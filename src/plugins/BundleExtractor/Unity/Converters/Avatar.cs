@@ -38,9 +38,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public string FindBonePath(uint hash)
+        public static string FindBonePath(Avatar res, uint hash)
         {
-            m_TOS.TryGetValue(hash, out string path);
+            res.TOS.TryGetValue(hash, out string path);
             return path;
         }
     }

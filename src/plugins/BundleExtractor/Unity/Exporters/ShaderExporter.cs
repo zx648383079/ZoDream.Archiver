@@ -14,16 +14,20 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class ShaderExporter(Shader shader) : IBundleExporter
+    internal class ShaderExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
         private const string NoteHeader = "//////////////////////////////////////////\n" +
                                       "//\n" +
                                       "// NOTE: This is *not* a valid shader file\n" +
                                       "//\n" +
                                       "///////////////////////////////////////////\n";
-        public string Name => shader.Name;
+        public string FileName => resource[entryId].Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            if (resource[entryId] is not Shader shader)
+            {
+                return;
+            }
             if (!LocationStorage.TryCreate(fileName, ".shader", mode, out fileName))
             {
                 return;
@@ -40,7 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         shader.SubProgramBlob,
                         shader.SubProgramBlob.Length, ms.GetBuffer(), uncompressedSize);
                 using var blobReader = new BundleBinaryReader(ms, leaveOpen: false);
-                blobReader.Add(shader.AssetFile.UnityVersion);
+                blobReader.Add(resource.Version);
                 var program = new ShaderProgram(blobReader);
                 program.Read(blobReader, 0);
                 program.Write(Encoding.UTF8.GetString(shader.Script), sw);
@@ -49,13 +53,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             if (shader.CompressedBlob != null) //5.5 and up
             {
-                ConvertSerializedShader(sw);
+                ConvertSerializedShader(sw, shader);
                 return;
             }
             sw.Write(shader.Script);
         }
 
-        private void ConvertSerializedShader(ICodeWriter writer)
+        private void ConvertSerializedShader(ICodeWriter writer, Shader shader)
         {
             var length = shader.Platforms.Length;
             var shaderPrograms = new ShaderProgram[length];
@@ -75,7 +79,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             ms.GetBuffer(),
                             decompressedLength);
                     using var blobReader = new BundleBinaryReader(ms, leaveOpen: false);
-                    blobReader.Add(shader.AssetFile.UnityVersion);
+                    blobReader.Add(resource.Version);
                     if (j == 0)
                     {
                         shaderPrograms[i] = new ShaderProgram(blobReader);

@@ -1,4 +1,5 @@
-﻿using ZoDream.Shared.Bundle;
+﻿using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
 {
@@ -10,9 +11,9 @@ namespace ZoDream.BundleExtractor.Producers
             return false;
         }
 
-        public IBundleElementScanner GetScanner(IBundleOptions options)
+        public IBundleSerializer GetSerializer(IBundleOptions options)
         {
-            return new BundleElementScanner();
+            return new BundleSerializer(Engines.UnityEngine.Converters);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)

@@ -1,10 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ZoDream.Shared.Bundle
 {
     public class BundleSerializer : IBundleSerializer
     {
-        public IBundleConverterCollection Converters { get; private set; } = new BundleConverterCollection();
+        public BundleSerializer()
+        {
+            Converters = new BundleConverterCollection();
+        }
+        public BundleSerializer(IEnumerable<IBundleConverter> items)
+        {
+            Converters = items is IBundleConverterCollection o ? o : new BundleConverterCollection([.. items]); 
+        }
+        public IBundleConverterCollection Converters { get; private set; }
 
         public T? Deserialize<T>(IBundleBinaryReader reader)
         {

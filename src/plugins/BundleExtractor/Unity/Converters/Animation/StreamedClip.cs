@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
@@ -12,62 +10,61 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public override StreamedClip Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
+            var length = reader.ReadInt32() * 4;
             return new()
             {
-                Data = reader.ReadArray(r => r.ReadUInt32()),
+                Data = ReadData(reader, length, serializer),
                 CurveCount = reader.ReadUInt32()
             };
         }
 
         
 
-        public List<StreamedFrame> ReadData()
+        public static StreamedFrame[] ReadData(IBundleBinaryReader reader, int length, IBundleSerializer serializer)
         {
             var frameList = new List<StreamedFrame>();
-            var buffer = new byte[data.Length * 4];
-            Buffer.BlockCopy(data, 0, buffer, 0, buffer.Length);
-            using (var reader = new BundleBinaryReader(new MemoryStream(buffer), EndianType.LittleEndian))
+            var end = reader.Position + length;
+            while (reader.Position < end)
             {
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
-                {
-                    frameList.Add(new StreamedFrame(reader));
-                }
+                frameList.Add(serializer.Deserialize<StreamedFrame>(reader));
             }
-
+            reader.Position = end;
             for (int frameIndex = 2; frameIndex < frameList.Count - 1; frameIndex++)
             {
                 var frame = frameList[frameIndex];
-                foreach (var curveKey in frame.keyList)
+                foreach (var curveKey in frame.KeyList)
                 {
                     for (int i = frameIndex - 1; i >= 0; i--)
                     {
                         var preFrame = frameList[i];
-                        var preCurveKey = preFrame.keyList.FirstOrDefault(x => x.index == curveKey.index);
+                        var preCurveKey = preFrame.KeyList.FirstOrDefault(x => x.Index == curveKey.Index);
                         if (preCurveKey != null)
                         {
-                            curveKey.inSlope = preCurveKey.CalculateNextInSlope(frame.time - preFrame.time, curveKey);
+                            curveKey.InSlope = StreamedCurveKeyConverter.CalculateNextInSlope(preCurveKey, frame.Time - preFrame.Time, curveKey);
                             break;
                         }
                     }
                 }
             }
-            return frameList;
+            return [..frameList];
         }
     }
     internal class StreamedCurveKeyConverter : BundleConverter<StreamedCurveKey>
     {
         public override StreamedCurveKey Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var res = new StreamedCurveKey();
-            res.Index = reader.ReadInt32();
-            res.Coeff = reader.ReadArray(4, (r, _) => r.ReadSingle());
+            var res = new StreamedCurveKey
+            {
+                Index = reader.ReadInt32(),
+                Coeff = reader.ReadArray(4, (r, _) => r.ReadSingle())
+            };
 
             res.OutSlope = res.Coeff[2];
             res.Value = res.Coeff[3];
             return res;
         }
 
-        public float CalculateNextInSlope(StreamedCurveKey res, float dx, StreamedCurveKey rhs)
+        public static float CalculateNextInSlope(StreamedCurveKey res, float dx, StreamedCurveKey rhs)
         {
             //Stepped
             if (res.Coeff[0] == 0f && res.Coeff[1] == 0f && res.Coeff[2] == 0f)
@@ -91,7 +88,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new StreamedFrame
             {
                 Time = reader.ReadSingle(),
-
                 KeyList = reader.ReadArray<StreamedCurveKey>(serializer)
             };
             return res;

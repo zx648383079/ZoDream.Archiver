@@ -12,9 +12,12 @@ namespace ZoDream.BundleExtractor.Producers
             return new Entertainment24ElementScanner(options.Package ?? string.Empty);
         }
 
-        public IBundleElementScanner GetScanner(IBundleOptions options)
+        public IBundleSerializer GetSerializer(IBundleOptions options)
         {
-            return new Entertainment24ElementScanner(options.Package ?? string.Empty);
+            return new BundleSerializer([
+                .. Engines.UnityEngine.Converters,
+                new Entertainment24ElementScanner(options.Package ?? string.Empty)
+                ]);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

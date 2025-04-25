@@ -1,12 +1,10 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class TextAssetConverter : BundleConverter<TextAsset>, IBundleExporter
+    internal sealed class TextAssetConverter : BundleConverter<TextAsset>
     {
         public override TextAsset? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -24,9 +22,5 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             };
         }
 
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
-        {
-            new RawExporter(this).SaveAs(fileName, mode);
-        }
     }
 }

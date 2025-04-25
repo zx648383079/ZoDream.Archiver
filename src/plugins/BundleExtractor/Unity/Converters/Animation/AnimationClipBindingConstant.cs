@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
@@ -11,11 +12,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return new()
             {
                 GenericBindings = reader.ReadArray<GenericBinding>(serializer),
-                CurveMapping = reader.ReadArray<PPtr>(serializer)
+                CurveMapping = reader.ReadPPtrArray<Object>(serializer)
             };
         }
 
-        public GenericBinding FindBinding(AnimationClipBindingConstant res, int index)
+        public static GenericBinding FindBinding(AnimationClipBindingConstant res, int index)
         {
             int curves = 0;
             foreach (var b in res.GenericBindings)

@@ -7,9 +7,9 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class CubismExporter(MonoBehaviour behavior) : IBundleExporter
+    internal class CubismExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        public string Name => behavior.Name;
+        public string FileName => resource[entryId].Name;
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
@@ -17,15 +17,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            var reader = behavior.Reader;
+            var reader = _behavior.Reader;
             var length = reader.ReadUInt32();
             reader.ReadAsStream(length).SaveAs(fileName);
         }
 
-        
-        public void Dispose()
-        {
-        }
 
         public static OrderedDictionary ParseMonoBehavior(MonoBehaviour m_MonoBehaviour,
             CubismMonoBehaviorType cubismMonoBehaviorType,
@@ -82,7 +78,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return null;
             }
             orderedDict = m_MonoBehaviour.ToType(m_Type);
-
             return orderedDict;
         }
     }

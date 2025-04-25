@@ -1,7 +1,9 @@
-﻿namespace UnityEngine
+﻿using System.IO;
+
+namespace UnityEngine
 {
     public class Font : Object
     {
-        public byte[] FontData;
+        public Stream? Data {  get; set; }
     }
 }

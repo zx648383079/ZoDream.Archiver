@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Linq;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Models;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal class ShaderConverter : BundleConverter<Shader>, IBundleExporter
+    internal class ShaderConverter : BundleConverter<Shader>
     {
         public static void ReadBase(Shader res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
@@ -89,10 +87,5 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
-        {
-            // TODO
-            new ShaderExporter(this).SaveAs(fileName, mode);
-        }
     }
 }

@@ -2,18 +2,21 @@
 using System.IO;
 using UnityEngine;
 using ZoDream.LuaDecompiler;
+using ZoDream.LuaDecompiler.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Language;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class LuaExporter(TextAsset asset) : IBundleExporter
+    internal class LuaExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        public string Name => asset.Name;
+        public string FileName => resource[entryId].Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            var asset = resource[entryId] as TextAsset;
             asset.Script.Position = 0;
             var extension = Path.GetExtension(fileName);
             if (string.IsNullOrWhiteSpace(extension))
@@ -39,11 +42,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             decompressor.Create(fs, res);
         }
 
-        public void Dispose()
+        public static void SaveAs(ILanguageReader<LuaBytecode> reader, string fileName, ArchiveExtractMode mode)
         {
-
+            if (!LocationStorage.TryCreate(fileName, ".lua", mode, out fileName))
+            {
+                return;
+            }
+            var data = reader.Read();
+            using var fs = File.Create(fileName);
+            new LuaWriter(data).Write(fs);
         }
-
         internal static bool IsSupport(byte[] buffer, int length)
         {
             if (buffer.StartsWith(LuacReader.Signature))

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Hashing;
@@ -7,12 +8,13 @@ using System.Numerics;
 using System.Text;
 using UnityEngine;
 using ZoDream.AutodeskExporter;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FbxExporter(IBundleContainer container) : IFbxImported, IMultipartExporter
+    internal class FbxExporter(ISerializedFile resource) : IFbxImported, IMultipartExporter
     {
 
         public FbxImportedFrame RootFrame { get; protected set; }
@@ -30,13 +32,32 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly Dictionary<Transform, FbxImportedFrame> _transformDictionary = [];
         private readonly Dictionary<uint, string> _morphChannelNames = [];
         public bool IsEmpty => MeshList.Count == 0 || RootFrame is null;
-        public string Name { get; private set; } = string.Empty;
+        public string FileName { get; private set; } = string.Empty;
+
+        public void Append(int entryId)
+        {
+            var obj = resource[entryId];
+            var fileId = resource.Get(entryId).FileID;
+            if (string.IsNullOrEmpty(FileName) && !string.IsNullOrEmpty(obj.Name))
+            {
+                FileName = obj.Name;
+            }
+            switch (obj)
+            {
+                case GameObject g:
+                    Append(g);
+                    break;
+                case Animator a:
+                    Append(a);
+                    break;
+                case AnimationClip c:
+                    Append(c);
+                    break;
+            }
+        }
+
         public void Append(GameObject obj)
         {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(obj.Name))
-            {
-                Name = obj.Name;
-            }
             if (obj.Animator != null)
             {
                 InitWithAnimator(obj.Animator);
@@ -50,28 +71,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(Mesh mesh)
         {
-            //if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
-            //{
-            //    Name = mesh.Name;
-            //}
         }
 
         public void Append(Animator animator)
         {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
-            {
-                Name = animator.Name;
-            }
             InitWithAnimator(animator);
             CollectAnimationClip(animator);
         }
 
         public void Append(AnimationClip animator)
         {
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(animator.Name))
-            {
-                Name = animator.Name;
-            }
             _animationClipHashSet.Add(animator);
         }
 
@@ -104,7 +113,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 _avatar = m_Avatar;
             }
-            container.TryAddExclude(m_Animator.GameObject.PathID);
+            resource.Container?.TryAddExclude(m_Animator.GameObject.PathID);
             m_Animator.GameObject.TryGet(out var m_GameObject);
             InitWithGameObject(m_GameObject, m_Animator.HasTransformHierarchy);
         }
@@ -282,9 +291,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(mesh.Name))
+            if (string.IsNullOrEmpty(FileName) && !string.IsNullOrEmpty(mesh.Name))
             {
-                Name = mesh.Name;
+                FileName = mesh.Name;
             }
             var iMesh = new FbxImportedMesh();
             meshR.GameObject.TryGet(out var m_GameObject2);
@@ -317,7 +326,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             iMesh.hasUV = new bool[8];
             for (int uv = 0; uv < 8; uv++)
             {
-                iMesh.hasUV[uv] = mesh.GetUV(uv)?.Length > 0;
+                iMesh.hasUV[uv] = MeshConverter.GetUV(mesh, uv)?.Length > 0;
             }
             iMesh.hasTangent = mesh.Tangents != null && mesh.Tangents.Length == mesh.VertexCount * 4;
             iMesh.hasColor = mesh.Colors?.Length > 0;
@@ -393,7 +402,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     if (iMesh.hasUV[uv])
                     {
-                        var m_UV = mesh.GetUV(uv);
+                        var m_UV = MeshConverter.GetUV(mesh, uv);
                         if (m_UV.Length == mesh.VertexCount * 2)
                         {
                             c = 2;
@@ -815,7 +824,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         var track = iAnim.FindTrack(FixBonePath(animationClip, m_CompressedRotationCurve.Path));
 
                         var numKeys = m_CompressedRotationCurve.Times.NumItems;
-                        var data = m_CompressedRotationCurve.Times.UnpackInts();
+                        var data = PackedIntVectorConverter.UnpackInts(m_CompressedRotationCurve.Times);
                         var times = new float[numKeys];
                         int t = 0;
                         for (int i = 0; i < numKeys; i++)
@@ -823,7 +832,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             t += data[i];
                             times[i] = t * 0.01f;
                         }
-                        var quats = m_CompressedRotationCurve.Values.UnpackQuats();
+                        var quats = PackedQuatVectorConverter.UnpackQuats(m_CompressedRotationCurve.Values);
 
                         for (int i = 0; i < numKeys; i++)
                         {
@@ -897,15 +906,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 else
                 {
                     var m_Clip = animationClip.MuscleClip.Clip;
-                    var streamedFrames = m_Clip.StreamedClip.ReadData();
-                    var m_ClipBindingConstant = animationClip.ClipBindingConstant ?? m_Clip.ConvertValueArrayToGenericBinding();
-                    for (int frameIndex = 1; frameIndex < streamedFrames.Count - 1; frameIndex++)
+                    var streamedFrames = m_Clip.StreamedClip.Data;
+                    var m_ClipBindingConstant = animationClip.ClipBindingConstant ?? ClipConverter.ConvertValueArrayToGenericBinding(m_Clip);
+                    for (int frameIndex = 1; frameIndex < streamedFrames.Length - 1; frameIndex++)
                     {
                         var frame = streamedFrames[frameIndex];
-                        var streamedValues = frame.keyList.Select(x => x.value).ToArray();
-                        for (int curveIndex = 0; curveIndex < frame.keyList.Count;)
+                        var streamedValues = frame.KeyList.Select(x => x.Value).ToArray();
+                        for (int curveIndex = 0; curveIndex < frame.KeyList.Length;)
                         {
-                            ReadCurveData(iAnim, m_ClipBindingConstant, frame.keyList[curveIndex].index, frame.time, streamedValues, 0, ref curveIndex);
+                            ReadCurveData(iAnim, m_ClipBindingConstant, frame.KeyList[curveIndex].Index, 
+                                frame.Time, streamedValues, 0, ref curveIndex);
                         }
                     }
                     var m_DenseClip = m_Clip.DenseClip;
@@ -941,10 +951,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void ReadCurveData(FbxImportedKeyframedAnimation iAnim, AnimationClipBindingConstant m_ClipBindingConstant, int index, float time, float[] data, int offset, ref int curveIndex)
         {
-            var binding = m_ClipBindingConstant.FindBinding(index);
-            if (binding.typeID == NativeClassID.SkinnedMeshRenderer) //BlendShape
+            var binding = AnimationClipBindingConstantConverter.FindBinding(m_ClipBindingConstant, index);
+            if (binding.TypeID == NativeClassID.SkinnedMeshRenderer) //BlendShape
             {
-                var channelName = GetChannelNameFromHash(binding.attribute);
+                var channelName = GetChannelNameFromHash(binding.Attribute);
                 if (string.IsNullOrEmpty(channelName))
                 {
                     curveIndex++;
@@ -956,7 +966,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     channelName = channelName.Substring(dotPos + 1);
                 }
 
-                var bPath = FixBonePath(GetPathFromHash(binding.path));
+                var bPath = FixBonePath(GetPathFromHash(binding.Path));
                 if (string.IsNullOrEmpty(bPath))
                 {
                     bPath = GetPathByChannelName(channelName);
@@ -966,12 +976,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 bTrack.BlendShape.ChannelName = channelName;
                 bTrack.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(time, data[curveIndex++ + offset]));
             }
-            else if (binding.typeID == NativeClassID.Transform)
+            else if (binding.TypeID == NativeClassID.Transform)
             {
-                var path = FixBonePath(GetPathFromHash(binding.path));
+                var path = FixBonePath(GetPathFromHash(binding.Path));
                 var track = iAnim.FindTrack(path);
 
-                switch (binding.attribute)
+                switch (binding.Attribute)
                 {
                     case 1:
                         track.Translations.Add(new FbxImportedKeyframe<Vector3>(time, new Vector3
@@ -1023,7 +1033,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _bonePathHash.TryGetValue(hash, out var boneName);
             if (string.IsNullOrEmpty(boneName))
             {
-                boneName = _avatar?.FindBonePath(hash);
+                boneName = AvatarConverter.FindBonePath(_avatar, hash);
             }
             if (string.IsNullOrEmpty(boneName))
             {
@@ -1062,7 +1072,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var skeletonPaths = new List<string>();
             foreach (var id in _avatar.Value.AvatarSkeleton.ID)
             {
-                var path = _avatar.FindBonePath(id);
+                var path = AvatarConverter.FindBonePath(_avatar, id);
                 skeletonPaths.Add(path);
             }
             // 2. Restore the original transform hierarchy

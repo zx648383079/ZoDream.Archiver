@@ -9,9 +9,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public string AliasName => ProducerName;
 
-        public IBundleElementScanner GetScanner(IBundleOptions options)
+        public IBundleSerializer GetSerializer(IBundleOptions options)
         {
-            return new TuanJieElementScanner(options.Package ?? string.Empty, options);
+            return new BundleSerializer([
+                .. Engines.UnityEngine.Converters,
+                new TuanJieElementScanner(options.Package ?? string.Empty, options)
+                ]);
         }
 
         public IBundleStorage GetStorage(IBundleOptions options)

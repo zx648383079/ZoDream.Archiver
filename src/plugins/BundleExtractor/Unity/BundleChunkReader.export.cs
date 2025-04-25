@@ -6,23 +6,25 @@ using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
-using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
 {
     internal partial class UnityBundleChunkReader
     {
 
-        private readonly Dictionary<Type, Type> _exportItems = new() 
+        private readonly Dictionary<NativeClassID, Type> _exportItems = new() 
         {
-            {typeof(TextAsset), typeof(RawExporter)},
-            {typeof(AudioClip), typeof(FsbExporter)},
-            {typeof(Shader), typeof(ShaderExporter) },
-            {typeof(MonoBehaviour), typeof(BehaviorExporter) },
-            {typeof(GameObject), typeof(GltfExporter)},
-            {typeof(Mesh), typeof(GltfExporter)},
-            {typeof(Animator), typeof(GltfExporter)},
-            {typeof(AnimationClip), typeof(GltfExporter)},
+            {NativeClassID.TextAsset, typeof(RawExporter)},
+            {NativeClassID.AudioClip, typeof(FsbExporter)},
+            {NativeClassID.Shader, typeof(ShaderExporter) },
+            {NativeClassID.MonoBehaviour, typeof(BehaviorExporter) },
+            {NativeClassID.GameObject, typeof(GltfExporter)},
+            {NativeClassID.Mesh, typeof(GltfExporter)},
+            {NativeClassID.Animator, typeof(GltfExporter)},
+            {NativeClassID.AnimationClip, typeof(GltfExporter)},
+            {NativeClassID.MovieTexture, typeof(MovieExporter)},
+            {NativeClassID.Texture2D, typeof(TextureExporter)},
+            {NativeClassID.Sprite, typeof(TextureExporter)},
         };
 
         private readonly Dictionary<Type, IMultipartExporter> _batchItems = [];
@@ -48,9 +50,9 @@ namespace ZoDream.BundleExtractor
                     {
                         var obj = asset[i];
                         var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() : obj.Name;
-                        var exporter = TryParse(obj);
+                        var exporter = TryParse(asset, i);
                         exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
-                            string.IsNullOrEmpty(exporter.Name) ? fileName : exporter.Name
+                            string.IsNullOrEmpty(exporter.FileName) ? fileName : exporter.FileName
                         ), folder), mode);
                         if (exporter is IDisposable d)
                         {
@@ -70,66 +72,52 @@ namespace ZoDream.BundleExtractor
                 foreach (var batch in _batchItems)
                 {
                     batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
-                        batch.Value.Name), folder), mode);
+                        batch.Value.FileName), folder), mode);
                     batch.Value.Dispose();
                 }
                 _batchItems.Clear();
             }
         }
 
-        private IMultipartExporter? TryParseModel()
+        private IMultipartExporter? TryParseModel(ISerializedFile asset)
         {
             return Options?.ModelFormat.ToLower() switch
             {
-                "fbx" => new FbxExporter(this),
-                _ => new GltfExporter(this),
+                "fbx" => new FbxExporter(asset),
+                _ => new GltfExporter(asset),
             };
         }
 
-        private bool IsExclude(Object obj)
-        {
-            return obj switch
-            {
-                GameObject or Mesh or AnimationClip or Animator => Options?.EnabledModel != true,
-                Shader => Options?.EnabledShader != true,
-                Texture2D or Texture or Sprite => Options?.EnabledImage != true,
-                AudioClip => Options?.EnabledAudio != true,
-                VideoClip => Options?.EnabledVideo != true,
-                TextAsset => Options?.EnabledLua != true && Options?.EnabledSpine != true && Options?.EnabledJson != true,
-                _ => false,
-            };
-        }
 
-        private IBundleExporter? TryParse(Object obj)
+        private IBundleExporter? TryParse(ISerializedFile asset, int objIndex)
         {
-            if (IsExclude(obj))
-            {
-                return null;
-            }
             IMultipartExporter? instance;
-            if (obj is GameObject or Mesh or Animator or AnimationClip)
+            var info = asset.Get(objIndex);
+            var cls = (NativeClassID)info.ClassID;
+            if (cls is NativeClassID.GameObject or NativeClassID.Mesh 
+                or NativeClassID.Animator or NativeClassID.AnimationClip)
             {
-                instance = TryParseModel();
+                instance = TryParseModel(asset);
                 if (instance is not null)
                 {
-                    TryAppend(instance, obj);
+                    TryAppend(instance, objIndex);
                     return instance;
                 }
             }
-            if (!_exportItems.TryGetValue(obj.GetType(), out var targetType))
+            if (!_exportItems.TryGetValue(cls, out var targetType))
             {
-                return obj is IBundleExporter f ? f : null;
+                return null;
             }
             if (_batchItems.TryGetValue(targetType, out instance))
             {
-                TryAppend(instance, obj);
+                TryAppend(instance, objIndex);
                 return null;
             }
-            var fn = targetType.GetConstructor([obj.GetType()]);
+            var fn = targetType.GetConstructor([typeof(int), typeof(ISerializedFile)]);
             object? target;
             if (fn is not null)
             {
-                target = fn?.Invoke([obj]);
+                target = fn?.Invoke([objIndex, asset]);
             }
             else
             {
@@ -141,16 +129,16 @@ namespace ZoDream.BundleExtractor
             }
             if (fn is null)
             {
-                TryAppend(target, obj);
+                TryAppend(target, objIndex);
             }
             _batchItems.TryAdd(targetType, m);
             return null;
         }
 
-        private static void TryAppend(object instance, Object obj)
+        private static void TryAppend(object instance, int objIndex)
         {
             instance.GetType().GetMethod("Append",
-                    [obj.GetType()])?.Invoke(instance, [obj]);
+                    [objIndex.GetType()])?.Invoke(instance, [objIndex]);
         }
     }
 }

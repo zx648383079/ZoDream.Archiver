@@ -6,16 +6,13 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class NormalTextureExporter(Texture2D texture) : IBundleExporter
+    internal class NormalTextureExporter(Texture2D texture, ISerializedFile resource) : IBundleExporter
     {
-        public string Name => texture.Name;
+        public string FileName => texture.Name;
+
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            //if (!LocationStorage.TryCreate(fileName, ".png", mode, out fileName))
-            //{
-            //    return;
-            //}
-            using var s = Texture2DConverter.ToImage(texture);
+            using var s = TextureExporter.ToImage(texture, resource);
             if (s is null)
             {
                 return;
