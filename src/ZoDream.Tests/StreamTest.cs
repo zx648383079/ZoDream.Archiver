@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using ZoDream.AutodeskExporter;
+using ZoDream.BundleExtractor;
 using ZoDream.BundleExtractor.Cocos;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.KhronosExporter;
+using ZoDream.KhronosExporter.Models;
+using ZoDream.ShaderDecompiler;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.IO;
 
@@ -72,24 +76,16 @@ namespace ZoDream.Tests
         }
 
         [TestMethod]
-        public void TestVertexMap()
+        public void TestSpv()
         {
-            var fileName = "F:\\apk\\test_output\\AssetBundles\\vertex_map_components_pc_a01_suit_swim.ab\\Swimbra_obj001.txt";
+            var fileName = "F:\\apk\\zmxs\\mesh.bin";
             using var fs = File.OpenRead(fileName);
-            var res = new VertexMapReader().Read(fs);
-            Assert.IsTrue(res is not null);
+            Assert.IsTrue(fs is null);
         }
 
-        [TestMethod]
-        public void TestBlendShape()
-        {
-            var fileName = "F:\\apk\\test_output\\AssetBundles\\bare_blend_shape_pc_a01_nk.ab\\E01.txt";
-            using var fs = File.OpenRead(fileName);
-            var res = new BlendShapeReader().Read(fs);
-            Assert.IsTrue(res is not null);
-        }
 
-        [TestMethod]
+
+        //[TestMethod]
         public void TestBc()
         {
             var src = "F:\\apk\\test\\check_version_view.lua";

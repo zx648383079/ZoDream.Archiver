@@ -11,10 +11,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             var version = reader.Get<Version>();
             var res = new SpriteRenderData();
-            res.Texture = serializer.Deserialize<PPtr<Texture2D>>(reader);
+            res.Texture = reader.ReadPPtr<Texture2D>(serializer);
             if (version.GreaterThanOrEquals(5, 2)) //5.2 and up
             {
-                res.AlphaTexture = serializer.Deserialize<PPtr<Texture2D>>(reader);
+                res.AlphaTexture = reader.ReadPPtr<Texture2D>(serializer);
             }
 
             if (version.GreaterThanOrEquals(2019)) //2019 and up

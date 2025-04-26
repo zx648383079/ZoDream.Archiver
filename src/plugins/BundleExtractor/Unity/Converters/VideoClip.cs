@@ -46,7 +46,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var m_AudioLanguage = reader.ReadArray(r => r.ReadAlignedString());
             if (version.GreaterThanOrEquals(2020, 1)) //2020.1 and up
             {
-                var m_VideoShaders = reader.ReadArray(_ => serializer.Deserialize<PPtr<Shader>>(reader));
+                var m_VideoShaders = reader.ReadPPtrArray<Shader>(serializer);
             }
             res.ExternalResources = new()
             {

@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 Attribute = reader.ReadAlignedString(),
                 Path = reader.ReadAlignedString(),
                 ClassID = (NativeClassID)reader.ReadInt32(),
-                Script = serializer.Deserialize<PPtr<MonoScript>>(reader)
+                Script = reader.ReadPPtr<MonoScript>(serializer)
             };
             if (version.GreaterThanOrEquals(2022, 2)) //2022.2 and up
             {

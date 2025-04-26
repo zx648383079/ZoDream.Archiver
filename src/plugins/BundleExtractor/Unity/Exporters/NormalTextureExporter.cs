@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Models;

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Specialized;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -72,6 +74,22 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 res.OutWeight = readerFunc();
             }
             return res;
+        }
+
+
+        public static OrderedDictionary? ToType(int entryId, ISerializedFile resource)
+        {
+            return ToType(resource.TypeItems[resource.Get(entryId).SerializedTypeIndex].OldType,
+                entryId, resource);
+        }
+
+        public static OrderedDictionary? ToType(TypeTree m_Type, int entryId, ISerializedFile resource)
+        {
+            if (m_Type != null)
+            {
+                return TypeTreeHelper.ReadType(m_Type, resource.OpenRead(entryId));
+            }
+            return null;
         }
     }
 }

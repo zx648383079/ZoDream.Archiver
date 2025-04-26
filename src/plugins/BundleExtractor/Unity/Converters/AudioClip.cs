@@ -1,10 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Models;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -95,11 +93,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
-        {
-            new FsbExporter(this).SaveAs(fileName, mode);
-        }
     }
 
 }

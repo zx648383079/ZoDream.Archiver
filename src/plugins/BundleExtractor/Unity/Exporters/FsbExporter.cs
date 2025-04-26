@@ -6,11 +6,15 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FsbExporter(AudioClip audio) : IBundleExporter
+    internal class FsbExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        public string Name => audio.Name;
+        public string FileName => resource[entryId].Name;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            if (resource[entryId] is not AudioClip audio)
+            {
+                return;
+            }
             //audio.m_AudioData.Position = 0;
             //if (FsbLoader.TryLoadFsbFromByteArray(audio.m_AudioData.ToArray(), out var instance))
             //{
@@ -47,7 +51,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public string GetExtensionName()
         {
-            if (audio.IsOldVersion)
+            if (resource[entryId] is not AudioClip audio)
+            {
+                return ".AudioClip";
+            }
+            if (resource.Version.LessThan(5))
             {
                 switch (audio.Type)
                 {
@@ -110,7 +118,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public bool IsSupport {
             get {
-                if (audio.IsOldVersion)
+                if (resource[entryId] is not AudioClip audio)
+                {
+                    return false;
+                }
+                if (resource.Version.LessThan(5))
                 {
                     return audio.Type switch
                     {
@@ -127,10 +139,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     };
                 }
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

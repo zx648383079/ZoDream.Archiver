@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -250,7 +251,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             if (version.GreaterThanOrEquals(3, 5)) //3.5 and up
             {
-                ReadVertexData(res);
+                ReadVertexData(res, reader);
             }
 
             if (res.CollisionMeshBaked)
@@ -260,16 +261,16 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and later
             {
-                DecompressCompressedMesh(res);
+                DecompressCompressedMesh(res, version);
             }
 
-            GetTriangles(res);
+            GetTriangles(res, version);
         }
 
-        private static void ReadVertexData(Mesh res)
+        private static void ReadVertexData(Mesh res, IBundleBinaryReader reader)
         {
             res.VertexCount = (int)res.VertexData.VertexCount;
-
+            var version = reader.Get<Version>();
             for (var chn = 0; chn < res.VertexData.Channels.Length; chn++)
             {
                 var m_Channel = res.VertexData.Channels[chn];
@@ -279,25 +280,25 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     var channelMask = new BitArray([(int)m_Stream.ChannelMask]);
                     if (channelMask.Get(chn))
                     {
-                        if (Reader.Version.LessThan(2018) && chn == 2 && m_Channel.Format == 2) //kShaderChannelColor && kChannelFormatColor
+                        if (version.LessThan(2018) && chn == 2 && m_Channel.Format == 2) //kShaderChannelColor && kChannelFormatColor
                         {
                             m_Channel.Dimension = 4;
                         }
 
-                        var vertexFormat = MeshHelper.ToVertexFormat(m_Channel.Format, Reader.Version);
+                        var vertexFormat = MeshHelper.ToVertexFormat(m_Channel.Format, version);
                         var componentByteSize = (int)MeshHelper.GetFormatSize(vertexFormat);
                         var componentBytes = new byte[res.VertexCount * m_Channel.Dimension * componentByteSize];
                         for (int v = 0; v < res.VertexCount; v++)
                         {
-                            var vertexOffset = (int)m_Stream.Offset + m_Channel.Offset + (int)m_Stream.stride * v;
+                            var vertexOffset = (int)m_Stream.Offset + m_Channel.Offset + (int)m_Stream.Stride * v;
                             for (int d = 0; d < m_Channel.Dimension; d++)
                             {
                                 var componentOffset = vertexOffset + componentByteSize * d;
-                                Buffer.BlockCopy(res.VertexData.DataSize, componentOffset, componentBytes, componentByteSize * (v * m_Channel.dimension + d), componentByteSize);
+                                Buffer.BlockCopy(res.VertexData.DataSize, componentOffset, componentBytes, componentByteSize * (v * m_Channel.Dimension + d), componentByteSize);
                             }
                         }
 
-                        if (Reader.EndianType == EndianType.BigEndian && componentByteSize > 1) //swap bytes
+                        if (reader.EndianType == EndianType.BigEndian && componentByteSize > 1) //swap bytes
                         {
                             for (var i = 0; i < componentBytes.Length / componentByteSize; i++)
                             {
@@ -315,7 +316,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         else
                             componentsFloatArray = MeshHelper.BytesToFloatArray(componentBytes, vertexFormat);
 
-                        if (Reader.Version.GreaterThanOrEquals(2018))
+                        if (version.GreaterThanOrEquals(2018))
                         {
                             switch (chn)
                             {
@@ -365,7 +366,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                                     {
                                         for (int j = 0; j < m_Channel.Dimension; j++)
                                         {
-                                            res.Skin[i].Weight[j] = componentsFloatArray[i * m_Channel.dimension + j];
+                                            res.Skin[i].Weight[j] = componentsFloatArray[i * m_Channel.Dimension + j];
                                         }
                                     }
                                     break;
@@ -378,7 +379,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                                     {
                                         for (int j = 0; j < m_Channel.Dimension; j++)
                                         {
-                                            res.Skin[i].boneIndex[j] = componentsIntArray[i * m_Channel.dimension + j];
+                                            res.Skin[i].BoneIndex[j] = componentsIntArray[i * m_Channel.Dimension + j];
                                         }
                                     }
                                     break;
@@ -404,7 +405,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                                     res.UV1 = componentsFloatArray;
                                     break;
                                 case 5:
-                                    if (Reader.Version.Major >= 5) //kShaderChannelTexCoord2
+                                    if (version.Major >= 5) //kShaderChannelTexCoord2
                                     {
                                         res.UV2 = componentsFloatArray;
                                     }
@@ -426,13 +427,13 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
         }
 
-        private void DecompressCompressedMesh(Mesh res)
+        private static void DecompressCompressedMesh(Mesh res, Version version)
         {
             //Vertex
             if (res.CompressedMesh.Vertices.NumItems > 0)
             {
                 res.VertexCount = (int)res.CompressedMesh.Vertices.NumItems / 3;
-                res.Vertices = res.CompressedMesh.Vertices.UnpackFloats(3, 3 * 4);
+                res.Vertices = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.Vertices, 3, 3 * 4);
             }
             //UV
             if (res.CompressedMesh.UV.NumItems > 0)
@@ -453,28 +454,28 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         if ((texCoordBits & kUVChannelExists) != 0)
                         {
                             var uvDim = 1 + (int)(texCoordBits & kUVDimensionMask);
-                            var m_UV = res.CompressedMesh.UV.UnpackFloats(uvDim, uvDim * 4, uvSrcOffset, m_VertexCount);
-                            SetUV(uv, m_UV);
+                            var m_UV = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.UV, uvDim, uvDim * 4, uvSrcOffset, res.VertexCount);
+                            SetUV(res, uv, m_UV);
                             uvSrcOffset += uvDim * res.VertexCount;
                         }
                     }
                 }
                 else
                 {
-                    res.UV0 = res.CompressedMesh.UV.UnpackFloats(2, 2 * 4, 0, res.VertexCount);
+                    res.UV0 = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.UV, 2, 2 * 4, 0, res.VertexCount);
                     if (res.CompressedMesh.UV.NumItems >= res.VertexCount * 4)
                     {
-                        res.UV1 = res.CompressedMesh.UV.UnpackFloats(2, 2 * 4, res.VertexCount * 2, m_VertexCount);
+                        res.UV1 = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.UV, 2, 2 * 4, res.VertexCount * 2, res.VertexCount);
                     }
                 }
             }
             //BindPose
-            if (Reader.Version.LessThan(5))
+            if (version.LessThan(5))
             {
                 if (res.CompressedMesh.BindPoses.NumItems > 0)
                 {
                     res.BindPose = new Matrix4x4[res.CompressedMesh.BindPoses.NumItems / 16];
-                    var m_BindPoses_Unpacked = res.CompressedMesh.BindPoses.UnpackFloats(16, 4 * 16);
+                    var m_BindPoses_Unpacked = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.BindPoses, 16, 4 * 16);
                     var buffer = new float[16];
                     for (int i = 0; i < res.BindPose.Length; i++)
                     {
@@ -486,8 +487,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             //Normal
             if (res.CompressedMesh.Normals.NumItems > 0)
             {
-                var normalData = res.CompressedMesh.Normals.UnpackFloats(2, 4 * 2);
-                var signs = res.CompressedMesh.NormalSigns.UnpackInts();
+                var normalData = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.Normals, 2, 4 * 2);
+                var signs = PackedIntVectorConverter.UnpackInts(res.CompressedMesh.NormalSigns);
                 res.Normals = new float[res.CompressedMesh.Normals.NumItems / 2 * 3];
                 for (int i = 0; i < res.CompressedMesh.Normals.NumItems / 2; ++i)
                 {
@@ -516,8 +517,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             //Tangent
             if (res.CompressedMesh.Tangents.NumItems > 0)
             {
-                var tangentData = res.CompressedMesh.Tangents.UnpackFloats(2, 4 * 2);
-                var signs = res.CompressedMesh.TangentSigns.UnpackInts();
+                var tangentData = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.Tangents, 2, 4 * 2);
+                var signs = PackedIntVectorConverter.UnpackInts(res.CompressedMesh.TangentSigns);
                 res.Tangents = new float[res.CompressedMesh.Tangents.NumItems / 2 * 4];
                 for (int i = 0; i < res.CompressedMesh.Tangents.NumItems / 2; ++i)
                 {
@@ -546,18 +547,18 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 }
             }
             //FloatColor
-            if (Reader.Version.GreaterThanOrEquals(5))
+            if (version.GreaterThanOrEquals(5))
             {
                 if (res.CompressedMesh.FloatColors.NumItems > 0)
                 {
-                    res.Colors = res.CompressedMesh.FloatColors.UnpackFloats(1, 4);
+                    res.Colors = PackedFloatVectorConverter.UnpackFloats(res.CompressedMesh.FloatColors, 1, 4);
                 }
             }
             //Skin
             if (res.CompressedMesh.Weights.NumItems > 0)
             {
-                var weights = res.CompressedMesh.Weights.UnpackInts();
-                var boneIndices = res.CompressedMesh.BoneIndices.UnpackInts();
+                var weights = PackedIntVectorConverter.UnpackInts(res.CompressedMesh.Weights);
+                var boneIndices = PackedIntVectorConverter.UnpackInts(res.CompressedMesh.BoneIndices);
 
                 InitMSkin(res);
 
@@ -601,14 +602,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             //IndexBuffer
             if (res.CompressedMesh.Triangles.NumItems > 0)
             {
-                res.IndexBuffer = Array.ConvertAll(res.CompressedMesh.Triangles.UnpackInts(), x => (uint)x);
+                res.IndexBuffer = Array.ConvertAll(PackedIntVectorConverter.UnpackInts(res.CompressedMesh.Triangles), x => (uint)x);
             }
             //Color
             if (res.CompressedMesh.Colors.NumItems > 0)
             {
                 res.CompressedMesh.Colors.NumItems *= 4;
                 res.CompressedMesh.Colors.BitSize /= 4;
-                var tempColors = res.CompressedMesh.Colors.UnpackInts();
+                var tempColors = PackedIntVectorConverter.UnpackInts(res.CompressedMesh.Colors);
                 res.Colors = new float[res.CompressedMesh.Colors.NumItems];
                 for (int v = 0; v < res.CompressedMesh.Colors.NumItems; v++)
                 {
@@ -617,8 +618,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
         }
 
-        private void GetTriangles(Mesh res)
+        private static void GetTriangles(Mesh res, Version version)
         {
+            var items = new List<uint>();
             foreach (var m_SubMesh in res.SubMeshes)
             {
                 var firstIndex = m_SubMesh.FirstByte / 2;
@@ -632,12 +634,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 {
                     for (int i = 0; i < indexCount; i += 3)
                     {
-                        res.Indices.Add(res.IndexBuffer[firstIndex + i]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + i + 1]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + i + 2]);
+                        items.Add(res.IndexBuffer[firstIndex + i]);
+                        items.Add(res.IndexBuffer[firstIndex + i + 1]);
+                        items.Add(res.IndexBuffer[firstIndex + i + 2]);
                     }
                 }
-                else if (Reader.Version.LessThan(4) || topology == GfxPrimitiveType.TriangleStrip)
+                else if (version.LessThan(4) || topology == GfxPrimitiveType.TriangleStrip)
                 {
                     // de-stripify :
                     uint triIndex = 0;
@@ -654,15 +656,15 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         // do the winding flip-flop of strips :
                         if ((i & 1) == 1)
                         {
-                            res.Indices.Add(b);
-                            res.Indices.Add(a);
+                            items.Add(b);
+                            items.Add(a);
                         }
                         else
                         {
-                            res.Indices.Add(a);
-                            res.Indices.Add(b);
+                            items.Add(a);
+                            items.Add(b);
                         }
-                        res.Indices.Add(c);
+                        items.Add(c);
                         triIndex += 3;
                     }
                     //fix indexCount
@@ -672,12 +674,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 {
                     for (int q = 0; q < indexCount; q += 4)
                     {
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q + 1]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q + 2]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q + 2]);
-                        res.Indices.Add(res.IndexBuffer[firstIndex + q + 3]);
+                        items.Add(res.IndexBuffer[firstIndex + q]);
+                        items.Add(res.IndexBuffer[firstIndex + q + 1]);
+                        items.Add(res.IndexBuffer[firstIndex + q + 2]);
+                        items.Add(res.IndexBuffer[firstIndex + q]);
+                        items.Add(res.IndexBuffer[firstIndex + q + 2]);
+                        items.Add(res.IndexBuffer[firstIndex + q + 3]);
                     }
                     //fix indexCount
                     m_SubMesh.IndexCount = indexCount / 2 * 3;
@@ -687,6 +689,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     throw new NotSupportedException("Failed getting triangles. Submesh topology is lines or points.");
                 }
             }
+            res.Indices = [..items];
         }
 
         private static void InitMSkin(Mesh res)

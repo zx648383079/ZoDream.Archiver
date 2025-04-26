@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             return new()
             {
-                Texture = serializer.Deserialize<PPtr<Texture2D>>(reader),
+                Texture = reader.ReadPPtr<Texture2D>(serializer),
                 Name = reader.ReadStringZeroTerm(),
             };
         }

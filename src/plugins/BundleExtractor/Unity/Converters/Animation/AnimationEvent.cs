@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
+using Object = UnityEngine.Object;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -14,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.Time = reader.ReadSingle();
             res.FunctionName = reader.ReadAlignedString();
             res.Data = reader.ReadAlignedString();
-            res.ObjectReferenceParameter = serializer.Deserialize<PPtr>(reader);
+            res.ObjectReferenceParameter = reader.ReadPPtr<Object>(serializer);
             res.FloatParameter = reader.ReadSingle();
             if (version.Major >= 3) //3 and up
             {

@@ -48,7 +48,7 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestCombine()
         {
-            var res = FileNameHelper.Combine("D://hhh", "a.t");
+            var res = BundleStorage.Combine("D://hhh", "a.t");
             Assert.IsTrue(res.IndexOf('#') > 0);
         }
 

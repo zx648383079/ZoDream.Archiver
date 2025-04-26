@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 PreloadIndex = reader.ReadInt32(),
                 PreloadSize = reader.ReadInt32(),
-                Asset = serializer.Deserialize<PPtr<Object>>(reader)
+                Asset = reader.ReadPPtr<Object>(serializer)
             };
         }
     }
@@ -35,7 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new AssetBundle
             {
                 Name = reader.ReadAlignedString(),
-                PreloadTable = reader.ReadArray(_ => serializer.Deserialize<PPtr<Object>>(reader)),
+                PreloadTable = reader.ReadPPtrArray<Object>(serializer),
 
                 Container = reader.ReadArray(_ => new KeyValuePair<string, AssetInfo>(reader.ReadAlignedString(),
                         serializer.Deserialize<AssetInfo>(reader)))

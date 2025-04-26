@@ -46,6 +46,7 @@ namespace ZoDream.BundleExtractor
         private readonly HashSet<string> _assetFileHash = [];
         private readonly HashSet<long> _excludeItems = [];
 
+        public IEntryService? Service => _service;
         public ISerializedFile? this[int index] => _assetItems[index];
         public ILogger? Logger => _service.Get<ILogger>();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 
@@ -24,11 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var compressedScalarTracks = reader.ReadBytes(compressedScalarTracksCount);
 
             int numaclTransformTrackIDToBindingCurveID = reader.ReadInt32();
-            var aclTransformTrackIDToBindingCurveID = new List<AclTransformTrackIDToBindingCurveID>();
-            for (int i = 0; i < numaclTransformTrackIDToBindingCurveID; i++)
-            {
-                aclTransformTrackIDToBindingCurveID.Add(new AclTransformTrackIDToBindingCurveID(reader));
-            }
+            var aclTransformTrackIDToBindingCurveID = reader.ReadArray<AclTransformTrackIDToBindingCurveID>(serializer);
             var aclScalarTrackIDToBindingCurveID = reader.ReadArray(r => r.ReadUInt32());
             return res;
         }

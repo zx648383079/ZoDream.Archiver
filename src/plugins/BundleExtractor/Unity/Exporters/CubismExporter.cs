@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -13,28 +14,34 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
+            if (resource[entryId] is not MonoBehaviour behavior)
+            {
+                return;
+            }
             if (!LocationStorage.TryCreate(fileName, ".moc3", mode, out fileName))
             {
                 return;
             }
-            var reader = _behavior.Reader;
+            var reader = resource.OpenRead(entryId);
+            reader.Position = behavior.DataOffset;
             var length = reader.ReadUInt32();
             reader.ReadAsStream(length).SaveAs(fileName);
         }
 
 
-        public static OrderedDictionary ParseMonoBehavior(MonoBehaviour m_MonoBehaviour,
+        public static OrderedDictionary ParseMonoBehavior(int entryId, ISerializedFile resource,
             CubismMonoBehaviorType cubismMonoBehaviorType,
             AssemblyLoader assemblyLoader)
         {
-            var orderedDict = m_MonoBehaviour.ToType();
+            var orderedDict = UnityConverter.ToType(entryId, resource);
             if (orderedDict != null)
             {
                 return orderedDict;
             }
 
             var fieldName = "";
-            var m_Type = BehaviorExporter.ConvertToTypeTree(m_MonoBehaviour, assemblyLoader);
+            var behaviour = resource[entryId] as MonoBehaviour;
+            var m_Type = BehaviorExporter.ConvertToTypeTree(behaviour, assemblyLoader, resource);
             switch (cubismMonoBehaviorType)
             {
                 case CubismMonoBehaviorType.FadeController:
@@ -73,12 +80,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             if (m_Type.Nodes.FindIndex(x => x.Name.Equals(fieldName, System.StringComparison.CurrentCultureIgnoreCase)) < 0)
             {
-                m_MonoBehaviour.Script.TryGet(out var m_MonoScript);
-                var assetName = m_MonoBehaviour.Name != "" ? m_MonoBehaviour.Name : m_MonoScript.ClassName;
+                behaviour.Script.TryGet(out var m_MonoScript);
+                var assetName = behaviour.Name != "" ? behaviour.Name : m_MonoScript.ClassName;
                 return null;
             }
-            orderedDict = m_MonoBehaviour.ToType(m_Type);
-            return orderedDict;
+            return UnityConverter.ToType(m_Type, entryId, resource);
         }
     }
 

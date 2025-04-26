@@ -18,8 +18,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             var res = new MeshFilter
             {
-                GameObject = serializer.Deserialize<PPtr<GameObject>>(reader),
-                Mesh = serializer.Deserialize<PPtr<Mesh>>(reader)
+                GameObject = reader.ReadPPtr<GameObject>(serializer),
+                Mesh = reader.ReadPPtr<Mesh>(serializer)
             };
             if (reader.TryGet<IDependencyBuilder>(out var builder))
             {

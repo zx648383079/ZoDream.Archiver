@@ -23,6 +23,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             reader.AlignStream();
             res.Script = reader.ReadPPtr<MonoScript>(serializer);
             res.Name = reader.ReadAlignedString();
+            res.DataOffset = reader.Position;
             return res;
         }
 

@@ -8,7 +8,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class JsonExporter(Object data) : IBundleExporter
+    internal class JsonExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
         private static readonly JsonSerializerOptions Options = new()
         {
@@ -19,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 },
         };
 
-        public string Name => data.Name;
+        public string FileName => resource[entryId].Name;
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
@@ -28,7 +28,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return;
             }
             using var fs = File.Create(fileName);
-            JsonSerializer.Serialize(fs, data, Options);
+            JsonSerializer.Serialize(fs, resource[entryId], Options);
         }
     }
 }

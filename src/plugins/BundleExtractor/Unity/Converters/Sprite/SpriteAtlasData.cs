@@ -12,8 +12,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var version = reader.Get<Version>();
             var res = new SpriteAtlasData
             {
-                Texture = serializer.Deserialize<PPtr<Texture2D>>(reader),
-                AlphaTexture = serializer.Deserialize<PPtr<Texture2D>>(reader),
+                Texture = reader.ReadPPtr<Texture2D>(serializer),
+                AlphaTexture = reader.ReadPPtr<Texture2D>(serializer),
                 TextureRect = reader.ReadVector4(),
                 TextureRectOffset = reader.ReadVector2()
             };

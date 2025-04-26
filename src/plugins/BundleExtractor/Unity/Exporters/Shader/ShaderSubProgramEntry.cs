@@ -1,4 +1,4 @@
-﻿using ZoDream.BundleExtractor.Models;
+﻿using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
@@ -11,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public ShaderSubProgramEntry(IBundleBinaryReader reader)
         {
-            var version = reader.Get<UnityVersion>();
+            var version = reader.Get<Version>();
             Offset = reader.ReadInt32();
             Length = reader.ReadInt32();
             if (version.GreaterThanOrEquals(2019, 3)) //2019.3 and up

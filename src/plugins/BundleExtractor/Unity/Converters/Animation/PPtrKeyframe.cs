@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
@@ -11,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return new()
             {
                 Time = reader.ReadSingle(),
-                Value = serializer.Deserialize<PPtr>(reader)
+                Value = reader.ReadPPtr<Object>(serializer)
             };
         }
 

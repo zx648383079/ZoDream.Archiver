@@ -20,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             var res = new AnimatorOverrideController();
             res.Name = reader.ReadAlignedString();
-            res.Controller = serializer.Deserialize<PPtr<RuntimeAnimatorController>>(reader);
+            res.Controller = reader.ReadPPtr<RuntimeAnimatorController>(serializer);
 
             res.Clips = reader.ReadArray(_ => serializer.Deserialize<AnimationClipOverride>(reader));
             return res;

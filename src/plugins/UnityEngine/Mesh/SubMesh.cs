@@ -1,7 +1,7 @@
 ﻿
 namespace UnityEngine
 {
-    public struct SubMesh
+    public class SubMesh
     {
         public uint FirstByte;
         public uint IndexCount;

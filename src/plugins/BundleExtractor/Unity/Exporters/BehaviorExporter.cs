@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Exporters.Cecil;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -9,20 +10,17 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class BehaviorExporter : IBundleExporter
+    internal class BehaviorExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        public BehaviorExporter(int entryId, ISerializedFile resource)
-        {
-            _behavior = resource[entryId] as MonoBehaviour;
-        }
-
-        private readonly MonoBehaviour _behavior;
-
-        public string FileName => _behavior.Name;
+        public string FileName => resource[entryId].Name;
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (_behavior.Script is null || !_behavior.Script.TryGet(out var script))
+            if (resource[entryId] is not MonoBehaviour behavior)
+            {
+                return;
+            }
+            if (behavior.Script is null || !behavior.Script.TryGet(out var script))
             {
                 return;
             }
@@ -33,7 +31,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             switch (script.ClassName)
             {
                 case "CubismMoc":
-                    new CubismExporter(_behavior).SaveAs(fileName, mode);
+                    new CubismExporter(entryId, resource).SaveAs(fileName, mode);
                     return;
                 case "CubismPhysicsController":
                     break;
@@ -56,18 +54,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 case "CubismDisplayInfoPartName":
                     break;
             }
-            var type = _behavior.ToType();
+            var type = UnityConverter.ToType(entryId, resource);
             if (type == null)
             {
-                var loader = _behavior.Reader.Get<AssemblyLoader>();
+                var loader = resource.Container?.Service?.Get<AssemblyLoader>();
                 if (loader is null)
                 {
                     return;
                 }
-                var m_Type = ConvertToTypeTree(_behavior, loader);
-                type = _behavior.ToType(m_Type);
+                var m_Type = ConvertToTypeTree(behavior, loader, resource);
+                type = UnityConverter.ToType(m_Type, entryId, resource);
             }
-            
             using var fs = File.Create(fileName);
             JsonSerializer.Serialize(fs, type);
         }
@@ -75,14 +72,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
 
         public static TypeTree ConvertToTypeTree(MonoBehaviour m_MonoBehavior, 
-            AssemblyLoader assemblyLoader)
+            AssemblyLoader assemblyLoader, ISerializedFile resource)
         {
             var m_Type = new TypeTree();
-            var helper = new SerializedTypeHelper(m_MonoBehavior.Version);
+            var helper = new SerializedTypeHelper(resource.Version);
             helper.AddMonoBehavior(m_Type.Nodes, 0);
             if (m_MonoBehavior.Script.TryGet(out var m_Script))
             {
-                var typeDef = assemblyLoader.GetTypeDefinition(m_Script.AssemblyName, string.IsNullOrEmpty(m_Script.m_Namespace) ? m_Script.m_ClassName : $"{m_Script.m_Namespace}.{m_Script.m_ClassName}");
+                var typeDef = assemblyLoader.GetTypeDefinition(m_Script.AssemblyName, 
+                    string.IsNullOrEmpty(m_Script.NameSpace) ? m_Script.ClassName : $"{m_Script.NameSpace}.{m_Script.ClassName}");
                 if (typeDef != null)
                 {
                     var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, helper, 1);

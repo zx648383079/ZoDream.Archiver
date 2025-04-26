@@ -18,12 +18,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             var res = new Animation
             {
-                GameObject = serializer.Deserialize<PPtr<GameObject>>(reader),
+                GameObject = reader.ReadPPtr<GameObject>(serializer),
                 IsEnabled = reader.ReadByte()
             };
             reader.AlignStream();
-            res.Clip = serializer.Deserialize<PPtr<AnimationClip>>(reader);
-            res.Clips = reader.ReadArray(_ => serializer.Deserialize<PPtr<AnimationClip>>(reader)!);
+            res.Clip = reader.ReadPPtr<AnimationClip>(serializer);
+            res.Clips = reader.ReadPPtrArray<AnimationClip>(serializer);
             if (reader.TryGet<IDependencyBuilder>(out var builder))
             {
                 var container = reader.Get<ISerializedFile>();

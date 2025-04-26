@@ -19,13 +19,13 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
             var res = new Transform();
-            res.GameObject = serializer.Deserialize<PPtr<GameObject>>(reader);
+            res.GameObject = reader.ReadPPtr<GameObject>(serializer);
             res.LocalRotation = reader.ReadQuaternion();
             res.LocalPosition = reader.ReadVector3Or4();
             res.LocalScale = reader.ReadVector3Or4();
 
-            res.Children = reader.ReadArray(_ => serializer.Deserialize<PPtr<Transform>>(reader));
-            res.Father = serializer.Deserialize<PPtr<Transform>>(reader);
+            res.Children = reader.ReadPPtrArray<Transform>(serializer);
+            res.Father = reader.ReadPPtr<Transform>(serializer);
 
             if (reader.TryGet<IDependencyBuilder>(out var builder))
             {

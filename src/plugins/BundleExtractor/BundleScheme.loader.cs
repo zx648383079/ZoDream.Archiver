@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor
     public partial class BundleScheme
     {
         private readonly Type[] _loaderItems = [
-            typeof(UnityEngine),
+            typeof(Engines.UnityEngine),
             typeof(CocosEngine),
             typeof(UnrealEngine),
             typeof(GodotEngine),

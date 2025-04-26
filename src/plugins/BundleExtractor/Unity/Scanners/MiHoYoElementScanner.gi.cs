@@ -2,6 +2,7 @@
 using System.IO;
 using System.Numerics;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -95,7 +96,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var pos = reader.Position;
             reader.Position = streamedClipOffset;
 
-            res.Data = reader.ReadArray(streamedClipCount, (r, _) => r.ReadUInt32());
+            res.Data = StreamedClipConverter.ReadData(reader, streamedClipCount * 4, serializer);
             res.CurveCount = streamedClipCurveCount;
 
             reader.Position = pos;

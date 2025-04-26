@@ -10,8 +10,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             return new()
             {
-                OriginalClip = serializer.Deserialize<PPtr<AnimationClip>>(reader),
-                OverrideClip = serializer.Deserialize<PPtr<AnimationClip>>(reader)
+                OriginalClip = reader.ReadPPtr<AnimationClip>(serializer),
+                OverrideClip = reader.ReadPPtr<AnimationClip>(serializer)
             };
         }
     }

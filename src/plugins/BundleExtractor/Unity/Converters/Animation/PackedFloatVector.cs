@@ -26,7 +26,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public float[] UnpackFloats(PackedFloatVector res, int itemCountInChunk, int chunkStride, int start = 0, int numChunks = -1)
+        public static float[] UnpackFloats(PackedFloatVector res, int itemCountInChunk, int chunkStride, int start = 0, int numChunks = -1)
         {
             int bitPos = res.BitSize * start;
             int indexPos = bitPos / 8;

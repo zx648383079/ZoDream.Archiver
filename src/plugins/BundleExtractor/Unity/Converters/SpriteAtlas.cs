@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new SpriteAtlas
             {
                 Name = reader.ReadAlignedString(),
-                PackedSprites = reader.ReadArray(_ => serializer.Deserialize<PPtr<Sprite>>(reader))
+                PackedSprites = reader.ReadPPtrArray<Sprite>(serializer)
             };
 
 

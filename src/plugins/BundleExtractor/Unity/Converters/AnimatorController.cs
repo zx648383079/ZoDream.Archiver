@@ -32,7 +32,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 res.TOS.Add(reader.ReadUInt32(), reader.ReadAlignedString());
             }
 
-            res.AnimationClips = reader.ReadArray(_ => serializer.Deserialize<PPtr<AnimationClip>>(reader));
+            res.AnimationClips = reader.ReadPPtrArray<AnimationClip>(serializer);
             return res;
         }
     }

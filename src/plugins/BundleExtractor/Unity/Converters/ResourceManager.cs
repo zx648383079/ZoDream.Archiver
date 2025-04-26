@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 var m_ObjectHideFlags = reader.ReadUInt32();
             }
-            return new()
+            return new(reader.Get<ISerializedFile>())
             {
                 Container = reader.ReadArray(_ => new KeyValuePair<string, PPtr>(reader.ReadAlignedString(), serializer.Deserialize<PPtr>(reader)))
             };

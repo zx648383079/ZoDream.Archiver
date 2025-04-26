@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
+using Object = UnityEngine.Object;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var version = reader.Get<Version>();
             res.Path = reader.ReadUInt32();
             res.Attribute = reader.ReadUInt32();
-            res.Script = serializer.Deserialize<PPtr>(reader);
+            res.Script = reader.ReadPPtr<Object>(serializer);
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
                 res.TypeID = (NativeClassID)reader.ReadInt32();
