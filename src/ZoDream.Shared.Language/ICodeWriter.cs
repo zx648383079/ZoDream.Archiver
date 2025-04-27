@@ -35,6 +35,7 @@ namespace ZoDream.Shared.Language
         public ICodeWriter Write(long val);
         public ICodeWriter Write(double val);
         public ICodeWriter Write(object? val);
+        public ICodeWriter Write(ICodeWriter val);
         /// <summary>
         /// 写入字符串，请确认编码是 UTF8
         /// </summary>

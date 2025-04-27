@@ -14,17 +14,11 @@ namespace ZoDream.Tests
             var fileName = Path.Combine(root, "unity//mesh.hexpat");
             using var fs = File.OpenRead(fileName);
             var lexer = new PatternLanguageLexer(new StreamReader(fs));
-            var items = new List<Token>();
-            while (true)
-            {
-                var token = lexer.NextToken();
-                items.Add(token);
-                if (token.Type == TokenType.Eof)
-                {
-                    break;
-                }
-            }
-            Assert.IsTrue(items.Count == 10);
+            var writer = new SourceWriter(lexer);
+            using var sb = new CodeWriter();
+            writer.Write(sb);
+            var res = sb.ToString();
+            Assert.IsTrue(res.Length > 0);
         }
     }
 }

@@ -3,6 +3,8 @@
 
 u64 beginPos in;
 
+import zodream.io;
+
 enum ArchiveFlags: u32 {
     CompressionTypeMask = 0x3f,
     BlocksAndDirectoryInfoCombined = 0x40,
@@ -20,12 +22,10 @@ struct FileHeader {
     u32 compressedBlocksInfoSize;
     ArchiveFlags flags;
     if (signature == "UnityFS") {
-        $ = $ + 1;
+        padding[1];
     }
     if (version >= 7) {
-        if ($ % 16 > 0) {
-            $ = $ + 16 - $ % 16;
-        }
+        zodream::AlignTo<4>;
     }
 };
 

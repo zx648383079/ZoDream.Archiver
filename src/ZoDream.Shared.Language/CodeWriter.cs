@@ -111,6 +111,11 @@ namespace ZoDream.Shared.Language
             return this;
         }
 
+        public ICodeWriter Write(ICodeWriter val)
+        {
+            return Write(val.ToString());
+        }
+
         public ICodeWriter Write(char val, int repeatCount)
         {
             return Write(new string(val, repeatCount));
@@ -195,6 +200,23 @@ namespace ZoDream.Shared.Language
         public void Flush()
         {
             writer.Flush();
+        }
+
+        public string ReadToEnd()
+        {
+            if (writer is StringWriter o)
+            {
+                return o.ToString();
+            }
+            if (writer is StreamWriter i)
+            {
+                var pos = i.BaseStream.Position;
+                i.BaseStream.Position = 0;
+                var res = new StreamReader(i.BaseStream, i.Encoding).ReadToEnd();
+                i.BaseStream.Position = pos;
+                return res;
+            }
+            return writer.ToString() ?? string.Empty;
         }
 
         public override string? ToString()

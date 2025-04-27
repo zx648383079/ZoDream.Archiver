@@ -55,10 +55,10 @@ struct MeshBlendShapeChannel{
 };
 
 struct BlendShapeData {
-    zodream::AlignString<BlendShapeVertex> vertices;
-    zodream::AlignString<MeshBlendShape> shapes;
-    zodream::AlignString<MeshBlendShapeChannel> channels;
-    zodream::AlignString<float> fullWeights;
+    zodream::List<BlendShapeVertex> vertices;
+    zodream::List<MeshBlendShape> shapes;
+    zodream::List<MeshBlendShapeChannel> channels;
+    zodream::List<float> fullWeights;
 };
 
 
@@ -97,15 +97,15 @@ struct ChannelInfo {
 
 struct VertexData {
     u32 VertexCount;
-    zodream::AlignString<ChannelInfo> channels;
-    zodream::AlignString<u8> DataSize;
+    zodream::List<ChannelInfo> channels;
+    zodream::List<u8> DataSize;
 };
 
 struct PackedFloatVector {
     u32 NumItems;
     float Range;
     float Start;
-    zodream::AlignString<u8> Data;
+    zodream::List<u8> Data;
     zodream::AlignTo<4>;
     u8 BitSize;
     zodream::AlignTo<4>;
@@ -113,7 +113,7 @@ struct PackedFloatVector {
 
 struct PackedIntVector {
     u32 NumItems;
-    zodream::AlignString<u8> Data;
+    zodream::List<u8> Data;
     zodream::AlignTo<4>;
     u8 BitSize;
     zodream::AlignTo<4>;
@@ -135,14 +135,14 @@ struct CompressedMesh {
 
 struct Mesh {
     zodream::AlignString name;
-    zodream::AlignString<SubMesh> subItems;
+    zodream::List<SubMesh> subItems;
     BlendShapeData shapes;
     UnityMatrix bindPose;
-    zodream::AlignString<u32> boneNameHashes;
+    zodream::List<u32> boneNameHashes;
     u32 rootBoneNameHash;
 
-    zodream::AlignString<MinMaxAABB> bonesAABB;
-    zodream::AlignString<u32> variableBoneCountWeights;
+    zodream::List<MinMaxAABB> bonesAABB;
+    zodream::List<u32> variableBoneCountWeights;
     u8 meshCompression;
     bool IsReadable;
     bool KeepVertices;
@@ -157,13 +157,13 @@ struct Mesh {
     u32 ResourceFlags;
     s32 RootClusterPage;
     u32 IndexBuffer[RootClusterPage / 4];
-    zodream::AlignString<u16> ImposterAtlas;
-    zodream::AlignString<VGPackedHierarchyNode> vgPackedHierarchyNode;
-    zodream::AlignString<u32> HierarchyRootOffsets;
-    zodream::AlignString<VGPageStreamingState> PageStreamingStates;
-    zodream::AlignString<u32> PageDependencies;
+    zodream::List<u16> ImposterAtlas;
+    zodream::List<VGPackedHierarchyNode> vgPackedHierarchyNode;
+    zodream::List<u32> HierarchyRootOffsets;
+    zodream::List<VGPageStreamingState> PageStreamingStates;
+    zodream::List<u32> PageDependencies;
     zodream::AlignTo<4>;
-    s32 _add;
+    s32;
     if (meshCompression == 0) {
         s32 IndexFormat;
     } else {
@@ -180,16 +180,16 @@ struct Mesh {
     VertexData vertexData;
     zodream::AlignTo<4>;
     if (meshCompression > 0) {
-        $ = $ + 44;
+        padding[44];
     }
     CompressedMesh compressedMesh;
     
     AABB localAABB;
     s32 MeshUsageFlags;
     s32 CookingOptions;
-    zodream::AlignString<u8> BakedConvexCollisionMesh;
+    zodream::List<u8> BakedConvexCollisionMesh;
     zodream::AlignTo<4>;
-    zodream::AlignString<u8> BakedTriangleCollisionMesh;
+    zodream::List<u8> BakedTriangleCollisionMesh;
     zodream::AlignTo<4>;
     float MeshMetrics[2];
 

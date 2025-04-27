@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -18,7 +19,7 @@ namespace ZoDream.SourceGenerator
         /// <summary>
         /// 上一次获取到的Token
         /// </summary>
-        public Token? Current;
+        public Token Current {  get; private set; }
         private int _lineIndex = 0;
         private int _columnIndex = 0;
         private int _charIndex = -1;
@@ -28,6 +29,9 @@ namespace ZoDream.SourceGenerator
         private int _currentChar = -1;
         // 指示下一次只获取当前的
         private bool _moveNextStop = false;
+
+        object IEnumerator.Current => Current;
+
         public Token NextToken()
         {
             Token token;
@@ -41,6 +45,27 @@ namespace ZoDream.SourceGenerator
             }
             Current = token;
             return token;
+        }
+
+        public bool MoveNext()
+        {
+            if (Current.Type == TokenType.Eof)
+            {
+                return false;
+            }
+            NextToken();
+            return true;
+        }
+
+        public void Reset()
+        {
+            if (reader is StreamReader o)
+            {
+                o.BaseStream.Position = 0;
+            } else
+            {
+                // 不支持
+            }
         }
 
         private Token ReadToken()
@@ -633,7 +658,7 @@ namespace ZoDream.SourceGenerator
         {
             return text switch
             {
-                "!" or "=" or "return" or "if" or "import" or "struct" or "for" or "break" or "switch" or "fn"
+                "!" or "=" or "return" or "if" or "else" or "import" or "struct" or "for" or "break" or "switch" or "fn"
                 or "const" or "as" or "namespace"
                 or "padding"
                 or "include" 
@@ -732,6 +757,11 @@ namespace ZoDream.SourceGenerator
         private CursorPosition CreatePosition()
         {
             return CreatePosition(_moveNextStop ? 1 : 0);
+        }
+
+        public void Dispose()
+        {
+            reader.Dispose();
         }
     }
 }

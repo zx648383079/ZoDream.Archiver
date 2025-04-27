@@ -1,7 +1,8 @@
-﻿namespace ZoDream.Shared.Language
+﻿using System.Collections.Generic;
+
+namespace ZoDream.Shared.Language
 {
-    public interface ILexer
+    public interface ILexer : IEnumerator<Token>
     {
-        public Token NextToken();
     }
 }

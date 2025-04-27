@@ -231,7 +231,7 @@ struct AnimationClip {
     AABB Bounds;
     u32 MuscleClipSize;
     if (MuscleClipSize > 0) {
-        u32 _un;
+        u32;
     }
     ClipMuscleConstant MuscleClip;
     StreamingInfo StreamData;
