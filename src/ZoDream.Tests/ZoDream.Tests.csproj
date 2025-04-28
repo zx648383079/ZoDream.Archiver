@@ -25,6 +25,7 @@
     <ProjectReference Include="..\plugins\FModExporter\FModExporter.csproj" />
     <ProjectReference Include="..\plugins\KhronosExporter\KhronosExporter.csproj" />
     <ProjectReference Include="..\plugins\LuaDecompiler\LuaDecompiler.csproj" />
+    <ProjectReference Include="..\plugins\SourceGenerator\SourceGenerator.csproj" />
     <ProjectReference Include="..\plugins\SpineExporter\SpineExporter.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Media\ZoDream.Shared.Media.csproj" />

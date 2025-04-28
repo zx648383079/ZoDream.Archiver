@@ -91,6 +91,7 @@ namespace ZoDream.BundleExtractor
             // 从配置获取制作者
             var producer = scheme.Get<IBundleProducer>(options);
             var service = scheme.Service;
+            service.Add(options);
             service.Add(UnknownProducer.CheckKey, producer is UnknownProducer || producer is null);
             if (producer is null)
             {

@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Hashing;
-using System.Linq;
-using System.Numerics;
-using System.Text;
+﻿using System.Text;
 using ZoDream.AutodeskExporter;
-using ZoDream.BundleExtractor;
 using ZoDream.BundleExtractor.Cocos;
 using ZoDream.KhronosExporter;
-using ZoDream.KhronosExporter.Models;
-using ZoDream.ShaderDecompiler;
-using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.IO;
 
@@ -80,7 +71,7 @@ namespace ZoDream.Tests
         {
             var fileName = "F:\\apk\\zmxs\\mesh.bin";
             using var fs = File.OpenRead(fileName);
-            Assert.IsTrue(fs is null);
+            Assert.IsTrue(fs is not null);
         }
 
 
