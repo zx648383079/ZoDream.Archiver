@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 using UnityE = ZoDream.BundleExtractor.Engines.UnityEngine;
@@ -20,7 +21,7 @@ namespace ZoDream.BundleExtractor.Producers
         {
             if (options.Engine == UnityE.EngineName)
             {
-                return new BundleSerializer(Engines.UnityEngine.Converters);
+                return new BundleSerializer(UnityConverter.Converters);
             }
             return new BundleSerializer();
         }
