@@ -49,6 +49,11 @@ namespace ZoDream.BundleExtractor
                     try
                     {
                         var obj = asset[i];
+                        if (obj is null)
+                        {
+                            // 默认 object 不做转化
+                            continue;
+                        }
                         var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() : obj.Name;
                         var exporter = TryParse(asset, i);
                         exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,

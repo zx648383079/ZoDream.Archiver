@@ -128,7 +128,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var res = new Clip();
             var version = reader.Get<Version>();
             res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
-            res.DenseClip = serializer.Deserialize<DenseClip>(reader);
+            res.DenseClip = UnityConverter.ReadDenseClip(reader, serializer);
             if (IsSRGroup)
             {
                 res.ACLClip = ReadMiHoYoACLClip(reader, serializer);

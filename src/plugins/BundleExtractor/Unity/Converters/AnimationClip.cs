@@ -47,7 +47,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_HasMotionFloatCurves = reader.ReadBoolean();
                 reader.AlignStream();
             }
-            res.Events = reader.ReadArray(_ => serializer.Deserialize<AnimationEvent>(reader));
+            res.Events = reader.ReadArray<AnimationEvent>(serializer);
             if (version.Major >= 2017) //2017 and up
             {
                 reader.AlignStream();
@@ -66,25 +66,25 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     res.UseHighQualityCurve = reader.ReadBoolean();
                 }
                 reader.AlignStream();
-                res.RotationCurves = reader.ReadArray(_ => serializer.Deserialize<QuaternionCurve>(reader));
+                res.RotationCurves = reader.ReadArray<QuaternionCurve>(serializer);
 
-                res.CompressedRotationCurves = reader.ReadArray(_ => serializer.Deserialize<CompressedAnimationCurve>(reader));
+                res.CompressedRotationCurves = reader.ReadArray<CompressedAnimationCurve>(serializer);
 
 
 
                 if (version.GreaterThanOrEquals(5, 3))//5.3 and up
                 {
-                    res.EulerCurves = reader.ReadArray(_ => serializer.Deserialize<Vector3Curve>(reader));
+                    res.EulerCurves = reader.ReadArray<Vector3Curve>(serializer);
                 }
 
-                res.PositionCurves = reader.ReadArray(_ => serializer.Deserialize<Vector3Curve>(reader));
+                res.PositionCurves = reader.ReadArray<Vector3Curve>(serializer);
 
-                res.ScaleCurves = reader.ReadArray(_ => serializer.Deserialize<Vector3Curve>(reader));
-                res.FloatCurves = reader.ReadArray(_ => serializer.Deserialize<FloatCurve>(reader));
+                res.ScaleCurves = reader.ReadArray<Vector3Curve>(serializer);
+                res.FloatCurves = reader.ReadArray<FloatCurve>(serializer);
 
                 if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
                 {
-                    res.PPtrCurves = reader.ReadArray(_ => serializer.Deserialize<PPtrCurve>(reader));
+                    res.PPtrCurves = reader.ReadArray<PPtrCurve>(serializer);
                 }
 
                 res.SampleRate = reader.ReadSingle();

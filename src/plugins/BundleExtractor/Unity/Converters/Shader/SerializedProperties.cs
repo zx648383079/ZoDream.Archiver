@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             return new() 
             {
-                Props = reader.ReadArray(_ => serializer.Deserialize<SerializedProperty>(reader))
+                Props = reader.ReadArray<SerializedProperty>(serializer)
             };
         }
     }

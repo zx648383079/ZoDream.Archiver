@@ -10,14 +10,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             var res = new SerializedProgramParameters
             {
-                VectorParams = reader.ReadArray(_ => serializer.Deserialize<VectorParameter>(reader)),
-                MatrixParams = reader.ReadArray(_ => serializer.Deserialize<MatrixParameter>(reader)),
-                TextureParams = reader.ReadArray(_ => serializer.Deserialize<TextureParameter>(reader)),
-                BufferParams = reader.ReadArray(_ => serializer.Deserialize<BufferBinding>(reader)),
-                ConstantBuffers = reader.ReadArray(_ => serializer.Deserialize<ConstantBuffer>(reader)),
-                ConstantBufferBindings = reader.ReadArray(_ => serializer.Deserialize<BufferBinding>(reader)),
-                UAVParams = reader.ReadArray(_ => serializer.Deserialize<UAVParameter>(reader)),
-                Samplers = reader.ReadArray(_ => serializer.Deserialize<SamplerParameter>(reader))
+                VectorParams = reader.ReadArray<VectorParameter>(serializer),
+                MatrixParams = reader.ReadArray<MatrixParameter>(serializer),
+                TextureParams = reader.ReadArray<TextureParameter>(serializer),
+                BufferParams = reader.ReadArray<BufferBinding>(serializer),
+                ConstantBuffers = reader.ReadArray<ConstantBuffer>(serializer),
+                ConstantBufferBindings = reader.ReadArray<BufferBinding>(serializer),
+                UAVParams = reader.ReadArray<UAVParameter>(serializer),
+                Samplers = reader.ReadArray<SamplerParameter>(serializer)
             };
             return res;
         }

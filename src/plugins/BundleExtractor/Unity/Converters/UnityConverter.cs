@@ -29,7 +29,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             new MeshFilterConverter(),
             new MeshRendererConverter(),
             new MonoBehaviourConverter(),
-            new MonoScriptConverter(),
             new MovieTextureConverter(),
             new PlayerSettingsConverter(),
             new PPtrConverter(),
@@ -154,6 +153,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             new SpriteRenderDataConverter(),
             new SpriteSettingsConverter(),
             new SpriteVertexConverter(),
+
+            new MonoScriptConverter(),
         ];
         public static void ReadTexture(Texture res, IBundleBinaryReader reader, IBundleSerializer serializer)
         {
@@ -178,6 +179,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
         }
 
+        public static DenseClip ReadDenseClip(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new DenseClip();
+            ReadDenseClip(res, reader, serializer);
+            return res;
+        }
         public static void ReadDenseClip(DenseClip res, IBundleBinaryReader reader, IBundleSerializer serializer)
         {
             res.FrameCount = reader.ReadInt32();

@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new SerializedPass();
             if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
             {
-                res.EditorDataHash = reader.ReadArray(_ => serializer.Deserialize<Hash128>(reader));
+                res.EditorDataHash = reader.ReadArray<Hash128>(serializer);
           
                 reader.AlignStream();
                 res.Platforms = reader.ReadArray(r => r.ReadByte());

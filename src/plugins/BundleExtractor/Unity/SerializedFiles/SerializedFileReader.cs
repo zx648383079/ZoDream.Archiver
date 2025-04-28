@@ -112,10 +112,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             var reader = new BundleBinaryReader(
                 new PartialStream(_reader.BaseStream, _header.DataOffset + info.ByteStart, info.ByteSize),
                 swapEndian ? EndianType.BigEndian : EndianType.LittleEndian);
-            reader.Add(this);
+            reader.Add<ISerializedFile>(this);
             reader.Add(info);
             reader.Add(Version);
             reader.Add(Platform);
+            reader.Add(Format);
             return reader;
         }
 

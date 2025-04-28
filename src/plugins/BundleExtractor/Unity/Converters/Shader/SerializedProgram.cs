@@ -11,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             var res = new SerializedProgram();
             var version = reader.Get<Version>();
-            res.SubPrograms = reader.ReadArray(_ => serializer.Deserialize<SerializedSubProgram>(reader));
+            res.SubPrograms = reader.ReadArray<SerializedSubProgram>(serializer);
   
 
             if (version.GreaterThanOrEquals(2021, 3, 10, VersionType.Final, 1) || //2021.3.10f1 and up

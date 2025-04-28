@@ -74,7 +74,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             reader.Position = clipOffset;
 
             res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
-            res.DenseClip = serializer.Deserialize<DenseClip>(reader); ;
+            res.DenseClip = UnityConverter.ReadDenseClip(reader, serializer);
 
             res.ConstantClip = serializer.Deserialize<ConstantClip>(reader);
 

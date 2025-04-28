@@ -19,9 +19,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             if (version.LessThan(2018, 2)) //2018.2 down
             {
-                res.Handles = reader.ReadArray(_ => serializer.Deserialize<Handle>(reader));
+                res.Handles = reader.ReadArray<Handle>(serializer);
 
-                res.ColliderArray = reader.ReadArray(_ => serializer.Deserialize<Collider>(reader));
+                res.ColliderArray = reader.ReadArray<Collider>(serializer);
             }
 
             res.HumanBoneIndex = reader.ReadInt32Array();

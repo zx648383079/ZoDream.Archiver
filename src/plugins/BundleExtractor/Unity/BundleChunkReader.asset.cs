@@ -8,6 +8,7 @@ using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
@@ -119,6 +120,7 @@ namespace ZoDream.BundleExtractor
                         var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
                         var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
                         object? res = null;
+                        // 默认 object 不做转化，所以为 null
                         if (serializer.Converters.TryGet(targetType, out var cvt))
                         {
                             if (serializedType.OldType is not null &&
@@ -203,7 +205,7 @@ namespace ZoDream.BundleExtractor
         {
             var serializer = _service.Get<IBundleSerializer>();
             var reader = asset.OpenRead(obj);
-            var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
+            var targetType = typeof(T);//ConvertToClassType((NativeClassID)obj.ClassID);
             var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
             if (serializer.Converters.TryGet(targetType, out var cvt))
             {

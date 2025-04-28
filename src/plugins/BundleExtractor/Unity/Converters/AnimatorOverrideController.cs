@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.Name = reader.ReadAlignedString();
             res.Controller = reader.ReadPPtr<RuntimeAnimatorController>(serializer);
 
-            res.Clips = reader.ReadArray(_ => serializer.Deserialize<AnimationClipOverride>(reader));
+            res.Clips = reader.ReadArray<AnimationClipOverride>(serializer);
             return res;
         }
     }

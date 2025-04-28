@@ -3,6 +3,9 @@
 
 import zodream.io;
 
+u32 versionMajor in;
+bool isTuanJie in;
+
 struct UnityMatrix {
     s32 length;
     float value[16 * length];
@@ -68,7 +71,7 @@ struct AnimationCurve<T> {
 };
 
 struct QuaternionCurve {
-    AnimationCurve<zodream::Vector4> curve;
+    AnimationCurve<zodream::Vector3> curve;
     zodream::AlignString path;
 };
 
@@ -88,6 +91,11 @@ struct FloatCurve {
     s32 classID;
     PPtr script;
     s32 flags;
+};
+
+struct Vector3Curve {
+    AnimationCurve<zodream::Vector3> curve;
+    zodream::AlignString path;
 };
 
 struct PPtrKeyframe {
@@ -227,17 +235,25 @@ struct AnimationClip {
     zodream::AlignTo<4>;
     zodream::List<QuaternionCurve> RotationCurves;
     zodream::List<CompressedAnimationCurve> compressedRotationCurves;
+    if (!isTuanJie) {
+        zodream::List<Vector3Curve> EulerCurves;
+        zodream::List<Vector3Curve> PositionCurves;
+        zodream::List<Vector3Curve> ScaleCurves;
+
+    }
     zodream::List<FloatCurve> floatCurves;
     zodream::List<PPtrCurve> PPtrCurves;
     float SampleRate;
     s32 WrapMode;
     AABB Bounds;
     u32 MuscleClipSize;
-    if (MuscleClipSize > 0) {
+    if (isTuanJie && MuscleClipSize > 0) {
         u32;
     }
     ClipMuscleConstant MuscleClip;
-    StreamingInfo StreamData;
+    if (isTuanJie) {
+        StreamingInfo StreamData;
+    }
 
     AnimationClipBindingConstant clipBindingConstant;
     bool HasGenericRootTransform;

@@ -81,7 +81,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var res = new Clip();
             var version = reader.Get<Version>();
             res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
-            res.DenseClip = serializer.Deserialize<DenseClip>(reader);
+            res.DenseClip = UnityConverter.ReadDenseClip(reader, serializer);
+            
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
                 res.ConstantClip = serializer.Deserialize<ConstantClip>(reader);

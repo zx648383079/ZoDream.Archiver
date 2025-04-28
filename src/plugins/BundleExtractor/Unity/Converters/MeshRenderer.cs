@@ -9,15 +9,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public override MeshRenderer? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            var target = reader.Get<BuildTarget>();
-            if (target == BuildTarget.NoTarget)
-            {
-                var m_ObjectHideFlags = reader.ReadUInt32();
-                var m_PrefabParentObject = serializer.Deserialize<PPtr>(reader);
-                var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
-            }
             var res = new MeshRenderer();
-            res.GameObject = reader.ReadPPtr<GameObject>(serializer);
+
+            RendererConverter.Read(res, reader, serializer);
+
             res.AdditionalVertexStreams = reader.ReadPPtr<Mesh>(serializer);
             if (reader.TryGet<IDependencyBuilder>(out var builder))
             {

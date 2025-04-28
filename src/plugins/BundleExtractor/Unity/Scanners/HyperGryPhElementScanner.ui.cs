@@ -119,7 +119,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             else
             {
-                res.DenseClip = serializer.Deserialize<DenseClip>(reader);
+                res.DenseClip = UnityConverter.ReadDenseClip(reader, serializer);
             }
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {

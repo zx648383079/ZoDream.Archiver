@@ -202,7 +202,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 }
             }
 
-            res.SubMeshes = reader.ReadArray(_ => serializer.Deserialize<SubMesh>(reader));
+            res.SubMeshes = reader.ReadArray<SubMesh>(serializer);
 
             if (version.GreaterThanOrEquals(4, 1)) //4.1 and up
             {
@@ -697,7 +697,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.Skin = new BoneWeights4[res.VertexCount];
             for (int i = 0; i < res.VertexCount; i++)
             {
-                res.Skin[i] = new BoneWeights4();
+                res.Skin[i] = new BoneWeights4()
+                {
+                    Weight = new float[4],
+                    BoneIndex = new int[4]
+                };
             }
         }
 

@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             var res = new ParserBindChannels
             {
-                Channels = reader.ReadArray(_ => serializer.Deserialize<ShaderBindChannel>(reader))
+                Channels = reader.ReadArray<ShaderBindChannel>(serializer)
             };
 
             reader.AlignStream();

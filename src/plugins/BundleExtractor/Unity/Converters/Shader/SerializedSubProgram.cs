@@ -78,17 +78,17 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             else
             {
-                res.VectorParams = reader.ReadArray(_ => serializer.Deserialize<VectorParameter>(reader));
-                res.MatrixParams = reader.ReadArray(_ => serializer.Deserialize<MatrixParameter>(reader));
-                res.TextureParams = reader.ReadArray(_ => serializer.Deserialize<TextureParameter>(reader));
-                res.BufferParams = reader.ReadArray(_ => serializer.Deserialize<BufferBinding>(reader));
-                res.ConstantBuffers = reader.ReadArray(_ => serializer.Deserialize<ConstantBuffer>(reader));
-                res.ConstantBufferBindings = reader.ReadArray(_ => serializer.Deserialize<BufferBinding>(reader));
-                res.UAVParams = reader.ReadArray(_ => serializer.Deserialize< UAVParameter>(reader));
+                res.VectorParams = reader.ReadArray<VectorParameter>(serializer);
+                res.MatrixParams = reader.ReadArray<MatrixParameter>(serializer);
+                res.TextureParams = reader.ReadArray<TextureParameter>(serializer);
+                res.BufferParams = reader.ReadArray<BufferBinding>(serializer);
+                res.ConstantBuffers = reader.ReadArray<ConstantBuffer>(serializer);
+                res.ConstantBufferBindings = reader.ReadArray<BufferBinding>(serializer);
+                res.UAVParams = reader.ReadArray<UAVParameter>(serializer);
       
                 if (version.GreaterThanOrEquals(2017)) //2017 and up
                 {
-                    res.Samplers = reader.ReadArray(_ => serializer.Deserialize<SamplerParameter>(reader));
+                    res.Samplers = reader.ReadArray<SamplerParameter>(serializer);
                 }
             }
 
@@ -106,7 +106,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             if (HasInstancedStructuredBuffers(reader.Get<SerializedType>()))
             {
-                var m_InstancedStructuredBuffers = reader.ReadArray(_ => serializer.Deserialize<ConstantBuffer>(reader));
+                var m_InstancedStructuredBuffers = reader.ReadArray<ConstantBuffer>(serializer);
             }
             cb.Invoke();
         }

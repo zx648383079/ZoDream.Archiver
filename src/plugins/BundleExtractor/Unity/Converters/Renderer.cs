@@ -113,7 +113,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_LightmapTilingOffsetDynamic = reader.ReadVector4();
             }
 
-            res.Materials = reader.ReadArray(_ => reader.ReadPPtr<Material>(serializer));
+            res.Materials = reader.ReadPPtrArray<Material>(serializer);
 
             if (version.Major < 3) //3.0 down
             {

@@ -20,12 +20,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             res.NameIndex = reader.ReadInt32();
 
-            res.MatrixParams = reader.ReadArray(_ => serializer.Deserialize<MatrixParameter>(reader));
-            res.VectorParams = reader.ReadArray(_ => serializer.Deserialize<VectorParameter>(reader));
+            res.MatrixParams = reader.ReadArray<MatrixParameter>(serializer);
+            res.VectorParams = reader.ReadArray<VectorParameter>(serializer);
 
             if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
             {
-                res.StructParams = reader.ReadArray(_ => serializer.Deserialize<StructParameter>(reader));
+                res.StructParams = reader.ReadArray<StructParameter>(serializer);
             }
             res.Size = reader.ReadInt32();
 

@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 PropInfo = serializer.Deserialize<SerializedProperties>(reader),
 
-                SubShaders = reader.ReadArray(_ => serializer.Deserialize<SerializedSubShader>(reader))
+                SubShaders = reader.ReadArray<SerializedSubShader>(serializer)
             };
 
 
@@ -29,12 +29,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.CustomEditorName = reader.ReadAlignedString();
             res.FallbackName = reader.ReadAlignedString();
 
-            res.Dependencies = reader.ReadArray(_ => serializer.Deserialize<SerializedShaderDependency>(reader));
+            res.Dependencies = reader.ReadArray<SerializedShaderDependency>(serializer);
 
 
             if (version.GreaterThanOrEquals(2021, 1)) //2021.1 and up
             {
-                res.CustomEditorForRenderPipelines = reader.ReadArray(_ => serializer.Deserialize<SerializedCustomEditorForRenderPipeline>(reader));
+                res.CustomEditorForRenderPipelines = reader.ReadArray<SerializedCustomEditorForRenderPipeline>(serializer);
             
             }
 

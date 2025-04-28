@@ -14,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new Clip
             {
                 StreamedClip = serializer.Deserialize<StreamedClip>(reader),
-                DenseClip = serializer.Deserialize<DenseClip>(reader)
+                DenseClip = UnityConverter.ReadDenseClip(reader, serializer)
             };
             if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
             {
