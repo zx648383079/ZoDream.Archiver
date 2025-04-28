@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using ZoDream.Shared.Converters;
 using ZoDream.Shared.Language;
 
@@ -7,6 +8,8 @@ namespace ZoDream.SourceGenerator
     public class SourceWriter(ILexer input) : ILanguageWriter
     {
         private readonly ICodeWriter _cvtWriter = new CodeWriter();
+        private readonly HashSet<string> _cvtItems = [];
+        private readonly HashSet<string> _propertyItems = [];
 
         public void Write(Stream output)
         {
@@ -45,7 +48,7 @@ namespace ZoDream.SourceGenerator
             }
             if (isAppend)
             {
-                writer.Write(_cvtWriter);
+                WriteRegister(writer);
             }
         }
 
@@ -103,6 +106,7 @@ namespace ZoDream.SourceGenerator
 
         private void WriteStruct(ICodeWriter writer)
         {
+            _propertyItems.Clear();
             writer.WriteLine(true)
                 .Write("internal struct ");
             _cvtWriter.WriteLine(true)
@@ -124,6 +128,7 @@ namespace ZoDream.SourceGenerator
 
             writer.Write(cls).WriteLine(true)
                 .Write("{").WriteIndentLine();
+            _cvtItems.Add(cls);
             _cvtWriter.WriteFormat("{0}Converter : BundleConverter<{0}>", cls)
                 .WriteLine(true)
                 .Write("{")
@@ -194,13 +199,14 @@ namespace ZoDream.SourceGenerator
                 if (type == "assert")
                 {
                     JumpToEnd();
-                    continue;
+                    break;
                 }
                 if (type == "AlignTo")
                 {
                     _cvtWriter.WriteFormat("reader.AlignStream({0});", childType)
                         .WriteLine(true);
-                    continue;
+                    JumpToEnd();
+                    break;
                 }
                 var name = string.Empty;
                 var isArray = false;
@@ -213,10 +219,17 @@ namespace ZoDream.SourceGenerator
                         isArray = true;
                     } else if (input.Current.Type == TokenType.Equal)
                     {
-                        _cvtWriter.WriteFormat("var {0} ", name);
+                        if (_propertyItems.Contains(name))
+                        {
+                            _cvtWriter.WriteFormat("res.{0} ", name);
+                        } else
+                        {
+                            _cvtWriter.WriteFormat("var {0} ", name);
+                        }
                         WriteSource(TokenType.Semicolon);
+                        _cvtWriter.Write(';').WriteLine(true);
                         JumpToEnd();
-                        continue;
+                        break;
                     }
                 }
                 var propertyType = type;
@@ -237,18 +250,8 @@ namespace ZoDream.SourceGenerator
                     {
                         _cvtWriter.WriteFormat("{0}reader.ReadArray(", ltText);
                     }
-                    while (input.MoveNext())
-                    {
-                        if (input.Current.Type == TokenType.BracketClose)
-                        {
-                            break;
-                        }
-                        if (input.Current.Type == TokenType.Identifier)
-                        {
-                            _cvtWriter.Write("res.");
-                        }
-                        _cvtWriter.Write(input.Current.Value);
-                    }
+                    input.MoveNext();
+                    WriteSource(TokenType.BracketClose);
                     if (type == "char")
                     {
                         _cvtWriter.Write(");");
@@ -270,9 +273,10 @@ namespace ZoDream.SourceGenerator
                 {
                     propertyType += "[]";
                 }
-                if (!string.IsNullOrEmpty(name))
+                if (!string.IsNullOrEmpty(name) && !_propertyItems.Contains(name))
                 {
                     writer.WriteFormat("public {0} {1};", propertyType, name).WriteLine(true);
+                    _propertyItems.Add(name);
                 }
                 JumpToEnd();
                 break;
@@ -285,28 +289,39 @@ namespace ZoDream.SourceGenerator
         /// </summary>
         private void WriteSource(TokenType end)
         {
+            var nextCanMove = true;
             do
             {
-                if (input.Current.Type == end)
+                nextCanMove = true;
+                var token = input.Current;
+                if (token.Type == end)
                 {
                     break;
                 }
-                if (input.Current.Type is TokenType.Comment or TokenType.NewLine)
+                if (token.Type is TokenType.Comment or TokenType.NewLine)
                 {
                     continue;
                 }
-                if (input.Current.Type == TokenType.Identifier)
+                if (token.Type is not TokenType.Identifier)
                 {
-                    if (input.Current.Value == "$")
-                    {
-                        _cvtWriter.Write("reader.Position");
-                        continue;
-                    }
+                    _cvtWriter.Write(token.Value);
+                    continue;
+                }
+                if (token.Value == "$")
+                {
+                    _cvtWriter.Write("reader.Position");
+                    continue;
+                }
+                input.MoveNext();
+                var next = input.Current;
+                if (!IsDoubleColon(next) && next.Type != TokenType.ParenOpen)
+                {
                     _cvtWriter.Write("res.");
                 }
-                _cvtWriter.Write(input.Current.Value);
+                _cvtWriter.Write(token.Value);
+                nextCanMove = false;
             }
-            while (input.MoveNext());
+            while (!nextCanMove || input.MoveNext());
         }
 
         private (string, string) GetPropertyType()
@@ -320,7 +335,7 @@ namespace ZoDream.SourceGenerator
                 {
                     break;
                 }
-                if (token.Type == TokenType.CompoundOperator && token.Value == "::")
+                if (IsDoubleColon(token))
                 {
                     input.MoveNext();
                     res = input.Current.Value;
@@ -350,6 +365,10 @@ namespace ZoDream.SourceGenerator
             } while (input.MoveNext());
         }
 
+        private static bool IsDoubleColon(Token token)
+        {
+            return token.Type == TokenType.CompoundOperator && token.Value == "::";
+        }
         private void WriteNamespace(ICodeWriter writer)
         {
             writer.WriteLine(true)
@@ -386,11 +405,31 @@ namespace ZoDream.SourceGenerator
                     WriteEnum(writer);
                 }
             }
-            writer.Write(_cvtWriter);
+            WriteRegister(writer);
             writer.WriteOutdentLine().Write("}").WriteLine(true);
         }
 
-        private string TranslateType(string text)
+        /// <summary>
+        /// 合并数据并追加
+        /// </summary>
+        /// <param name="writer"></param>
+        private void WriteRegister(ICodeWriter writer)
+        {
+            writer.Write(_cvtWriter);
+            writer.WriteLine(true)
+                .Write("internal partial static class Engine").WriteLine(true)
+                .Write('{').WriteIndentLine()
+                .Write("public static IBundleConverter[] Converters = [").WriteIndentLine();
+            foreach (var item in _cvtItems)
+            {
+                writer.WriteFormat("new {0}Converter(),", item).WriteLine(true);
+            }
+            writer.WriteOutdentLine()
+                .Write("];").WriteOutdentLine()
+                .Write('}').WriteLine(true);
+        }
+
+        private static string TranslateType(string text)
         {
             return text switch 
             {
@@ -407,7 +446,7 @@ namespace ZoDream.SourceGenerator
             };
         }
 
-        private string TranslateReadType(string text)
+        private static string TranslateReadType(string text)
         {
             return text switch
             {
