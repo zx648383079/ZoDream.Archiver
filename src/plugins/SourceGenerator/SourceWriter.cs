@@ -268,6 +268,10 @@ namespace ZoDream.SourceGenerator
                         ltText, TranslateReadType(type));
                 }
                 _cvtWriter.WriteLine(true);
+                if (propertyType is "char" or "char16")
+                {
+                    isArray = false;
+                }
                 propertyType = TranslateType(propertyType);
                 if (isArray)
                 {
@@ -289,7 +293,7 @@ namespace ZoDream.SourceGenerator
         /// </summary>
         private void WriteSource(TokenType end)
         {
-            var nextCanMove = true;
+            bool nextCanMove;
             do
             {
                 nextCanMove = true;
@@ -302,23 +306,59 @@ namespace ZoDream.SourceGenerator
                 {
                     continue;
                 }
-                if (token.Type is not TokenType.Identifier)
-                {
-                    _cvtWriter.Write(token.Value);
-                    continue;
-                }
                 if (token.Value == "$")
                 {
                     _cvtWriter.Write("reader.Position");
                     continue;
                 }
-                input.MoveNext();
-                var next = input.Current;
-                if (!IsDoubleColon(next) && next.Type != TokenType.ParenOpen)
+                if (token.Type is not TokenType.Identifier)
                 {
-                    _cvtWriter.Write("res.");
+                    _cvtWriter.Write(token.Value);
+                    continue;
                 }
-                _cvtWriter.Write(token.Value);
+                var text = token.Value;
+                var isProperty = true;
+                while (input.MoveNext())
+                {
+                    var next = input.Current;
+                    if (next.Type == end)
+                    {
+                        break;
+                    }
+                    if (next.Type is TokenType.ParenOpen)
+                    {
+                        isProperty = false;
+                        break;
+                    }
+                    if (IsDoubleColon(next))
+                    {
+                        isProperty = false;
+                    } else if (next.Type is not TokenType.Identifier)
+                    {
+                        break;
+                    }
+                    text += next.Value;
+                }
+                if (isProperty)
+                {
+                    text = StringConverter.Studly(text);
+                    if (_propertyItems.Contains(text))
+                    {
+                        _cvtWriter.Write("res.");
+                    }
+                    _cvtWriter.Write(text);
+                } else if (text.EndsWith("::eof"))
+                {
+                    input.MoveNext();
+                    input.MoveNext();
+                    _cvtWriter.Write("(reader.RemainingLength <= 0)");
+                } else if (text.Contains("::mem::"))
+                {
+                    _cvtWriter.Write("reader.").Write(StringConverter.Studly(text[(text.LastIndexOf(':') + 1)..]));
+                } else
+                {
+                    _cvtWriter.Write(text);
+                }
                 nextCanMove = false;
             }
             while (!nextCanMove || input.MoveNext());
@@ -440,8 +480,8 @@ namespace ZoDream.SourceGenerator
                 "s8" => "sbyte",
                 "s16" => "short",
                 "s24" or "s32" => "int",
-                "s48" or "s64" => "long",
-                "char" or "str" or "char16" or "AlignString" => "string",
+                "s48" or "s64" or "LEB128" => "long",
+                "char" or "str" or "char16" or "AlignString" or "Leb128String" => "string",
                 _ => text
             };
         }

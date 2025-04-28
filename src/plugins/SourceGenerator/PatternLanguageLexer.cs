@@ -658,8 +658,10 @@ namespace ZoDream.SourceGenerator
         {
             return text switch
             {
-                "!" or "=" or "return" or "if" or "else" or "import" or "struct" or "for" or "break" or "switch" or "fn"
-                or "const" or "as" or "namespace"
+                "!" or "=" or "return" or "if" or "else" or "import" or 
+                "struct" or "for" or "break" or "switch" or "fn"
+                or "const" or "as" or 
+                "namespace"
                 or "padding"
                 or "include" 
                 or "enum"
