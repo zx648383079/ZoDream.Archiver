@@ -2,9 +2,6 @@
 #pragma description Unity Mesh Asset
 
 import zodream.io;
-import std.io;
-import std.sys;
-
 
 struct UnityMatrix {
     s32 length;

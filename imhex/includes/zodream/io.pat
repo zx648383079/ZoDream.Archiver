@@ -15,22 +15,22 @@ namespace auto zodream {
         if (length > 0) {
             T elements[length] [[inline]];
         }
-    } [[format("fmt_collection")]];
+    } [[format("zodream::fmt_collection")]];
 
     struct AlignTo<auto Alignment> {
         padding[Alignment- ((($ - 1) % Alignment) + 1)];
     } [[hidden]];
 
     struct AlignString {
-        s32 length [[hidden]];
-        char value[length] [[inline]];
+        s32 length;
+        char value[length];
         AlignTo<4>;
-    } [[format("fmt_collection")]];
+    };
 
     struct Leb128String {
-        type::LEB128 length [[hidden]];
-        char value[length] [[inline]];
-    } [[format("fmt_collection")]];
+        type::LEB128 length;
+        char value[length];
+    };
 
     struct Vector4 {
         float x;
@@ -76,18 +76,18 @@ namespace auto zodream {
     };
 
     struct Matrix2x2 {
-        float[2] m1;
-        float[2] m2;
+        float m1[2];
+        float m2[2];
     };
     struct Matrix3x3 {
-        float[3] m1;
-        float[3] m2;
-        float[3] m3;
+        float m1[3];
+        float m2[3];
+        float m3[3];
     };
     struct Matrix4x4 {
-        float[4] m1;
-        float[4] m2;
-        float[4] m3;
-        float[4] m4;
+        float m1[4];
+        float m2[4];
+        float m3[4];
+        float m4[4];
     };
-};
+}

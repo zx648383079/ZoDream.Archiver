@@ -2,8 +2,6 @@
 #pragma description Unity Animation Asset
 
 import zodream.io;
-import std.io;
-import std.sys;
 
 struct UnityMatrix {
     s32 length;
@@ -13,6 +11,11 @@ struct UnityMatrix {
 struct PPtr {
     s32 FileID;
     s64 PathID;
+};
+
+struct AABB {
+    zodream::Vector3 center;
+    zodream::Vector3 extent;
 };
 
 
@@ -65,7 +68,7 @@ struct AnimationCurve<T> {
 };
 
 struct QuaternionCurve {
-    AnimationCurve<Vector4> curve;
+    AnimationCurve<zodream::Vector4> curve;
     zodream::AlignString path;
 };
 
@@ -102,7 +105,7 @@ struct PPtrCurve {
 };
 
  struct HumanGoal {
-    zodream::XForm<Vector3> x;
+    zodream::XForm<zodream::Vector3> x;
     float WeightT;
     float WeightR;
     zodream::Vector3 HintT;
@@ -110,7 +113,7 @@ struct PPtrCurve {
  };
 
  struct HandPose {
-    zodream::XForm<Vector3> GrabX;
+    zodream::XForm<zodream::Vector3> GrabX;
     zodream::List<float> DoFArray;
     float Override;
     float CloseOpen;
@@ -119,14 +122,14 @@ struct PPtrCurve {
  };
 
 struct HumanPose {
-    zodream::XForm<Vector3> RootX;
+    zodream::XForm<zodream::Vector3> RootX;
     zodream::Vector3 LookAtPosition;
     zodream::Vector4 LookAtWeight;
     zodream::List<HumanGoal> GoalArray;
     HandPose LeftHandPose;
     HandPose RightHandPose;
     zodream::List<float> DoFArray;
-    zodream::List<Vector3> TDoFArray;
+    zodream::List<zodream::Vector3> TDoFArray;
 };
 
 struct StreamedClip {
@@ -159,10 +162,10 @@ struct ConstantClip {
 
 struct ClipMuscleConstant {
     HumanPose DeltaPose;
-    zodream::XForm<Vector3> StartX;
-    zodream::XForm<Vector3> StopX;
-    zodream::XForm<Vector3> LeftFootStartX;
-    zodream::XForm<Vector3> RightFootStartX;
+    zodream::XForm<zodream::Vector3> StartX;
+    zodream::XForm<zodream::Vector3> StopX;
+    zodream::XForm<zodream::Vector3> LeftFootStartX;
+    zodream::XForm<zodream::Vector3> RightFootStartX;
     zodream::Vector3 AverageSpeed;
     Clip clip;
     float StartTime;
