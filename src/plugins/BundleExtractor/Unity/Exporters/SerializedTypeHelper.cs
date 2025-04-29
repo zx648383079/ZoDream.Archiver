@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using TypeTreeNode = ZoDream.BundleExtractor.Unity.SerializedFiles.TypeTreeNode;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {

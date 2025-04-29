@@ -71,7 +71,12 @@ struct AnimationCurve<T> {
 };
 
 struct QuaternionCurve {
-    AnimationCurve<zodream::Vector3> curve;
+    if (isTuanJie && versionMajor >= 2022) {
+        AnimationCurve<zodream::Vector4> curve;
+    } else {
+        AnimationCurve<zodream::Vector3> curve;
+    }
+
     zodream::AlignString path;
 };
 

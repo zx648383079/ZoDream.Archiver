@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ZoDream.Shared.Language\ZoDream.Shared.Language.csproj" />
+    <ProjectReference Include="..\UnityEngine\UnityEngine.csproj" />
   </ItemGroup>
 
 </Project>
