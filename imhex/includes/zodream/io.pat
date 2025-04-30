@@ -17,6 +17,18 @@ namespace auto zodream {
         }
     } [[format("zodream::fmt_collection")]];
 
+    struct MapPair<K, T> {
+        K key;
+        T value;
+    };
+
+    struct Map<K, T> {
+        s32 length [[hidden]];
+        if (length > 0) {
+            MapPair<K, T> elements[length] [[inline]];
+        }
+    } [[format("zodream::fmt_collection")]];
+
     struct AlignTo<auto Alignment> {
         padding[Alignment- ((($ - 1) % Alignment) + 1)];
     } [[hidden]];

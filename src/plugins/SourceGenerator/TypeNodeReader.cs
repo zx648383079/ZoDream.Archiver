@@ -8,7 +8,7 @@ namespace ZoDream.SourceGenerator
     public class TypeNodeReader(Stream input)
     {
 
-        public TypeTreeNode[] Read()
+        public TypeNodeCollection Read()
         {
             var doc = JsonDocument.Parse(input);
             if (doc == null)
@@ -17,11 +17,16 @@ namespace ZoDream.SourceGenerator
             }
             var root = doc.RootElement;
             var res = new List<TypeTreeNode>();
+            var version = string.Empty;
+            if (root.TryGetProperty("Version", out var node))
+            {
+                version = node.GetString() ?? string.Empty;
+            }
             if (root.TryGetProperty("Classes", out var items))
             {
                 foreach (var item in items.EnumerateArray())
                 {
-                    if (item.TryGetProperty("EditorRootNode", out var node))
+                    if (item.TryGetProperty("EditorRootNode", out node))
                     {
                         var n = Read(node);
                         if (n != null)
@@ -31,7 +36,10 @@ namespace ZoDream.SourceGenerator
                     }
                 }
             }
-            return [..res];
+            return new([.. res])
+            {
+                Version = version
+            };
         }
 
         private TypeTreeNode? Read(JsonElement node)

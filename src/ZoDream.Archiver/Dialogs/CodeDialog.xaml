@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="ZoDream.Archiver.Dialogs.CodeDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    Title="代码生成"
+    IsPrimaryButtonEnabled="{Binding IsValid}"
+    PrimaryButtonText="确认"
+    SecondaryButtonText="取消"
+    mc:Ignorable="d">
+    <ContentDialog.DataContext>
+        <vm:CodeDialogViewModel />
+    </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
+    <StackPanel>
+        <TextBlock Text="Source Path" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding OpenCommand}"
+                Content="&#xE8DA;"
+                Style="{StaticResource IconBtn}" />
+        </Grid>
+        <ComboBox
+            Header="Language"
+            ItemsSource="{Binding LanguageItems}"
+            SelectedIndex="{Binding LanguageIndex, Mode=TwoWay}" />
+        <TextBox Header="Namesapce" Text="{Binding PackageName}" />
+        <TextBox Header="Version" Text="{Binding Version}" />
+        <TextBlock Style="{StaticResource InputHeaderTb}" Text="Output Path" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding OutputFileName, Mode=TwoWay}" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding OpenOutputCommand}"
+                Content="&#xE8DA;"
+                Style="{StaticResource IconBtn}" />
+        </Grid>
+    </StackPanel>
+</ContentDialog>

@@ -25,6 +25,7 @@
   <ItemGroup>
     <None Remove="Dialogs\BundleDialog.xaml" />
     <None Remove="Dialogs\BundlePropertyDialog.xaml" />
+    <None Remove="Dialogs\CodeDialog.xaml" />
     <None Remove="Dialogs\CompressDialog.xaml" />
     <None Remove="Dialogs\ConfirmDialog.xaml" />
     <None Remove="Dialogs\EntryDialog.xaml" />
@@ -82,6 +83,7 @@
     <ProjectReference Include="..\plugins\ChmExtractor\ChmExtractor.csproj" />
     <ProjectReference Include="..\plugins\ElectronExtractor\ElectronExtractor.csproj" />
     <ProjectReference Include="..\plugins\EpubExtractor\EpubExtractor.csproj" />
+    <ProjectReference Include="..\plugins\SourceGenerator\SourceGenerator.csproj" />
     <ProjectReference Include="..\plugins\WallpaperExtractor\WallpaperExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
@@ -94,6 +96,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\CodeDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\EntryDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

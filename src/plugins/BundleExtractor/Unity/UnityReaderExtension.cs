@@ -56,6 +56,7 @@ namespace ZoDream.BundleExtractor.Unity
             return buffer;
         }
 
+
         public static int[] ReadInt32Array(this IBundleBinaryReader reader)
         {
             return reader.ReadArray(reader.ReadInt32);

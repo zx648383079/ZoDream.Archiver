@@ -59,6 +59,11 @@ namespace ZoDream.Shared.Numerics
             return new(vec.X, vec.Y, vec.Z, vec.W);
         }
 
+        public static explicit operator Vector4(Color color)
+        {
+            return new((float)color.R / 255, (float)color.G / 255, (float)color.B / 255, (float)color.A / 255);
+        }
+
         public static explicit operator Color(Vector3Int vec)
         {
             return new((byte)vec.X, (byte)vec.Y, (byte)vec.Z);

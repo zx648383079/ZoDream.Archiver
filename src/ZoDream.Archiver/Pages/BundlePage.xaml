@@ -71,6 +71,14 @@
                     Icon="Link"
                     Label="资源目录"
                     ToolTipService.ToolTip="根据依赖文件生成资源索引" />
+                <AppBarButton
+                    Command="{Binding CodeCommand}"
+                    Label="代码转化"
+                    ToolTipService.ToolTip="根据相关文件进行解析代码生成">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xE943;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
             </CommandBar.SecondaryCommands>
         </CommandBar>
         <ListView

@@ -34,6 +34,7 @@ namespace ZoDream.Archiver.ViewModels
             SettingCommand = new RelayCommand(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             ExplorerCommand = new RelayCommand(TapExplorer);
+            CodeCommand = new RelayCommand(TapCode);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -77,13 +78,29 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand SettingCommand { get; private set; }
 
         public ICommand ExplorerCommand {  get; private set; }
+        public ICommand CodeCommand {  get; private set; }
+
+        private async void TapCode(object? _)
+        {
+            var picker = new CodeDialog();
+            var res = await _app.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
+            if (picker.ViewModel.SaveAs())
+            {
+                _app.Success("已完成代码生成！");
+            }
+
+        }
 
         private async void TapExplorer(object? _)
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".bin");
             picker.FileTypeFilter.Add(".json");
-            App.ViewModel.InitializePicker(picker);
+            _app.InitializePicker(picker);
             var res = await picker.PickSingleFileAsync();
             if (res is null)
             {
