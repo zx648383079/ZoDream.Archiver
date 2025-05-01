@@ -39,6 +39,34 @@ namespace ZoDream.SourceGenerator
             }
         }
 
+        private string WriteType(ICodeWriter writer, TypeTreeNode node)
+        {
+            if (IsRegisterType(node.Type))
+            {
+                return TranslateType(node.Type);
+            }
+            if (node.Type == "xform")
+            {
+                return $"Transform<{TranslateType(node.Children[0].Type)}>";
+            }
+            if (node.Type == "pair")
+            {
+                return WriteMapPair(writer, node);
+            }
+            if (node.Type == "map")
+            {
+                return WriteMap(writer, node);
+            }
+            if (node.Type is "vector" or "set" or "staticvector" or "Array")
+            {
+                return WriteArray(writer, node);
+            }
+            WriteStruct(writer, node);
+            return TranslateType(node.Type);
+        }
+
+      
+
         private void WriteStruct(ICodeWriter writer, TypeTreeNode node)
         {
             var structName = node.Type;
@@ -57,30 +85,43 @@ namespace ZoDream.SourceGenerator
         private void WriteStruct(ICodeWriter writer, string structName, TypeTreeNode[] children)
         {
             var maps = new Dictionary<string, string>();
+            var arrayItems = new Dictionary<string, int>();
             foreach (var item in children)
             {
-                if (IsRegisterType(item.Type))
+                var name = item.Name;
+                var match = TypeSourceWriter.ArrayIndexRegex().Match(name);
+                if (match.Success)
+                {
+                    name = match.Groups[1].Value;
+                    arrayItems[name] = int.Parse(match.Groups[2].Value);
+                }
+                if (maps.ContainsKey(name))
                 {
                     continue;
                 }
-                if (item.Type == "map")
-                {
-                    maps.Add(item.Name, WriteMap(writer, item));
-                    continue;
-                }
-                if (item.Type is "vector" or "set")
-                {
-                    maps.Add(item.Name, WriteArray(writer, item));
-                    continue;
-                }
-                WriteStruct(writer, item);
+                maps.Add(name, WriteType(writer, item));
             }
-            writer.WriteFormat("struct {0} {", structName).WriteIndentLine();
+            writer.WriteFormat("struct {0} {{", structName).WriteIndentLine();
             foreach (var item in children)
             {
-                if (maps.TryGetValue(item.Name, out var type))
+                var name = item.Name;
+                var match = TypeSourceWriter.ArrayIndexRegex().Match(name);
+                if (match.Success)
                 {
-                    var field = item.Name.Replace(' ', '_');
+                    name = match.Groups[1].Value;
+                    if (item.Name != $"{name}[{arrayItems[name]}]")
+                    {
+                        continue;
+                    }
+                }
+                if (maps.TryGetValue(name, out var type))
+                {
+                    var field = name.Replace(' ', '_');
+                    if (match.Success)
+                    {
+                        writer.WriteFormat("Array<{0}, {1}> {2};", type, arrayItems[name] + 1, field).WriteLine(true);
+                        continue;
+                    }
                     writer.WriteFormat("{0} {1};", type, field).WriteLine(true);
                     continue;
                 }
@@ -98,11 +139,14 @@ namespace ZoDream.SourceGenerator
 
         private string WriteArray(ICodeWriter writer, TypeTreeNode node)
         {
-            var children = node.Children?[0].Children?.Skip(1).ToArray() ?? [];
+            if (node.Type != "Array" && node.Children?.Length == 1 && node.Children[0].Type == "Array")
+            {
+                node = node.Children[0];
+            }
+            var children = node?.Children?.Skip(1).ToArray() ?? [];
             if (children.Length == 1)
             {
-                WriteStruct(writer, children[0]);
-                return $"zodream::List<{TranslateType(children[0].Type)}>";
+                return $"zodream::List<{WriteType(writer, children[0])}>";
             }
             var hash = string.Join(',', children.Select(i => i.Type));
             if (!_unknownItems.TryGetValue(hash, out var structName))
@@ -118,11 +162,14 @@ namespace ZoDream.SourceGenerator
         {
             var children = node.Children?[0].Children?[1].Children?.ToArray() ?? [];
             Debug.Assert(children.Length == 2);
-            foreach (var item in children)
-            {
-                WriteStruct(writer, item);
-            }
-            return $"zodream::Map<{string.Join(", ", children.Select(i => TranslateType(i.Type)))}>";
+            return $"zodream::Map<{string.Join(", ", children.Select(i => WriteType(writer, i)))}>";
+        }
+
+        private string WriteMapPair(ICodeWriter writer, TypeTreeNode node)
+        {
+            var children = node.Children?.ToArray() ?? [];
+            Debug.Assert(children.Length == 2);
+            return $"zodream::MapPair<{string.Join(", ", children.Select(i => WriteType(writer, i)))}>";
         }
 
         private bool IsRegisterType(string type)
@@ -136,7 +183,7 @@ namespace ZoDream.SourceGenerator
                 or "Vector2f" or "Vector3f" or "Vector4f"
                 or "unsigned int" or "SInt64" or "UInt64" or "UInt16"
                 or "SInt16" or "SInt8" or "FileSize" or "Type*" or "None"
-                or "GUID" or "Hash128";
+                or "GUID" or "Hash128" or "float3" or "float4" or "Rectf";
         }
 
         private static string TranslateType(string type)
@@ -152,8 +199,8 @@ namespace ZoDream.SourceGenerator
                 "SInt8" => "s8",
                 "Matrix4x4f" => "zodream::Matrix4x4",
                 "Vector2f" => "zodream::Vector2",
-                "Vector3f" => "zodream::Vector3",
-                "Vector4f" => "zodream::Vector4",
+                "Vector3f" or "float3" => "zodream::Vector3",
+                "Vector4f" or "float4" => "zodream::Vector4",
                 "Quaternionf" => "zodream::Quaternion",
                 "unsigned int" or "UInt32" or "Type*" => "u32",
                 "SInt16" or "short" => "s16",
@@ -163,6 +210,9 @@ namespace ZoDream.SourceGenerator
                 "UInt64" or "unsigned long long" or "FileSize" => "u64",
                 "string" => "zodream::AlignString",
                 "GUID" or "Hash128" => "Array<u8, 16>",
+
+                "Rectf" => "zodream::Rect",
+                "Vector3" or "Vector2" or "Vector4" or "Quaternion" => $"zodream::{type}",
                 _ => type,
             };
         }

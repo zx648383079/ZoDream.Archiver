@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using ZoDream.Shared.Language;
@@ -311,6 +309,6 @@ namespace ZoDream.SourceGenerator
         }
 
         [GeneratedRegex(@"(.+)\[(\d+)\]$")]
-        private static partial Regex ArrayIndexRegex();
+        internal static partial Regex ArrayIndexRegex();
     }
 }
