@@ -1,8 +1,9 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace ZoDream.Shared.Numerics
 {
-    public struct Color
+    public struct Color: IEquatable<Color>
     {
         public byte A;
         public byte B;
@@ -44,9 +45,14 @@ namespace ZoDream.Shared.Numerics
         {
             if (obj is Color o)
             {
-                return o.R == R && o.G == G && o.B == B && o.A == A;
+                return Equals(o);
             }
             return base.Equals(obj);
+        }
+
+        public readonly bool Equals(Color other)
+        {
+            return other.R == R && other.G == G && other.B == B && other.A == A;
         }
 
         public static explicit operator Color(Vector3 vec)

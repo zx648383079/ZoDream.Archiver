@@ -83,7 +83,6 @@ namespace ZoDream.Shared.Bundle
         public Vector3 ReadVector3();
         public Vector4 ReadVector4();
         public Quaternion ReadQuaternion();
-
         public Matrix4x4 ReadMatrix();
 
         public T[] ReadArray<T>(int count, Func<IBundleBinaryReader, int, T> cb);

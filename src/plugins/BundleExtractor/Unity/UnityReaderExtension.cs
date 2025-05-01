@@ -72,6 +72,20 @@ namespace ZoDream.BundleExtractor.Unity
             return res;
         }
 
+        public static Rect ReadRect(this IBundleBinaryReader reader)
+        {
+            return new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
+
+        /// <summary>
+        /// float 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static Color ReadColorRGBA(this IBundleBinaryReader reader)
+        {
+            return new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
         public static Transform<Vector3> ReadXForm(this IBundleBinaryReader reader)
         {
             var t = ReadVector3Or4(reader);

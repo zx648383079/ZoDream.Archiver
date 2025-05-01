@@ -1,6 +1,8 @@
-﻿namespace ZoDream.Shared.Numerics
+﻿using System;
+
+namespace ZoDream.Shared.Numerics
 {
-    public struct Vector2Int
+    public struct Vector2Int : IEquatable<Vector2Int>
     {
         public int X; 
         public int Y;
@@ -30,10 +32,16 @@
         {
             if (obj is Vector2Int o)
             {
-                return o.X == X && o.Y == Y;
+                return Equals(o);
             }
             return base.Equals(obj);
         }
+
+        public readonly bool Equals(Vector2Int other)
+        {
+            return other.X == X && other.Y == Y;
+        }
+
         public static Vector2Int operator +(Vector2Int v1, Vector2Int v2)
         {
             return new(v1.X + v2.X, v1.Y + v2.Y);
