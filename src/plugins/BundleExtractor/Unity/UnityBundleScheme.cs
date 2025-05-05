@@ -49,6 +49,7 @@ namespace ZoDream.BundleExtractor
                 return r;
             }
             IBundleArchiveScheme[] schemes = [
+                new DBreezeScheme(),
                 new BrotliFileScheme(),
                 new GZipFileScheme(),
                 new SerializedFileScheme(),
