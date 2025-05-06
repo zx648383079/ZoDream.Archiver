@@ -79,6 +79,11 @@
                         <FontIcon Glyph="&#xE943;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
+                <AppBarButton
+                    Command="{Binding LogCommand}"
+                    Icon="CalendarDay"
+                    Label="日志文件"
+                    ToolTipService.ToolTip="查看日志文件" />
             </CommandBar.SecondaryCommands>
         </CommandBar>
         <ListView

@@ -117,16 +117,16 @@ namespace ZoDream.BundleExtractor
                         Logger?.Info("Reading assets has been cancelled !!");
                         return;
                     }
-                    var obj = asset.Get(i);
-                    if (_dependency is null && IsExclude((NativeClassID)obj.ClassID))
+                    var info = asset.Get(i);
+                    if (_dependency is null && IsExclude((NativeClassID)info.ClassID))
                     {
                         continue;
                     }
                     try
                     {
-                        var reader = asset.OpenRead(obj);
-                        var targetType = ConvertToClassType((NativeClassID)obj.ClassID);
-                        var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
+                        var reader = asset.OpenRead(info);
+                        var targetType = ConvertToClassType((NativeClassID)info.ClassID);
+                        var serializedType = asset.TypeItems[info.SerializedTypeIndex];
                         object? res = null;
                         // 默认 object 不做转化，所以为 null
                         if (serializer.Converters.TryGet(targetType, out var cvt))
@@ -146,12 +146,12 @@ namespace ZoDream.BundleExtractor
                         if (res is Object o)
                         {
                             asset[i] = o;
-                            _dependency?.AddEntry(asset.FullPath, obj.FileID, o.Name, obj.ClassID);
+                            _dependency?.AddEntry(asset.FullPath, info.FileID, o.Name, info.ClassID);
                         }
                     }
                     catch (Exception e)
                     {
-                        Logger?.Log(LogLevel.Error, e.Message, $"{obj.FileID} in {asset.FullPath}");
+                        Logger?.Log(LogLevel.Error, e.Message, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
                     }
                 }
                 if (progress is not null)

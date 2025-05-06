@@ -108,7 +108,7 @@ namespace ZoDream.SourceGenerator
         {
             _propertyItems.Clear();
             writer.WriteLine(true)
-                .Write("internal struct ");
+                .Write("internal class ");
             _cvtWriter.WriteLine(true)
                 .Write("internal class ");
             var cls = string.Empty;

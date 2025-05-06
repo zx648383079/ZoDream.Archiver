@@ -35,6 +35,7 @@ namespace ZoDream.Archiver.ViewModels
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             ExplorerCommand = new RelayCommand(TapExplorer);
             CodeCommand = new RelayCommand(TapCode);
+            LogCommand = new RelayCommand(TapLog);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -79,6 +80,12 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand ExplorerCommand {  get; private set; }
         public ICommand CodeCommand {  get; private set; }
+        public ICommand LogCommand {  get; private set; }
+
+        private void TapLog(object? _)
+        {
+            Process.Start("explorer", $"/select,{AppViewModel.LogFileName}");
+        }
 
         private async void TapCode(object? _)
         {

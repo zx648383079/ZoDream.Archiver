@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Text;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Converters;
 
@@ -198,11 +199,12 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             where T : UnityEngine.Object
         {
             var data = ReadType(m_Types, reader);
-            ConvertType(data, instance);
+            var obj = (object)instance;
+            ConvertType(data, ref obj);
             data.Clear();
         }
 
-        private static void ConvertType(IDictionary data, object instance)
+        private static void ConvertType(IDictionary data, ref object instance)
         {
             var type = instance.GetType();
             foreach (string key in data.Keys)
@@ -210,7 +212,12 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 var fieldName = key.Trim().Replace(' ', '_');
                 if (fieldName.StartsWith("m_"))
                 {
-                    fieldName = StringConverter.Studly(fieldName[2..]);
+                    fieldName = fieldName[2..];
+                }
+                fieldName = StringConverter.Studly(fieldName);
+                if (instance is ResourceSource && fieldName == "Path")
+                {
+                    fieldName = "Source";
                 }
                 var obj = data[key];
                 if (obj is null)
@@ -240,7 +247,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 {
                     return ctor;
                 }
-                ConvertType(dict, ctor);
+                ConvertType(dict, ref ctor);
                 return ctor;
             }
             if (type == typeof(Stream))

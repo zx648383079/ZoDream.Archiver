@@ -1,15 +1,16 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI;
+﻿using Microsoft.UI;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using WinRT.Interop;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Dispatching;
-using ZoDream.Shared.ViewModel;
 using ZoDream.Shared.Interfaces;
-using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
+using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -24,6 +25,7 @@ namespace ZoDream.Archiver.ViewModels
         private Window _baseWindow;
         private IntPtr _baseWindowHandle;
         private AppWindow _appWindow;
+        private ILogger? _logger;
 
         /// <summary>
         /// UI线程.
@@ -41,7 +43,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        public ILogger Logger { get; private set; } = new EventLogger();
+        public ILogger Logger => _logger ??= new EventLogger(CreateFileLog());
         public PluginViewModel Plugin { get; private set; } = new();
 
         public ISettingContainer Setting { get; private set; } = new SettingContainer();
@@ -79,5 +81,15 @@ namespace ZoDream.Archiver.ViewModels
         {
             Logger.Dispose();
         }
+
+        public static ILogger CreateFileLog()
+        {
+            var fs = File.OpenWrite(LogFileName);
+            fs.Seek(0, SeekOrigin.End);
+            return new FileLogger(fs);
+        }
+
+        public static string LogFileName =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
     }
 }

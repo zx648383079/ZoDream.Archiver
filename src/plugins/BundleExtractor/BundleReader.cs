@@ -43,7 +43,7 @@ namespace ZoDream.BundleExtractor
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
             var service = scheme.Service;
-            var progress = logger.CreateProgress(string.Empty, fileItems.Count);
+            var progress = logger.CreateProgress("Extract Chunk ...", fileItems.Count);
             if (!onlyDependencyTask && service.TryLoadPoint(fileItems.GetHashCode(), out var record))
             {
                 fileItems.Index = record;

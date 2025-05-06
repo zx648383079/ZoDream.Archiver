@@ -92,8 +92,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
             var m_PriorityLevel = reader.ReadInt32();
             var m_UploadedMode = reader.ReadInt32();
-            var m_DataStreamData_size = reader.ReadUInt32();
-            var m_DataStreamData_path = reader.ReadAlignedString();
+            var m_DataStreamData = new ResourceSource()
+            {
+                Size = reader.ReadUInt32(),
+                Source = reader.ReadAlignedString()
+            };
             // res.DataStreamData = new DataStreamingInfo(reader);
 
             res.TextureFormat = (TextureFormat)reader.ReadInt32();

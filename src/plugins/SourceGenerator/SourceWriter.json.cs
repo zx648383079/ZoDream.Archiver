@@ -126,10 +126,10 @@ namespace ZoDream.SourceGenerator
                 }
                 maps.Add(name, WriteType(writer, item));
             }
-            writer.WriteFormat("internal struct {0}", structName).WriteLine(true)
+            writer.WriteFormat("internal class {0}", structName).WriteLine(true)
                 .Write("{").WriteIndentLine();
             _cvtItems.Add(structName);
-            _cvtWriter.WriteFormat("internal struct {0}Converter : BundleConverter<{0}>", structName).WriteLine(true)
+            _cvtWriter.WriteFormat("internal class {0}Converter : BundleConverter<{0}>", structName).WriteLine(true)
                 .Write("{")
                 .WriteIndentLine()
                 .WriteFormat("public override {0} Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)", structName)

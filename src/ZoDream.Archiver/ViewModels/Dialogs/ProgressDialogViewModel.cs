@@ -126,7 +126,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private string _childTitle;
+        private string _childTitle = string.Empty;
 
         public string ChildTitle {
             get => _childTitle;
@@ -146,8 +146,6 @@ namespace ZoDream.Archiver.ViewModels
             get => _childProgress;
             set => Set(ref _childProgress, value);
         }
-
-
 
         /// <summary>
         /// 只有进度更新了才更新剩余时间

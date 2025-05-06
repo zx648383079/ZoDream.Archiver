@@ -56,7 +56,7 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}; {source}");
+            _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
         }
 
         public void Log(LogLevel level, Exception message, string source)
@@ -65,7 +65,7 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}; {source}");
+            _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
         }
 
 
