@@ -1,16 +1,22 @@
-﻿using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.Models;
+﻿using System;
 
 namespace ZoDream.Shared.Logging
 {
-    public class EventLogger(LogLevel level) : ILogger
+    public class EventLogger(LogLevel level = LogLevel.Debug) : ILogger
     {
-        public EventLogger() : this(LogLevel.Debug)
+        public EventLogger(ILogger target, LogLevel level = LogLevel.Debug)
+            : this(level)
         {
-
+            _target = target;
         }
+        /// <summary>
+        /// 附加一个线程
+        /// </summary>
+        private readonly ILogger? _target;
+        private ProgressLogger? _master;
+        private ProgressLogger? _child;
 
-        public LogLevel Level { get; private set; } = level;
+        public LogLevel Level => level;
 
         public event LogEventHandler? OnLog;
         public event ProgressEventHandler? OnProgress;
@@ -30,6 +36,11 @@ namespace ZoDream.Shared.Logging
             Log(LogLevel.Debug, message);
         }
 
+        public void Warning(string message)
+        {
+            Log(LogLevel.Warn, message);
+        }
+
         public void Log(string message)
         {
             Log(Level, message);
@@ -37,33 +48,73 @@ namespace ZoDream.Shared.Logging
 
         public void Log(LogLevel level, string message)
         {
+            _target?.Log(level, message);
             if (level >= Level)
             {
                 OnLog?.Invoke(message, level);
             }
-            System.Diagnostics.Debug.WriteLine(message);
+        }
+
+        public void Log(LogLevel level, string message, string source)
+        {
+            _target?.Log(level, message, source);
+            if (level >= Level)
+            {
+                OnLog?.Invoke(message, level);
+            }
+        }
+
+        public void Log(LogLevel level, Exception message, string source)
+        {
+            _target?.Log(level, message, source);
+            if (level >= Level)
+            {
+                OnLog?.Invoke(message.ToString(), level);
+            }
         }
 
         public void Progress(long current, long total)
         {
-            Progress(current, total, string.Empty);
+            _master ??= new ProgressLogger(this, true);
+            _master.Max = total;
+            _master.Value = current;
+            OnProgress?.Invoke(_master);
         }
 
-        public void Warning(string message)
+
+        public ProgressLogger CreateProgress(string title, long max = 0)
         {
-            Log(LogLevel.Warn, message);
+            _master ??= new ProgressLogger(this, true);
+            _master.Title = title;
+            _master.Max = max;
+            _master.Value = 0;
+            OnProgress?.Invoke(_master);
+            return _master;
         }
 
-        public void Progress(long current, long total, string message)
+        public ProgressLogger CreateSubProgress(string title, long max = 0)
         {
-            OnProgress?.Invoke(current, total, message);
+            _child ??= new ProgressLogger(this, false);
+            _child.Title = title;
+            _child.Max = max;
+            _child.Value = 0;
+            OnProgress?.Invoke(_child);
+            return _child;
+        }
+
+        internal void Emit(ProgressLogger progress)
+        {
+            OnProgress?.Invoke(progress);
         }
 
         public void Dispose()
         {
+            _target?.Dispose();
         }
+
+
     }
 
     public delegate void LogEventHandler(string message, LogLevel level);
-    public delegate void ProgressEventHandler(long current, long total, string message);
+    public delegate void ProgressEventHandler(ProgressLogger progress);
 }

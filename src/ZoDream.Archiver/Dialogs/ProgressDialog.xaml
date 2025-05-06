@@ -18,35 +18,33 @@
 
     <ContentDialog.Resources>
         <cvt:TimeConverter x:Key="TimeCvt" />
+        <cvt:ToggleConverter x:Key="ToggleCvt" />
     </ContentDialog.Resources>
 
-    <Grid RowSpacing="8">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+    <StackPanel Spacing="8">
+        <Grid RowSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="已用时间：" />
+            <TextBlock Text="已用时间：" />
+            <TextBlock
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Text="{Binding ElapsedTime, Converter={StaticResource TimeCvt}}" />
+            <TextBlock Grid.Row="1" Text="剩余时间：" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Text="{Binding TimeLeft, Converter={StaticResource TimeCvt}}" />
+        </Grid>
         <TextBlock
-            Grid.Column="1"
-            HorizontalAlignment="Right"
-            Text="{Binding ElapsedTime, Converter={StaticResource TimeCvt}}" />
-        <TextBlock Grid.Row="1" Text="剩余时间：" />
-        <TextBlock
-            Grid.Row="1"
-            Grid.Column="1"
-            HorizontalAlignment="Right"
-            Text="{Binding TimeLeft, Converter={StaticResource TimeCvt}}" />
-
-        <TextBlock
-            Grid.Row="2"
-            Grid.ColumnSpan="2"
             MaxWidth="300"
             MaxLines="5"
             Style="{ThemeResource CaptionTextBlockStyle}"
@@ -54,11 +52,22 @@
             TextWrapping="Wrap" />
 
         <ProgressBar
-            Grid.Row="3"
-            Grid.ColumnSpan="2"
             IsIndeterminate="{Binding ProgressUnknow}"
             ShowError="False"
             ShowPaused="False"
             Value="{Binding Progress}" />
-    </Grid>
+        <StackPanel Spacing="8" Visibility="{Binding ChildEnabled, Converter={StaticResource ToggleCvt}}">
+            <TextBlock
+                MaxLines="1"
+                Style="{ThemeResource CaptionTextBlockStyle}"
+                Text="{Binding ChildTitle}"
+                TextWrapping="Wrap" />
+
+            <ProgressBar
+                IsIndeterminate="False"
+                ShowError="False"
+                ShowPaused="False"
+                Value="{Binding ChildProgress}" />
+        </StackPanel>
+    </StackPanel>
 </ContentDialog>

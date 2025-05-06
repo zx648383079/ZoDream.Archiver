@@ -10,6 +10,7 @@ using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 using Object = UnityEngine.Object;
 using Version = UnityEngine.Version;

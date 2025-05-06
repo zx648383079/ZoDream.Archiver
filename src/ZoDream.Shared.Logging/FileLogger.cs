@@ -1,20 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Logging
 {
-    public class FileLogger : ILogger
+    public class FileLogger(Stream output, LogLevel level = LogLevel.Debug) : ILogger
     {
-        public FileLogger(Stream output, LogLevel level = LogLevel.Debug)
-        {
-            _writer = new StreamWriter(output, Encoding.UTF8);
-            Level = level;
-        }
-        private readonly StreamWriter _writer;
-        public LogLevel Level { get; private set; }
+        private readonly StreamWriter _writer = new(output, Encoding.UTF8);
+
+        public LogLevel Level => level;
+
 
         public void Error(string message)
         {
@@ -55,19 +50,56 @@ namespace ZoDream.Shared.Logging
             _writer.WriteLine($"[{DateTime.Now}] {level}: {message}");
         }
 
-        public void Progress(long current, long total)
+        public void Log(LogLevel level, string message, string source)
         {
-            Progress(current, total, string.Empty);
+            if (level < Level)
+            {
+                return;
+            }
+            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}; {source}");
         }
 
-        public void Progress(long current, long total, string message)
+        public void Log(LogLevel level, Exception message, string source)
         {
-
+            if (level < Level)
+            {
+                return;
+            }
+            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}; {source}");
         }
+
+
 
         public void Dispose()
         {
             _writer.Dispose();
         }
+
+    
+
+        public void Progress(long current, long total)
+        {
+
+        }
+
+        public ProgressLogger CreateProgress(string title, long max = 0)
+        {
+            return new ProgressLogger(this, true)
+            {
+                Title = title,
+                Max = max
+            };
+        }
+
+        public ProgressLogger CreateSubProgress(string title, long max = 0)
+        {
+            return new ProgressLogger(this, false)
+            {
+                Title = title,
+                Max = max
+            };
+        }
+
+        
     }
 }

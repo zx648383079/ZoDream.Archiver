@@ -4,6 +4,7 @@ using System.Threading;
 using ZoDream.BundleExtractor.Producers;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -42,13 +43,12 @@ namespace ZoDream.BundleExtractor
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
             var service = scheme.Service;
-            var progress = 0;
+            var progress = logger.CreateProgress(string.Empty, fileItems.Count);
             if (!onlyDependencyTask && service.TryLoadPoint(fileItems.GetHashCode(), out var record))
             {
                 fileItems.Index = record;
-                progress = (int)record;
+                progress.Value = (int)record;
             }
-            logger.Progress(progress, fileItems.Count);
             if (fileItems.Count == 0)
             {
                 return;
@@ -73,8 +73,7 @@ namespace ZoDream.BundleExtractor
                 }
                 temporary.Clear();
                 builder?.Flush();
-                progress += items.Index;
-                logger.Progress(progress, fileItems.Count);
+                progress.Value += items.Index;
                 if (!onlyDependencyTask)
                 {
                     service?.SavePoint(fileItems.GetHashCode(), fileItems.Index);

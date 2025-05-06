@@ -19,6 +19,7 @@
 	  <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
+	  <ProjectReference Include="..\..\ZoDream.Shared.Logging\ZoDream.Shared.Logging.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared.Media\ZoDream.Shared.Media.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared.Numerics\ZoDream.Shared.Numerics.csproj" />
 	  <ProjectReference Include="..\..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />

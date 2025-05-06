@@ -8,7 +8,7 @@ using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.IO;
+using ZoDream.Shared.Logging;
 using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
@@ -17,6 +17,7 @@ namespace ZoDream.BundleExtractor
     {
         private void ProcessAssets(CancellationToken token)
         {
+            var progress = Logger?.CreateSubProgress("Process assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
                 for (var i = 0; i < asset.Count; i++)
@@ -80,6 +81,10 @@ namespace ZoDream.BundleExtractor
                         }
                     }
                 }
+                if (progress is not null)
+                {
+                    progress.Value++;
+                }
             }
         }
 
@@ -99,6 +104,9 @@ namespace ZoDream.BundleExtractor
 
         private void ReadAssets(CancellationToken token)
         {
+            var progress = Logger?.CreateSubProgress(
+                _dependency is not null ? "Build dependencies ... " : "Read assets...",
+                _assetItems.Count);
             var serializer = _service.Get<IBundleSerializer>();
             foreach (var asset in _assetItems)
             {
@@ -143,21 +151,12 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-#if DEBUG
-                        var fullPath = BundleStorage.Separate(asset.FullPath, out var entryName);
-                        var sb = new StringBuilder();
-                        sb.AppendLine("Unable to load object")
-                            .AppendLine($"Assets {entryName}")
-                            .AppendLine($"Path {fullPath}")
-                            .AppendLine($"Type {obj.TypeID}")
-                            .AppendLine($"PathID {obj.FileID}")
-                            .Append(e);
-                        Debug.WriteLine(sb.ToString());
-#endif
-                        //Logger.Error(sb.ToString());
-                        //Logger.Error("Unable to load object");
-                        Logger?.Error(e.Message);
+                        Logger?.Log(LogLevel.Error, e.Message, $"{obj.FileID} in {asset.FullPath}");
                     }
+                }
+                if (progress is not null)
+                {
+                    progress.Value++;
                 }
             }
         }

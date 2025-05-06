@@ -1,6 +1,6 @@
-﻿namespace ZoDream.Shared.Models
+﻿namespace ZoDream.Shared.Logging
 {
-    public enum LogLevel
+    public enum LogLevel : byte
     {
         NotSet,
         Debug,

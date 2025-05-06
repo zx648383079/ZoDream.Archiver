@@ -8,6 +8,7 @@ using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Logging;
 
 namespace ZoDream.Archiver.ViewModels
 {

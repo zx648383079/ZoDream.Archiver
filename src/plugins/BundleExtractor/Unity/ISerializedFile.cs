@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Logging;
 using Object = UnityEngine.Object;
 using Version = UnityEngine.Version;
 

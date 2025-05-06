@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Logging;
 
 namespace ZoDream.BundleExtractor
 {

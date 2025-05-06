@@ -1,11 +1,12 @@
 ﻿using System;
-using ZoDream.Shared.Models;
 
-namespace ZoDream.Shared.Interfaces
+namespace ZoDream.Shared.Logging
 {
     public interface ILogger : IDisposable
     {
 
+        public void Log(LogLevel level, string message, string source);
+        public void Log(LogLevel level, Exception message, string source);
         public void Log(LogLevel level, string message);
         public void Log(string message);
 
@@ -22,9 +23,10 @@ namespace ZoDream.Shared.Interfaces
         /// </summary>
         /// <param name="current"></param>
         /// <param name="total"></param>
-        public void Progress(long current, long total);
+        public void Progress(long current, long total = 0);
 
-        public void Progress(long current, long total, string message);
+        public ProgressLogger CreateProgress(string title, long max = 0);
+        public ProgressLogger CreateSubProgress(string title, long max = 0);
 
     }
 }

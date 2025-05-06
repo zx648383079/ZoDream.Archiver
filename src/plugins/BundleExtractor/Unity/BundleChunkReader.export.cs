@@ -5,6 +5,7 @@ using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -32,6 +33,7 @@ namespace ZoDream.BundleExtractor
 
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
+            var progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
                 for (var i = 0; i < asset.Count; i++)
@@ -66,8 +68,7 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-                        Logger?.Debug(asset.FullPath);
-                        Logger?.Error(e.Message);
+                        Logger?.Log(LogLevel.Error, e.Message, $"{info.FileID} in {asset.FullPath}");
                     }
                 }
                 if (token.IsCancellationRequested)
@@ -81,6 +82,10 @@ namespace ZoDream.BundleExtractor
                     batch.Value.Dispose();
                 }
                 _batchItems.Clear();
+                if (progress is not null)
+                {
+                    progress.Value++;
+                }
             }
         }
 

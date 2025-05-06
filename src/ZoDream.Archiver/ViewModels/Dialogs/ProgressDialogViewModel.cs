@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
-using ZoDream.Shared.Models;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -19,16 +18,26 @@ namespace ZoDream.Archiver.ViewModels
             StartTick();
         }
 
-        private void Logger_OnProgress(long current, long total, string message)
+        private void Logger_OnProgress(ProgressLogger progress)
         {
             _messageRefreshToken.Cancel();
             _app.DispatcherQueue.TryEnqueue(() => {
-                Message = message;
-                if (current > 0 || total > 0)
+                if (!progress.IsMaster)
+                {
+                    ChildTitle = progress.Title;
+                    ChildEnabled = progress.Max > 0;
+                    ChildProgress = (double)progress;
+                    return;
+                }
+                if (!string.IsNullOrEmpty(progress.Title))
+                {
+                    Message = progress.Title;
+                }
+                Progress = (double)progress;
+                if (progress.Max > 0)
                 {
                     ProgressUnknow = false;
                 }
-                Progress = total > 0 ? ((double)current * 100 / total) : 0;
             });
         }
 
@@ -116,6 +125,29 @@ namespace ZoDream.Archiver.ViewModels
                 Set(ref _message, value);
             }
         }
+
+        private string _childTitle;
+
+        public string ChildTitle {
+            get => _childTitle;
+            set => Set(ref _childTitle, value);
+        }
+
+        private bool _childEnabled;
+
+        public bool ChildEnabled {
+            get => _childEnabled;
+            set => Set(ref _childEnabled, value);
+        }
+
+        private double _childProgress;
+
+        public double ChildProgress {
+            get => _childProgress;
+            set => Set(ref _childProgress, value);
+        }
+
+
 
         /// <summary>
         /// 只有进度更新了才更新剩余时间

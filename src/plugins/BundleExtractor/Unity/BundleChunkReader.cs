@@ -11,6 +11,7 @@ using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
@@ -115,7 +116,7 @@ namespace ZoDream.BundleExtractor
                 _importItems.Add(item);
                 _importFileHash.Add(Path.GetFileName(item));
             }
-            Logger?.Info("Load file...");
+            var progress = Logger?.CreateSubProgress("Load file...", _importItems.Count);
             for (int i = 0; i < _importItems.Count; i++)
             {
                 if (token.IsCancellationRequested)
@@ -123,16 +124,18 @@ namespace ZoDream.BundleExtractor
                     return;
                 }
                 LoadFile(_importItems[i], token);
+                if (progress is not null)
+                {
+                    progress.Max = _importItems.Count;
+                    progress.Value = i;
+                }
             }
-            Logger?.Info(_dependency is not null ? "Build dependencies ... " : "Read assets...");
             ReadAssets(token);
             if (_dependency is not null)
             {
                 return;
             }
-            Logger?.Info("Process assets...");
             ProcessAssets(token);
-            Logger?.Info("Export assets...");
             ExportAssets(folder, mode, token);
         }
 
