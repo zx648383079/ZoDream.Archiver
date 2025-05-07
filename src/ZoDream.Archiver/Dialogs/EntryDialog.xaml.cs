@@ -14,5 +14,6 @@ namespace ZoDream.Archiver.Dialogs
         }
 
         public EntryDialogViewModel ViewModel => (EntryDialogViewModel)DataContext;
+
     }
 }

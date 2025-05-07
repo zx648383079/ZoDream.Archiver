@@ -3,8 +3,10 @@
     x:Class="ZoDream.Archiver.Dialogs.EntryDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bhv="using:ZoDream.Archiver.Behaviors"
     xmlns:cvt="using:ZoDream.Archiver.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ivy="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:ZoDream.Archiver.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZoDream.Archiver.ViewModels"
@@ -18,7 +20,7 @@
         <vm:EntryDialogViewModel />
     </ContentDialog.DataContext>
     <ContentDialog.Resources>
-        <cvt:BundleTypeConverter x:Key="BTCvt" />
+        <ResourceDictionary Source="ms-appx:///Themes/EntryStyle.xaml" />
     </ContentDialog.Resources>
 
     <Grid>
@@ -26,60 +28,49 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <AutoSuggestBox />
-        <ListView Grid.Row="1" ItemsSource="{Binding EntrySource, Mode=OneWay}">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ItemsStackPanel AreStickyGroupHeadersEnabled="false" />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-            <ListView.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.HeaderTemplate>
-                        <DataTemplate>
-                            <Border AutomationProperties.AccessibilityView="Raw">
-                                <TextBlock
-                                    AutomationProperties.AccessibilityView="Raw"
-                                    Style="{ThemeResource TitleTextBlockStyle}"
-                                    Text="{Binding Name}" />
-                            </Border>
-                        </DataTemplate>
-                    </GroupStyle.HeaderTemplate>
-                </GroupStyle>
-            </ListView.GroupStyle>
-
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            Grid.RowSpan="2"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource BodyTextBlockStyle}"
-                            Text="{Binding Name}" />
-                        <TextBlock
-                            Grid.Column="1"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="{Binding Id}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="{Binding Type, Converter={StaticResource BTCvt}}" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <AutoSuggestBox PlaceholderText="Search Resource Name" QueryIcon="Find">
+            <ivy:Interaction.Behaviors>
+                <bhv:SearchTextBehavior Command="{Binding SearchCommand}" />
+            </ivy:Interaction.Behaviors>
+        </AutoSuggestBox>
+        <ListBox
+            Grid.Row="1"
+            ItemTemplateSelector="{StaticResource EntryIndexTemplateSelector}"
+            ItemsSource="{Binding EntryItems, Mode=OneWay}">
+            <ListBox.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="只显示此文件">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE7B3;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="查看此文件依赖">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE723;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="查看此文件引用">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE71B;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="浏览文件">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE838;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="复制文件路径">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xF413;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="复制文件ID">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8C8;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+            </ListBox.ContextFlyout>
+        </ListBox>
     </Grid>
 </ContentDialog>

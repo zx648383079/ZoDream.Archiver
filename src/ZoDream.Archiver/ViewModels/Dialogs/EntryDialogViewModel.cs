@@ -1,7 +1,6 @@
-﻿using Microsoft.UI.Xaml.Data;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Windows.Input;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.ViewModel;
 
@@ -11,12 +10,10 @@ namespace ZoDream.Archiver.ViewModels
     {
         public EntryDialogViewModel()
         {
-            _source.Source = EntryItems;
+            SearchCommand = new RelayCommand<string>(TapSearch);
         }
 
-        private readonly CollectionViewSource _source = new() { IsSourceGrouped = true };
-
-        public ICollectionView EntrySource => _source.View;
+        private IBundleEntrySource[] _items = [];
 
         private string _keywords = string.Empty;
 
@@ -25,21 +22,50 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _keywords, value);
         }
 
-        private ObservableCollection<IBundleEntrySource> _entryItems = [];
+        private object[] _entryItems = [];
 
-        public ObservableCollection<IBundleEntrySource> EntryItems {
+        public object[] EntryItems {
             get => _entryItems;
             set => Set(ref _entryItems, value);
+        }
+
+        public ICommand SearchCommand { get; private set; }
+
+        private void TapSearch(string? keywords)
+        {
+            Keywords = keywords ?? string.Empty;
+            Refresh();
         }
 
         public void Load(string fileName)
         {
             using var fs = File.OpenRead(fileName);
-            EntryItems.Clear();
-            foreach (var item in BundleStorage.LoadEntry(fs))
-            {
-                EntryItems.Add(item);
-            }
+            _items = [.. BundleStorage.LoadEntry(fs)];
+            Refresh();
         }
+
+        private void Refresh()
+        {
+            var items = new List<object>();
+            foreach (var item in _items)
+            {
+                var hasHeader = false;
+                foreach (var it in item)
+                {
+                    if (!string.IsNullOrWhiteSpace(Keywords) && !it.Name.Contains(Keywords))
+                    {
+                        continue;
+                    }
+                    if (!hasHeader)
+                    {
+                        items.Add(item);
+                        hasHeader = true;
+                    }
+                    items.Add(it);
+                }
+            }
+            EntryItems = [.. items];
+        }
+
     }
 }

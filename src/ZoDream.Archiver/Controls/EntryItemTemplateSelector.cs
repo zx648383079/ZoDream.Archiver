@@ -1,6 +1,8 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using ZoDream.Archiver.ViewModels;
+using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Archiver.Controls
 {
@@ -19,6 +21,14 @@ namespace ZoDream.Archiver.Controls
             if (item is EntryViewModel e)
             {
                 return e.IsDirectory ? DirectoryTemplate : DefaultTemplate;
+            }
+            if (item is IBundleEntrySource)
+            {
+                return DirectoryTemplate;
+            }
+            if (item is IBundleEntry)
+            {
+                return DefaultTemplate;
             }
             return base.SelectTemplateCore(item, container);
         }
