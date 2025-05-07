@@ -382,7 +382,7 @@ namespace ZoDream.Shared.Bundle
                 {
                     writer.Write(item.Id);
                     writer.Write(item.Type);
-                    writer.Write(item.Name);
+                    writer.Write(item.Name ?? string.Empty);
                 }
                 writer.Write(_linked.Count);
                 foreach (var item in _linked)

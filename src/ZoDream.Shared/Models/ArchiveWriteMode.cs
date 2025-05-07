@@ -3,7 +3,7 @@
     /// <summary>
     /// 解压文件，遇到同名文件
     /// </summary>
-    public enum ArchiveExtractMode
+    public enum ArchiveExtractMode : byte
     {
         None,
         Overwrite,

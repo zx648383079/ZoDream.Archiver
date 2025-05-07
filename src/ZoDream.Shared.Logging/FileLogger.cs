@@ -59,9 +59,9 @@ namespace ZoDream.Shared.Logging
             _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
         }
 
-        public void Log(Exception message, string source)
+        public void Log(Exception message)
         {
-            Log(LogLevel.Error, message, source);
+            Log(LogLevel.Error, message, string.Empty);
         }
 
         public void Log(LogLevel level, Exception message, string source)
@@ -74,11 +74,6 @@ namespace ZoDream.Shared.Logging
             if (!string.IsNullOrEmpty(message.Source))
             {
                 _writer.WriteLine(message.Source);
-            }
-            if (!string.IsNullOrEmpty(message.StackTrace))
-            {
-                _writer.Write("Stack trace: ");
-                _writer.WriteLine(message.StackTrace);
             }
         }
 

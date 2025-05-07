@@ -7,7 +7,7 @@ namespace ZoDream.Shared.Logging
 
         public void Log(LogLevel level, string message, string source);
         public void Log(LogLevel level, Exception message, string source);
-        public void Log(Exception message, string source);
+        public void Log(Exception message);
         public void Log(LogLevel level, string message);
         public void Log(string message);
 

@@ -37,6 +37,8 @@ namespace ZoDream.BundleExtractor
         private readonly IEntryService _service;
         private readonly UnityBundleScheme _scheme;
         private readonly IDependencyBuilder? _dependency;
+        private ArchiveExtractMode _extractMode;
+        private string _extractFolder = string.Empty;
 
         private readonly List<ISerializedFile> _assetItems = [];
         private readonly ConcurrentDictionary<string, int> _assetIndexItems = [];
@@ -111,6 +113,8 @@ namespace ZoDream.BundleExtractor
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
+            _extractMode = mode;
+            _extractFolder = folder;
             foreach (var item in _fileItems)
             {
                 _importItems.Add(item);
@@ -176,7 +180,9 @@ namespace ZoDream.BundleExtractor
                 Logger?.Error(e.Message);
             }
         }
-        private void LoadFile(IBundleBinaryReader stream, string fullName, CancellationToken token)
+        private void LoadFile(IBundleBinaryReader stream, 
+            string fullName, 
+            CancellationToken token)
         {
             var temporary = _service.Get<ITemporaryStorage>();
             temporary.Add(stream.BaseStream);
@@ -219,6 +225,10 @@ namespace ZoDream.BundleExtractor
                 if (token.IsCancellationRequested)
                 {
                     return;
+                }
+                if (reader is IRawEntryReader r && r.TryExtractTo(item, _extractFolder, _extractMode))
+                {
+                    continue;
                 }
                 var ms = temporary.Create();
                 reader.ExtractTo(item, ms);

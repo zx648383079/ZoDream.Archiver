@@ -270,7 +270,7 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    _app.Logger.Log(ex, string.Empty);
+                    _app.Logger.Log(ex);
                 }
                 reader?.Dispose();
                 _app.CloseProgress();

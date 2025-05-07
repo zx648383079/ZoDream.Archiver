@@ -12,11 +12,12 @@ using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 {
-    public class DBreezeReader(Stream input) : IArchiveReader
+    public class DBreezeReader(Stream input) : IArchiveReader, IRawEntryReader
     {
 
         public const string FileName = "_DBreezeResources";
@@ -68,7 +69,58 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             flip?.Encode(output, SkiaSharp.SKEncodedImageFormat.Png, 100);
         }
 
-        private void ExtractTo(ArchiveEntry entry, string folder)
+        public bool TryExtractTo(IReadOnlyEntry entry, string folder, ArchiveExtractMode mode)
+        {
+            if (entry is not ArchiveEntry o)
+            {
+                return false;
+            }
+            var fs = ReadStream(o);
+            var buffer = fs.ReadBytes(4);
+            fs.Position = 0;
+            var leaveOpen = true;
+            if (buffer.Equal([0x04, 0x22, 0x4D, 0x18]))
+            {
+                fs = LZ4Frame.Decode(fs, 0, true).AsStream();
+                leaveOpen = false;
+            }
+            var fileName = Path.Combine(folder, entry.Name);
+            var isRaw = true;
+            if (entry.Name.StartsWith("utex2."))
+            {
+                if (LocationStorage.TryCreate(fileName, ".png", mode, out fileName))
+                {
+                    using var ouput = File.Create(fileName);
+                    WriteTexture(ouput, fs);
+                }
+            }
+            else
+            {
+                buffer = fs.ReadBytes(8);
+                fs.Position = 0;
+                var ext = string.Empty;
+                if (buffer.StartsWith("OggS"))
+                {
+                    ext = ".ogg";
+                }
+                else if (buffer.Equal("UnityFS\x00"))
+                {
+                    ext = ".ab";
+                    isRaw = false;
+                }
+                if (isRaw && LocationStorage.TryCreate(fileName, ext, mode, out fileName))
+                {
+                    fs.SaveAs(fileName);
+                }
+            }
+            if (!leaveOpen)
+            {
+                fs.Dispose();
+            }
+            return isRaw;
+        }
+
+        private void ExtractTo(ArchiveEntry entry, string folder, ArchiveExtractMode mode)
         {
             var fs = ReadStream(entry);
             var buffer = fs.ReadBytes(4);
@@ -113,7 +165,7 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 {
                     break;
                 }
-                ExtractTo((ArchiveEntry)item, folder);
+                ExtractTo((ArchiveEntry)item, folder, mode);
             }
         }
 
@@ -165,5 +217,7 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
         {
             input.Dispose();
         }
+
+       
     }
 }

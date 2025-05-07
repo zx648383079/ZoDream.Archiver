@@ -64,9 +64,9 @@ namespace ZoDream.Shared.Logging
             }
         }
 
-        public void Log(Exception message, string source)
+        public void Log(Exception message)
         {
-            Log(LogLevel.Error, message, source);
+            Log(LogLevel.Error, message, string.Empty);
         }
 
         public void Log(LogLevel level, Exception message, string source)
