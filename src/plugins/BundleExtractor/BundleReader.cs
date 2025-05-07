@@ -39,6 +39,7 @@ namespace ZoDream.BundleExtractor
             //    });
             var onlyDependencyTask = options is IBundleExtractOptions o && o.OnlyDependencyTask;
             var logger = scheme.Service.Get<ILogger>();
+            logger.Info($"Engine: {_engine.AliasName}");
             logger.Info("Analyzing ...");
             fileItems.Analyze(this, token);
             logger.Info($"Found {fileItems.Count} files.");
@@ -115,6 +116,7 @@ namespace ZoDream.BundleExtractor
             var storage = last is IBundleStorage s ? s : producer.GetStorage(options);
             service.Add(storage);
             service.Add(storage is IBundleCodec codec ? codec : service.Get<BundleCodec>());
+            service.Get<ILogger>().Info($"Producer: {producer.AliasName}");
         }
     }
 }

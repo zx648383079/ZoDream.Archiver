@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;

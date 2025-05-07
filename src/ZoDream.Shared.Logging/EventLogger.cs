@@ -64,6 +64,11 @@ namespace ZoDream.Shared.Logging
             }
         }
 
+        public void Log(Exception message, string source)
+        {
+            Log(LogLevel.Error, message, source);
+        }
+
         public void Log(LogLevel level, Exception message, string source)
         {
             _target?.Log(level, message, source);
@@ -100,6 +105,11 @@ namespace ZoDream.Shared.Logging
             _child.Value = 0;
             OnProgress?.Invoke(_child);
             return _child;
+        }
+
+        public void Flush()
+        {
+
         }
 
         internal void Emit(ProgressLogger progress)

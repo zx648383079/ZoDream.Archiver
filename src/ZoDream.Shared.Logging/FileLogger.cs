@@ -59,6 +59,11 @@ namespace ZoDream.Shared.Logging
             _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
         }
 
+        public void Log(Exception message, string source)
+        {
+            Log(LogLevel.Error, message, source);
+        }
+
         public void Log(LogLevel level, Exception message, string source)
         {
             if (level < Level)
@@ -66,14 +71,20 @@ namespace ZoDream.Shared.Logging
                 return;
             }
             _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
+            if (!string.IsNullOrEmpty(message.Source))
+            {
+                _writer.WriteLine(message.Source);
+            }
+            if (!string.IsNullOrEmpty(message.StackTrace))
+            {
+                _writer.Write("Stack trace: ");
+                _writer.WriteLine(message.StackTrace);
+            }
         }
 
 
 
-        public void Dispose()
-        {
-            _writer.Dispose();
-        }
+  
 
     
 
@@ -100,6 +111,15 @@ namespace ZoDream.Shared.Logging
             };
         }
 
-        
+        public void Flush()
+        {
+            _writer.Flush();
+        }
+
+        public void Dispose()
+        {
+            _writer.Dispose();
+        }
+
     }
 }

@@ -262,8 +262,6 @@ namespace ZoDream.Archiver.ViewModels
             }
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
-                var watch = new Stopwatch();
-                watch.Start();
                 IBundleReader? reader;
                 reader = _scheme.Load(source, _options);
                 try
@@ -272,13 +270,12 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
+                    _app.Logger.Log(ex, string.Empty);
                 }
                 reader?.Dispose();
-                watch.Stop();
-                Debug.WriteLine($"Use Time: {watch.Elapsed.TotalSeconds}");
                 _app.CloseProgress();
                 _app.Success("已完成操作！");
+                _app.Logger.Flush();
             }, token);
         }
 

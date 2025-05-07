@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor
             {
                 return null;
             }
-            Service.Get<ILogger>().Info(option.Platform);
+            Service.Get<ILogger>().Info($"Platform: {option.Platform}" );
             return new BundleReader(source, option, this);
         }
 

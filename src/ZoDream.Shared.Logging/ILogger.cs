@@ -7,6 +7,7 @@ namespace ZoDream.Shared.Logging
 
         public void Log(LogLevel level, string message, string source);
         public void Log(LogLevel level, Exception message, string source);
+        public void Log(Exception message, string source);
         public void Log(LogLevel level, string message);
         public void Log(string message);
 
@@ -27,6 +28,8 @@ namespace ZoDream.Shared.Logging
 
         public ProgressLogger CreateProgress(string title, long max = 0);
         public ProgressLogger CreateSubProgress(string title, long max = 0);
+
+        public void Flush();
 
     }
 }

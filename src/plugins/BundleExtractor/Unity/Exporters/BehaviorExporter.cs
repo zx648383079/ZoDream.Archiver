@@ -66,7 +66,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 type = UnityConverter.ToType(m_Type, entryId, resource);
             }
             using var fs = File.Create(fileName);
-            JsonSerializer.Serialize(fs, type);
+            JsonSerializer.Serialize(fs, type, JsonExporter.Options);
         }
 
 

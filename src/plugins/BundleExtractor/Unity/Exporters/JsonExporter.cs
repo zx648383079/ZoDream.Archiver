@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -10,9 +9,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 {
     internal class JsonExporter(int entryId, ISerializedFile resource) : IBundleExporter
     {
-        private static readonly JsonSerializerOptions Options = new()
+        internal static readonly JsonSerializerOptions Options = new()
         {
             WriteIndented = true,
+            NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Converters =
                 {
                     new JsonStringEnumConverter()
