@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -42,13 +43,61 @@ namespace ZoDream.Shared.Bundle
 
         public bool TryGet(string fileName, out string[] items)
         {
-            if (!TryGetValue(fileName, out var entry))
+            return TryGet([fileName], out items);
+        }
+
+        public bool TryGet(IEnumerable<string> files, out string[] items)
+        {
+            #region 简单版 // 只循环一次
+            //var source = files.ToArray();
+            //var res = new HashSet<string>();
+            //foreach (var item in source)
+            //{
+            //    if (!TryGetValue(item, out var entry))
+            //    {
+            //        continue;
+            //    }
+            //    foreach (var it in entry.Dependencies)
+            //    {
+            //        if (source.Contains(it))
+            //        {
+            //            continue;
+            //        }
+            //        res.Add(it);
+            //    }
+            //}
+            //items = [.. res];
+            //return items.Length > 0;
+            #endregion
+
+            #region 复制版 // 获取全部的依赖
+            var res = new HashSet<string>();
+            var source = files.ToArray();
+            var data = source;
+            while (data.Length > 0)
             {
-                items = [];
-                return false;
+                var next = new List<string>();
+                foreach (var item in data)
+                {
+                    if (!TryGetValue(item, out var entry))
+                    {
+                        continue;
+                    }
+                    foreach (var it in entry.Dependencies)
+                    {
+                        if (source.Contains(it) || res.Contains(it))
+                        {
+                            continue;
+                        }
+                        next.Add(it);
+                        res.Add(it);
+                    }
+                }
+                data = [.. next];
             }
-            items = [.. entry.Dependencies];
-            return true;
+            items = [.. res];
+            return items.Length > 0;
+            #endregion
         }
     }
 }

@@ -23,24 +23,24 @@ namespace ZoDream.Shared.Bundle
             }
             if (!File.Exists(fileName))
             {
-                Root = fileName;
+                Entrance = fileName;
                 return;
             }
-            Root = Path.GetDirectoryName(fileName)!;
+            Entrance = Path.GetDirectoryName(fileName)!;
             _fileItems = [fileName];
             _count = _fileItems.Count();
         }
 
         public BundleChunk(string baseFolder, IEnumerable<string> items)
         {
-            Root = baseFolder;
+            Entrance = baseFolder;
             _fileItems = items;
             _count = _fileItems.Count();
         }
 
         private readonly IEnumerable<string>? _fileItems;
         private readonly string _globPattern = "*.*";
-        public string Root { get; private set; }
+        public string Entrance { get; private set; }
 
         private int _count = -1;
         public int Count 
@@ -51,7 +51,7 @@ namespace ZoDream.Shared.Bundle
                     return _count;
                 }
                 _count = 0;
-                _count = (int)BundleStorage.FileCount([Root], _globPattern);
+                _count = (int)BundleStorage.FileCount([Entrance], _globPattern);
                 return _count;
             }
         }
@@ -60,9 +60,9 @@ namespace ZoDream.Shared.Bundle
 
         public string Create(string sourcePath, string outputFolder)
         {
-            if (sourcePath.StartsWith(Root))
+            if (sourcePath.StartsWith(Entrance))
             {
-                return Path.Combine(outputFolder, Path.GetRelativePath(Root, sourcePath));
+                return Path.Combine(outputFolder, Path.GetRelativePath(Entrance, sourcePath));
             }
             if (sourcePath.StartsWith(outputFolder))
             {
@@ -90,7 +90,7 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            var res = new FileSystemEnumerable<string>(Root, delegate (ref FileSystemEntry entry)
+            var res = new FileSystemEnumerable<string>(Entrance, delegate (ref FileSystemEntry entry)
             {
                 return entry.ToSpecifiedFullPath();
             }, options)

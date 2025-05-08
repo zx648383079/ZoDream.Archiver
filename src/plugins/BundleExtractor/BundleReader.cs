@@ -63,6 +63,7 @@ namespace ZoDream.BundleExtractor
                 {
                     break;
                 }
+                logger.Info($"Extract {items.Count} files ...");
                 try
                 {
                     using var chunk = _engine.OpenRead(items, options);

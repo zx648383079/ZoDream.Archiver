@@ -74,7 +74,7 @@ namespace ZoDream.Shared.Logging
             _target?.Log(level, message, source);
             if (level >= Level)
             {
-                OnLog?.Invoke(message.ToString(), level);
+                OnLog?.Invoke(message.Message, level);
             }
         }
 

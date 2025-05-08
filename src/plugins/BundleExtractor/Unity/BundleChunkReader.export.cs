@@ -68,7 +68,7 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-                        Logger?.Log(LogLevel.Error, e.Message, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
+                        Logger?.Log(LogLevel.Error, e, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
                     }
                 }
                 if (token.IsCancellationRequested)

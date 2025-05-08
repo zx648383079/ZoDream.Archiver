@@ -64,6 +64,11 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount)
         {
+            return EnumerateChunk(maxFileCount, null);
+        }
+
+        private IEnumerable<IBundleChunk> EnumerateChunk(int maxFileCount, HashSet<string>? excludeItems)
+        {
             var items = new List<string>();
             var options = new EnumerationOptions()
             {
@@ -79,6 +84,10 @@ namespace ZoDream.Shared.Bundle
                 if (File.Exists(item))
                 {
                     if (index++ < begin)
+                    {
+                        continue;
+                    }
+                    if (excludeItems?.Contains(item) == true)
                     {
                         continue;
                     }
@@ -106,6 +115,10 @@ namespace ZoDream.Shared.Bundle
                     {
                         continue;
                     }
+                    if (excludeItems?.Contains(it) == true)
+                    {
+                        continue;
+                    }
                     items.Add(it);
                     if (items.Count >= maxFileCount)
                     {
@@ -122,16 +135,21 @@ namespace ZoDream.Shared.Bundle
                 }
             }
         }
-
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
         {
-            foreach (var item in GetFiles())
+            var exclude = new HashSet<string>();
+            foreach (var item in EnumerateChunk(5, exclude))
             {
-                if (dependencies.TryGet(item, out var items))
+                if (!dependencies.TryGet(item, out var items))
                 {
-                    yield return new BundleChunk(dependencies.Entrance, [.. items, item]);
+                    yield return item;
+                    continue;
                 }
-                yield return new BundleChunk(item);
+                yield return new BundleChunk(item.Entrance, [.. item, .. items]);
+                foreach (var it in items)
+                {
+                    exclude.Add(it);
+                }
             }
         }
 

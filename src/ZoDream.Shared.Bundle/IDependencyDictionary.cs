@@ -32,5 +32,6 @@ namespace ZoDream.Shared.Bundle
         /// <param name="items"></param>
         /// <returns></returns>
         public bool TryGet(string fileName, out string[] items);
+        public bool TryGet(IEnumerable<string> files, out string[] items);
     }
 }
