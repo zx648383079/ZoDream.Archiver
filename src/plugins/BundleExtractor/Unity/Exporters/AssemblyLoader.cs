@@ -4,7 +4,7 @@ using System.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class AssemblyLoader
+    public class AssemblyLoader
     {
         public bool IsLoaded { get; private set; }
         private readonly Dictionary<string, ModuleDefinition> _moduleItems = [];

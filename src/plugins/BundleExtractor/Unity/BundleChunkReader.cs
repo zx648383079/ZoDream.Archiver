@@ -135,11 +135,11 @@ namespace ZoDream.BundleExtractor
                 }
             }
             ReadAssets(token);
+            ProcessAssets(token);
             if (_dependency is not null)
             {
                 return;
             }
-            ProcessAssets(token);
             ExportAssets(folder, mode, token);
         }
 

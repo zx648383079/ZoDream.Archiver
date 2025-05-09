@@ -20,7 +20,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            if (behavior.Script is null || !behavior.Script.TryGet(out var script))
+            if (behavior.Script is null 
+                || !behavior.Script.TryGet(out var script) 
+                || script.ClassName.StartsWith("Cubism"))
             {
                 return;
             }
@@ -28,32 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            switch (script.ClassName)
-            {
-                case "CubismMoc":
-                    new CubismExporter(entryId, resource).SaveAs(fileName, mode);
-                    return;
-                case "CubismPhysicsController":
-                    break;
-                case "CubismExpressionData":
-                    break;
-                case "CubismFadeMotionData":
-                    break;
-                case "CubismFadeMotionList":
-                    break;
-                case "CubismEyeBlinkParameter":
-                    break;
-                case "CubismMouthParameter":
-                    break;
-                case "CubismParameter":
-                    break;
-                case "CubismPart":
-                    break;
-                case "CubismDisplayInfoParameterName":
-                    break;
-                case "CubismDisplayInfoPartName":
-                    break;
-            }
+            
             var type = UnityConverter.ToType(entryId, resource);
             if (type == null)
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -53,62 +53,76 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             
         }
 
-        private static bool HasMesh(Transform m_Transform, List<bool> meshes)
+        public static bool TryGet<T>(GameObject game, [NotNullWhen(true)] out T? result)
+            where T : Component
+        {
+            foreach (var item in ForEach<T>(game))
+            {
+                result = item;
+                return true;
+            }
+            result = null;
+            return false;
+        }
+
+        public static IEnumerable<T> ForEach<T>(GameObject game)
+            where T : Component
+        {
+            foreach (var item in game.Components)
+            {
+                if (item.TryGet(out var res) && res is T instance)
+                {
+                    yield return instance;
+                }
+            }
+        }
+
+        private static bool HasMesh(Transform transform, List<bool> meshes)
         {
             try
             {
-                m_Transform.GameObject.TryGet(out var m_GameObject);
-
-                if (m_GameObject.MeshRenderer != null)
+                if (transform.GameObject?.TryGet(out var game) == true)
                 {
-                    var mesh = GetMesh(m_GameObject.MeshRenderer);
-                    meshes.Add(mesh != null);
-                }
-
-                if (m_GameObject.SkinnedMeshRenderer != null)
-                {
-                    var mesh = GetMesh(m_GameObject.SkinnedMeshRenderer);
-                    meshes.Add(mesh != null);
-                }
-
-                foreach (var pptr in m_Transform.Children)
-                {
-                    if (pptr.TryGet(out var child))
+                    foreach (var item in ForEach<Component>(game))
                     {
-                        meshes.Add(HasMesh(child, meshes));
+                        if (item is Renderer r && GetMesh(r) is not null)
+                        {
+                            return true;
+                        }
                     }
                 }
 
-                return meshes.Any(x => x == true);
+                foreach (var pptr in transform.Children)
+                {
+                    if (pptr.TryGet(out var child) && HasMesh(child, meshes))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Debug.WriteLine($"Unable to verify if {m_Transform?.Name} has meshes, skipping...");
+                Debug.WriteLine($"Unable to verify if {transform?.Name} has meshes, skipping...");
                 return false;
             }
         }
 
-        private static Mesh GetMesh(Renderer meshR)
+        public static Mesh? GetMesh(Renderer meshR)
         {
             if (meshR is SkinnedMeshRenderer sMesh)
             {
-                if (sMesh.Mesh.TryGet(out var m_Mesh))
+                if (sMesh.Mesh.TryGet(out var mesh))
                 {
-                    return m_Mesh;
+                    return mesh;
                 }
             }
-            else
+            else if(true == meshR.GameObject?.TryGet(out var game) && 
+                TryGet<MeshFilter>(game, out var filter) && filter.Mesh.TryGet(out var mesh))
             {
-                if (meshR.GameObject.TryGet(out var m_GameObject) && 
-                    m_GameObject.MeshFilter != null)
-                {
-                    if (m_GameObject.MeshFilter.Mesh.TryGet(out var m_Mesh))
-                    {
-                        return m_Mesh;
-                    }
-                }
+                return mesh;
             }
-
             return null;
         }
     }

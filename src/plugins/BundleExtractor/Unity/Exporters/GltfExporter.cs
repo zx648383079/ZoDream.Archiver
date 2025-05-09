@@ -23,6 +23,7 @@ using Mesh = ZoDream.KhronosExporter.Models.Mesh;
 using Node = ZoDream.KhronosExporter.Models.Node;
 using UnityMaterial = UnityEngine.Material;
 using UnityMesh = UnityEngine.Mesh;
+using UnityAnimation = UnityEngine.Animation;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -96,9 +97,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         }
         public void Append(GameObject obj)
         {
-            if (obj.Animator is not null)
+            if (GameObjectConverter.TryGet<Animator>(obj, out var animator))
             {
-                AddAnimator(obj.Animator);
+                AddAnimator(animator);
             }
             else
             {
@@ -145,7 +146,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         }
         private void AddGame(GameObject game, bool hasTransformHierarchy = true)
         {
-            var m_Transform = game.Transform;
+            if (!GameObjectConverter.TryGet<Transform>(game, out var transform))
+            {
+                return;
+            }
             //if (!hasTransformHierarchy)
             //{
             //    AddTransforms(m_Transform);
@@ -163,48 +167,53 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             //    CreateBonePathHash(m_Transform);
             //}
 
-            AddMeshRenderer(m_Transform);
-            CreateBonePathHash(m_Transform);
+            AddMeshRenderer(transform);
+            CreateBonePathHash(transform);
         }
 
-        private void AddMeshRenderer(Transform m_Transform, int meshParent = -1)
+        private void AddMeshRenderer(Transform transform, int meshParent = -1)
         {
-            m_Transform.GameObject.TryGet(out var m_GameObject);
-            _resource.Container.TryAddExclude(m_Transform.GameObject.PathID);
-            if (m_GameObject?.MeshRenderer != null)
+            _resource.Container.TryAddExclude(transform.GameObject.PathID);
+            if (transform.GameObject.TryGet(out var game))
             {
-                meshParent = AddMeshRenderer(m_GameObject.MeshRenderer, meshParent);
-                if (meshParent >= 0)
+                foreach (var item in GameObjectConverter.ForEach<Component>(game))
                 {
-                    _transformItems.TryAdd(m_Transform, meshParent);
-                }
-            }
-
-            if (m_GameObject?.SkinnedMeshRenderer != null)
-            {
-                var skinIndex = AddMeshRenderer(m_GameObject.SkinnedMeshRenderer);
-                if (skinIndex >= 0)
-                {
-                    _transformItems.TryAdd(m_Transform, skinIndex);
-                }
-            }
-
-            if (m_GameObject?.Animation != null)
-            {
-                foreach (var animation in m_GameObject.Animation.Clips)
-                {
-                    if (animation.TryGet(out var animationClip))
+                    switch (item)
                     {
-                        //if (!boundAnimationPathDic.ContainsKey(animationClip))
-                        //{
-                        //    boundAnimationPathDic.Add(animationClip, GetTransformPath(m_Transform));
-                        //}
-                        _animationItems.Add(animationClip);
+                        case MeshRenderer renderer:
+                            meshParent = AddMeshRenderer(renderer, meshParent);
+                            if (meshParent >= 0)
+                            {
+                                _transformItems.TryAdd(transform, meshParent);
+                            }
+                            break;
+                        case SkinnedMeshRenderer renderer:
+                            var skinIndex = AddMeshRenderer(renderer);
+                            if (skinIndex >= 0)
+                            {
+                                _transformItems.TryAdd(transform, skinIndex);
+                            }
+                            break;
+                        case UnityAnimation animation:
+                            foreach (var pptr in animation.Clips)
+                            {
+                                if (pptr.TryGet(out var animationClip))
+                                {
+                                    //if (!boundAnimationPathDic.ContainsKey(animationClip))
+                                    //{
+                                    //    boundAnimationPathDic.Add(animationClip, GetTransformPath(m_Transform));
+                                    //}
+                                    _animationItems.Add(animationClip);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
 
-            foreach (var pptr in m_Transform.Children)
+            foreach (var pptr in transform.Children)
             {
                 _resource.Container.TryAddExclude(pptr.PathID);
                 if (pptr.TryGet(out var child))
@@ -362,8 +371,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 //Morphs
                 if (mesh.Shapes?.Channels?.Length > 0)
                 {
-                    meshR.GameObject.TryGet(out var m_GameObject2);
-                    _channelPathItems[mesh.Name] = FindNodeByTransform(m_GameObject2.Transform);
+                    if (meshR.GameObject.TryGet(out var game) &&
+                        GameObjectConverter.TryGet<Transform>(game, out var transform))
+                    {
+                        _channelPathItems[mesh.Name] = FindNodeByTransform(transform);
+                    }
                     for (int i = 0; i < mesh.Shapes.Channels.Length; i++)
                     {
                         var shapeChannel = mesh.Shapes.Channels[i];
@@ -486,10 +498,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return sMesh.Mesh;
             }
-            else if (meshR.GameObject.TryGet(out var m_GameObject) 
-                && m_GameObject.MeshFilter != null)
+            else if (true == meshR.GameObject?.TryGet(out var game) &&
+                GameObjectConverter.TryGet<MeshFilter>(game, out var filter))
             {
-                return m_GameObject.MeshFilter.Mesh;
+                return filter.Mesh;
             }
 
             return null;
@@ -506,9 +518,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private void AddNode(Transform trans, int sceneIndex, int parentIndex)
         {
             var nodeIndex = parentIndex;
-            if (!trans.GameObject.TryGet(out var game))
+            if (!trans.GameObject.TryGet(out var game) && 
+                GameObjectConverter.TryGet<MeshRenderer>(game, out var meshR))
             {
-                var res = AddNode(game.MeshRenderer, sceneIndex, parentIndex);
+                var res = AddNode(meshR, sceneIndex, parentIndex);
                 // var skin = AddNode(obj.m_SkinnedMeshRenderer, sceneIndex);
                 if (res >= 0)
                 {

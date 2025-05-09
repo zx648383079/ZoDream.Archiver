@@ -218,6 +218,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 if (instance is ResourceSource && fieldName == "Path")
                 {
                     fieldName = "Source";
+                } else if (fieldName == "Namespace")
+                {
+                    fieldName = "NameSpace";
                 }
                 var obj = data[key];
                 if (obj is null)

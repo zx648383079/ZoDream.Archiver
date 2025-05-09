@@ -58,10 +58,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Append(GameObject obj)
         {
-            if (obj.Animator != null)
+            if (GameObjectConverter.TryGet<Animator>(obj, out var animator))
             {
-                InitWithAnimator(obj.Animator);
-                CollectAnimationClip(obj.Animator);
+                InitWithAnimator(animator);
+                CollectAnimationClip(animator);
             }
             else
             {
@@ -107,29 +107,34 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             Directory.SetCurrentDirectory(currentDir);
         }
 
-        private void InitWithAnimator(Animator m_Animator)
+        private void InitWithAnimator(Animator animator)
         {
-            if (m_Animator.Avatar.TryGet(out var m_Avatar))
+            if (animator.Avatar.TryGet(out var m_Avatar))
             {
                 _avatar = m_Avatar;
             }
-            resource.Container?.TryAddExclude(m_Animator.GameObject.PathID);
-            m_Animator.GameObject.TryGet(out var m_GameObject);
-            InitWithGameObject(m_GameObject, m_Animator.HasTransformHierarchy);
+            resource.Container?.TryAddExclude(animator.GameObject.PathID);
+            if (animator.GameObject.TryGet(out var game))
+            {
+                InitWithGameObject(game, animator.HasTransformHierarchy);
+            }
         }
 
-        private void InitWithGameObject(GameObject m_GameObject, bool hasTransformHierarchy = true)
+        private void InitWithGameObject(GameObject game, bool hasTransformHierarchy = true)
         {
-            var m_Transform = m_GameObject.Transform;
+            if (!GameObjectConverter.TryGet<Transform>(game, out var transform))
+            {
+                return;
+            }
             if (!hasTransformHierarchy)
             {
-                ConvertTransforms(m_Transform, null);
+                ConvertTransforms(transform, null);
                 DeoptimizeTransformHierarchy();
             }
             else
             {
                 var frameList = new List<FbxImportedFrame>();
-                var tempTransform = m_Transform;
+                var tempTransform = transform;
                 while (tempTransform.Father.TryGet(out var m_Father))
                 {
                     frameList.Add(ConvertTransform(m_Father));
@@ -145,49 +150,49 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         var parent = frameList[i + 1];
                         parent.AddChild(frame);
                     }
-                    ConvertTransforms(m_Transform, frameList[0]);
+                    ConvertTransforms(transform, frameList[0]);
                 }
                 else
                 {
-                    ConvertTransforms(m_Transform, null);
+                    ConvertTransforms(transform, null);
                 }
 
-                CreateBonePathHash(m_Transform);
+                CreateBonePathHash(transform);
             }
 
-            ConvertMeshRenderer(m_Transform);
+            ConvertMeshRenderer(transform);
         }
 
-        private void ConvertMeshRenderer(Transform m_Transform)
+        private void ConvertMeshRenderer(Transform transform)
         {
-            m_Transform.GameObject.TryGet(out var m_GameObject);
-
-            if (m_GameObject.MeshRenderer != null)
+            if (transform.GameObject.TryGet(out var game))
             {
-                ConvertMeshRenderer(m_GameObject.MeshRenderer);
-            }
-
-            if (m_GameObject.SkinnedMeshRenderer != null)
-            {
-                ConvertMeshRenderer(m_GameObject.SkinnedMeshRenderer);
-            }
-
-            if (m_GameObject.Animation != null)
-            {
-                foreach (var animation in m_GameObject.Animation.Clips)
+                foreach (var item in GameObjectConverter.ForEach<Component>(game))
                 {
-                    if (animation.TryGet(out var animationClip))
+                    switch (item)
                     {
-                        if (!_boundAnimationPathDic.ContainsKey(animationClip))
-                        {
-                            _boundAnimationPathDic.Add(animationClip, GetTransformPath(m_Transform));
-                        }
-                        _animationClipHashSet.Add(animationClip);
+                        case Renderer renderer:
+                            ConvertMeshRenderer(renderer);
+                            break;
+                        case Animation animation:
+                            foreach (var pptr in animation.Clips)
+                            {
+                                if (pptr.TryGet(out var animationClip))
+                                {
+                                    if (!_boundAnimationPathDic.ContainsKey(animationClip))
+                                    {
+                                        _boundAnimationPathDic.Add(animationClip, GetTransformPath(transform));
+                                    }
+                                    _animationClipHashSet.Add(animationClip);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
-
-            foreach (var pptr in m_Transform.Children)
+            foreach (var pptr in transform.Children)
             {
                 if (pptr.TryGet(out var child))
                 {
@@ -286,7 +291,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void ConvertMeshRenderer(Renderer meshR)
         {
-            var mesh = GetMesh(meshR);
+            var mesh = GameObjectConverter.GetMesh(meshR);
             if (mesh == null)
             {
                 return;
@@ -296,8 +301,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 FileName = mesh.Name;
             }
             var iMesh = new FbxImportedMesh();
-            meshR.GameObject.TryGet(out var m_GameObject2);
-            iMesh.Path = GetTransformPath(m_GameObject2.Transform);
+            if (meshR.GameObject.TryGet(out var game) && 
+                GameObjectConverter.TryGet<Transform>(game, out var transform))
+            {
+                iMesh.Path = GetTransformPath(transform);
+            }
+            
             iMesh.SubmeshList = new List<FbxImportedSubmesh>();
             var subHashSet = new HashSet<int>();
             var combine = false;
@@ -601,29 +610,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             MeshList.Add(iMesh);
         }
 
-        private static Mesh GetMesh(Renderer meshR)
-        {
-            if (meshR is SkinnedMeshRenderer sMesh)
-            {
-                if (sMesh.Mesh.TryGet(out var m_Mesh))
-                {
-                    return m_Mesh;
-                }
-            }
-            else
-            {
-                meshR.GameObject.TryGet(out var m_GameObject);
-                if (m_GameObject.MeshFilter != null)
-                {
-                    if (m_GameObject.MeshFilter.Mesh.TryGet(out var m_Mesh))
-                    {
-                        return m_Mesh;
-                    }
-                }
-            }
-
-            return null;
-        }
 
         private string GetTransformPath(Transform transform)
         {

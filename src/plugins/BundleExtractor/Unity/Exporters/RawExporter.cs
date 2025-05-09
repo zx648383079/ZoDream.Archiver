@@ -68,7 +68,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private static void SaveAs(Stream input, string fileName, string extension, ArchiveExtractMode mode)
         {
-            if (!LocationStorage.TryCreate(fileName, ".skel.json", mode, out fileName))
+            if (!LocationStorage.TryCreate(fileName, extension, mode, out fileName))
             {
                 return;
             }

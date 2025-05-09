@@ -25,43 +25,7 @@ namespace ZoDream.BundleExtractor
                         Logger?.Info("Processing assets has been cancelled !!");
                         return;
                     }
-                    if (asset[i] is GameObject m_GameObject)
-                    {
-                        foreach (var pPtr in m_GameObject.Components)
-                        {
-                            if (pPtr.TryGet(out var m_Component))
-                            {
-                                switch (m_Component)
-                                {
-                                    case Transform m_Transform:
-                                        m_GameObject.Transform = m_Transform;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                    case MeshRenderer m_MeshRenderer:
-                                        m_GameObject.MeshRenderer = m_MeshRenderer;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                    case MeshFilter m_MeshFilter:
-                                        m_GameObject.MeshFilter = m_MeshFilter;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                    case SkinnedMeshRenderer m_SkinnedMeshRenderer:
-                                        m_GameObject.SkinnedMeshRenderer = m_SkinnedMeshRenderer;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                    case Animator m_Animator:
-                                        m_GameObject.Animator = m_Animator;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                    case Animation m_Animation:
-                                        m_GameObject.Animation = m_Animation;
-                                        TryAddExclude(pPtr.PathID);
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                    else if (asset[i] is SpriteAtlas m_SpriteAtlas && m_SpriteAtlas.RenderDataMap.Count > 0)
+                    if (asset[i] is SpriteAtlas m_SpriteAtlas && m_SpriteAtlas.RenderDataMap.Count > 0)
                     {
                         foreach (var m_PackedSprite in m_SpriteAtlas.PackedSprites)
                         {
@@ -78,6 +42,7 @@ namespace ZoDream.BundleExtractor
                             }
                         }
                     }
+                    PreExport(i, asset);
                 }
                 if (progress is not null)
                 {

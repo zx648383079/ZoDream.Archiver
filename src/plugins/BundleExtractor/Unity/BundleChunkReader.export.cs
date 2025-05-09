@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
+using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
@@ -27,13 +28,21 @@ namespace ZoDream.BundleExtractor
             {NativeClassID.Texture2D, typeof(TextureExporter)},
             {NativeClassID.Sprite, typeof(TextureExporter)},
         };
-
-        private readonly Dictionary<Type, IMultipartExporter> _batchItems = [];
+        private readonly List<IMultipartExporter> _exporterItems = [];
 
 
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
-            var progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
+            var progress = Logger?.CreateSubProgress("Batch Export ...", _exporterItems.Count);
+            foreach (var exporter in _exporterItems)
+            {
+                exporter.SaveAs(_fileItems.Create(FileNameHelper.Create(exporter.SourcePath,
+                            exporter.FileName
+                        ), folder), mode);
+                exporter.Dispose();
+            }
+            _exporterItems.Clear();
+            progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
                 for (var i = 0; i < asset.Count; i++)
@@ -75,18 +84,26 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                foreach (var batch in _batchItems)
-                {
-                    batch.Value.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath, 
-                        batch.Value.FileName), folder), mode);
-                    batch.Value.Dispose();
-                }
-                _batchItems.Clear();
                 if (progress is not null)
                 {
                     progress.Value++;
                 }
             }
+        }
+        /// <summary>
+        /// 一些涉及多个对象的批量导出
+        /// </summary>
+        /// <param name="entryId"></param>
+        /// <param name="resource"></param>
+        /// <returns></returns>
+        private bool PreExport(int entryId, ISerializedFile resource)
+        {
+            if (CubismExporter.IsExportable(entryId, resource))
+            {
+                _exporterItems.Add(new CubismExporter(entryId, resource));
+                return true;
+            }
+            return false;
         }
 
         private IMultipartExporter? TryParseModel(ISerializedFile asset)
@@ -97,7 +114,6 @@ namespace ZoDream.BundleExtractor
                 _ => new GltfExporter(asset),
             };
         }
-
 
         private IBundleExporter? TryParse(ISerializedFile asset, int objIndex)
         {
@@ -118,37 +134,13 @@ namespace ZoDream.BundleExtractor
             {
                 return null;
             }
-            if (_batchItems.TryGetValue(targetType, out instance))
-            {
-                TryAppend(instance, objIndex);
-                return null;
-            }
             var fn = targetType.GetConstructor([typeof(int), typeof(ISerializedFile)]);
-            object? target;
             if (fn is not null)
             {
-                target = fn?.Invoke([objIndex, asset]);
+                return (IBundleExporter)fn?.Invoke([objIndex, asset]);
             }
-            else
-            {
-                target = targetType.GetConstructor([])?.Invoke([]);
-            }
-            if (target is not IMultipartExporter m)
-            {
-                return (IBundleExporter)target;
-            }
-            if (fn is null)
-            {
-                TryAppend(target, objIndex);
-            }
-            _batchItems.TryAdd(targetType, m);
             return null;
         }
 
-        private static void TryAppend(object instance, int objIndex)
-        {
-            instance.GetType().GetMethod("Append",
-                    [objIndex.GetType()])?.Invoke(instance, [objIndex]);
-        }
     }
 }
