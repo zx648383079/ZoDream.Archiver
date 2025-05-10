@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using UnityEngine;
@@ -17,11 +16,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _entryId = entryId;
             _resource = resource;
+            _assembly = _resource.Container?.Service?.Get<AssemblyLoader>();
             var obj = _resource[_entryId] as GameObject;
             Debug.Assert(obj is not null);
             Initialize(obj);
         }
 
+        private readonly AssemblyLoader _assembly;
         private readonly int _entryId;
         private readonly ISerializedFile _resource;
 
@@ -43,7 +44,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             foreach (var pptr in game.Components)
             {
-                if (!pptr.TryGet(out var instance) || instance is not MonoBehaviour behaviour)
+                if (!pptr.TryGet(out var instance))
+                {
+                    continue;
+                }
+                if (instance is Transform transform)
+                {
+                    TransformConverter.ForEach(transform);
+                    continue;
+                }
+                if (instance is not MonoBehaviour behaviour)
                 {
                     continue;
                 }
@@ -65,6 +75,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     case "CubismExpressionController":
                         GetExpressionList(_resource.IndexOf(pptr.PathID), behaviour);
                         break;
+                    case "CubismRenderer":
+                        GetRenderTexture(_resource.IndexOf(pptr.PathID), behaviour);
+                        break;
                     default:
                         break;
                 }
@@ -73,11 +86,33 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetFadeList(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId, _resource, _resource.Container.Service.Get<AssemblyLoader>())
+            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            if (data is null)
+            {
+                return;
+            }
+            var res = data[GetFieldName(behaviour)];
         }
 
         private void GetExpressionList(int entryId, MonoBehaviour behaviour)
         {
+            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            if (data is null)
+            {
+                return;
+            }
+            var res = data[GetFieldName(behaviour)];
+
+        }
+
+        private void GetRenderTexture(int entryId, MonoBehaviour behaviour)
+        {
+            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            if (data is null)
+            {
+                return;
+            }
+            var res = data[GetFieldName(behaviour)];
 
         }
 
@@ -217,6 +252,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public static bool IsExportable(int entryId, ISerializedFile resource)
         {
             if (resource[entryId] is not GameObject game)
+            {
+                return false;
+            }
+            if (!GameObjectConverter.IsRoot(game))
             {
                 return false;
             }

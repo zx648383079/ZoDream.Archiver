@@ -125,5 +125,15 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             return null;
         }
+        /// <summary>
+        /// 判断是否根节点
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static bool IsRoot(GameObject game)
+        {
+            return TryGet<Transform>(game, out var transform) && TransformConverter.IsRoot(transform);
+        }
     }
 }

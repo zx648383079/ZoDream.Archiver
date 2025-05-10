@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -49,6 +50,69 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
             return res;
         }
+        /// <summary>
+        /// 是否是根节点
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static bool IsRoot(Transform transform)
+        {
+            return !transform.Father.TryGet(out _);
+        }
 
+        /// <summary>
+        /// 获取根节点
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static Transform GetRoot(Transform transform)
+        {
+            while (transform.Father.TryGet(out var next))
+            {
+                transform = next;
+            }
+            return transform;
+        }
+        
+        /// <summary>
+        /// 遍历子节点
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static IEnumerable<Transform> ForEach(Transform transform)
+        {
+            foreach (var item in transform.Children)
+            {
+                if (item.TryGet(out var res))
+                {
+                    yield return res;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 遍历子孙节点
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static IEnumerable<Transform> ForEachDeep(Transform transform)
+        {
+            var from = transform.Children;
+            var next = new List<IPPtr<Transform>>();
+            while (from.Length > 0)
+            {
+                foreach (var item in from)
+                {
+                    if (!item.TryGet(out var instance))
+                    {
+                        continue;
+                    }
+                    yield return instance;
+                    next.AddRange(instance.Children);
+                }
+                from = [.. next];
+                next.Clear();
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -45,13 +46,13 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
     internal sealed class Texture2DConverter : BundleConverter<Texture2D>, IElementTypeLoader
     {
-        public object? Read(IBundleBinaryReader reader, Type targetType, TypeTree typeMaps)
+        public object? Read(IBundleBinaryReader reader, Type targetType, VirtualDocument typeMaps)
         {
             var res = new Texture2D();
-            TypeTreeHelper.ReadType(typeMaps, reader, res);
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
             if (!string.IsNullOrEmpty(res.StreamData.Source))
             {
-                var container = reader.Get<ISerializedFile>();
                 if (reader.TryGet<IDependencyBuilder>(out var builder))
                 {
                     var fileName = container.FullPath;

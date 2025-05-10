@@ -1,5 +1,5 @@
 ﻿using System;
-using ZoDream.BundleExtractor.Unity.Document;
+using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -10,6 +10,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     internal interface IElementTypeLoader
     {
 
-        public object? Read(IBundleBinaryReader reader, Type target, TypeTree typeMaps);
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps);
     }
 }
