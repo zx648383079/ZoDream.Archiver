@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters
+namespace ZoDream.BundleExtractor.Unity.Document
 {
+    /// <summary>
+    /// https://github.com/Perfare/Il2CppDumper 先提取 dll
+    /// </summary>
     public class AssemblyLoader
     {
         public bool IsLoaded { get; private set; }

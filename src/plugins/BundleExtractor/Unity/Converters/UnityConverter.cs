@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Specialized;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -236,11 +237,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 entryId, resource);
         }
 
-        public static OrderedDictionary? ToType(TypeTree m_Type, int entryId, ISerializedFile resource)
+        public static OrderedDictionary? ToType(VirtualDocument types, int entryId, ISerializedFile resource)
         {
-            if (m_Type != null)
+            if (types != null)
             {
-                return TypeTreeHelper.ReadType(m_Type, resource.OpenRead(entryId));
+                return new DocumentReader(resource).Read(types, resource.OpenRead(entryId));
             }
             return null;
         }

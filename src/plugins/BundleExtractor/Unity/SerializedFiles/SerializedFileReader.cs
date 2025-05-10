@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
-using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -73,6 +72,15 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public int IndexOf(long pathID)
         {
             return Array.FindIndex(_metadata.Object, item => item.FileID == pathID);
+        }
+
+        public int IndexOf(Object obj)
+        {
+            if (obj is null)
+            {
+                return -1;
+            }
+            return Array.FindIndex(_children, item => item == obj);
         }
 
         public ObjectInfo Get(int index)

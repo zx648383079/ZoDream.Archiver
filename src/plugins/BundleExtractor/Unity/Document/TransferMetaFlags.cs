@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine.Document;
 
-namespace ZoDream.BundleExtractor.Unity.SerializedFiles
+namespace ZoDream.BundleExtractor.Unity.Document
 {
     
     public static class TransferMetaFlagsExtensions

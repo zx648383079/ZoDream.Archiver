@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
     internal class GenericInstanceHolder
     {
@@ -13,9 +13,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
 
     internal class TypeResolver
     {
-        private readonly IGenericInstance _typeDefinitionContext;
-        private readonly IGenericInstance _methodDefinitionContext;
-        private readonly Dictionary<string, GenericInstanceHolder> _context = new Dictionary<string, GenericInstanceHolder>();
+        private readonly IGenericInstance? _typeDefinitionContext;
+        private readonly IGenericInstance? _methodDefinitionContext;
+        private readonly Dictionary<string, GenericInstanceHolder> _context = [];
 
         public TypeResolver()
         {
@@ -472,7 +472,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
             if (fixedBufferAttribute == null)
                 throw new ArgumentException(string.Format("Field '{0}' is not a fixed buffer field.", fieldDefinition.FullName));
 
-            var size = (Int32)fixedBufferAttribute.ConstructorArguments[1].Value;
+            var size = (int)fixedBufferAttribute.ConstructorArguments[1].Value;
 
             return size;
         }
@@ -592,7 +592,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
                 }
                 else
                 {
-                    return (resolvedTypeDeclaration.IsSerializable && !resolvedTypeDeclaration.CustomAttributes.Any(a => a.AttributeType.FullName.Contains("System.Runtime.CompilerServices.CompilerGenerated"))) ||
+                    return resolvedTypeDeclaration.IsSerializable && !resolvedTypeDeclaration.CustomAttributes.Any(a => a.AttributeType.FullName.Contains("System.Runtime.CompilerServices.CompilerGenerated")) ||
                         resolvedTypeDeclaration.IsSubclassOf(EngineTypePredicates.MonoBehaviour, EngineTypePredicates.ScriptableObject);
                 }
             }

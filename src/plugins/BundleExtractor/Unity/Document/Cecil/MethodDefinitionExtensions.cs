@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
     internal static class MethodDefinitionExtensions
     {

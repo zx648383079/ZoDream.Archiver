@@ -8,6 +8,7 @@ namespace UnityEngine
         public Object? this[int index] { get; }
 
         public int IndexOf(long pathID);
+        public int IndexOf(Object obj);
         public bool TryGet<T>(PPtr ptr, [NotNullWhen(true)] out T? instance);
     }
 }

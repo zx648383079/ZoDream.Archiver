@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil;
 using System;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
     internal static class ResolutionExtensions
     {

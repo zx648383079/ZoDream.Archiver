@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -40,7 +42,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// The type of the class.
         /// </summary>
-        public TypeTree OldType { get; } = new();
+        public VirtualDocument OldType { get; } = new();
         /// <summary>
         /// Hash128
         /// </summary>
@@ -48,7 +50,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public byte[] OldTypeHash { get; set; } = [];
 
         public void Read(IBundleBinaryReader reader,
-            Version unityVersion,
             bool hasTypeTree)
         {
             var version = reader.Get<FormatVersion>();
@@ -75,7 +76,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 bool readScriptID = typeIdLocal == -1
                     || typeIdLocal == 114
-                    || !IgnoreScriptTypeForHash(version, unityVersion) && ScriptTypeIndex >= 0;
+                    || !IgnoreScriptTypeForHash(version, reader.Get<Version>()) && ScriptTypeIndex >= 0;
                 if (readScriptID)
                 {
                     ScriptID = reader.ReadBytes(16);//actually read as 4 uint
@@ -85,7 +86,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
             if (hasTypeTree)
             {
-                OldType.Read(reader);
+                DocumentConverter.Read(OldType, reader);
                 if (version < FormatVersion.HasTypeTreeHashes)
                 {
                     //OldTypeHash gets recalculated here in a complicated way on 2023.

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;

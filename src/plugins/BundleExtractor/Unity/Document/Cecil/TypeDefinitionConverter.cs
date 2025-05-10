@@ -2,35 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
-    internal class TypeDefinitionConverter
+    internal class TypeDefinitionConverter(TypeDefinition typeDef, DocumentBuilder builder, int indent)
     {
-        private readonly TypeDefinition TypeDef;
-        private readonly TypeResolver TypeResolver;
-        private readonly SerializedTypeHelper Helper;
-        private readonly int Indent;
+        private readonly TypeResolver TypeResolver = new();
 
-        public TypeDefinitionConverter(TypeDefinition typeDef, SerializedTypeHelper helper, int indent)
+        public void ConvertTo()
         {
-            TypeDef = typeDef;
-            TypeResolver = new TypeResolver(null);
-            Helper = helper;
-            Indent = indent;
-        }
-
-        public List<TypeTreeNode> ConvertToTypeTreeNodes()
-        {
-            var nodes = new List<TypeTreeNode>();
-
             var baseTypes = new Stack<TypeReference>();
-            var lastBaseType = TypeDef.BaseType;
+            var lastBaseType = typeDef.BaseType;
             while (!SerializationLogic.IsNonSerialized(lastBaseType))
             {
-                var genericInstanceType = lastBaseType as GenericInstanceType;
-                if (genericInstanceType != null)
+                if (lastBaseType is GenericInstanceType genericInstanceType)
                 {
                     TypeResolver.Add(genericInstanceType);
                 }
@@ -43,24 +28,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
                 var typeDefinition = typeReference.Resolve();
                 foreach (var fieldDefinition in typeDefinition.Fields.Where(WillUnitySerialize))
                 {
-                    if (!IsHiddenByParentClass(baseTypes, fieldDefinition, TypeDef))
+                    if (!IsHiddenByParentClass(baseTypes, fieldDefinition, typeDef))
                     {
-                        nodes.AddRange(ProcessingFieldRef(ResolveGenericFieldReference(fieldDefinition)));
+                        ProcessingFieldRef(ResolveGenericFieldReference(fieldDefinition));
                     }
                 }
 
-                var genericInstanceType = typeReference as GenericInstanceType;
-                if (genericInstanceType != null)
+                if (typeReference is GenericInstanceType genericInstanceType)
                 {
                     TypeResolver.Remove(genericInstanceType);
                 }
             }
             foreach (var field in FilteredFields())
             {
-                nodes.AddRange(ProcessingFieldRef(field));
+                ProcessingFieldRef(field);
             }
-
-            return nodes;
         }
 
         private bool WillUnitySerialize(FieldDefinition fieldDefinition)
@@ -94,7 +76,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
 
         private IEnumerable<FieldDefinition> FilteredFields()
         {
-            return TypeDef.Fields.Where(WillUnitySerialize).Where(f =>
+            return typeDef.Fields.Where(WillUnitySerialize).Where(f =>
                 SerializationLogic.IsSupportedCollection(f.FieldType) ||
                 !f.FieldType.IsGenericInstance ||
                 SerializationLogic.ShouldImplementIDeserializable(f.FieldType.Resolve()));
@@ -103,10 +85,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
         private FieldReference ResolveGenericFieldReference(FieldReference fieldRef)
         {
             var field = new FieldReference(fieldRef.Name, fieldRef.FieldType, ResolveDeclaringType(fieldRef.DeclaringType));
-            return TypeDef.Module.ImportReference(field);
+            return typeDef.Module.ImportReference(field);
         }
 
-        private TypeReference ResolveDeclaringType(TypeReference declaringType)
+        private TypeReference? ResolveDeclaringType(TypeReference declaringType)
         {
             var typeDefinition = declaringType.Resolve();
             if (typeDefinition == null || !typeDefinition.HasGenericParameters)
@@ -121,10 +103,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
             return TypeResolver.Resolve(genericInstanceType);
         }
 
-        private List<TypeTreeNode> ProcessingFieldRef(FieldReference fieldDef)
+        private void ProcessingFieldRef(FieldReference fieldDef)
         {
             var typeRef = TypeResolver.Resolve(fieldDef.FieldType);
-            return TypeRefToTypeTreeNodes(typeRef, fieldDef.Name, Indent, false);
+            TypeRefToTypeTreeNodes(typeRef, fieldDef.Name, indent, false);
         }
 
         private static bool IsStruct(TypeReference typeRef)
@@ -151,11 +133,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
             return typeRef.FullName == "System.String";
         }
 
-        private List<TypeTreeNode> TypeRefToTypeTreeNodes(TypeReference typeRef, string name, int indent, bool isElement)
+        private void TypeRefToTypeTreeNodes(TypeReference typeRef, string name, int indent, bool isElement)
         {
             var align = false;
 
-            if (!IsStruct(TypeDef) || !EngineTypePredicates.IsUnityEngineValueType(TypeDef))
+            if (!IsStruct(typeDef) || !EngineTypePredicates.IsUnityEngineValueType(typeDef))
             {
                 if (IsStruct(typeRef) || RequiresAlignment(typeRef))
                 {
@@ -163,7 +145,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
                 }
             }
 
-            var nodes = new List<TypeTreeNode>();
             if (typeRef.IsPrimitive)
             {
                 var primitiveName = typeRef.Name;
@@ -187,73 +168,71 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
                 {
                     align = false;
                 }
-                nodes.Add(new TypeTreeNode(primitiveName, name, indent, align));
+                builder.Add(new(primitiveName, name, indent, align));
             }
             else if (IsSystemString(typeRef))
             {
-                Helper.AddString(nodes, name, indent);
+                builder.AddString(name, indent);
             }
             else if (IsEnum(typeRef))
             {
-                nodes.Add(new TypeTreeNode("SInt32", name, indent, align));
+                builder.Add(new("SInt32", name, indent, align));
             }
             else if (CecilUtils.IsGenericList(typeRef))
             {
                 var elementRef = CecilUtils.ElementTypeOfCollection(typeRef);
-                nodes.Add(new TypeTreeNode(typeRef.Name, name, indent, align));
-                Helper.AddArray(nodes, indent + 1);
-                nodes.AddRange(TypeRefToTypeTreeNodes(elementRef, "data", indent + 2, true));
+                builder.Add(new(typeRef.Name, name, indent, align));
+                builder.AddArray(indent + 1);
+                TypeRefToTypeTreeNodes(elementRef, "data", indent + 2, true);
             }
             else if (typeRef.IsArray)
             {
                 var elementRef = typeRef.GetElementType();
-                nodes.Add(new TypeTreeNode(typeRef.Name, name, indent, align));
-                Helper.AddArray(nodes, indent + 1);
-                nodes.AddRange(TypeRefToTypeTreeNodes(elementRef, "data", indent + 2, true));
+                builder.Add(new(typeRef.Name, name, indent, align));
+                builder.AddArray(indent + 1);
+                TypeRefToTypeTreeNodes(elementRef, "data", indent + 2, true);
             }
             else if (EngineTypePredicates.IsUnityEngineObject(typeRef))
             {
-                Helper.AddPPtr(nodes, typeRef.Name, name, indent);
+                builder.AddPPtr(typeRef.Name, name, indent);
             }
             else if (EngineTypePredicates.IsSerializableUnityClass(typeRef) || EngineTypePredicates.IsSerializableUnityStruct(typeRef))
             {
                 switch (typeRef.FullName)
                 {
                     case "UnityEngine.AnimationCurve":
-                        Helper.AddAnimationCurve(nodes, name, indent);
+                        builder.AddAnimationCurve(name, indent);
                         break;
                     case "UnityEngine.Gradient":
-                        Helper.AddGradient(nodes, name, indent);
+                        builder.AddGradient(name, indent);
                         break;
                     case "UnityEngine.GUIStyle":
-                        Helper.AddGUIStyle(nodes, name, indent);
+                        builder.AddGUIStyle(name, indent);
                         break;
                     case "UnityEngine.RectOffset":
-                        Helper.AddRectOffset(nodes, name, indent);
+                        builder.AddRectOffset(name, indent);
                         break;
                     case "UnityEngine.Color32":
-                        Helper.AddColor32(nodes, name, indent);
+                        builder.AddColor32(name, indent);
                         break;
                     case "UnityEngine.Matrix4x4":
-                        Helper.AddMatrix4x4(nodes, name, indent);
+                        builder.AddMatrix4x4(name, indent);
                         break;
                     case "UnityEngine.Rendering.SphericalHarmonicsL2":
-                        Helper.AddSphericalHarmonicsL2(nodes, name, indent);
+                        builder.AddSphericalHarmonicsL2(name, indent);
                         break;
                     case "UnityEngine.PropertyName":
-                        Helper.AddPropertyName(nodes, name, indent);
+                        builder.AddPropertyName(name, indent);
                         break;
                 }
             }
             else
             {
-                nodes.Add(new TypeTreeNode(typeRef.Name, name, indent, align));
+                builder.Add(new(typeRef.Name, name, indent, align));
                 var typeDef = typeRef.Resolve();
-                var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, Helper, indent + 1);
-                nodes.AddRange(typeDefinitionConverter.ConvertToTypeTreeNodes());
+                var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, builder, indent + 1);
+                typeDefinitionConverter.ConvertTo();
             }
-
-            return nodes;
         }
     }
 }

@@ -2,12 +2,12 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.SourceGenerator
 {
-    public class PatternLanguageWriter(IEnumerable<TypeTreeNode> input) : ILanguageWriter
+    public class PatternLanguageWriter(IEnumerable<VirtualNode> input) : ILanguageWriter
     {
 
         private readonly HashSet<string> _typeItems = [];
@@ -24,7 +24,7 @@ namespace ZoDream.SourceGenerator
             writer.WriteLine("#pragma author zodream")
                 .WriteLine("#pragma description generate by source generator");
 
-            if (input is TypeNodeCollection c && !string.IsNullOrWhiteSpace(c.Version))
+            if (input is VirtualDocument c)
             {
                 writer.WriteFormat("// Version {0}", c.Version).WriteLine();
             }
@@ -33,13 +33,13 @@ namespace ZoDream.SourceGenerator
                 .WriteLine()
                 .WriteLine("import zodream.io;");
 
-            foreach (TypeTreeNode node in input)
+            foreach (VirtualNode node in input)
             {
                 WriteStruct(writer, node);
             }
         }
 
-        private string WriteType(ICodeWriter writer, TypeTreeNode node)
+        private string WriteType(ICodeWriter writer, VirtualNode node)
         {
             if (IsRegisterType(node.Type))
             {
@@ -67,7 +67,7 @@ namespace ZoDream.SourceGenerator
 
       
 
-        private void WriteStruct(ICodeWriter writer, TypeTreeNode node)
+        private void WriteStruct(ICodeWriter writer, VirtualNode node)
         {
             var structName = node.Type;
             if (structName.StartsWith("PPtr<"))
@@ -82,7 +82,7 @@ namespace ZoDream.SourceGenerator
             _typeItems.Add(structName);
         }
 
-        private void WriteStruct(ICodeWriter writer, string structName, TypeTreeNode[] children)
+        private void WriteStruct(ICodeWriter writer, string structName, VirtualNode[] children)
         {
             var maps = new Dictionary<string, string>();
             var arrayItems = new Dictionary<string, int>();
@@ -132,12 +132,12 @@ namespace ZoDream.SourceGenerator
 
 
 
-        private void WriteProperty(ICodeWriter writer, TypeTreeNode node)
+        private void WriteProperty(ICodeWriter writer, VirtualNode node)
         {
             writer.WriteFormat("{0} {1};", TranslateType(node.Type), node.Name.Replace(' ', '_')).WriteLine(true);
         }
 
-        private string WriteArray(ICodeWriter writer, TypeTreeNode node)
+        private string WriteArray(ICodeWriter writer, VirtualNode node)
         {
             if (node.Type != "Array" && node.Children?.Length == 1 && node.Children[0].Type == "Array")
             {
@@ -158,14 +158,14 @@ namespace ZoDream.SourceGenerator
             return $"zodream::List<{structName}>";
         }
 
-        private string WriteMap(ICodeWriter writer, TypeTreeNode node)
+        private string WriteMap(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?[0].Children?[1].Children?.ToArray() ?? [];
             Debug.Assert(children.Length == 2);
             return $"zodream::Map<{string.Join(", ", children.Select(i => WriteType(writer, i)))}>";
         }
 
-        private string WriteMapPair(ICodeWriter writer, TypeTreeNode node)
+        private string WriteMapPair(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?.ToArray() ?? [];
             Debug.Assert(children.Length == 2);

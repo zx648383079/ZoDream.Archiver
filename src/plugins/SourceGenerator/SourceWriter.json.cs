@@ -4,11 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.SourceGenerator
 {
-    public partial class TypeSourceWriter(IEnumerable<TypeTreeNode> input) : ILanguageWriter
+    public partial class TypeSourceWriter(IEnumerable<VirtualNode> input) : ILanguageWriter
     {
         private readonly ICodeWriter _cvtWriter = new CodeWriter();
         private readonly HashSet<string> _typeItems = [];
@@ -24,7 +25,7 @@ namespace ZoDream.SourceGenerator
 
         public void Write(ICodeWriter writer)
         {
-            if (input is TypeNodeCollection c && !string.IsNullOrWhiteSpace(c.Version))
+            if (input is VirtualDocument c)
             {
                 writer.WriteFormat("// Version {0}", c.Version).WriteLine();
             }
@@ -32,7 +33,7 @@ namespace ZoDream.SourceGenerator
             writer.WriteLine()
                 .WriteLine();
 
-            foreach (TypeTreeNode node in input)
+            foreach (VirtualNode node in input)
             {
                 WriteStruct(writer, node);
             }
@@ -65,7 +66,7 @@ namespace ZoDream.SourceGenerator
         /// <param name="writer"></param>
         /// <param name="node"></param>
         /// <returns></returns>
-        private KeyValuePair<string, string> WriteType(ICodeWriter writer, TypeTreeNode node)
+        private KeyValuePair<string, string> WriteType(ICodeWriter writer, VirtualNode node)
         {
             if (IsRegisterType(node.Type))
             {
@@ -92,7 +93,7 @@ namespace ZoDream.SourceGenerator
             return new(TranslateType(node.Type), TranslateReadType(node.Type));
         }
 
-        private void WriteStruct(ICodeWriter writer, TypeTreeNode node)
+        private void WriteStruct(ICodeWriter writer, VirtualNode node)
         {
             var structName = node.Type;
             if (structName.StartsWith("PPtr<"))
@@ -107,7 +108,7 @@ namespace ZoDream.SourceGenerator
             _typeItems.Add(structName);
         }
 
-        private void WriteStruct(ICodeWriter writer, string structName, TypeTreeNode[] children)
+        private void WriteStruct(ICodeWriter writer, string structName, VirtualNode[] children)
         {
             var maps = new Dictionary<string, KeyValuePair<string, string>>();
             var arrayItems = new Dictionary<string, int>();
@@ -174,7 +175,7 @@ namespace ZoDream.SourceGenerator
 
 
 
-        private void WriteProperty(ICodeWriter writer, TypeTreeNode node)
+        private void WriteProperty(ICodeWriter writer, VirtualNode node)
         {
             var field = node.Name.Replace(' ', '_');
             writer.WriteFormat("public {0} {1};", TranslateType(node.Type), field).WriteLine(true);
@@ -182,7 +183,7 @@ namespace ZoDream.SourceGenerator
                     field, TranslateReadType(node.Type)).WriteLine(true);
         }
 
-        private KeyValuePair<string, string> WriteArray(ICodeWriter writer, TypeTreeNode node)
+        private KeyValuePair<string, string> WriteArray(ICodeWriter writer, VirtualNode node)
         {
             if (node.Type != "Array" && node.Children?.Length == 1 && node.Children[0].Type == "Array")
             {
@@ -204,13 +205,13 @@ namespace ZoDream.SourceGenerator
             return new($"{structName}[]", $"reader.ReadArray<{structName}>(serializer)");
         }
 
-        private KeyValuePair<string, string> WriteMap(ICodeWriter writer, TypeTreeNode node)
+        private KeyValuePair<string, string> WriteMap(ICodeWriter writer, VirtualNode node)
         {
             var res = WriteMapPair(writer, node.Children?[0].Children?[1]);
             return new($"{res.Key}[]", $"reader.ReadArray(_ => {res.Value})");
         }
 
-        private KeyValuePair<string, string> WriteMapPair(ICodeWriter writer, TypeTreeNode node)
+        private KeyValuePair<string, string> WriteMapPair(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?.ToArray() ?? [];
             Debug.Assert(children.Length == 2);

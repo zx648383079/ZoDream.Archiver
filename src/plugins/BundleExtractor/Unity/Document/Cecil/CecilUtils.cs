@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
     internal static class CecilUtils
     {
-        public static MethodDefinition FindInTypeExplicitImplementationFor(MethodDefinition interfaceMethod, TypeDefinition typeDefinition)
+        public static MethodDefinition? FindInTypeExplicitImplementationFor(MethodDefinition interfaceMethod, TypeDefinition typeDefinition)
         {
             return typeDefinition.Methods.SingleOrDefault(m => m.Overrides.Any(o => o.CheckedResolve().SameAs(interfaceMethod)));
         }
@@ -52,7 +52,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
                 return at.ElementType;
 
             if (IsGenericList(type))
+            {
                 return ((GenericInstanceType)type).GenericArguments.Single();
+            }
 
             throw new ArgumentException();
         }

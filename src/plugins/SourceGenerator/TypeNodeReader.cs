@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using UnityEngine;
+using UnityEngine.Document;
 
 namespace ZoDream.SourceGenerator
 {
     public class TypeNodeReader(Stream input)
     {
 
-        public TypeNodeCollection Read()
+        public VirtualDocument Read()
         {
             var doc = JsonDocument.Parse(input);
             if (doc == null)
@@ -16,7 +16,7 @@ namespace ZoDream.SourceGenerator
                 return [];
             }
             var root = doc.RootElement;
-            var res = new List<TypeTreeNode>();
+            var res = new List<VirtualNode>();
             var version = string.Empty;
             if (root.TryGetProperty("Version", out var node))
             {
@@ -36,19 +36,16 @@ namespace ZoDream.SourceGenerator
                     }
                 }
             }
-            return new([.. res])
-            {
-                Version = version
-            };
+            return new(UnityEngine.Version.Parse(version), [.. res]);
         }
 
-        private TypeTreeNode? Read(JsonElement node)
+        private VirtualNode? Read(JsonElement node)
         {
             if (node.ValueKind != JsonValueKind.Object)
             {
                 return null;
             }
-            var res = new TypeTreeNode();
+            var res = new VirtualNode();
             foreach (var item in node.EnumerateObject())
             {
                 switch (item.Name)
@@ -60,7 +57,7 @@ namespace ZoDream.SourceGenerator
                         res.Name = item.Value.GetString() ?? string.Empty;
                         break;
                     case "Level":
-                        res.Level = item.Value.GetByte();
+                        res.Depth = item.Value.GetByte();
                         break;
                     case "ByteSize":
                         res.ByteSize = item.Value.GetInt32();
@@ -87,13 +84,13 @@ namespace ZoDream.SourceGenerator
             return res;
         }
 
-        private TypeTreeNode[] ReadArray(JsonElement items)
+        private VirtualNode[] ReadArray(JsonElement items)
         {
             if (items.ValueKind != JsonValueKind.Array)
             {
                 return [];
             }
-            var res = new List<TypeTreeNode>();
+            var res = new List<VirtualNode>();
             foreach (var item in items.EnumerateArray())
             {
                 var n = Read(item);

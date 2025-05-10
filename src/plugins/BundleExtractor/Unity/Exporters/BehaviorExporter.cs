@@ -1,9 +1,10 @@
 ﻿using System.IO;
 using System.Text.Json;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Converters;
-using ZoDream.BundleExtractor.Unity.Exporters.Cecil;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.BundleExtractor.Unity.Document.Cecil;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -39,8 +40,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     return;
                 }
-                var m_Type = ConvertToTypeTree(behavior, loader, resource);
-                type = UnityConverter.ToType(m_Type, entryId, resource);
+                var doc = ConvertToTypeTree(behavior, loader, resource);
+                type = UnityConverter.ToType(doc, entryId, resource);
             }
             using var fs = File.Create(fileName);
             JsonSerializer.Serialize(fs, type, JsonExporter.Options);
@@ -48,24 +49,28 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
 
 
-        public static TypeTree ConvertToTypeTree(MonoBehaviour m_MonoBehavior, 
+        public static VirtualDocument ConvertToTypeTree(MonoBehaviour behavior, 
             AssemblyLoader assemblyLoader, ISerializedFile resource)
         {
-            var m_Type = new TypeTree();
-            var helper = new SerializedTypeHelper(resource.Version);
-            helper.AddMonoBehavior(m_Type.Nodes, 0);
-            if (m_MonoBehavior.Script.TryGet(out var m_Script))
+            var builder = new DocumentBuilder(resource.Version);
+            builder.AddMonoBehavior(0);
+            if (behavior.Script.TryGet(out var script))
             {
-                var typeDef = assemblyLoader.GetTypeDefinition(m_Script.AssemblyName, 
-                    string.IsNullOrEmpty(m_Script.NameSpace) ? m_Script.ClassName : $"{m_Script.NameSpace}.{m_Script.ClassName}");
+                var typeDef = assemblyLoader.GetTypeDefinition(script.AssemblyName, 
+                    string.IsNullOrEmpty(script.NameSpace) ? script.ClassName : $"{script.NameSpace}.{script.ClassName}");
                 if (typeDef != null)
                 {
-                    var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, helper, 1);
-                    m_Type.Nodes.AddRange(typeDefinitionConverter.ConvertToTypeTreeNodes());
+                    var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, builder, 1);
+                    typeDefinitionConverter.ConvertTo();
+                } else
+                {
+                    CubismExporter.ConvertToTypeTree(builder, script);
                 }
             }
-            return m_Type;
+            return builder.ToDocument();
         }
+
+
 
     }
 }

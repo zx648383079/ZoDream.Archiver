@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 
-namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
+namespace ZoDream.BundleExtractor.Unity.Document.Cecil
 {
     internal static class TypeDefinitionExtensions
     {
@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
             if (baseTypeDef == null)
                 return false;
 
-            return IsSubclassOf(baseTypeDef, baseTypeName);
+            return baseTypeDef.IsSubclassOf(baseTypeName);
         }
 
         public static bool IsSubclassOf(this TypeDefinition type, params string[] baseTypeNames)
@@ -33,7 +33,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters.Cecil
             if (baseTypeDef == null)
                 return false;
 
-            return IsSubclassOf(baseTypeDef, baseTypeNames);
+            return baseTypeDef.IsSubclassOf(baseTypeNames);
         }
     }
 }

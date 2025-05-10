@@ -98,8 +98,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 string signature = reader.ReadStringZeroTerm();
                 Version = Version.Parse(signature);
-                reader.Add(Version);
             }
+            reader.Add(Version);
             if (HasPlatform(generation))
             {
                 TargetPlatform = (BuildTarget)reader.ReadUInt32();
@@ -110,7 +110,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             Types = reader.ReadArray(() =>
             {
                 var o = new SerializedType();
-                o.Read(reader, Version, EnableTypeTree);
+                o.Read(reader, EnableTypeTree);
                 return o;
             });
 
@@ -149,7 +149,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 RefTypes = reader.ReadArray(() =>
                 {
                     var o = new SerializedTypeReference();
-                    o.Read(reader, Version, EnableTypeTree);
+                    o.Read(reader, EnableTypeTree);
                     return o;
                 });
             }

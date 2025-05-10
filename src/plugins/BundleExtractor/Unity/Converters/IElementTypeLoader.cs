@@ -1,5 +1,5 @@
 ﻿using System;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters

@@ -1,6 +1,6 @@
-﻿namespace UnityEngine
+﻿namespace UnityEngine.Document
 {
-    public class TypeTreeNode
+    public class VirtualNode
     {
         /// <summary>
         /// Field type version, starts with 1 and is incremented after the type information has been significantly updated in a new release.<br/>
@@ -10,7 +10,7 @@
         /// <summary>
         /// Depth of current type relative to root
         /// </summary>
-        public byte Level { get; set; }
+        public byte Depth { get; set; }
         /// <summary>
         /// Array flag, set to 1 if type is "Array" or "TypelessData".
         /// </summary>
@@ -40,6 +40,31 @@
         public TransferMetaFlags MetaFlag { get; set; }
         public ulong RefTypeHash { get; set; }
 
-        public TypeTreeNode[]? Children { get; set; }
+        public VirtualNode[] Children { get; set; } = [];
+
+
+        public VirtualNode()
+        {  
+        }
+
+        public VirtualNode(string typeName, string name, int depth, bool align)
+        {
+            Type = typeName;
+            Name = name;
+            Depth = (byte)depth;
+            MetaFlag = align ? TransferMetaFlags.AlignBytes : TransferMetaFlags.NoTransferFlags;
+        }
+
+        public override string ToString()
+        {
+            if (Type == null)
+            {
+                return base.ToString();
+            }
+            else
+            {
+                return $"[{Type}]{Name}";
+            }
+        }
     }
 }

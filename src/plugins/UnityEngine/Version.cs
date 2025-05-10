@@ -26,32 +26,32 @@ namespace UnityEngine
 
         private const ulong ushortMask = 65535uL;
 
-        private readonly ulong m_data;
+        private readonly ulong _value;
 
         //
         // 摘要:
         //     The first number in a Unity version string
-        public ushort Major => (ushort)((m_data >> 48) & 0xFFFF);
+        public ushort Major => (ushort)((_value >> 48) & 0xFFFF);
 
         //
         // 摘要:
         //     The second number in a Unity version string
-        public ushort Minor => (ushort)((m_data >> 32) & 0xFFFF);
+        public ushort Minor => (ushort)((_value >> 32) & 0xFFFF);
 
         //
         // 摘要:
         //     The third number in a Unity version string
-        public ushort Build => (ushort)((m_data >> 16) & 0xFFFF);
+        public ushort Build => (ushort)((_value >> 16) & 0xFFFF);
 
         //
         // 摘要:
         //     The letter in a Unity version string
-        public VersionType Type => (VersionType)((m_data >> 8) & 0xFF);
+        public VersionType Type => (VersionType)((_value >> 8) & 0xFF);
 
         //
         // 摘要:
         //     The last number in a Unity version string
-        public byte TypeNumber => (byte)(m_data & 0xFF);
+        public byte TypeNumber => (byte)(_value & 0xFF);
 
         //
         // 摘要:
@@ -221,22 +221,22 @@ namespace UnityEngine
 
         private Version From(ushort major)
         {
-            return new Version(((ulong)major << 48) | (0xFFFFFFFFFFFFuL & m_data));
+            return new Version(((ulong)major << 48) | (0xFFFFFFFFFFFFuL & _value));
         }
 
         private Version From(ushort major, ushort minor)
         {
-            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | (0xFFFFFFFFu & m_data));
+            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | (0xFFFFFFFFu & _value));
         }
 
         private Version From(ushort major, ushort minor, ushort build)
         {
-            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | (0xFFFF & m_data));
+            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | (0xFFFF & _value));
         }
 
         private Version From(ushort major, ushort minor, ushort build, VersionType type)
         {
-            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8) | (0xFF & m_data));
+            return new Version(((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8) | (0xFF & _value));
         }
 
         //
@@ -244,7 +244,7 @@ namespace UnityEngine
         //     Construct a new Unity version
         public Version(ushort major)
         {
-            m_data = (ulong)major << 48;
+            _value = (ulong)major << 48;
         }
 
         //
@@ -252,7 +252,7 @@ namespace UnityEngine
         //     Construct a new Unity version
         public Version(ushort major, ushort minor)
         {
-            m_data = ((ulong)major << 48) | ((ulong)minor << 32);
+            _value = ((ulong)major << 48) | ((ulong)minor << 32);
         }
 
         //
@@ -260,7 +260,7 @@ namespace UnityEngine
         //     Construct a new Unity version
         public Version(ushort major, ushort minor, ushort build)
         {
-            m_data = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16);
+            _value = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16);
         }
 
         //
@@ -268,7 +268,7 @@ namespace UnityEngine
         //     Construct a new Unity version
         public Version(ushort major, ushort minor, ushort build, VersionType type)
         {
-            m_data = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8);
+            _value = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8);
         }
 
         //
@@ -276,12 +276,12 @@ namespace UnityEngine
         //     Construct a new Unity version
         public Version(ushort major, ushort minor, ushort build, VersionType type, byte typeNumber)
         {
-            m_data = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8) | typeNumber;
+            _value = ((ulong)major << 48) | ((ulong)minor << 32) | ((ulong)build << 16) | ((ulong)type << 8) | typeNumber;
         }
 
         private Version(ulong data)
         {
-            m_data = data;
+            _value = data;
         }
 
         //
@@ -292,7 +292,7 @@ namespace UnityEngine
         //     An unsigned long integer having the same bits as this
         public ulong GetBits()
         {
-            return m_data;
+            return _value;
         }
 
         //
@@ -346,7 +346,7 @@ namespace UnityEngine
         //     0 if equal
         public int CompareTo(Version other)
         {
-            return m_data.CompareTo(other.m_data);
+            return _value.CompareTo(other._value);
         }
 
         //
@@ -386,7 +386,7 @@ namespace UnityEngine
 
         public override int GetHashCode()
         {
-            return m_data.GetHashCode();
+            return _value.GetHashCode();
         }
 
         //
@@ -455,12 +455,12 @@ namespace UnityEngine
         //     runtime comparisons, such as finding the closest version in a list.
         public static ulong Distance(Version left, Version right)
         {
-            if (left.m_data >= right.m_data)
+            if (left._value >= right._value)
             {
-                return left.m_data - right.m_data;
+                return left._value - right._value;
             }
 
-            return right.m_data - left.m_data;
+            return right._value - left._value;
         }
 
         //
@@ -595,7 +595,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator ==(Version left, Version right)
         {
-            return left.m_data == right.m_data;
+            return left._value == right._value;
         }
 
         //
@@ -610,7 +610,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator !=(Version left, Version right)
         {
-            return left.m_data != right.m_data;
+            return left._value != right._value;
         }
 
         //
@@ -625,7 +625,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator >(Version left, Version right)
         {
-            return left.m_data > right.m_data;
+            return left._value > right._value;
         }
 
         //
@@ -640,7 +640,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator >=(Version left, Version right)
         {
-            return left.m_data >= right.m_data;
+            return left._value >= right._value;
         }
 
         //
@@ -655,7 +655,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator <(Version left, Version right)
         {
-            return left.m_data < right.m_data;
+            return left._value < right._value;
         }
 
         //
@@ -670,7 +670,7 @@ namespace UnityEngine
         //     The right Unity version
         public static bool operator <=(Version left, Version right)
         {
-            return left.m_data <= right.m_data;
+            return left._value <= right._value;
         }
 
         //
