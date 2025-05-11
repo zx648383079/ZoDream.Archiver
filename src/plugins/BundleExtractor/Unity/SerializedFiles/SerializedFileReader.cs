@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -32,12 +34,15 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             CombineFormats(_header.Version, _metadata);
             _dependencyItems.AddRange(_metadata.Externals);
             _children = new Object?[_metadata.Object.Length];
+            _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));
         }
 
         private readonly IArchiveOptions? _options;
         private readonly IBundleBinaryReader _reader;
         private readonly SerializedFileHeader _header = new();
         private readonly SerializedFileMetadata _metadata = new();
+        private readonly ImmutableDictionary<long, int> _objectIdMap;
+        private readonly HashSet<int> _excludeItems = [];
         /// <summary>
         /// 跟 _metadata.Object 一一对应
         /// </summary>
@@ -48,7 +53,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public ILogger? Logger => Container?.Logger;
         public string FullPath { get; private set; }
-        public SerializedType[] TypeItems => _metadata.Types;
         public FormatVersion Format => _header.Version;
         public Version Version => _metadata.Version;
 
@@ -71,7 +75,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public int IndexOf(long pathID)
         {
-            return Array.FindIndex(_metadata.Object, item => item.FileID == pathID);
+            if (_objectIdMap.TryGetValue(pathID, out var index))
+            {
+                return index;
+            }
+            return -1;
         }
 
         public int IndexOf(Object obj)
@@ -87,6 +95,41 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             Debug.Assert(index >= 0 && index < Count);
             return _metadata.Object[index];
+        }
+
+        public VirtualDocument? GetType(int index)
+        {
+            Debug.Assert(index >= 0 && index < Count);
+            var i = _metadata.Object[index].SerializedTypeIndex;
+            return i < 0 ? null : _metadata.Types[i].OldType;
+        }
+
+        /// <summary>
+        /// 添加一个不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        public void AddExclude(long fileId)
+        {
+            var index = IndexOf(fileId);
+            if (index < 0)
+            {
+                return;
+            }
+            _excludeItems.Add(index);
+        }
+        /// <summary>
+        /// 判断一个对象不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        public bool IsExclude(long fileId)
+        {
+            var index = IndexOf(fileId);
+            if (index < 0)
+            {
+                return false;
+            }
+            return _excludeItems.Contains(index);
         }
 
         public string GetDependency(int index)
@@ -209,7 +252,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                         instance = variable;
                         return true;
                     }
-                    instance = Container!.ConvertTo<T>(sourceFile, sourceFile.Get(i));
+                    instance = Container!.ConvertTo<T>(sourceFile, i);
                     return instance is not null;
                 }
             }

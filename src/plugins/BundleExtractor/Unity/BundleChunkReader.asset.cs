@@ -87,18 +87,16 @@ namespace ZoDream.BundleExtractor
                     }
                     try
                     {
-                        var reader = asset.OpenRead(info);
+                        var reader = asset.OpenRead(i);
                         var targetType = ConvertToClassType((NativeClassID)info.ClassID);
-                        var serializedType = asset.TypeItems[info.SerializedTypeIndex];
+                        var doc = asset.GetType(i);
                         object? res = null;
                         // 默认 object 不做转化，所以为 null
                         if (serializer.Converters.TryGet(targetType, out var cvt))
                         {
-                            if (serializedType.OldType is not null &&
-                            serializedType.OldType.Nodes.Count > 0 &&
-                            cvt is IElementTypeLoader tl)
+                            if (doc?.Count > 0 && cvt is IElementTypeLoader tl)
                             {
-                                res = tl.Read(reader, targetType, serializedType.OldType);
+                                res = tl.Read(reader, targetType, doc);
                             }
                             else
                             {
@@ -163,19 +161,17 @@ namespace ZoDream.BundleExtractor
             };
         }
 
-        public T? ConvertTo<T>(ISerializedFile asset, ObjectInfo obj)
+        public T? ConvertTo<T>(ISerializedFile asset, int entryId)
         {
             var serializer = _service.Get<IBundleSerializer>();
-            var reader = asset.OpenRead(obj);
+            var reader = asset.OpenRead(entryId);
             var targetType = typeof(T);//ConvertToClassType((NativeClassID)obj.ClassID);
-            var serializedType = asset.TypeItems[obj.SerializedTypeIndex];
+            var doc = asset.GetType(entryId);
             if (serializer.Converters.TryGet(targetType, out var cvt))
             {
-                if (serializedType.OldType is not null &&
-                serializedType.OldType.Nodes.Count > 0 &&
-                cvt is IElementTypeLoader tl)
+                if (doc?.Count > 0 && cvt is IElementTypeLoader tl)
                 {
-                    return (T)tl.Read(reader, targetType, serializedType.OldType);
+                    return (T)tl.Read(reader, targetType, doc);
                 }
                 else
                 {

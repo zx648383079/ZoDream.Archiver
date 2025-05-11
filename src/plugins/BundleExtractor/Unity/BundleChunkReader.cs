@@ -7,6 +7,7 @@ using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Producers;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -47,30 +48,27 @@ namespace ZoDream.BundleExtractor
         private readonly HashSet<string> _resourceFileHash = [];
         private readonly HashSet<string> _importFileHash = [];
         private readonly HashSet<string> _assetFileHash = [];
-        private readonly HashSet<long> _excludeItems = [];
 
-        public IEntryService? Service => _service;
+        public IAssemblyReader Assembly 
+        {
+            get {
+                if (_service.TryGet<IAssemblyReader>(out var instance))
+                {
+                    return instance;
+                }
+                instance = new AssemblyReader();
+                if (!string.IsNullOrWhiteSpace(_options.Entrance))
+                {
+                    instance.Load(_options.Entrance);
+                }
+                _service.Add<IAssemblyReader>(instance);
+                return instance;
+            }
+        }
         public ISerializedFile? this[int index] => _assetItems[index];
         public ILogger? Logger => _service.Get<ILogger>();
 
         public IBundleExtractOptions Options => (IBundleExtractOptions)_options;
-        /// <summary>
-        /// 添加一个不需要导出
-        /// </summary>
-        /// <param name="fileId"></param>
-        public void TryAddExclude(long fileId)
-        {
-            _excludeItems.Add(fileId);
-        }
-        /// <summary>
-        /// 判断一个对象不需要导出
-        /// </summary>
-        /// <param name="fileId"></param>
-        /// <returns></returns>
-        public bool IsExclude(long fileId)
-        {
-            return _excludeItems.Contains(fileId);
-        }
 
         public int IndexOf(string fileName)
         {

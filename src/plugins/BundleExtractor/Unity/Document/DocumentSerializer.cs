@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             return writer.ToString() ?? string.Empty;
         }
 
-        private void Serialize(CodeWriter writer, VirtualNode node, IBundleBinaryReader reader)
+        private static void Serialize(CodeWriter writer, VirtualNode node, IBundleBinaryReader reader)
         {
             var align = node.MetaFlag.IsAlignBytes();
             switch (node.Type)
@@ -99,7 +99,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                     {
                         var size = reader.ReadInt32();
                         reader.Position += size;
-                        writer.WriteFormat("{0} {1} = {2}", node.Type, node.Name)
+                        writer.WriteFormat("{0} {1}", node.Type, node.Name)
                             .WriteLine(true)
                             .WriteFormat("int size = {0}", size).WriteLine(true);
                         break;
@@ -113,14 +113,14 @@ namespace ZoDream.BundleExtractor.Unity.Document
                                 align = true;
                             }
                             var size = reader.ReadInt32();
-                            writer.WriteFormat("{0} {1} = {2}", node.Type, node.Name)
+                            writer.WriteFormat("{0} {1}", node.Type, node.Name)
                                 .WriteIndentLine()
                                 .Write("Array Array")
                                 .WriteLine(true)
                                 .WriteFormat("int size = {0}", size)
                                 .WriteIndentLine();
 
-                            foreach (var item in node.Children.Skip(1))
+                            foreach (var item in node.Children[0].Children.Skip(1))
                             {
                                 Serialize(writer, item, reader);
                             }
@@ -129,9 +129,9 @@ namespace ZoDream.BundleExtractor.Unity.Document
                         }
                         else //Class
                         {
-                            writer.WriteFormat("{0} {1} = {2}", node.Type, node.Name)
+                            writer.WriteFormat("{0} {1}", node.Type, node.Name)
                                 .WriteLine(true);
-                            foreach (var item in node.Children.Skip(1))
+                            foreach (var item in node.Children)
                             {
                                 Serialize(writer, item, reader);
                             }

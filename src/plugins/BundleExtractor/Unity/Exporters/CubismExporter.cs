@@ -16,18 +16,20 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _entryId = entryId;
             _resource = resource;
-            _assembly = _resource.Container?.Service?.Get<AssemblyLoader>();
+            _assembly = _resource.Container!.Assembly;
+            _converter = new(resource);
             var obj = _resource[_entryId] as GameObject;
             Debug.Assert(obj is not null);
             Initialize(obj);
         }
 
-        private readonly AssemblyLoader _assembly;
+        private readonly DocumentReader _converter;
+        private readonly IAssemblyReader _assembly;
         private readonly int _entryId;
         private readonly ISerializedFile _resource;
 
         public bool IsEmpty => _moc is null;
-        public string FileName => _resource[_entryId].Name;
+        public string FileName { get; private set; }
         public string SourcePath => _resource.FullPath;
 
         private MonoBehaviour? _moc;
@@ -42,72 +44,97 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void Initialize(GameObject game)
         {
-            foreach (var pptr in game.Components)
+            if (!GameObjectConverter.TryGet<Transform>(game, out var transform))
             {
-                if (!pptr.TryGet(out var instance))
+                return;
+            }
+            transform = TransformConverter.GetRoot(transform);
+            var items = new List<string>();
+            foreach (var item in TransformConverter.ForEachTree(transform))
+            {
+                if (item.GameObject?.TryGet(out var obj) != true)
                 {
                     continue;
                 }
-                if (instance is Transform transform)
+                _resource.AddExclude(item.GameObject.PathID);
+                if (item == transform)
                 {
-                    TransformConverter.ForEach(transform);
-                    continue;
+                    FileName = obj.Name ?? string.Empty;
                 }
-                if (instance is not MonoBehaviour behaviour)
+                foreach (var pptr in obj.Components)
                 {
-                    continue;
-                }
-                if (!behaviour.Script.TryGet(out var script))
-                {
-                    continue;
-                }
-                switch (script.ClassName)
-                {
-                    case "CubismModel":
-                        _model = behaviour;
-                        break;
-                    case "CubismPhysicsController":
-                        _physics = behaviour;
-                        break;
-                    case "CubismFadeController":
-                        GetFadeList(_resource.IndexOf(pptr.PathID), behaviour);
-                        break;
-                    case "CubismExpressionController":
-                        GetExpressionList(_resource.IndexOf(pptr.PathID), behaviour);
-                        break;
-                    case "CubismRenderer":
-                        GetRenderTexture(_resource.IndexOf(pptr.PathID), behaviour);
-                        break;
-                    default:
-                        break;
+                    if (!pptr.TryGet(out var instance))
+                    {
+                        continue;
+                    }
+                    if (instance is not MonoBehaviour behaviour)
+                    {
+                        continue;
+                    }
+                    if (!behaviour.Script.TryGet(out var script))
+                    {
+                        continue;
+                    }
+                    items.Add(script.ClassName);
+                    switch (script.ClassName)
+                    {
+                        case "CubismModel":
+                            _model = behaviour;
+                            break;
+                        case "CubismPhysicsController":
+                            _physics = behaviour;
+                            break;
+                        case "CubismFadeController":
+                            GetFadeList(_resource.IndexOf(pptr.PathID), behaviour);
+                            break;
+                        case "CubismExpressionController":
+                            GetExpressionList(_resource.IndexOf(pptr.PathID), behaviour);
+                            break;
+                        case "CubismRenderer":
+                            GetRenderTexture(_resource.IndexOf(pptr.PathID), behaviour);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+            
         }
 
         private void GetFadeList(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            var data = ParseMonoBehavior(entryId);
             if (data is null)
             {
                 return;
             }
-            var res = data[GetFieldName(behaviour)];
+            var res = _converter.ConvertType<IPPtr<MonoBehaviour>>(data[GetFieldName(behaviour)]);
+            if (res?.IsNull != false)
+            {
+                return;
+            }
+            res.TryGet(out var obj); // CubismFadeMotionList
+            obj?.Script.TryGet(out var script);
         }
 
         private void GetExpressionList(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            var data = ParseMonoBehavior(entryId);
             if (data is null)
             {
                 return;
             }
-            var res = data[GetFieldName(behaviour)];
-
+            var res = _converter.ConvertType<IPPtr<Object>>(data[GetFieldName(behaviour)]);
+            if (res?.IsNull != false)
+            {
+                return;
+            }
+            res.TryGet(out var obj);
         }
 
         private void GetRenderTexture(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId, _resource, _assembly);
+            var data = ParseMonoBehavior(entryId);
             if (data is null)
             {
                 return;
@@ -165,20 +192,27 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
         }
 
-        public static OrderedDictionary? ParseMonoBehavior(int entryId, ISerializedFile resource,
-            AssemblyLoader assemblyLoader)
+        private OrderedDictionary? ParseMonoBehavior(int entryId)
         {
-            var orderedDict = UnityConverter.ToType(entryId, resource);
-            if (orderedDict != null)
+            var doc = _resource.GetType(entryId);
+            if (doc is null)
             {
-                return orderedDict;
+                if (_resource[entryId] is not MonoBehaviour behaviour)
+                {
+                    return null;
+                }
+                doc = BehaviorExporter.ConvertToTypeTree(behaviour, _assembly, _resource);
             }
-            if (resource[entryId] is not MonoBehaviour behaviour)
+            if (doc is null)
             {
                 return null;
             }
-            var res = BehaviorExporter.ConvertToTypeTree(behaviour, assemblyLoader, resource);
-            return UnityConverter.ToType(res, entryId, resource);
+            var res = _converter.Read(doc, _resource.OpenRead(entryId));
+            if (res.Count == 1)
+            {
+                return (OrderedDictionary)res[0];
+            }
+            return res;
         }
 
         private static string GetFieldName(MonoBehaviour behaviour)
@@ -194,17 +228,17 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             return script.ClassName switch
             {
-                "CubismFadeController" => "cubismfademotionlist",
-                "CubismFadeMotionList" => "cubismfademotionobjects",
-                "CubismFadeMotionData" => "parameterids",
-                "CubismExpressionController" => "expressionslist",
-                // "CubismExpressionController" => "cubismexpressionobjects",
-                "CubismExpressionData" => "parameters",
+                "CubismFadeController" => "CubismFadeMotionList",
+                "CubismFadeMotionList" => "CubismFadeMotionObjects",
+                "CubismFadeMotionData" => "ParameterIds",
+                "CubismExpressionController" => "ExpressionsList",
+                "CubismExpressionList" => "CubismExpressionObjects",
+                "CubismExpressionData" => "Parameters",
                 "CubismPhysicsController" => "_rig",
                 "CubismDisplayInfoPartName" or "CubismDisplayInfoParameterName" => "name",
-                "CubismPosePart" => "groupindex",
+                "CubismPosePart" => "GroupIndex",
                 "CubismModel" => "_moc",
-                "CubismRenderer" => "_maintexture",
+                "CubismRenderer" => "_mainTexture",
                 "CubismEyeBlinkParameter" or "CubismMouthParameter" or "CubismParameter" or "CubismPart" => string.Empty,
                 _ => string.Empty
             };
@@ -255,13 +289,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return false;
             }
-            if (!GameObjectConverter.IsRoot(game))
-            {
-                return false;
-            }
             foreach (var item in GameObjectConverter.ForEach<MonoBehaviour>(game))
             {
-                if (true == item.Script?.TryGet(out var script) 
+                if (true == item.Script?.TryGet(out var script)
                     && script.ClassName.StartsWith("Cubism"))
                 {
                     return true;

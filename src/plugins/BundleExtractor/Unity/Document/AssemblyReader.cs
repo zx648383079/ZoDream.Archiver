@@ -7,14 +7,14 @@ namespace ZoDream.BundleExtractor.Unity.Document
     /// <summary>
     /// https://github.com/Perfare/Il2CppDumper 先提取 dll
     /// </summary>
-    public class AssemblyLoader
+    public class AssemblyReader : IAssemblyReader
     {
         public bool IsLoaded { get; private set; }
         private readonly Dictionary<string, ModuleDefinition> _moduleItems = [];
 
-        public void Load(string path)
+        public void Load(string folder)
         {
-            var files = Directory.GetFiles(path, "*.dll");
+            var files = Directory.GetFiles(folder, "*.dll");
             var resolver = new UnityAssemblyResolver();
             var readerParameters = new ReaderParameters
             {
@@ -36,7 +36,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             IsLoaded = true;
         }
 
-        public TypeDefinition GetTypeDefinition(string assemblyName, string fullName)
+        public TypeDefinition? GetType(string assemblyName, string fullName)
         {
             if (_moduleItems.TryGetValue(assemblyName, out var module))
             {
@@ -57,7 +57,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             return null;
         }
 
-        public void Clear()
+        public void Dispose()
         {
             foreach (var pair in _moduleItems)
             {

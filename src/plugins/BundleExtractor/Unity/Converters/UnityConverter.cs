@@ -233,11 +233,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
         public static OrderedDictionary? ToType(int entryId, ISerializedFile resource)
         {
-            return ToType(resource.TypeItems[resource.Get(entryId).SerializedTypeIndex].OldType,
+            return ToType(resource.GetType(entryId),
                 entryId, resource);
         }
 
-        public static OrderedDictionary? ToType(VirtualDocument types, int entryId, ISerializedFile resource)
+        public static OrderedDictionary? ToType(VirtualDocument? types, int entryId, ISerializedFile resource)
         {
             if (types != null)
             {

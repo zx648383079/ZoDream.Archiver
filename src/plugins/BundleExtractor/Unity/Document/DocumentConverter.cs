@@ -90,6 +90,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 items[i] = node;
             }
             doc.Children = BuildTree(items);
+            reader.Position += stringBufferSize;
         }
 
         /// <summary>

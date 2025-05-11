@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
-using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
@@ -20,10 +19,10 @@ namespace ZoDream.BundleExtractor
             {NativeClassID.AudioClip, typeof(FsbExporter)},
             {NativeClassID.Shader, typeof(ShaderExporter) },
             {NativeClassID.MonoBehaviour, typeof(BehaviorExporter) },
-            {NativeClassID.GameObject, typeof(GltfExporter)},
-            {NativeClassID.Mesh, typeof(GltfExporter)},
-            {NativeClassID.Animator, typeof(GltfExporter)},
-            {NativeClassID.AnimationClip, typeof(GltfExporter)},
+            //{NativeClassID.GameObject, typeof(GltfExporter)},
+            //{NativeClassID.Mesh, typeof(GltfExporter)},
+            //{NativeClassID.Animator, typeof(GltfExporter)},
+            //{NativeClassID.AnimationClip, typeof(GltfExporter)},
             {NativeClassID.MovieTexture, typeof(MovieExporter)},
             {NativeClassID.Texture2D, typeof(TextureExporter)},
             {NativeClassID.Sprite, typeof(TextureExporter)},
@@ -53,7 +52,7 @@ namespace ZoDream.BundleExtractor
                         return;
                     }
                     var info = asset.Get(i);
-                    if (IsExclude(info.FileID))
+                    if (asset.IsExclude(info.FileID))
                     {
                         continue;
                     }
@@ -117,19 +116,19 @@ namespace ZoDream.BundleExtractor
 
         private IBundleExporter? TryParse(ISerializedFile asset, int objIndex)
         {
-            IMultipartExporter? instance;
+            //IMultipartExporter? instance;
             var info = asset.Get(objIndex);
             var cls = (NativeClassID)info.ClassID;
-            if (cls is NativeClassID.GameObject or NativeClassID.Mesh 
-                or NativeClassID.Animator or NativeClassID.AnimationClip)
-            {
-                instance = TryParseModel(asset);
-                if (instance is not null)
-                {
-                    TryAppend(instance, objIndex);
-                    return instance;
-                }
-            }
+            //if (cls is NativeClassID.GameObject or NativeClassID.Mesh 
+            //    or NativeClassID.Animator or NativeClassID.AnimationClip)
+            //{
+            //    instance = TryParseModel(asset);
+            //    if (instance is not null)
+            //    {
+            //        TryAppend(instance, objIndex);
+            //        return instance;
+            //    }
+            //}
             if (!_exportItems.TryGetValue(cls, out var targetType))
             {
                 return null;

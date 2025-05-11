@@ -33,6 +33,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly Dictionary<uint, string> _morphChannelNames = [];
         public bool IsEmpty => MeshList.Count == 0 || RootFrame is null;
         public string FileName { get; private set; } = string.Empty;
+        public string SourcePath => resource.FullPath;
 
         public void Append(int entryId)
         {
@@ -113,7 +114,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 _avatar = m_Avatar;
             }
-            resource.Container?.TryAddExclude(animator.GameObject.PathID);
+            resource.AddExclude(animator.GameObject.PathID);
             if (animator.GameObject.TryGet(out var game))
             {
                 InitWithGameObject(game, animator.HasTransformHierarchy);

@@ -35,10 +35,7 @@ namespace ZoDream.BundleExtractor.Unity
                 ptr.FileID += 1;
             }
 
-            var assetsManager = resource.Container;
-
-
-            _index = assetsManager.IndexOf(name);
+            _index = resource.Container!.IndexOf(name);
 
             ptr.PathID = entry.FileID;
         }
@@ -67,7 +64,7 @@ namespace ZoDream.BundleExtractor.Unity
                 if (_index >= 0)
                 {
                     result = assetsManager[_index];
-                    return true;
+                    return result is not null;
                 }
             }
             return false;
@@ -89,7 +86,7 @@ namespace ZoDream.BundleExtractor.Unity
                         instance = variable;
                         return true;
                     }
-                    instance = sourceFile.Container!.ConvertTo<K>(sourceFile, sourceFile.Get(i));
+                    instance = sourceFile.Container!.ConvertTo<K>(sourceFile, i);
                     return instance is not null;
                 }
             }

@@ -135,5 +135,39 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         {
             return TryGet<Transform>(game, out var transform) && TransformConverter.IsRoot(transform);
         }
+
+        public static GameObject GetRoot(GameObject game)
+        {
+            if (!TryGet<Transform>(game, out var transform))
+            {
+                return game;
+            }
+            var rootTransform = TransformConverter.GetRoot(transform);
+            if (rootTransform == transform)
+            {
+                return game;
+            }
+            if (rootTransform.GameObject?.TryGet(out var root) == true)
+            {
+                return root;
+            }
+            return game;
+        }
+
+        public static IEnumerable<GameObject> ForEachTree(GameObject game)
+        {
+            yield return game;
+            if (!TryGet<Transform>(game, out var transform))
+            {
+                yield break;
+            }
+            foreach (var item in TransformConverter.ForEachDeep(transform))
+            {
+                if (item.GameObject?.TryGet(out var obj) == true)
+                {
+                    yield return obj;
+                }
+            }
+        }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
@@ -22,12 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
         public OrderedDictionary Read(VirtualDocument doc, IBundleBinaryReader reader)
         {
             reader.Position = 0; // 回到开始
-            var obj = new OrderedDictionary();
-            foreach (var item in doc)
-            {
-                obj.Add(item.Name, Read(item, reader));
-            }
-            return obj;
+            return ReadDict(doc, reader);
         }
 
         public void Read<T>(VirtualDocument doc, IBundleBinaryReader reader,
@@ -78,7 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             }
         }
 
-        private object ConvertType(object val, Type type)
+        public object ConvertType(object val, Type type)
         {
             if (val is IDictionary dict)
             {
@@ -110,6 +104,15 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 return Enum.ToObject(type, val);
             }
             return Convert.ChangeType(val, type);
+        }
+
+        public T? ConvertType<T>(object val)
+        {
+            if (val is null)
+            {
+                return default;
+            }
+            return (T)ConvertType(val, typeof(T));
         }
 
         private object Read(VirtualNode node, IBundleBinaryReader reader)
@@ -172,15 +175,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
                         }
 
                         int size = reader.ReadInt32();
-                        var dic = new List<KeyValuePair<object, object>>(size);
-                        for (int j = 0; j < size; j++)
-                        {
-                            int tmp1 = 0;
-                            int tmp2 = 0;
-                            dic.Add(new KeyValuePair<object, object>(Read(node.Children[1].Children[0], reader),
-                                Read(node.Children[1].Children[1], reader)));
-                        }
-                        value = dic;
+                        var firstNode = node.Children[1].Children[0];
+                        var secondNode = node.Children[1].Children[1];
+                        value = reader.ReadArray(size, _ => new KeyValuePair<object, object>(Read(firstNode, reader),
+                                Read(secondNode, reader)));
                         break;
                     }
                 case "TypelessData":
@@ -197,18 +195,14 @@ namespace ZoDream.BundleExtractor.Unity.Document
                             {
                                 align = true;
                             }
-
-                            value = node.Children.Skip(1).Select(i => Read(i, reader));
+                            int size = reader.ReadInt32();
+                            var itemNode = node.Children[0].Children[1];
+                            value = reader.ReadArray(size, _ => Read(itemNode, reader));
                             break;
                         }
                         else //Class
                         {
-                            var obj = new OrderedDictionary();
-                            foreach (var item in node.Children)
-                            {
-                                obj.Add(item.Name, Read(item, reader));
-                            }
-                            value = obj;
+                            value = ReadDict(node.Children, reader);
                             break;
                         }
                     }
@@ -219,6 +213,16 @@ namespace ZoDream.BundleExtractor.Unity.Document
             }
 
             return value;
+        }
+
+        private OrderedDictionary ReadDict(IEnumerable<VirtualNode> items, IBundleBinaryReader reader)
+        {
+            var res = new OrderedDictionary();
+            foreach (var item in items)
+            {
+                res.Add(item.Name, Read(item, reader));
+            }
+            return res;
         }
     }
 }

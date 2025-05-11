@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
@@ -22,7 +23,6 @@ namespace ZoDream.BundleExtractor.Unity
         public Version Version { get; }
         public BuildTarget Platform { get; }
         public IEnumerable<string> Dependencies { get; }
-        public SerializedType[] TypeItems { get; }
         public string GetDependency(int index);
         /// <summary>
         /// 根据依赖名 获取依赖的位置
@@ -33,7 +33,24 @@ namespace ZoDream.BundleExtractor.Unity
 
         public int AddDependency(string dependency);
 
+        /// <summary>
+        /// 添加一个不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        public void AddExclude(long fileId);
+        /// <summary>
+        /// 判断一个对象不需要导出
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        public bool IsExclude(long fileId);
+
         public new Object? this[int index] { get; set; }
+        /// <summary>
+        /// 根据序号获取解析流
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public IBundleBinaryReader OpenRead(int index);
         public IBundleBinaryReader OpenRead(ObjectInfo info);
         /// <summary>
@@ -42,6 +59,8 @@ namespace ZoDream.BundleExtractor.Unity
         /// <param name="index"></param>
         /// <returns></returns>
         public ObjectInfo Get(int index);
+
+        public VirtualDocument? GetType(int index);
         public Stream OpenResource(ResourceSource source);
     }
 }

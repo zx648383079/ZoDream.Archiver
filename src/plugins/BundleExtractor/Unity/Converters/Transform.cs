@@ -114,5 +114,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 next.Clear();
             }
         }
+
+        public static IEnumerable<Transform> ForEachTree(Transform transform)
+        {
+            yield return transform;
+            foreach (var item in ForEachDeep(transform))
+            {
+                yield return item;
+            }
+        }
     }
 }

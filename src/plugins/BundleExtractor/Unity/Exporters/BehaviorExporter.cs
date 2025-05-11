@@ -35,7 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var type = UnityConverter.ToType(entryId, resource);
             if (type == null)
             {
-                var loader = resource.Container?.Service?.Get<AssemblyLoader>();
+                var loader = resource.Container?.Assembly;
                 if (loader is null)
                 {
                     return;
@@ -50,13 +50,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
 
         public static VirtualDocument ConvertToTypeTree(MonoBehaviour behavior, 
-            AssemblyLoader assemblyLoader, ISerializedFile resource)
+            IAssemblyReader assemblyLoader, ISerializedFile resource)
         {
             var builder = new DocumentBuilder(resource.Version);
             builder.AddMonoBehavior(0);
             if (behavior.Script.TryGet(out var script))
             {
-                var typeDef = assemblyLoader.GetTypeDefinition(script.AssemblyName, 
+                var typeDef = assemblyLoader.GetType(script.AssemblyName, 
                     string.IsNullOrEmpty(script.NameSpace) ? script.ClassName : $"{script.NameSpace}.{script.ClassName}");
                 if (typeDef != null)
                 {

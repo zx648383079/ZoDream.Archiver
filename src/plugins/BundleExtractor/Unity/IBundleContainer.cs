@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
 
 namespace ZoDream.BundleExtractor.Unity
@@ -10,19 +9,8 @@ namespace ZoDream.BundleExtractor.Unity
     {
         public ILogger? Logger { get; }
 
-        public IEntryService? Service { get; }
+        public IAssemblyReader Assembly { get; }
         public IBundleExtractOptions Options { get; }
-        /// <summary>
-        /// 添加一个不需要导出
-        /// </summary>
-        /// <param name="fileId"></param>
-        public void TryAddExclude(long fileId);
-        /// <summary>
-        /// 判断一个对象不需要导出
-        /// </summary>
-        /// <param name="fileId"></param>
-        /// <returns></returns>
-        public bool IsExclude(long fileId);
 
         /// <summary>
         /// 判断文件在 Asset 中的位置
@@ -43,8 +31,9 @@ namespace ZoDream.BundleExtractor.Unity
         /// 转换为
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="reader"></param>
+        /// <param name="asset"></param>
+        /// <param name="entryId">资源的序号</param>
         /// <returns></returns>
-        public T? ConvertTo<T>(ISerializedFile asset, ObjectInfo obj);
+        public T? ConvertTo<T>(ISerializedFile asset, int entryId);
     }
 }
