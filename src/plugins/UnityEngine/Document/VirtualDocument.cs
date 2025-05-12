@@ -24,6 +24,9 @@ namespace UnityEngine.Document
 
 
         public Version Version { get; set; }
+        /// <summary>
+        /// 只包含一个 Base 节点及类型
+        /// </summary>
         public VirtualNode[] Children { get; set; } = [];
 
         public int Count => Children.Length;

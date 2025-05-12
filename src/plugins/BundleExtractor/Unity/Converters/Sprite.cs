@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -62,24 +61,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             }
 
             //vector m_Bones 2018 and up
-            
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                if (res.SpriteAtlas != null)
-                {
-                    builder?.AddDependencyEntry(fileName,
-                        fileId,
-                        res.SpriteAtlas.PathID);
-                }
-                else
-                {
-                    builder?.AddDependencyEntry(fileName,
-                        fileId, res.RD.Texture.PathID);
-                }
-            }
             return res;
         }
 

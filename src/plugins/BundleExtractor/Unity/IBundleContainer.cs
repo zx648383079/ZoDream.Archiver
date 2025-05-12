@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 

@@ -22,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity
 
         public Version Version { get; }
         public BuildTarget Platform { get; }
-        public IEnumerable<string> Dependencies { get; }
+        public IList<string> Dependencies { get; }
         public string GetDependency(int index);
         /// <summary>
         /// 根据依赖名 获取依赖的位置

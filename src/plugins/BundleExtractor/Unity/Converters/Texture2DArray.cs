@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
@@ -7,8 +9,15 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class Texture2DArrayConverter : BundleConverter<Texture2DArray>
+    internal sealed class Texture2DArrayConverter : BundleConverter<Texture2DArray>, IElementTypeLoader
     {
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
+        {
+            var res = new Texture2DArray();
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
+            return res;
+        }
 
         public override Texture2DArray? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
@@ -58,5 +67,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
+        
     }
 }

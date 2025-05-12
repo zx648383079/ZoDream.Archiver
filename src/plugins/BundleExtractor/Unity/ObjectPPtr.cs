@@ -36,7 +36,6 @@ namespace ZoDream.BundleExtractor.Unity
             }
 
             _index = resource.Container!.IndexOf(name);
-
             ptr.PathID = entry.FileID;
         }
 
@@ -96,6 +95,11 @@ namespace ZoDream.BundleExtractor.Unity
             }
             instance = default;
             return false;
+        }
+
+        public override string ToString()
+        {
+            return $"[PPtr<{typeof(T).Name}>]{FileID}:{PathID}";
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -166,21 +165,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 //SInt16 m_SortingLayer 5.6 and up
                 var m_SortingOrder = reader.ReadInt16();
                 reader.AlignStream();
-            }
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.GameObject.PathID);
-                foreach (var item in res.Materials)
-                {
-                    builder.AddDependencyEntry(fileName,
-                        fileId,
-                        item.PathID);
-                }
             }
         }
 

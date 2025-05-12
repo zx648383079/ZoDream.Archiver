@@ -235,7 +235,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 }
             }
             
-            
             ProcessData(res, reader);
         }
 

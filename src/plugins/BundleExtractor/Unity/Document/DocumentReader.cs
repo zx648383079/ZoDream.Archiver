@@ -2,11 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Converters;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity.Document
 {
@@ -21,38 +24,202 @@ namespace ZoDream.BundleExtractor.Unity.Document
         public OrderedDictionary Read(VirtualDocument doc, IBundleBinaryReader reader)
         {
             reader.Position = 0; // 回到开始
-            return ReadDict(doc, reader);
+            return ReadDict(doc.Children[0].Children, reader);
+        }
+        /// <summary>
+        /// 根据根节点的类型自动创建
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public object? ReadAs(VirtualDocument doc, IBundleBinaryReader reader)
+        {
+            if (doc.Children.Length != 1)
+            {
+                return null;
+            }
+            reader.Position = 0; // 回到开始
+            var objType = typeof(Object);
+            var objNamespace = objType.Namespace;
+            var rootType = objType.Assembly.GetType($"{objNamespace}.{doc.Children[0].Type}");
+            if (rootType is null || !objType.IsAssignableFrom(rootType))
+            {
+                return null;
+            }
+            if (Activator.CreateInstance(rootType) is not Object instance)
+            {
+                return null;
+            }
+            Read(doc, reader, instance);
+            return instance;
         }
 
         public void Read<T>(VirtualDocument doc, IBundleBinaryReader reader,
             T instance)
-            where T : UnityEngine.Object
+            where T : Object
         {
-            var data = Read(doc, reader);
             var obj = (object)instance;
-            ConvertType(data, ref obj);
-            data.Clear();
+            ReadObject(ref obj, doc.Children[0].Children, reader);
         }
+
+        private void ReadObject(ref object instance, VirtualNode[] nodes, IBundleBinaryReader reader)
+        {
+            var type = instance.GetType();
+            foreach (var node in nodes)
+            {
+                var fieldName = ConvertFieldName(node.Name, instance);
+                var field = type.GetField(fieldName);
+                if (field is not null)
+                {
+                    field?.SetValue(instance, ReadType(field.FieldType, node, reader));
+                    continue;
+                }
+                var property = type.GetProperty(fieldName);
+                if (property is not null)
+                {
+                    property?.SetValue(instance, ReadType(property.PropertyType, node, reader));
+                    continue;
+                }
+                Read(node, reader);
+            }
+        }
+
+        private object? ReadType(Type type, VirtualNode node, IBundleBinaryReader reader)
+        {
+            var align = node.MetaFlag.IsAlignBytes();
+            if (TryRead(node, reader, out var value))
+            {
+                if (align)
+                {
+                    reader.AlignStream();
+                }
+                return ConvertType(value, type);
+            }
+            var isFromType = false;
+            switch (node.Type)
+            {
+                case "map":
+                    {
+                        if (node.Children[0].MetaFlag.IsAlignBytes())
+                        {
+                            align = true;
+                        }
+                        int size = reader.ReadInt32();
+                        var childNode = node.Children[0].Children[1].Children;
+                        Debug.Assert(childNode.Length == 2);
+                        Type childType = null;
+                        var inType = typeof(IEnumerable<>);
+                        foreach (var item in type.GetInterfaces())
+                        {
+                            if (item.IsGenericType && item.GetGenericTypeDefinition() == inType)
+                            {
+                                childType = item.GenericTypeArguments[0];
+                                break;
+                            }
+                        }
+                        Debug.Assert(childType is not null);
+                        value = ReadArray(childType, size, () =>
+                                Activator.CreateInstance(childType, 
+                                    ReadType(childType.GenericTypeArguments[0], childNode[0], reader),
+                                    ReadType(childType.GenericTypeArguments[1], childNode[1], reader)));
+                        if (!type.IsArray)
+                        {
+                            value = Activator.CreateInstance(type, [Convert.ChangeType(value, childType)]);
+                        }
+                        isFromType = true;
+                        break;
+                    }
+                case "TypelessData":
+                    {
+                        var size = reader.ReadInt32();
+                        if (type == typeof(Stream))
+                        {
+                            value = reader.ReadAsStream(size);
+                        } else if (type == typeof(byte[]))
+                        {
+                            value = reader.ReadBytes(size);
+                        } else
+                        {
+                            value = null;
+                            reader.Position += size;
+                        }
+                        isFromType = true;
+                        break;
+                    }
+                default:
+                    {
+                        if (node.Children.Length == 1 && node.Children[0].Type == "Array") //Array
+                        {
+                            if (node.Children[0].MetaFlag.IsAlignBytes())
+                            {
+                                align = true;
+                            }
+                            int size = reader.ReadInt32();
+                            var itemNode = node.Children[0].Children[1];
+                            var itemType = type.IsArray ? type.GetElementType() : type.GenericTypeArguments[0];
+                            value = ReadArray(itemType, size, () => ReadType(itemType, itemNode, reader));
+                            if (!type.IsArray)
+                            {
+                                value = Activator.CreateInstance(type, [value]);
+                            }
+                            isFromType = true;
+                        }
+                        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IPPtr<>))
+                        {
+                            var pptr = (object)new PPtr();
+                            ReadObject(ref pptr, node.Children, reader);
+                            return Activator.CreateInstance(
+                                typeof(ObjectPPtr<>).MakeGenericType(type.GenericTypeArguments), [resource, pptr]);
+                        }
+                        else //Class
+                        {
+                            value = Activator.CreateInstance(type);
+                            ReadObject(ref value, node.Children, reader);
+                            isFromType = true;
+                        }
+                        break;
+                    }
+            }
+            if (align)
+            {
+                reader.AlignStream();
+            }
+            if (isFromType)
+            {
+                return value;
+            }
+            return ConvertType(value, type);
+        }
+
+        private static Array ReadArray(Type itemType, int length, Func<object?> cb)
+        {
+            var data = Array.CreateInstance(itemType, length);
+            for (int i = 0; i < length; i++)
+            {
+                data.SetValue(cb.Invoke(), i);
+            }
+            return data;
+        }
+
+        private static object ReadList(Type itemType, int length, Func<object?> cb)
+        {
+            var type = typeof(List<>).MakeGenericType(itemType);
+            var addFn = type.GetMethod("Add", [itemType]);
+            var data = Activator.CreateInstance(type, length);
+            for (int i = 0; i < length; i++)
+            {
+                addFn?.Invoke(data, [cb.Invoke()]);
+            }
+            return data;
+        }
+
 
         private void ConvertType(IDictionary data, ref object instance)
         {
             var type = instance.GetType();
             foreach (string key in data.Keys)
             {
-                var fieldName = key.Trim().Replace(' ', '_');
-                if (fieldName.StartsWith("m_"))
-                {
-                    fieldName = fieldName[2..];
-                }
-                fieldName = StringConverter.Studly(fieldName);
-                if (instance is ResourceSource && fieldName == "Path")
-                {
-                    fieldName = "Source";
-                }
-                else if (fieldName == "Namespace")
-                {
-                    fieldName = "NameSpace";
-                }
+                var fieldName = ConvertFieldName(key, instance);
                 var obj = data[key];
                 if (obj is null)
                 {
@@ -117,68 +284,29 @@ namespace ZoDream.BundleExtractor.Unity.Document
 
         private object Read(VirtualNode node, IBundleBinaryReader reader)
         {
-            var varTypeStr = node.Type;
-            object value;
             var align = node.MetaFlag.IsAlignBytes();
-            switch (varTypeStr)
+            if (TryRead(node, reader, out var value))
             {
-                case "SInt8":
-                    value = reader.ReadSByte();
-                    break;
-                case "UInt8":
-                case "char":
-                    value = reader.ReadByte();
-                    break;
-                case "short":
-                case "SInt16":
-                    value = reader.ReadInt16();
-                    break;
-                case "UInt16":
-                case "unsigned short":
-                    value = reader.ReadUInt16();
-                    break;
-                case "int":
-                case "SInt32":
-                    value = reader.ReadInt32();
-                    break;
-                case "UInt32":
-                case "unsigned int":
-                case "Type*":
-                    value = reader.ReadUInt32();
-                    break;
-                case "long long":
-                case "SInt64":
-                    value = reader.ReadInt64();
-                    break;
-                case "UInt64":
-                case "unsigned long long":
-                case "FileSize":
-                    value = reader.ReadUInt64();
-                    break;
-                case "float":
-                    value = reader.ReadSingle();
-                    break;
-                case "double":
-                    value = reader.ReadDouble();
-                    break;
-                case "bool":
-                    value = reader.ReadBoolean();
-                    break;
-                case "string":
-                    value = reader.ReadAlignedString();
-                    break;
-                case "map":
+                if (align)
+                {
+                    reader.AlignStream();
+                }
+                return value;
+            }
+            switch (node.Type)
+            {
+                case "map":// map.Array.pair
                     {
                         if (node.Children[0].MetaFlag.IsAlignBytes())
                         {
                             align = true;
                         }
-
                         int size = reader.ReadInt32();
-                        var firstNode = node.Children[1].Children[0];
-                        var secondNode = node.Children[1].Children[1];
-                        value = reader.ReadArray(size, _ => new KeyValuePair<object, object>(Read(firstNode, reader),
-                                Read(secondNode, reader)));
+                        var childNode = node.Children[0].Children[1].Children;
+                        value = reader.ReadArray(size, _ => 
+                        new KeyValuePair<object, object>(
+                            Read(childNode[0], reader),
+                                Read(childNode[1], reader)));
                         break;
                     }
                 case "TypelessData":
@@ -211,8 +339,62 @@ namespace ZoDream.BundleExtractor.Unity.Document
             {
                 reader.AlignStream();
             }
-
             return value;
+        }
+
+        private static bool TryRead(VirtualNode node, IBundleBinaryReader reader, [NotNullWhen(true)] out object? result)
+        {
+            switch (node.Type)
+            {
+                case "SInt8":
+                    result = reader.ReadSByte();
+                    return true;
+                case "UInt8":
+                case "char":
+                    result = reader.ReadByte();
+                    return true;
+                case "short":
+                case "SInt16":
+                    result = reader.ReadInt16();
+                    return true;
+                case "UInt16":
+                case "unsigned short":
+                    result = reader.ReadUInt16();
+                    return true;
+                case "int":
+                case "SInt32":
+                    result = reader.ReadInt32();
+                    return true;
+                case "UInt32":
+                case "unsigned int":
+                case "Type*":
+                    result = reader.ReadUInt32();
+                    return true;
+                case "long long":
+                case "SInt64":
+                    result = reader.ReadInt64();
+                    return true;
+                case "UInt64":
+                case "unsigned long long":
+                case "FileSize":
+                    result = reader.ReadUInt64();
+                    return true;
+                case "float":
+                    result = reader.ReadSingle();
+                    return true;
+                case "double":
+                    result = reader.ReadDouble();
+                    return true;
+                case "bool":
+                    result = reader.ReadBoolean();
+                    return true;
+                case "string":
+                    result = reader.ReadAlignedString();
+                    return true;
+                default:
+                    result = null;
+                    return false;
+            }
         }
 
         private OrderedDictionary ReadDict(IEnumerable<VirtualNode> items, IBundleBinaryReader reader)
@@ -223,6 +405,25 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 res.Add(item.Name, Read(item, reader));
             }
             return res;
+        }
+    
+        private static string ConvertFieldName(string key, object host)
+        {
+            var fieldName = key.Trim().Replace(' ', '_');
+            if (fieldName.StartsWith("m_"))
+            {
+                fieldName = fieldName[2..];
+            }
+            fieldName = StringConverter.Studly(fieldName);
+            if (host is ResourceSource && fieldName == "Path")
+            {
+                fieldName = "Source";
+            }
+            else if (fieldName == "Namespace")
+            {
+                fieldName = "NameSpace";
+            }
+            return fieldName;
         }
     }
 }

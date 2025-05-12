@@ -8,9 +8,14 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class SpineExporter(int entryId, ISerializedFile resource) : IBundleExporter
+    internal class SpineExporter(int entryId, ISerializedFile resource) : IMultipartExporter
     {
         public string FileName => resource[entryId].Name;
+
+        public string SourcePath => resource.FullPath;
+
+        public bool IsEmpty => false;
+
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (resource[entryId] is not TextAsset asset)
@@ -40,6 +45,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return false;
             }
             return buffer[0] == '{' && buffer.IndexOf(Encoding.ASCII.GetBytes("\"skeleton\"")) > 0;
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

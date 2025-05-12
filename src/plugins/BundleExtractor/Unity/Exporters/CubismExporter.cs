@@ -20,6 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _converter = new(resource);
             var obj = _resource[_entryId] as GameObject;
             Debug.Assert(obj is not null);
+            FileName = obj.Name ?? string.Empty;
             Initialize(obj);
         }
 
@@ -28,19 +29,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly int _entryId;
         private readonly ISerializedFile _resource;
 
-        public bool IsEmpty => _moc is null;
+        public bool IsEmpty => _moc < 0;
         public string FileName { get; private set; }
         public string SourcePath => _resource.FullPath;
 
-        private MonoBehaviour? _moc;
+        private int _moc = -1;
         private MonoBehaviour? _model;
         private MonoBehaviour? _pose;
         private MonoBehaviour? _physics;
         private MonoBehaviour? _displayInfo;
         private MonoBehaviour? _userData;
-        private List<MonoBehaviour> _motions = [];
-        private List<MonoBehaviour> _expressions = [];
-        private List<Texture2D> _textures = [];
+        private readonly List<MonoBehaviour> _motions = [];
+        private readonly List<MonoBehaviour> _expressions = [];
+        private readonly List<Texture2D> _textures = [];
 
         private void Initialize(GameObject game)
         {
@@ -75,14 +76,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    items.Add(script.ClassName);
+                    items.Add($"[{script.ClassName}]{behaviour.Name}-{script.Name}");
                     switch (script.ClassName)
                     {
                         case "CubismModel":
-                            _model = behaviour;
+                            GetModel(_resource.IndexOf(pptr.PathID), behaviour);
                             break;
                         case "CubismPhysicsController":
-                            _physics = behaviour;
+                            GetPhysics(_resource.IndexOf(pptr.PathID), behaviour);
                             break;
                         case "CubismFadeController":
                             GetFadeList(_resource.IndexOf(pptr.PathID), behaviour);
@@ -93,6 +94,24 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         case "CubismRenderer":
                             GetRenderTexture(_resource.IndexOf(pptr.PathID), behaviour);
                             break;
+                        case "CubismExpressionData":
+                            break;
+                        case "CubismFadeMotionData":
+                            break;
+                        case "CubismFadeMotionList":
+                            break;
+                        case "CubismEyeBlinkParameter":
+                            break;
+                        case "CubismMouthParameter":
+                            break;
+                        case "CubismParameter":
+                            break;
+                        case "CubismPart":
+                            break;
+                        case "CubismDisplayInfoParameterName":
+                            break;
+                        case "CubismDisplayInfoPartName":
+                            break;
                         default:
                             break;
                     }
@@ -101,15 +120,30 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             
         }
 
-        private void GetFadeList(int entryId, MonoBehaviour behaviour)
+        private void GetModel(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId);
-            if (data is null)
+            var res = ParseMonoBehavior<MonoBehaviour>(entryId, GetFieldName(behaviour));
+            if (res is null)
             {
                 return;
             }
-            var res = _converter.ConvertType<IPPtr<MonoBehaviour>>(data[GetFieldName(behaviour)]);
-            if (res?.IsNull != false)
+            _moc = _resource.IndexOf(res.PathID);
+        }
+
+        private void GetPhysics(int entryId, MonoBehaviour behaviour)
+        {
+            var res = ParseMonoBehavior(entryId)[GetFieldName(behaviour)] as OrderedDictionary;
+            if (res is null)
+            {
+                return;
+            }
+
+        }
+
+        private void GetFadeList(int entryId, MonoBehaviour behaviour)
+        {
+            var res = ParseMonoBehavior<MonoBehaviour>(entryId, GetFieldName(behaviour));
+            if (res is null)
             {
                 return;
             }
@@ -119,13 +153,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetExpressionList(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId);
-            if (data is null)
-            {
-                return;
-            }
-            var res = _converter.ConvertType<IPPtr<Object>>(data[GetFieldName(behaviour)]);
-            if (res?.IsNull != false)
+            var res = ParseMonoBehavior<MonoBehaviour>(entryId, GetFieldName(behaviour));
+            if (res is null)
             {
                 return;
             }
@@ -134,57 +163,33 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetRenderTexture(int entryId, MonoBehaviour behaviour)
         {
-            var data = ParseMonoBehavior(entryId);
-            if (data is null)
+            var res = ParseMonoBehavior<Object>(entryId, GetFieldName(behaviour));
+            if (res is null)
             {
                 return;
             }
-            var res = data[GetFieldName(behaviour)];
-
+            // Texture2D
+            if (res.TryGet(out var obj) && obj is Texture2D texture)
+            {
+                _textures.Add(texture);
+            }
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (_resource[_entryId] is not MonoBehaviour behavior || !behavior.Script.TryGet(out var script))
+            if (IsEmpty)
             {
                 return;
             }
-            if (!LocationStorage.TryCreate(fileName, ".moc3", mode, out fileName))
+            if (_moc >= 0 && !LocationStorage.TryCreate(fileName, ".moc3", mode, out fileName))
             {
-                return;
+                var reader = _resource.OpenRead(_moc);
+                reader.Position = (_resource[_moc] as MonoBehaviour).DataOffset;
+                var length = reader.ReadUInt32();
+                reader.ReadAsStream(length).SaveAs(fileName);
             }
-            switch (script.ClassName)
-            {
-                case "CubismMoc":
-                case "CubismPhysicsController":
-                case "CubismFadeController":
-                case "CubismExpressionController":
-                    break;
-                case "CubismExpressionData":
-                    break;
-                case "CubismFadeMotionData":
-                    break;
-                case "CubismFadeMotionList":
-                    break;
-                case "CubismEyeBlinkParameter":
-                    break;
-                case "CubismMouthParameter":
-                    break;
-                case "CubismParameter":
-                    break;
-                case "CubismPart":
-                    break;
-                case "CubismDisplayInfoParameterName":
-                    break;
-                case "CubismDisplayInfoPartName":
-                    break;
-            }
-            var reader = _resource.OpenRead(_entryId);
-            reader.Position = behavior.DataOffset;
-            var length = reader.ReadUInt32();
-            reader.ReadAsStream(length).SaveAs(fileName);
+            
         }
-
 
 
 
@@ -192,6 +197,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
         }
 
+        private IPPtr<T>? ParseMonoBehavior<T>(int entryId, string fieldName)
+            where T : Object
+        {
+            var data = ParseMonoBehavior(entryId);
+            if (data is null || !data.Contains(fieldName))
+            {
+                return null;
+            }
+            var res = _converter.ConvertType<IPPtr<T>>(data[fieldName]!);
+            if (res?.IsNull != false)
+            {
+                return null;
+            }
+            return res;
+        }
         private OrderedDictionary? ParseMonoBehavior(int entryId)
         {
             var doc = _resource.GetType(entryId);
@@ -207,12 +227,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return null;
             }
-            var res = _converter.Read(doc, _resource.OpenRead(entryId));
-            if (res.Count == 1)
-            {
-                return (OrderedDictionary)res[0];
-            }
-            return res;
+            return _converter.Read(doc, _resource.OpenRead(entryId));
         }
 
         private static string GetFieldName(MonoBehaviour behaviour)

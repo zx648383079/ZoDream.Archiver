@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -31,28 +30,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 res.BlendShapeWeights = reader.ReadArray(r => r.ReadSingle());
             }
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Mesh.PathID);
-                if (res.RootBone is not null)
-                {
-                    builder.AddDependencyEntry(fileName,
-                        fileId,
-                        res.RootBone.PathID);
-                }
-                foreach (var item in res.Bones)
-                {
-                    builder.AddDependencyEntry(fileName,
-                        fileId,
-                        item.PathID);
-                }
-            }
-
             return res;
         }
 

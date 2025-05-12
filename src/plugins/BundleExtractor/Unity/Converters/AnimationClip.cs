@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
 
-    internal class AnimationClipConverter : BundleConverter<AnimationClip>
+    internal class AnimationClipConverter : BundleConverter<AnimationClip>, IElementTypeLoader
     {
         public static void ReadBase(AnimationClip res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
@@ -102,5 +104,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
+        {
+            var res = new AnimationClip();
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
+            return res;
+        }
     }
 }

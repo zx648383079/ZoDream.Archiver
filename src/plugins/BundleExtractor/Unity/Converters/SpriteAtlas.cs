@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -41,25 +40,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var m_Tag = reader.ReadAlignedString();
             res.IsVariant = reader.ReadBoolean();
             reader.AlignStream();
-            
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                foreach (var item in res.PackedSprites)
-                {
-                    builder.AddDependencyEntry(fileName,
-                        fileId,
-                        item.PathID);
-                }
-                foreach (var item in res.RenderDataMap)
-                {
-                    builder.AddDependencyEntry(fileName,
-                       fileId,
-                       item.Value.Texture.PathID);
-                }
-            }
             return res;
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -30,24 +29,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 Father = reader.ReadPPtr<Transform>(serializer)
             };
 
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.GameObject.PathID);
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Father.PathID);
-                foreach (var item in res.Children)
-                {
-                    builder.AddDependencyEntry(fileName,
-                    fileId,
-                    item.PathID);
-                }
-            }
             return res;
         }
         /// <summary>

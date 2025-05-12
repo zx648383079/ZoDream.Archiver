@@ -82,15 +82,9 @@ namespace ZoDream.BundleExtractor
         }
         private void AddDependency(IEnumerable<string> fileItems, string entryPath)
         {
-            foreach (var item in _fileItems)
+            foreach (var item in fileItems)
             {
-                AddDependency(Path.GetFileName(item), FileNameHelper.CombineBrother(entryPath, item));
-            }
-        }
-        private void AddDependency(IEnumerable<string> fileItems)
-        {
-            foreach (var item in _fileItems)
-            {
+                _dependency?.AddDependency(entryPath, item);
                 AddDependency(Path.GetFileName(item), item);
             }
         }
@@ -132,12 +126,12 @@ namespace ZoDream.BundleExtractor
                     progress.Value = i;
                 }
             }
-            ReadAssets(token);
-            ProcessAssets(token);
             if (_dependency is not null)
             {
                 return;
             }
+            ReadAssets(token);
+            ProcessAssets(token);
             ExportAssets(folder, mode, token);
         }
 
@@ -213,6 +207,7 @@ namespace ZoDream.BundleExtractor
                     _service.Add(UnknownProducer.CheckKey, false);
                 }
                 _assetItems.Add(s);
+                // 绑定文件依赖
                 AddDependency(s.Dependencies, fullName);
                 temporary.Add(s);
                 return;

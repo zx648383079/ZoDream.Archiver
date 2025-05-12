@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class MaterialConverter : BundleConverter<Material>
+    internal sealed class MaterialConverter : BundleConverter<Material>, IElementTypeLoader
     {
         public static void ReadBase(Material res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)
@@ -80,16 +81,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.SavedProperties = serializer.Deserialize<PropertySheet>(reader);
 
             //vector m_BuildTextureStacks 2020 and up
-            
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Shader.PathID);
-            }
+            return res;
+        }
+
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
+        {
+            var res = new Material();
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
             return res;
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -80,21 +79,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 var m_KeepAnimatorControllerStateOnDisable = reader.ReadBoolean();
                 reader.AlignStream();
-            }
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.GameObject.PathID);
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Avatar.PathID);
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Controller.PathID);
             }
         }
     }

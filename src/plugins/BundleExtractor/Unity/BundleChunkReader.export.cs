@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
@@ -97,9 +98,20 @@ namespace ZoDream.BundleExtractor
         /// <returns></returns>
         private bool PreExport(int entryId, ISerializedFile resource)
         {
-            if (CubismExporter.IsExportable(entryId, resource))
+            if (resource[entryId] is not MonoBehaviour behaviour 
+                || !behaviour.Script.TryGet(out var script) || behaviour.GameObject?.FileID != 0)
             {
-                _exporterItems.Add(new CubismExporter(entryId, resource));
+                return false;
+            }
+            var gameIndex = resource.IndexOf(behaviour.GameObject.PathID);
+            if (script.ClassName.StartsWith("Cubism"))
+            {
+                _exporterItems.Add(new CubismExporter(gameIndex, resource));
+                return true;
+            }
+            if (script.ClassName.StartsWith("Spine"))
+            {
+                _exporterItems.Add(new SpineExporter(gameIndex, resource));
                 return true;
             }
             return false;

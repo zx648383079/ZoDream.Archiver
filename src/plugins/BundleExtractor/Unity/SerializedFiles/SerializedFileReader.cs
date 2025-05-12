@@ -32,7 +32,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             }
             _metadata.Read(reader.BaseStream, _header);
             CombineFormats(_header.Version, _metadata);
-            _dependencyItems.AddRange(_metadata.Externals);
+            foreach (var item in _metadata.Externals)
+            {
+                Dependencies.Add(FileNameHelper.CombineBrother(fullPath, item.PathName));
+            }
             _children = new Object?[_metadata.Object.Length];
             _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));
         }
@@ -47,8 +50,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// 跟 _metadata.Object 一一对应
         /// </summary>
         private readonly Object?[] _children;
-        private readonly List<FileIdentifier> _dependencyItems = [];
-
         public IBundleContainer? Container { get; set; }
 
         public ILogger? Logger => Container?.Logger;
@@ -60,7 +61,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public int Count => _metadata.Object.Length;
 
-        public IEnumerable<string> Dependencies => _dependencyItems.Select(i => i.PathName);
+        /// <summary>
+        /// 依赖的完整路径
+        /// </summary>
+        public IList<string> Dependencies { get; private set; } = [];
 
         public Object? this[int index] 
         {
@@ -134,21 +138,25 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public string GetDependency(int index)
         {
-            return _dependencyItems[index].PathName;
+            return Dependencies[index];
         }
 
         public int AddDependency(string dependency)
         {
-            _dependencyItems.Add(new()
-            {
-                PathName = dependency,
-            });
-            return _dependencyItems.Count - 1;
+            Dependencies.Add(dependency);
+            return Dependencies.Count - 1;
         }
 
         public int IndexOf(string dependency)
         {
-            return _dependencyItems.FindIndex(x => x.PathName.Equals(dependency, StringComparison.OrdinalIgnoreCase));
+            for (int i = 0; i < Dependencies.Count; i++)
+            {
+                if (Dependencies[i].Equals(dependency, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public IBundleBinaryReader OpenRead(int index)
@@ -280,7 +288,6 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                     return false;
                 }
                 var index = assetsManager.IndexOf(GetDependency(fileId - 1));
-
                 if (index >= 0)
                 {
                     result = assetsManager[index];

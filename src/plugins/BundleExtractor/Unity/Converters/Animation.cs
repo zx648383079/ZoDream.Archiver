@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -24,24 +23,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             reader.AlignStream();
             res.Clip = reader.ReadPPtr<AnimationClip>(serializer);
             res.Clips = reader.ReadPPtrArray<AnimationClip>(serializer);
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.GameObject!.PathID);
-                builder.AddDependencyEntry(fileName,
-                    fileId,
-                    res.Clip!.PathID);
-                foreach (var item in res.Clips)
-                {
-                    builder.AddDependencyEntry(fileName,
-                    fileId,
-                    item.PathID);
-                }
-            }
             return res; 
         }
 

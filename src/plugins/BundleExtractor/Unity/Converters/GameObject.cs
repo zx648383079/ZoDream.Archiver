@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
-using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
@@ -39,18 +38,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var m_Layer = reader.ReadInt32();
             cb.Invoke();
             res.Name = reader.ReadAlignedString();
-           
-            if (reader.TryGet<IDependencyBuilder>(out var builder))
-            {
-                var container = reader.Get<ISerializedFile>();
-                var fileName = container.FullPath;
-                var fileId = reader.Get<ObjectInfo>().FileID;
-                foreach (var item in res.Components)
-                {
-                    builder?.AddDependencyEntry(fileName, fileId, item.PathID);
-                }
-            }
-            
         }
 
         public static bool TryGet<T>(GameObject game, [NotNullWhen(true)] out T? result)
