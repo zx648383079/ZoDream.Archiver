@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
@@ -407,6 +408,57 @@ namespace ZoDream.BundleExtractor.Unity.Document
             return res;
         }
     
+        private static Type ConvertType(VirtualNode node)
+        {
+            switch (node.Type)
+            {
+                case "SInt8":
+                    return typeof(sbyte);
+                case "UInt8":
+                case "char":
+                    return typeof(byte);
+                case "short":
+                case "SInt16":
+                    return typeof(short);
+                case "UInt16":
+                case "unsigned short":
+                    return typeof(ushort);
+                case "int":
+                case "SInt32":
+                    return typeof(int);
+                case "UInt32":
+                case "unsigned int":
+                case "Type*":
+                    return typeof(uint);
+                case "long long":
+                case "SInt64":
+                    return typeof(long);
+                case "UInt64":
+                case "unsigned long long":
+                case "FileSize":
+                    return typeof(ulong);
+                case "float":
+                    return typeof(float);
+                case "double":
+                    return typeof(double);
+                case "bool":
+                    return typeof(bool);
+                case "string":
+                    return typeof(string);
+                case "map":
+                    return typeof(Array);//.MakeGenericType(typeof(KeyValuePair<,>)
+                        // .MakeGenericType([.. node.Children[0].Children[1].Children.Select(ConvertType)]));
+                case "TypelessData":
+                    return typeof(byte[]);
+                default:
+                    if (node.Children.Length > 0 && node.Children[0].Type == "Array")
+                    {
+                        return typeof(Array);//.MakeGenericType(ConvertType(node.Children[0].Children[1]));
+                    }
+                    return typeof(OrderedDictionary);
+            }
+        }
+
         private static string ConvertFieldName(string key, object host)
         {
             var fieldName = key.Trim().Replace(' ', '_');

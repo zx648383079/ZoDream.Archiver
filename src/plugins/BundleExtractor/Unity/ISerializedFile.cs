@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
@@ -46,12 +44,7 @@ namespace ZoDream.BundleExtractor.Unity
         public bool IsExclude(long fileId);
 
         public new Object? this[int index] { get; set; }
-        /// <summary>
-        /// 根据序号获取解析流
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public IBundleBinaryReader OpenRead(int index);
+  
         public IBundleBinaryReader OpenRead(ObjectInfo info);
         /// <summary>
         /// 获取原始结构信息
@@ -60,7 +53,5 @@ namespace ZoDream.BundleExtractor.Unity
         /// <returns></returns>
         public ObjectInfo Get(int index);
 
-        public VirtualDocument? GetType(int index);
-        public Stream OpenResource(ResourceSource source);
     }
 }

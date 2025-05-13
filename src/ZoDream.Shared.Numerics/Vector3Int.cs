@@ -31,9 +31,9 @@ namespace ZoDream.Shared.Numerics
             return $"{{{X},{Y},{Z}}}";
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
+            return HashCode.Combine(X, Y, Z);
         }
 
         public override readonly bool Equals(object? obj)
@@ -48,6 +48,15 @@ namespace ZoDream.Shared.Numerics
         public readonly bool Equals(Vector3Int other)
         {
             return other.X == X && other.Y == Y && other.Z == Z;
+        }
+        public static bool operator ==(Vector3Int left, Vector3Int right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Vector3Int left, Vector3Int right)
+        {
+            return !(left == right);
         }
     }
 }

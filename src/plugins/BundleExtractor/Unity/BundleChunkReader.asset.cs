@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor
                         {
                             if (m_PackedSprite.TryGet(out var m_Sprite))
                             {
-                                if (m_Sprite.SpriteAtlas.IsNull)
+                                if (!m_Sprite.SpriteAtlas.IsNotNull)
                                 {
                                     (m_Sprite.SpriteAtlas as ObjectPPtr<SpriteAtlas>).Set(asset.Get(i), asset);
                                 }

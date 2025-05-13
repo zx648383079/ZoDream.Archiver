@@ -579,7 +579,7 @@ namespace ZoDream.Shared.Numerics.Matrix
         /// </summary>
         /// <param name="other">Other matrix to test</param>
         /// <returns>True if the matrices are equal, false otherwise</returns>
-        public bool Equals(Matrix4x4 other)
+        public readonly bool Equals(Matrix4x4 other)
         {
             return (((M11 == other.M11) && (M12 == other.M12) && (M13 == other.M13) && (M14 == other.M14))
                 && ((M21 == other.M21) && (M22 == other.M22) && (M23 == other.M23) && (M24 == other.M24))
@@ -594,7 +594,7 @@ namespace ZoDream.Shared.Numerics.Matrix
         /// <returns>
         ///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Matrix4x4 x)
             {
@@ -609,10 +609,26 @@ namespace ZoDream.Shared.Numerics.Matrix
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return M11.GetHashCode() + M12.GetHashCode() + M13.GetHashCode() + M14.GetHashCode() + M21.GetHashCode() + M22.GetHashCode() + M23.GetHashCode() + M24.GetHashCode() +
-                M31.GetHashCode() + M32.GetHashCode() + M33.GetHashCode() + M34.GetHashCode() + M41.GetHashCode() + M42.GetHashCode() + M43.GetHashCode() + M44.GetHashCode();
+            var hash = new HashCode();
+            hash.Add(M11);
+            hash.Add(M12);
+            hash.Add(M13);
+            hash.Add(M14);
+            hash.Add(M21);
+            hash.Add(M22);
+            hash.Add(M23);
+            hash.Add(M24);
+            hash.Add(M31);
+            hash.Add(M32);
+            hash.Add(M33);
+            hash.Add(M34);
+            hash.Add(M41);
+            hash.Add(M42);
+            hash.Add(M43);
+            hash.Add(M44);
+            return hash.ToHashCode();
         }
 
         /// <summary>
@@ -621,7 +637,7 @@ namespace ZoDream.Shared.Numerics.Matrix
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             var info = CultureInfo.CurrentCulture;
             return string.Format(info, 

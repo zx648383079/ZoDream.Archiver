@@ -1,72 +1,110 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity
 {
-    internal class ObjectPPtr<T>(ISerializedFile resource, PPtr ptr): IPPtr<T>
+    internal class ObjectPPtr<T>: IPPtr<T>
         where T : Object
     {
-        private int _index = -2; //-2 - Prepare, -1 - Missing
-        public PPtr Value => ptr;
+        public ObjectPPtr(ISerializedFile resource)
+        {
+            _resource = resource;
+        }
+        public ObjectPPtr(ISerializedFile resource, PPtr ptr)
+        {
+            FileID = ptr.FileID;
+            PathID = ptr.PathID;
+            _resource = GetResource(resource, FileID);
+        }
+        private ISerializedFile? _resource;
+        /// <summary>
+        /// 之后不在更新 _resource
+        /// </summary>
+        public int FileID { get; private set; }
 
-        public int FileID => ptr.FileID;
+        public long PathID { get; private set; }
+        public IResourceEntry? Resource => _resource;
 
-        public long PathID => ptr.PathID;
-        public bool IsNull => ptr.PathID == 0 || ptr.FileID < 0;
+        public int Index => _resource.IndexOf(PathID);
+        public bool IsNotNull => PathID != 0 && FileID >= 0 && _resource is not null;
+
+        public IPPtr<K> Create<K>(IPPtr ptr) where K : Object
+        {
+            if (ptr == this)
+            {
+                return new ObjectPPtr<K>(_resource)
+                {
+                    FileID = ptr.FileID,
+                    PathID = ptr.PathID
+                };
+            }
+            var source = ptr is PPtr o ? o : new PPtr()
+            {
+                FileID = FileID,
+                PathID = PathID,
+            };
+            return new ObjectPPtr<K>(_resource, source);
+        }
 
         public void Set(ObjectInfo entry, ISerializedFile instanceSource)
         {
             var name = instanceSource.FullPath;
-            if (string.Equals(resource.FullPath, name, StringComparison.OrdinalIgnoreCase))
+            var source = _resource is null ? instanceSource : _resource;
+            if (string.Equals(source.FullPath, name, StringComparison.OrdinalIgnoreCase))
             {
-                ptr.FileID = 0;
+                FileID = 0;
             }
             else
             {
-                ptr.FileID = resource.IndexOf(name);
-                if (ptr.FileID == -1)
+                FileID = source.IndexOf(name);
+                if (FileID == -1)
                 {
-                    ptr.FileID = resource.AddDependency(instanceSource.FullPath);
+                    FileID = source.AddDependency(instanceSource.FullPath);
                 }
-                ptr.FileID += 1;
+                FileID += 1;
             }
-
-            _index = resource.Container!.IndexOf(name);
-            ptr.PathID = entry.FileID;
+            var host = source.Container!;
+            var index = host.IndexOf(name);
+            if (index < 0)
+            {
+                source.Logger?.Warning($"Need: {name}[{FileID}]{PathID}");
+                _resource = null;
+            } else
+            {
+                _resource = host[index];
+            }
+            PathID = entry.FileID;
         }
 
-        private bool TryGetResource([NotNullWhen(true)] out ISerializedFile? result)
+        private static ISerializedFile? GetResource(ISerializedFile resource, int fileId)
         {
-            if (ptr.FileID == 0)
+            if (fileId == 0)
             {
-                result = resource;
-                return true;
+                return resource;
             }
-            result = null;
-            if (ptr.FileID > 0 && ptr.FileID - 1 < resource.Dependencies.Count())
+            if (fileId > 0 && fileId - 1 < resource.Dependencies.Count)
             {
                 var assetsManager = resource.Container;
                 if (assetsManager is null)
                 {
-                    return false;
+                    return null;
                 }
-                if (_index == -2)
+                var name = resource.GetDependency(fileId - 1);
+                var index = assetsManager.IndexOf(name);
+                if (index < 0)
                 {
-                    var name = resource.GetDependency(ptr.FileID - 1);
-                    _index = assetsManager.IndexOf(name);
+                    resource.Logger?.Warning($"Need: {name}[{fileId}]");
+                    return null;
                 }
-
-                if (_index >= 0)
+                else
                 {
-                    result = assetsManager[_index];
-                    return result is not null;
+                    return assetsManager[index];
                 }
             }
-            return false;
+            return null;
         }
 
         public bool TryGet([NotNullWhen(true)] out T? instance)
@@ -75,31 +113,43 @@ namespace ZoDream.BundleExtractor.Unity
         }
         public bool TryGet<K>([NotNullWhen(true)] out K? instance)
         {
-            if (TryGetResource(out var sourceFile))
+            if (_resource is null)
             {
-                var i = sourceFile.IndexOf(ptr.PathID);
-                if (i >= 0)
-                {
-                    if (sourceFile[i] is K variable)
-                    {
-                        instance = variable;
-                        return true;
-                    }
-                    instance = sourceFile.Container!.ConvertTo<K>(sourceFile, i);
-                    return instance is not null;
-                }
+                instance = default;
+                return false;
             }
-            if (ptr.PathID != 0 && ptr.FileID >= 0)
+            var i = Index;
+            if (i >= 0)
             {
-                resource.Logger?.Warning($"Need: [{ptr.FileID}]{ptr.PathID}");
+                if (_resource[i] is K variable)
+                {
+                    instance = variable;
+                    return true;
+                }
+                instance = _resource.Container!.ConvertTo<K>(_resource, i);
+                return instance is not null;
             }
             instance = default;
             return false;
         }
 
+        public override bool Equals(object? obj)
+        {
+            if (obj is IPPtr ptr)
+            {
+                return ptr.FileID == FileID && ptr.PathID == PathID;
+            }
+            return base.Equals(obj);
+        }
+
         public override string ToString()
         {
             return $"[PPtr<{typeof(T).Name}>]{FileID}:{PathID}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FileID, PathID);
         }
     }
 }

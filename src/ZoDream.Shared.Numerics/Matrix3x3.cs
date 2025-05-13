@@ -195,14 +195,14 @@ namespace ZoDream.Shared.Numerics
             return M11 * M22 * M33 - M11 * M23 * M32 + M12 * M23 * M31 - M12 * M21 * M33 + M13 * M21 * M32 - M13 * M22 * M31;
         }
 
-        public bool Equals(Matrix3x3 other)
+        public readonly bool Equals(Matrix3x3 other)
         {
             return (M11 == other.M11) && (M12 == other.M12) && (M13 == other.M13)
                 && (M21 == other.M21) && (M22 == other.M22) && (M23 == other.M23)
                 && (M31 == other.M31) && (M32 == other.M32) && (M33 == other.M33);
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Matrix3x3 x)
             {
@@ -211,10 +211,19 @@ namespace ZoDream.Shared.Numerics
             return false;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return M11.GetHashCode() + M12.GetHashCode() + M13.GetHashCode() + M21.GetHashCode() + M22.GetHashCode() + M23.GetHashCode() +
-                M31.GetHashCode() + M32.GetHashCode() + M33.GetHashCode();
+            var hash = new HashCode();
+            hash.Add(M11);
+            hash.Add(M12);
+            hash.Add(M13);
+            hash.Add(M21);
+            hash.Add(M22);
+            hash.Add(M23);
+            hash.Add(M31);
+            hash.Add(M32);
+            hash.Add(M33);
+            return hash.ToHashCode();
         }
 
         public override string ToString()

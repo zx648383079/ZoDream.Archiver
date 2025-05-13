@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace ZoDream.Shared.Numerics
 {
-    public struct Rect: IEquatable<Rect>
+    public struct Rect : IEquatable<Rect>
     {
         public float X;
         public float Y;
@@ -22,15 +22,33 @@ namespace ZoDream.Shared.Numerics
             Width = width;
             Height = height;
         }
-
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is Rect rect && Equals(rect);
+        }
         public readonly bool Equals(Rect other)
         {
             return other.X == X && other.Y == Y && other.Width == Width && other.Height == Height;
         }
 
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Width, Height);
+        }
+
         public override readonly string ToString()
         {
             return $"{{{X},{Y},{Width},{Height}}}";
+        }
+
+        public static bool operator ==(Rect left, Rect right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Rect left, Rect right)
+        {
+            return !(left == right);
         }
 
         public static explicit operator Rect(Vector4 vec)
@@ -52,5 +70,6 @@ namespace ZoDream.Shared.Numerics
         {
             return new(rect.X, rect.Y, rect.Width, rect.Height);
         }
+
     }
 }

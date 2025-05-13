@@ -23,9 +23,9 @@ namespace ZoDream.Shared.Numerics
             return $"{{{X},{Y}}}";
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return X.GetHashCode() + Y.GetHashCode();
+            return HashCode.Combine(X, Y);
         }
 
         public override readonly bool Equals(object? obj)

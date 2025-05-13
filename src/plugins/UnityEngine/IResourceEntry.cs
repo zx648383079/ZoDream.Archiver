@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.IO;
+using UnityEngine.Document;
+using ZoDream.Shared.Bundle;
 
 namespace UnityEngine
 {
@@ -9,6 +11,15 @@ namespace UnityEngine
 
         public int IndexOf(long pathID);
         public int IndexOf(Object obj);
-        public bool TryGet<T>(PPtr ptr, [NotNullWhen(true)] out T? instance);
+
+        /// <summary>
+        /// 根据序号获取解析流
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public IBundleBinaryReader OpenRead(int index);
+
+        public VirtualDocument? GetType(int index);
+        public Stream OpenResource(ResourceSource source);
     }
 }
