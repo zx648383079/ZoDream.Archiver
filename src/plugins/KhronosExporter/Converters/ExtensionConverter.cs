@@ -65,7 +65,7 @@ namespace ZoDream.KhronosExporter.Converters
             foreach (var item in value)
             {
                 writer.WritePropertyName(item.Key);
-                JsonSerializer.Serialize(item.Value);
+                JsonSerializer.Serialize(writer, item.Value, options);
             }
             writer.WriteEndObject();
         }

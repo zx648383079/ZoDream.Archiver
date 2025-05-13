@@ -3,11 +3,11 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.IO;
-using ZoDream.Shared.Language;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
@@ -40,10 +40,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private IPPtr<MonoBehaviour>? _physics;
         private readonly List<IPPtr<MonoBehaviour>> _poseParts = [];
         private readonly List<IPPtr<MonoBehaviour>> _parametersCdi = [];
-        private readonly List<string> _eyeBlinkParameters = [];
-        private readonly List<string> _lipSyncParameters = [];
-        private readonly List<string> _parameterNames = [];
-        private readonly List<string> _partNames = [];
+        private HashSet<string> _eyeBlinkParameters = [];
+        private HashSet<string> _lipSyncParameters = [];
+        private readonly HashSet<string> _parameterNames = [];
+        private readonly HashSet<string> _partNames = [];
         private readonly List<IPPtr<MonoBehaviour>> _partsCdi = [];
         private readonly List<IPPtr<MonoBehaviour>> _motions = [];
         private readonly List<IPPtr<MonoBehaviour>> _expressions = [];
@@ -214,22 +214,132 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             var folder = fileName;
             var baseFileName = Path.Combine(folder, FileName);
-            if (_moc?.IsNotNull == true && !LocationStorage.TryCreate(baseFileName, ".moc3", mode, out fileName))
+            if (!LocationStorage.TryCreate(baseFileName, ".model3.json", ArchiveExtractMode.Overwrite, out fileName))
+            {
+                return;
+            }
+            using var writer = JsonExporter.OpenWrite(fileName);
+            writer.WriteStartObject();
+            writer.WritePropertyName("Version");
+            writer.WriteNumberValue(3);
+            writer.WritePropertyName("Name");
+            writer.WriteStringValue(FileName);
+            writer.WritePropertyName("FileReferences");
+            writer.WriteStartObject();
+            if (_moc?.IsNotNull == true && LocationStorage.TryCreate(baseFileName, ".moc3", mode, out fileName))
             {
                 var reader = _moc.Resource.OpenRead(_moc.Index);
                 _moc.TryGet(out var behaviour);
                 reader.Position = behaviour.DataOffset;
                 var length = reader.ReadUInt32();
                 reader.ReadAsStream(length).SaveAs(fileName);
+                writer.WritePropertyName("Moc");
+                writer.WriteStringValue(Path.GetFileName(fileName));
             }
-            if (_physics?.IsNotNull == true && !LocationStorage.TryCreate(baseFileName, ".physics3.json", mode, out fileName))
+
+            if (_textures.Count > 0)
             {
-                using var sb = new CodeWriter(File.Create(baseFileName));
-                SavePhysics(sb);
+                writer.WritePropertyName("Textures");
+                writer.WriteStringValue(Path.GetFileName(fileName));
             }
+           
+
+            if (_physics?.IsNotNull == true && LocationStorage.TryCreate(baseFileName, ".physics3.json", mode, out fileName))
+            {
+                using var sb = JsonExporter.OpenWrite(fileName);
+                SavePhysics(sb);
+                writer.WritePropertyName("Physics");
+                writer.WriteStringValue(Path.GetFileName(fileName));
+            }
+            if (_poseParts.Count > 0 && LocationStorage.TryCreate(baseFileName, ".pose3.json", mode, out fileName))
+            {
+                writer.WritePropertyName("Pose");
+                writer.WriteStringValue(Path.GetFileName(fileName));
+            }
+            if ((_parametersCdi.Count > 0 || _partsCdi.Count > 0)
+                && LocationStorage.TryCreate(baseFileName, ".cdi3.json", mode, out fileName))
+            {
+                writer.WritePropertyName("DisplayInfo");
+                writer.WriteStringValue(Path.GetFileName(fileName));
+            }
+            if (_motions.Count > 0)
+            {
+                writer.WritePropertyName("Motions");
+                writer.WriteStringValue(Path.GetFileName(fileName));
+            }
+            if (_expressions.Count > 0)
+            {
+                writer.WritePropertyName("Expressions");
+                writer.WriteStartArray();
+                var childFolder = Path.Combine(folder, "expressions");
+                foreach (var ptr in _expressions)
+                {
+                    if (!ptr.TryGet(out var behaviour))
+                    {
+                        continue;
+                    }
+                    if (!LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".exp3.json", mode, out fileName))
+                    {
+                        continue;
+                    }
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Name");
+                    writer.WritePropertyName("File");
+                    writer.WriteStringValue($"expressions/{Path.GetFileName(fileName)}");
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+            writer.WritePropertyName("Groups");
+            writer.WriteStartArray();
+
+            if (_eyeBlinkParameters.Count == 0)
+            {
+                _eyeBlinkParameters = _parameterNames.Where(x =>
+                    x.ToLower().Contains("eye")
+                    && x.ToLower().Contains("open")
+                    && (x.ToLower().Contains('l') || x.ToLower().Contains('r'))
+                ).ToHashSet();
+            }
+            if (_lipSyncParameters.Count == 0)
+            {
+                _lipSyncParameters = _parameterNames.Where(x =>
+                    x.ToLower().Contains("mouth")
+                    && x.ToLower().Contains("open")
+                    && x.ToLower().Contains('y')
+                ).ToHashSet();
+            }
+
+            if (_eyeBlinkParameters.Count > 0)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("Target");
+                writer.WriteStringValue("Parameter");
+                writer.WritePropertyName("Name");
+                writer.WriteStringValue("EyeBlink");
+                writer.WritePropertyName("Ids");
+                JsonExporter.Serialize(writer, _eyeBlinkParameters);
+                writer.WriteEndObject();
+            }
+            if (_lipSyncParameters.Count > 0)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("Target");
+                writer.WriteStringValue("Parameter");
+                writer.WritePropertyName("Name");
+                writer.WriteStringValue("LipSync");
+                writer.WritePropertyName("Ids");
+                JsonExporter.Serialize(writer, _lipSyncParameters);
+                writer.WriteEndObject();
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
-        private void SavePhysics(ICodeWriter writer)
+        private void SavePhysics(Utf8JsonWriter writer)
         {
             if (ParseMonoBehavior(_physics)["_rig"] is not OrderedDictionary res)
             {
@@ -237,133 +347,125 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             var target = "Parameter"; // 同名GameObject父节点的名称
             var subRigs = res["SubRigs"] as OrderedDictionary[];
-            writer.Write('{')
-                .Write("Version", true).Write(":3,")
-                .Write("Meta", true).Write(":{")
-                .Write("PhysicsSettingCount", true).Write(':').Write(subRigs.Length).Write(',')
-                .Write("TotalInputCount", true).Write(':').Write(subRigs.Sum(x => (x["Input"] as object[]).Length)).Write(',')
-                .Write("TotalOutputCount", true).Write(':').Write(subRigs.Sum(x => (x["Output"] as object[]).Length)).Write(',')
-                .Write("VertexCount", true).Write(':').Write(subRigs.Sum(x => (x["Particles"] as object[]).Length)).Write(',')
-                .Write("Fps", true).Write(':').Write(res["fps"]).Write(',')
-                .Write("EffectiveForces", true).Write(":{")
-                    .Write("Gravity", true).Write(':');
-            Write(writer, res["Gravity"] as OrderedDictionary);
-            writer.Write(',')
-                .Write("Wind", true).Write(':');
-            Write(writer, res["Wind"] as OrderedDictionary);
-            writer.Write("},")
-                .Write("PhysicsDictionary", true).Write(":[");
+            writer.WriteStartObject();
+            writer.WritePropertyName("Version");
+            writer.WriteNumberValue(3);
+            writer.WritePropertyName("Meta");
+            writer.WriteStartObject();
+            writer.WritePropertyName("PhysicsSettingCount");
+            writer.WriteNumberValue(subRigs.Length);
+            writer.WritePropertyName("TotalInputCount");
+            writer.WriteNumberValue(subRigs.Sum(x => (x["Input"] as object[]).Length));
+            writer.WritePropertyName("TotalOutputCount");
+            writer.WriteNumberValue(subRigs.Sum(x => (x["Output"] as object[]).Length));
+            writer.WritePropertyName("VertexCount");
+            writer.WriteNumberValue(subRigs.Sum(x => (x["Particles"] as object[]).Length));
+            writer.WritePropertyName("Fps");
+            JsonExporter.Serialize(writer, res["fps"]);
+            writer.WritePropertyName("EffectiveForces");
+            writer.WriteStartObject();
+            writer.WritePropertyName("Gravity");
+            JsonExporter.Serialize(writer, res["Gravity"]);
+            writer.WritePropertyName("Wind");
+            JsonExporter.Serialize(writer, res["Wind"]);
+            writer.WriteEndObject();
+            writer.WritePropertyName("PhysicsDictionary");
+            writer.WriteStartArray();
             for (int i = 0; i < subRigs.Length; i++)
             {
-                if (i > 0)
-                {
-                    writer.Write(',');
-                }
-                writer.Write('{')
-                    .Write("Id", true).Write(':').Write($"PhysicsSetting{i + 1}", true).Write(',')
-                    .Write("Name", true).Write(':').Write($"Dummy{i + 1}", true)
-                    .Write('}');
+                writer.WriteStartObject();
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue($"PhysicsSetting{i + 1}");
+                writer.WritePropertyName("Name");
+                writer.WriteStringValue($"Dummy{i + 1}");
+                writer.WriteEndObject();
             }
-            writer.Write("]},")
-                .Write("PhysicsSettings", true).Write(":[");
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+            writer.WritePropertyName("PhysicsSettings");
+            writer.WriteStartArray();
             for (int i = 0; i < subRigs.Length; i++)
             {
                 var item = subRigs[i];
-                if (i > 0)
-                {
-                    writer.Write(',');
-                }
-                writer.Write('{')
-                    .Write("Id", true).Write(':').Write($"PhysicsSetting{i + 1}", true).Write(',');
-                writer.Write("Input", true).Write(":[");
+                writer.WriteStartObject();
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue($"PhysicsSetting{i + 1}");
+                writer.WritePropertyName("Input");
+                writer.WriteStartArray();
                 var items = item["Input"] as object[];
                 for (int j = 0; j < items.Length; j++)
                 {
                     var child = items[j] as OrderedDictionary;
-                    if (j > 0)
-                    {
-                        writer.Write(',');
-                    }
-                    writer.Write('{')
-                        .Write("Source", true).Write(":{")
-                            .Write("Target", true).Write(':').Write(target, true).Write(',')
-                            .Write("Id", true).Write(':').Write(child["SourceId"].ToString(), true)
-                        .Write("},")
-                        .Write("Weight", true).Write(':').Write(child["Weight"]).Write(',')
-                        .Write("Type", true).Write(':').Write(child["SourceComponent"].ToString(), true).Write(',')
-                        .Write("Reflect", true).Write(':').Write(child["IsInverted"])
-                        .Write('}');
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Source");
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Target");
+                    writer.WriteStringValue(target);
+                    writer.WritePropertyName("Id");
+                    writer.WriteStringValue(child["SourceId"]?.ToString());
+                    writer.WriteEndObject();
+                    writer.WritePropertyName("Weight");
+                    JsonExporter.Serialize(writer, child["Weight"]);
+                    writer.WritePropertyName("Type");
+                    writer.WriteStringValue(child["SourceComponent"]?.ToString());
+                    writer.WritePropertyName("Reflect");
+                    JsonExporter.Serialize(writer, child["IsInverted"]);
+                    writer.WriteEndObject();
                 }
-                writer.Write("],");
-                writer.Write("Output", true).Write(":[");
+                writer.WriteEndArray();
+                writer.WritePropertyName("Output");
+                writer.WriteStartArray();
                 items = item["Output"] as object[];
                 for (int j = 0; j < items.Length; j++)
                 {
                     var child = items[j] as OrderedDictionary;
-                    if (j > 0)
-                    {
-                        writer.Write(',');
-                    }
-                    writer.Write('{')
-                        .Write("Destination", true).Write(":{")
-                            .Write("Target", true).Write(':').Write(target, true).Write(',')
-                            .Write("Id", true).Write(':').Write(child["DestinationId"].ToString(), true)
-                        .Write("},")
-                        .Write("VertexIndex", true).Write(':').Write(child["ParticleIndex"]).Write(',')
-                        .Write("Scale", true).Write(':').Write(child["AngleScale"]).Write(',')
-                        .Write("Weight", true).Write(':').Write(child["Weight"]).Write(',')
-                        .Write("Type", true).Write(':').Write(child["SourceComponent"].ToString(), true).Write(',')
-                        .Write("Reflect", true).Write(':').Write(child["IsInverted"])
-                        .Write('}');
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Destination");
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Target");
+                    JsonExporter.Serialize(writer, target);
+                    writer.WritePropertyName("Id");
+                    writer.WriteStringValue(child["DestinationId"]?.ToString());
+                   writer.WriteEndObject();
+                    writer.WritePropertyName("VertexIndex");
+                    JsonExporter.Serialize(writer, child["ParticleIndex"]);
+                    writer.WritePropertyName("Scale");
+                    JsonExporter.Serialize(writer, child["AngleScale"]);
+                    writer.WritePropertyName("Weight");
+                    JsonExporter.Serialize(writer, child["Weight"]);
+                    writer.WritePropertyName("Type");
+                    writer.WriteStringValue(child["SourceComponent"]?.ToString());
+                    writer.WritePropertyName("Reflect");
+                    JsonExporter.Serialize(writer, child["IsInverted"]);
+                    writer.WriteEndObject();
                 }
-                writer.Write("],");
-                writer.Write("Vertices", true).Write(":[");
+                writer.WriteEndArray();
+                writer.WritePropertyName("Vertices");
+                writer.WriteStartArray();
                 items = item["Particles"] as object[];
                 for (int j = 0; j < items.Length; j++)
                 {
                     var child = items[j] as OrderedDictionary;
-                    if (j > 0)
-                    {
-                        writer.Write(',');
-                    }
-                    writer.Write('{')
-                        .Write("Position", true).Write(':');
-                    Write(writer, child["InitialPosition"] as OrderedDictionary);
-                    writer.Write(',')
-                        .Write("Mobility", true).Write(':').Write(child["Mobility"]).Write(',')
-                        .Write("Delay", true).Write(':').Write(child["Delay"]).Write(',')
-                        .Write("Acceleration", true).Write(':').Write(child["Acceleration"]).Write(',')
-                        .Write("Radius", true).Write(':').Write(child["Radius"])
-                        .Write('}');
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Position");
+                    JsonExporter.Serialize(writer, child["InitialPosition"]);
+                    writer.WritePropertyName("Mobility");
+                    JsonExporter.Serialize(writer, child["Mobility"]);
+                    writer.WritePropertyName("Delay");
+                    JsonExporter.Serialize(writer, child["Delay"]);
+                    writer.WritePropertyName("Acceleration");
+                    JsonExporter.Serialize(writer, child["Acceleration"]);
+                    writer.WritePropertyName("Radius");
+                    JsonExporter.Serialize(writer, child["Radius"]);
+                    writer.WriteEndObject();
                 }
-                writer.Write("],");
-                writer.Write("Normalization", true).Write(':');
-                Write(writer, item["Normalization"] as OrderedDictionary);
-                writer.Write('}');
+                writer.WriteEndArray();
+                writer.WritePropertyName("Normalization");
+                JsonExporter.Serialize(writer, item["Normalization"]);
+                writer.WriteEndObject();
             }
-            writer.Write("]}");
-        }
-
-        private static void Write(ICodeWriter writer, OrderedDictionary data)
-        {
-            writer.Write('{');
-            var i = 0;
-            foreach (var key in data.Keys)
-            {
-                if (i++ > 0)
-                {
-                    writer.Write(',');
-                }
-                writer.Write(key.ToString(), true).Write(':');
-                if (data[key] is OrderedDictionary next)
-                {
-                    Write(writer, next);
-                } else
-                {
-                    writer.Write(data[key]);
-                }
-            }
-            writer.Write('}');
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
         public void Dispose()

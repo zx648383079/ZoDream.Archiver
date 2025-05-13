@@ -30,5 +30,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             using var fs = File.Create(fileName);
             JsonSerializer.Serialize(fs, resource[entryId], Options);
         }
+
+
+        public static Utf8JsonWriter OpenWrite(string fileName)
+        {
+            return new(File.Create(fileName), new JsonWriterOptions()
+            {
+                Indented = Options.WriteIndented,
+                IndentCharacter = Options.IndentCharacter,
+                IndentSize = Options.IndentSize,
+            });
+        }
+
+        public static void Serialize(Utf8JsonWriter writer, object? data)
+        {
+            JsonSerializer.Serialize(writer, data, Options);
+        }
     }
 }
