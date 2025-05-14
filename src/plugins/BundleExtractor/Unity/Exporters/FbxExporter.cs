@@ -881,8 +881,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                                 path = GetPathByChannelName(channelName);
                             }
                             var track = iAnim.FindTrack(path);
-                            track.BlendShape = new FbxImportedBlendShape();
-                            track.BlendShape.ChannelName = channelName;
+                            track.BlendShape = new FbxImportedBlendShape
+                            {
+                                ChannelName = channelName
+                            };
                             foreach (var m_Curve in m_FloatCurve.Curve.Curve)
                             {
                                 track.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(m_Curve.Time, m_Curve.Value));

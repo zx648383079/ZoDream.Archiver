@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
@@ -60,7 +59,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return;
             }
             transform = TransformConverter.GetRoot(transform);
-            var items = new List<string>();
             foreach (var item in TransformConverter.ForEachTree(transform))
             {
                 if (item.GameObject?.TryGet(out var obj) != true)
@@ -74,6 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 foreach (var pptr in obj.Components)
                 {
+                    _resource.AddExclude(pptr.PathID);
                     if (!pptr.TryGet(out var instance))
                     {
                         continue;
@@ -86,7 +85,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    items.Add($"[{script.ClassName}]{behaviour.Name}-{script.Name}");
                     switch (script.ClassName)
                     {
                         case "CubismModel":
@@ -151,8 +149,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             _moc = res;
         }
-
-        
 
         private void GetFadeController(IPPtr<MonoBehaviour> ptr)
         {
@@ -288,8 +284,46 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             if (_motions.Count > 0)
             {
+                var childFolder = Path.Combine(folder, "motions");
+                var maps = new SortedDictionary<string, List<string>>();
+                foreach (var ptr in _motions)
+                {
+                    if (!ptr.TryGet(out var behaviour))
+                    {
+                        continue;
+                    }
+                    var data = ParseMonoBehavior(ptr);
+                    if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".motion3.json", mode, out fileName))
+                    {
+                        continue;
+                    }
+                    using var sb = JsonExporter.OpenWrite(fileName);
+                    SaveMotion(sb, data);
+                    if (maps.TryGetValue(behaviour.Name, out List<string>? value))
+                    {
+                        value.Add(Path.GetFileName(fileName));
+                    }
+                    else
+                    {
+                        maps.Add(behaviour.Name, [Path.GetFileName(fileName)]);
+                    }
+                }
                 writer.WritePropertyName("Motions");
-                writer.WriteStringValue(Path.GetFileName(fileName));
+                writer.WriteStartObject();
+                foreach (var items in maps)
+                {
+                    writer.WritePropertyName(items.Key);
+                    writer.WriteStartArray();
+                    foreach (var item in items.Value)
+                    {
+                        writer.WriteStartObject();
+                        writer.WritePropertyName("File");
+                        writer.WriteStringValue($"motions/{item}");
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndArray();
+                }
+                writer.WriteEndObject();
             }
             if (_expressions.Count > 0)
             {
@@ -362,6 +396,158 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteEndObject();
             }
 
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        private void SaveMotion(Utf8JsonWriter writer, OrderedDictionary data)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("Version");
+            writer.WriteNumberValue(3);
+
+
+            writer.WritePropertyName("Curves");
+            writer.WriteStartArray();
+
+            var curveCount = 0;
+            var totalSegmentCount = 0;
+            var totalPointCount = 0;
+            var i = -1;
+            foreach (var item in (data["ParameterCurves"] as object[]).Cast<OrderedDictionary>())
+            {
+                i++;
+                if (item is null)
+                {
+                    continue;
+                }
+                var curveItems = (item["m_Curve"] as object[]).Cast<OrderedDictionary>().ToArray();
+                if (curveItems.Length == 0)
+                {
+                    continue;
+                }
+                string target;
+                var paramId = (data["ParameterIds"] as object[])[i].ToString();
+                switch (paramId)
+                {
+                    case "Opacity":
+                    case "EyeBlink":
+                    case "LipSync":
+                        target = "Model";
+                        break;
+                    default:
+                        if (_parameterNames.Contains(paramId))
+                        {
+                            target = "Parameter";
+                        }
+                        else if (_partNames.Contains(paramId))
+                        {
+                            target = "PartOpacity";
+                        }
+                        else
+                        {
+                            target = paramId.ToLower().Contains("part") ? "PartOpacity" : "Parameter";
+                            _resource.Logger?.Warning($"[{data["m_Name"]}] Binding error: Unable to find \"{paramId}\" among the model parts/parameters");
+                        }
+                        break;
+                }
+                writer.WriteStartObject();
+                writer.WritePropertyName("Target");
+                writer.WriteStringValue(target);
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue(paramId);
+                writer.WritePropertyName("FadeInTime");
+                writer.WriteNumberValue((float)(data["ParameterFadeInTimes"] as object[])[i]);
+                writer.WritePropertyName("FadeOutTime");
+                writer.WriteNumberValue((float)(data["ParameterFadeOutTimes"] as object[])[i]);
+                writer.WritePropertyName("Segments");
+                writer.WriteStartArray();
+                for (var j = 1; j < curveItems.Length; j++)
+                {
+                    var curve = curveItems[j];
+                    var preCurve = curveItems[j - 1];
+                    var next = curveItems.ElementAtOrDefault(j + 1);
+                    var nextCurve = next ?? [];
+                    if (Math.Abs((float)curve["time"] - (float)preCurve["time"] - 0.01f) < 0.0001f) // InverseSteppedSegment
+                    {
+                        if (nextCurve["value"] == curve["value"])
+                        {
+                            writer.WriteNumberValue(3f); // Segment ID
+                            writer.WriteNumberValue((float)nextCurve["time"]);
+                            writer.WriteNumberValue((float)nextCurve["value"]);
+                            j += 1;
+                            totalPointCount += 1;
+                            totalSegmentCount++;
+                            continue;
+                        }
+                    }
+                    if (float.IsPositiveInfinity((float)curve["inSlope"])) // SteppedSegment
+                    {
+                        writer.WriteNumberValue(2f); // Segment ID
+                        writer.WriteNumberValue((float)curve["time"]);
+                        writer.WriteNumberValue((float)curve["value"]);
+                        totalPointCount += 1;
+                    }
+                    else if ((float)preCurve["outSlope"] == 0f && Math.Abs((float)curve["inSlope"]) < 0.0001f) // LinearSegment
+                    {
+                        writer.WriteNumberValue(0f); // Segment ID
+                        writer.WriteNumberValue((float)curve["time"]);
+                        writer.WriteNumberValue((float)curve["value"]);
+                        totalPointCount += 1;
+                    }
+                    else // BezierSegment
+                    {
+                        var tangentLength = ((float)curve["time"] - (float)preCurve["time"]) / 3f;
+                        writer.WriteNumberValue(1f); // Segment ID
+                        writer.WriteNumberValue((float)preCurve["time"] + tangentLength);
+                        writer.WriteNumberValue((float)preCurve["outSlope"] * tangentLength + (float)preCurve["value"]);
+                        writer.WriteNumberValue((float)curve["time"] - tangentLength);
+                        writer.WriteNumberValue((float)curve["value"] - (float)curve["inSlope"] * tangentLength);
+                        writer.WriteNumberValue((float)curve["time"]);
+                        writer.WriteNumberValue((float)curve["value"]);
+                        totalPointCount += 3;
+                    }
+                    totalSegmentCount++;
+                }
+                curveCount++;
+                totalPointCount++;
+                writer.WriteEndArray();
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+
+            writer.WritePropertyName("Meta");
+
+            writer.WriteStartObject();
+            writer.WritePropertyName("Duration");
+            writer.WriteNumberValue((float)data["MotionLength"]);
+            writer.WritePropertyName("Fps");
+            writer.WriteNumberValue(30);
+            writer.WritePropertyName("Loop");
+            writer.WriteBooleanValue(true);
+            writer.WritePropertyName("AreBeziersRestricted");
+            writer.WriteBooleanValue(true);
+            writer.WritePropertyName("FadeInTime");
+            writer.WriteNumberValue((float)data["FadeInTime"]);
+            writer.WritePropertyName("FadeOutTime");
+            writer.WriteNumberValue((float)data["FadeOutTime"]);
+            writer.WritePropertyName("UserDataCount");
+            writer.WriteNumberValue(0);
+            writer.WritePropertyName("CurveCount");
+            writer.WriteNumberValue(curveCount);
+            writer.WritePropertyName("TotalSegmentCount");
+            writer.WriteNumberValue(totalSegmentCount);
+            writer.WritePropertyName("TotalPointCount");
+            writer.WriteNumberValue(totalPointCount);
+            writer.WritePropertyName("TotalUserDataSize");
+            writer.WriteNumberValue(0);
+            writer.WriteEndObject();
+
+
+
+            writer.WritePropertyName("UserData");
+            writer.WriteStartArray();
             writer.WriteEndArray();
             writer.WriteEndObject();
         }

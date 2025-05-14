@@ -11,7 +11,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
     internal class SpineExporter(int entryId, ISerializedFile resource) : IMultipartExporter
     {
         public string FileName => resource[entryId].Name;
-
         public string SourcePath => resource.FullPath;
 
         public bool IsEmpty => false;
@@ -49,7 +48,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }
