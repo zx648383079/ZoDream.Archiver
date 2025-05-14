@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using UnityEngine;
+using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.BundleExtractor.Unity.Live2d;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -28,6 +30,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             Debug.Assert(obj is not null);
             FileName = obj.Name ?? string.Empty;
             Initialize(obj);
+        }
+        public CubismExporter(IPPtr<GameObject> ptr)
+            : this(ptr.Index, (ISerializedFile)ptr.Resource)
+        {
         }
 
         private readonly DocumentReader _converter;
@@ -142,7 +148,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetModel(IPPtr<MonoBehaviour> ptr)
         {
-            var res = ParseMonoBehavior<MonoBehaviour>(ptr);
+            var res = GetChildToPPtr<MonoBehaviour>(ptr);
             if (res is null)
             {
                 return;
@@ -152,7 +158,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetFadeController(IPPtr<MonoBehaviour> ptr)
         {
-            var pptr = ParseMonoBehavior<MonoBehaviour>(ptr);
+            var pptr = GetChildToPPtr<MonoBehaviour>(ptr);
             if (pptr is null)
             {
                 return;
@@ -162,7 +168,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetFadeList(IPPtr<MonoBehaviour> ptr)
         {
-            var data = ParseMonoBehavior(ptr); // CubismFadeMotionList
+            var data = Deserialize(ptr); // CubismFadeMotionList
             if (data["CubismFadeMotionObjects"] is not object[] items)
             {
                 return;
@@ -175,12 +181,12 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetExpressionList(IPPtr<MonoBehaviour> ptr)
         {
-            var pptr = ParseMonoBehavior<MonoBehaviour>(ptr);
+            var pptr = GetChildToPPtr<MonoBehaviour>(ptr);
             if (pptr is null)
             {
                 return;
             }
-            var data = ParseMonoBehavior(pptr);
+            var data = Deserialize(pptr);
             if (data["CubismExpressionObjects"] is not object[] items)
             {
                 return;
@@ -193,7 +199,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetRenderTexture(IPPtr<MonoBehaviour> ptr)
         {
-            var res = ParseMonoBehavior<Texture2D>(ptr);
+            var res = GetChildToPPtr<Texture2D>(ptr);
             if (res is null)
             {
                 return;
@@ -292,7 +298,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    var data = ParseMonoBehavior(ptr);
+                    var data = Deserialize<CubismFadeMotionData>(ptr);
                     if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".motion3.json", mode, out fileName))
                     {
                         continue;
@@ -336,7 +342,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    var data = ParseMonoBehavior(ptr);
+                    var data = Deserialize<CubismExpressionData>(ptr);
                     if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".exp3.json", mode, out fileName))
                     {
                         continue;
@@ -400,7 +406,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WriteEndObject();
         }
 
-        private void SaveMotion(Utf8JsonWriter writer, OrderedDictionary data)
+        private void SaveMotion(Utf8JsonWriter writer, CubismFadeMotionData data)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("Version");
@@ -414,20 +420,20 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             var totalSegmentCount = 0;
             var totalPointCount = 0;
             var i = -1;
-            foreach (var item in (data["ParameterCurves"] as object[]).Cast<OrderedDictionary>())
+            foreach (var item in data.ParameterCurves)
             {
                 i++;
                 if (item is null)
                 {
                     continue;
                 }
-                var curveItems = (item["m_Curve"] as object[]).Cast<OrderedDictionary>().ToArray();
+                var curveItems = item.Curve;
                 if (curveItems.Length == 0)
                 {
                     continue;
                 }
                 string target;
-                var paramId = (data["ParameterIds"] as object[])[i].ToString();
+                var paramId = data.ParameterIds[i];
                 switch (paramId)
                 {
                     case "Opacity":
@@ -447,7 +453,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         else
                         {
                             target = paramId.ToLower().Contains("part") ? "PartOpacity" : "Parameter";
-                            _resource.Logger?.Warning($"[{data["m_Name"]}] Binding error: Unable to find \"{paramId}\" among the model parts/parameters");
+                            _resource.Logger?.Warning($"[{data.Name}] Binding error: Unable to find \"{paramId}\" among the model parts/parameters");
                         }
                         break;
                 }
@@ -457,54 +463,53 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WritePropertyName("Id");
                 writer.WriteStringValue(paramId);
                 writer.WritePropertyName("FadeInTime");
-                writer.WriteNumberValue((float)(data["ParameterFadeInTimes"] as object[])[i]);
+                writer.WriteNumberValue(data.ParameterFadeInTimes[i]);
                 writer.WritePropertyName("FadeOutTime");
-                writer.WriteNumberValue((float)(data["ParameterFadeOutTimes"] as object[])[i]);
+                writer.WriteNumberValue(data.ParameterFadeOutTimes[i]);
                 writer.WritePropertyName("Segments");
                 writer.WriteStartArray();
                 for (var j = 1; j < curveItems.Length; j++)
                 {
                     var curve = curveItems[j];
                     var preCurve = curveItems[j - 1];
-                    var next = curveItems.ElementAtOrDefault(j + 1);
-                    var nextCurve = next ?? [];
-                    if (Math.Abs((float)curve["time"] - (float)preCurve["time"] - 0.01f) < 0.0001f) // InverseSteppedSegment
+                    var nextCurve = curveItems.ElementAtOrDefault(j + 1);
+                    if (Math.Abs(curve.Time - preCurve.Time - 0.01f) < 0.0001f) // InverseSteppedSegment
                     {
-                        if (nextCurve["value"] == curve["value"])
+                        if (nextCurve.Value == curve.Value)
                         {
                             writer.WriteNumberValue(3f); // Segment ID
-                            writer.WriteNumberValue((float)nextCurve["time"]);
-                            writer.WriteNumberValue((float)nextCurve["value"]);
+                            writer.WriteNumberValue(nextCurve.Time);
+                            writer.WriteNumberValue(nextCurve.Value);
                             j += 1;
                             totalPointCount += 1;
                             totalSegmentCount++;
                             continue;
                         }
                     }
-                    if (float.IsPositiveInfinity((float)curve["inSlope"])) // SteppedSegment
+                    if (float.IsPositiveInfinity(curve.InSlope)) // SteppedSegment
                     {
                         writer.WriteNumberValue(2f); // Segment ID
-                        writer.WriteNumberValue((float)curve["time"]);
-                        writer.WriteNumberValue((float)curve["value"]);
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
                         totalPointCount += 1;
                     }
-                    else if ((float)preCurve["outSlope"] == 0f && Math.Abs((float)curve["inSlope"]) < 0.0001f) // LinearSegment
+                    else if (preCurve.OutSlope == 0f && Math.Abs(curve.InSlope) < 0.0001f) // LinearSegment
                     {
                         writer.WriteNumberValue(0f); // Segment ID
-                        writer.WriteNumberValue((float)curve["time"]);
-                        writer.WriteNumberValue((float)curve["value"]);
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
                         totalPointCount += 1;
                     }
                     else // BezierSegment
                     {
-                        var tangentLength = ((float)curve["time"] - (float)preCurve["time"]) / 3f;
+                        var tangentLength = (curve.Time - preCurve.Time) / 3f;
                         writer.WriteNumberValue(1f); // Segment ID
-                        writer.WriteNumberValue((float)preCurve["time"] + tangentLength);
-                        writer.WriteNumberValue((float)preCurve["outSlope"] * tangentLength + (float)preCurve["value"]);
-                        writer.WriteNumberValue((float)curve["time"] - tangentLength);
-                        writer.WriteNumberValue((float)curve["value"] - (float)curve["inSlope"] * tangentLength);
-                        writer.WriteNumberValue((float)curve["time"]);
-                        writer.WriteNumberValue((float)curve["value"]);
+                        writer.WriteNumberValue(preCurve.Time + tangentLength);
+                        writer.WriteNumberValue(preCurve.OutSlope * tangentLength + (float)preCurve.Value);
+                        writer.WriteNumberValue(curve.Time - tangentLength);
+                        writer.WriteNumberValue(curve.Value - (float)curve.InSlope * tangentLength);
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
                         totalPointCount += 3;
                     }
                     totalSegmentCount++;
@@ -521,7 +526,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             writer.WriteStartObject();
             writer.WritePropertyName("Duration");
-            writer.WriteNumberValue((float)data["MotionLength"]);
+            writer.WriteNumberValue(data.MotionLength);
             writer.WritePropertyName("Fps");
             writer.WriteNumberValue(30);
             writer.WritePropertyName("Loop");
@@ -529,9 +534,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WritePropertyName("AreBeziersRestricted");
             writer.WriteBooleanValue(true);
             writer.WritePropertyName("FadeInTime");
-            writer.WriteNumberValue((float)data["FadeInTime"]);
+            writer.WriteNumberValue(data.FadeInTime);
             writer.WritePropertyName("FadeOutTime");
-            writer.WriteNumberValue((float)data["FadeOutTime"]);
+            writer.WriteNumberValue(data.FadeOutTime);
             writer.WritePropertyName("UserDataCount");
             writer.WriteNumberValue(0);
             writer.WritePropertyName("CurveCount");
@@ -552,26 +557,26 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WriteEndObject();
         }
 
-        private void SaveExpression(Utf8JsonWriter writer, OrderedDictionary data)
+        private void SaveExpression(Utf8JsonWriter writer, CubismExpressionData data)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("Type");
-            writer.WriteStringValue(data["Type"].ToString());
+            writer.WriteStringValue(data.Type);
             writer.WritePropertyName("FadeInTime");
-            writer.WriteNumberValue((float)data["FadeInTime"]);
+            writer.WriteNumberValue(data.FadeInTime);
             writer.WritePropertyName("FadeOutTime");
-            writer.WriteNumberValue((float)data["FadeOutTime"]);
+            writer.WriteNumberValue(data.FadeOutTime);
             writer.WritePropertyName("Parameters");
             writer.WriteStartArray();
-            foreach (var item in (data["Parameters"] as object[]).Cast<OrderedDictionary>())
+            foreach (var item in data.Parameters)
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName("Id");
-                writer.WriteStringValue(data["Id"].ToString());
+                writer.WriteStringValue(item.Id);
                 writer.WritePropertyName("Value");
-                writer.WriteNumberValue((float)data["Value"]);
+                writer.WriteNumberValue(item.Value);
                 writer.WritePropertyName("Blend");
-                writer.WriteStringValue(data["Blend"].ToString());
+                writer.WriteStringValue(Enum.GetName(item.Blend));
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
@@ -645,7 +650,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     continue;
                 }
-                var data = ParseMonoBehavior(ptr);
+                var data = Deserialize(ptr);
                 if (data is null)
                 {
                     continue;
@@ -688,12 +693,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void SavePhysics(Utf8JsonWriter writer)
         {
-            if (ParseMonoBehavior(_physics)["_rig"] is not OrderedDictionary res)
+            var res = Deserialize<CubismPhysics>(_physics)?.Rig;
+            if (res is null)
             {
                 return;
             }
             var target = "Parameter"; // 同名GameObject父节点的名称
-            var subRigs = res["SubRigs"] as OrderedDictionary[];
+            var subRigs = res.SubRigs;
             writer.WriteStartObject();
             writer.WritePropertyName("Version");
             writer.WriteNumberValue(3);
@@ -702,19 +708,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WritePropertyName("PhysicsSettingCount");
             writer.WriteNumberValue(subRigs.Length);
             writer.WritePropertyName("TotalInputCount");
-            writer.WriteNumberValue(subRigs.Sum(x => (x["Input"] as object[]).Length));
+            writer.WriteNumberValue(subRigs.Sum(x => x.Input.Length));
             writer.WritePropertyName("TotalOutputCount");
-            writer.WriteNumberValue(subRigs.Sum(x => (x["Output"] as object[]).Length));
+            writer.WriteNumberValue(subRigs.Sum(x => x.Output.Length));
             writer.WritePropertyName("VertexCount");
-            writer.WriteNumberValue(subRigs.Sum(x => (x["Particles"] as object[]).Length));
+            writer.WriteNumberValue(subRigs.Sum(x => x.Particles.Length));
             writer.WritePropertyName("Fps");
-            JsonExporter.Serialize(writer, res["fps"]);
+            writer.WriteNumberValue(res.Fps);
             writer.WritePropertyName("EffectiveForces");
             writer.WriteStartObject();
             writer.WritePropertyName("Gravity");
-            JsonExporter.Serialize(writer, res["Gravity"]);
+            JsonExporter.Serialize(writer, res.Gravity);
             writer.WritePropertyName("Wind");
-            JsonExporter.Serialize(writer, res["Wind"]);
+            JsonExporter.Serialize(writer, res.Wind);
             writer.WriteEndObject();
             writer.WritePropertyName("PhysicsDictionary");
             writer.WriteStartArray();
@@ -739,76 +745,70 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteStringValue($"PhysicsSetting{i + 1}");
                 writer.WritePropertyName("Input");
                 writer.WriteStartArray();
-                var items = item["Input"] as object[];
-                for (int j = 0; j < items.Length; j++)
+                foreach (var child in item.Input)
                 {
-                    var child = items[j] as OrderedDictionary;
                     writer.WriteStartObject();
                     writer.WritePropertyName("Source");
                     writer.WriteStartObject();
                     writer.WritePropertyName("Target");
                     writer.WriteStringValue(target);
                     writer.WritePropertyName("Id");
-                    writer.WriteStringValue(child["SourceId"]?.ToString());
+                    writer.WriteStringValue(child.SourceId);
                     writer.WriteEndObject();
                     writer.WritePropertyName("Weight");
-                    JsonExporter.Serialize(writer, child["Weight"]);
+                    writer.WriteNumberValue(child.Weight);
                     writer.WritePropertyName("Type");
-                    writer.WriteStringValue(child["SourceComponent"]?.ToString());
+                    writer.WriteStringValue(Enum.GetName(child.SourceComponent));
                     writer.WritePropertyName("Reflect");
-                    JsonExporter.Serialize(writer, child["IsInverted"]);
+                    writer.WriteBooleanValue(child.IsInverted);
                     writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
                 writer.WritePropertyName("Output");
                 writer.WriteStartArray();
-                items = item["Output"] as object[];
-                for (int j = 0; j < items.Length; j++)
+                foreach (var child in item.Output)
                 {
-                    var child = items[j] as OrderedDictionary;
                     writer.WriteStartObject();
                     writer.WritePropertyName("Destination");
                     writer.WriteStartObject();
                     writer.WritePropertyName("Target");
-                    JsonExporter.Serialize(writer, target);
+                    writer.WriteStringValue(target);
                     writer.WritePropertyName("Id");
-                    writer.WriteStringValue(child["DestinationId"]?.ToString());
-                   writer.WriteEndObject();
+                    writer.WriteStringValue(child.DestinationId);
+                    writer.WriteEndObject();
                     writer.WritePropertyName("VertexIndex");
-                    JsonExporter.Serialize(writer, child["ParticleIndex"]);
+                    writer.WriteNumberValue(child.ParticleIndex);
                     writer.WritePropertyName("Scale");
-                    JsonExporter.Serialize(writer, child["AngleScale"]);
+                    writer.WriteNumberValue(child.AngleScale);
                     writer.WritePropertyName("Weight");
-                    JsonExporter.Serialize(writer, child["Weight"]);
+                    writer.WriteNumberValue(child.Weight);
                     writer.WritePropertyName("Type");
-                    writer.WriteStringValue(child["SourceComponent"]?.ToString());
+                    writer.WriteStringValue(Enum.GetName(child.SourceComponent));
                     writer.WritePropertyName("Reflect");
-                    JsonExporter.Serialize(writer, child["IsInverted"]);
+                    writer.WriteBooleanValue(child.IsInverted);
                     writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
                 writer.WritePropertyName("Vertices");
                 writer.WriteStartArray();
-                items = item["Particles"] as object[];
-                for (int j = 0; j < items.Length; j++)
+                foreach (var child in item.Particles)
                 {
-                    var child = items[j] as OrderedDictionary;
                     writer.WriteStartObject();
                     writer.WritePropertyName("Position");
-                    JsonExporter.Serialize(writer, child["InitialPosition"]);
+                    JsonExporter.Serialize(writer, child.InitialPosition);
                     writer.WritePropertyName("Mobility");
-                    JsonExporter.Serialize(writer, child["Mobility"]);
+                    writer.WriteNumberValue(child.Mobility);
                     writer.WritePropertyName("Delay");
-                    JsonExporter.Serialize(writer, child["Delay"]);
+                    writer.WriteNumberValue(child.Delay);
                     writer.WritePropertyName("Acceleration");
-                    JsonExporter.Serialize(writer, child["Acceleration"]);
+                    writer.WriteNumberValue(child.Acceleration);
                     writer.WritePropertyName("Radius");
-                    JsonExporter.Serialize(writer, child["Radius"]);
+                    writer.WriteNumberValue(child.Radius);
                     writer.WriteEndObject();
                 }
                 writer.WriteEndArray();
                 writer.WritePropertyName("Normalization");
-                JsonExporter.Serialize(writer, item["Normalization"]);
+                JsonExporter.Serialize(writer, item.Normalization);
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
@@ -821,7 +821,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string GetDisplayName(IPPtr<MonoBehaviour> ptr)
         {
-            var dict = ParseMonoBehavior(ptr);
+            var dict = Deserialize(ptr);
             if (dict == null)
             {
                 return null;
@@ -836,10 +836,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return name;
         }
 
-        private IPPtr<T>? ParseMonoBehavior<T>(IPPtr<MonoBehaviour> ptr)
+        private IPPtr<T>? GetChildToPPtr<T>(IPPtr<MonoBehaviour> ptr)
             where T : Object
         {
-            var data = ParseMonoBehavior(ptr);
+            var data = Deserialize(ptr);
             if (data is null || !ptr.TryGet(out var behaviour))
             {
                 return null;
@@ -857,7 +857,28 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return res;
         }
 
-        private OrderedDictionary? ParseMonoBehavior(IPPtr<MonoBehaviour> ptr)
+        private OrderedDictionary? Deserialize(IPPtr<MonoBehaviour> ptr)
+        {
+            var doc = GetTypeNode(ptr);
+            if (doc is null)
+            {
+                return null;
+            }
+            return _converter.Read(doc, ptr.Resource.OpenRead(ptr.Index));
+        }
+        private T? Deserialize<T>(IPPtr<MonoBehaviour> ptr)
+            where T : MonoBehaviour, new()
+        {
+            var doc = GetTypeNode(ptr);
+            if (doc is null)
+            {
+                return default;
+            }
+            var instance = new T();
+            _converter.Read(doc, ptr.Resource.OpenRead(ptr.Index), instance);
+            return instance;
+        }
+        private VirtualDocument GetTypeNode(IPPtr<MonoBehaviour> ptr)
         {
             var doc = ptr.Resource.GetType(ptr.Index);
             if (doc is null)
@@ -868,11 +889,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 doc = BehaviorExporter.ConvertToTypeTree(behaviour, _assembly, _resource);
             }
-            if (doc is null)
-            {
-                return null;
-            }
-            return _converter.Read(doc, ptr.Resource.OpenRead(ptr.Index));
+            return doc;
         }
 
         private static string GetFieldName(MonoBehaviour behaviour)

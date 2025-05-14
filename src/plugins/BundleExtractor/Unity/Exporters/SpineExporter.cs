@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -8,16 +12,44 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class SpineExporter(int entryId, ISerializedFile resource) : IMultipartExporter
+    internal class SpineExporter : IMultipartExporter
     {
-        public string FileName => resource[entryId].Name;
-        public string SourcePath => resource.FullPath;
+        public SpineExporter(IPPtr<GameObject> ptr)
+            : this(ptr.Index, (ISerializedFile)ptr.Resource)
+        {
+        }
+        public SpineExporter(int entryId, ISerializedFile resource)
+        {
+            _entryId = entryId;
+            _resource = resource;
+            _assembly = _resource.Container!.Assembly;
+            _converter = new(resource);
+            var obj = _resource[_entryId] as GameObject;
+            Debug.Assert(obj is not null);
+            FileName = obj.Name ?? string.Empty;
+            Initialize(obj);
+        }
+
+  
+
+        private readonly DocumentReader _converter;
+        private readonly IAssemblyReader _assembly;
+        private readonly int _entryId;
+        private readonly ISerializedFile _resource;
+
+        public string FileName { get; private set; }
+        public string SourcePath => _resource.FullPath;
 
         public bool IsEmpty => false;
 
+
+        private void Initialize(GameObject game)
+        {
+        }
+
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            if (resource[entryId] is not TextAsset asset)
+            if (_resource[_entryId] is not TextAsset asset)
             {
                 return;
             }

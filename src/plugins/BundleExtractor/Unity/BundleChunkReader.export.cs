@@ -99,19 +99,19 @@ namespace ZoDream.BundleExtractor
         private bool PreExport(int entryId, ISerializedFile resource)
         {
             if (resource[entryId] is not MonoBehaviour behaviour 
-                || !behaviour.Script.TryGet(out var script) || behaviour.GameObject?.FileID != 0)
+                || !behaviour.Script.TryGet(out var script) 
+                || behaviour.GameObject?.Index < 0)
             {
                 return false;
             }
-            var gameIndex = resource.IndexOf(behaviour.GameObject.PathID);
             if (script.ClassName.StartsWith("Cubism"))
             {
-                _exporterItems.Add(new CubismExporter(gameIndex, resource));
+                _exporterItems.Add(new CubismExporter(behaviour.GameObject));
                 return true;
             }
             if (script.ClassName.StartsWith("Spine"))
             {
-                _exporterItems.Add(new SpineExporter(gameIndex, resource));
+                _exporterItems.Add(new SpineExporter(behaviour.GameObject));
                 return true;
             }
             return false;

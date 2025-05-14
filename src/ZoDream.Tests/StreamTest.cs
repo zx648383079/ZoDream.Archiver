@@ -66,7 +66,7 @@ namespace ZoDream.Tests
             Assert.IsTrue(res);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void TestSpv()
         {
             var fileName = "F:\\apk\\zmxs\\mesh.bin";
