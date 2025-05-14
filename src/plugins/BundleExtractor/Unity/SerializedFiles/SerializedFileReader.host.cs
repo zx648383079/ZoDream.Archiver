@@ -88,7 +88,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// 添加一个不需要导出
         /// </summary>
-        /// <param name="fileId"></param>
+        /// <param name="fileId">资源的编号</param>
         public void AddExclude(long fileId)
         {
             var index = IndexOf(fileId);
@@ -101,11 +101,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// 判断一个对象不需要导出
         /// </summary>
-        /// <param name="fileId"></param>
+        /// <param name="index">序号</param>
         /// <returns></returns>
-        public bool IsExclude(long fileId)
+        public bool IsExclude(int index)
         {
-            var index = IndexOf(fileId);
             if (index < 0)
             {
                 return false;

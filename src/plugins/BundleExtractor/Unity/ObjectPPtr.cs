@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
@@ -19,6 +20,7 @@ namespace ZoDream.BundleExtractor.Unity
             PathID = ptr.PathID;
             _resource = GetResource(resource, FileID);
         }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private ISerializedFile? _resource;
         /// <summary>
         /// 之后不在更新 _resource
@@ -26,10 +28,30 @@ namespace ZoDream.BundleExtractor.Unity
         public int FileID { get; private set; }
 
         public long PathID { get; private set; }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IResourceEntry? Resource => _resource;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public int Index => IsNotNull ? _resource.IndexOf(PathID) : -1;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public bool IsValid => Index >= 0 && _resource[Index] is T;
 
-        public int Index => _resource.IndexOf(PathID);
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsNotNull => PathID != 0 && FileID >= 0 && _resource is not null;
+#if DEBUG
+        public Object? Target => Index >= 0 ? _resource[Index] : null;
+#endif
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public bool IsExclude 
+        {
+            get => IsNotNull && _resource?.IsExclude(Index) == true;
+            set {
+                if (value && IsNotNull)
+                {
+                    _resource?.AddExclude(PathID);
+                }
+            }
+        }
 
         public IPPtr<K> Create<K>(IPPtr ptr) where K : Object
         {

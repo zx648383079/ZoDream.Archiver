@@ -46,5 +46,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             JsonSerializer.Serialize(writer, data, Options);
         }
+        public static string Serialize(object? data)
+        {
+            return JsonSerializer.Serialize(data, Options);
+        }
     }
 }

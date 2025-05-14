@@ -114,7 +114,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 _avatar = m_Avatar;
             }
-            resource.AddExclude(animator.GameObject.PathID);
+            animator.GameObject.IsExclude = true;
             if (animator.GameObject.TryGet(out var game))
             {
                 InitWithGameObject(game, animator.HasTransformHierarchy);

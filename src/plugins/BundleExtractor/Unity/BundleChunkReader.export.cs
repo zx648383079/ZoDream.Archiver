@@ -36,9 +36,12 @@ namespace ZoDream.BundleExtractor
             var progress = Logger?.CreateSubProgress("Batch Export ...", _exporterItems.Count);
             foreach (var exporter in _exporterItems)
             {
-                exporter.SaveAs(_fileItems.Create(FileNameHelper.Create(exporter.SourcePath,
+                if(!exporter.IsEmpty)
+                {
+                    exporter.SaveAs(_fileItems.Create(FileNameHelper.Create(exporter.SourcePath,
                             exporter.FileName
                         ), folder), mode);
+                }
                 exporter.Dispose();
             }
             _exporterItems.Clear();
@@ -52,11 +55,12 @@ namespace ZoDream.BundleExtractor
                         Logger?.Info("Exporting assets has been cancelled !!");
                         return;
                     }
-                    var info = asset.Get(i);
-                    if (asset.IsExclude(info.FileID))
+                    
+                    if (asset.IsExclude(i))
                     {
                         continue;
                     }
+                    var info = asset.Get(i);
                     try
                     {
                         var obj = asset[i];
@@ -98,6 +102,10 @@ namespace ZoDream.BundleExtractor
         /// <returns></returns>
         private bool PreExport(int entryId, ISerializedFile resource)
         {
+            if (resource.IsExclude(entryId))
+            {
+                return false;
+            }
             if (resource[entryId] is not MonoBehaviour behaviour 
                 || !behaviour.Script.TryGet(out var script) 
                 || behaviour.GameObject?.Index < 0)
@@ -109,7 +117,7 @@ namespace ZoDream.BundleExtractor
                 _exporterItems.Add(new CubismExporter(behaviour.GameObject));
                 return true;
             }
-            if (script.ClassName.StartsWith("Spine"))
+            if (script.NameSpace.StartsWith("Spine."))
             {
                 _exporterItems.Add(new SpineExporter(behaviour.GameObject));
                 return true;

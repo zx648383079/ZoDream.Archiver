@@ -1,14 +1,16 @@
-﻿using Mono.Cecil;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
+using System.IO;
 using System.Text;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.BundleExtractor.Unity.Spine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
+using static ZoDream.BundleExtractor.Unity.Spine.SpineSkeletonDataAsset;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -30,8 +32,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             Initialize(obj);
         }
 
-  
-
         private readonly DocumentReader _converter;
         private readonly IAssemblyReader _assembly;
         private readonly int _entryId;
@@ -39,21 +39,137 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public string FileName { get; private set; }
         public string SourcePath => _resource.FullPath;
+        public bool IsEmpty => _skeleton is null;
 
-        public bool IsEmpty => false;
-
+        private IPPtr<TextAsset>? _skeleton;
+        private readonly HashSet<IPPtr<Shader>> _shaders = [];
+        private readonly HashSet<IPPtr<Texture2D>> _textures = [];
+        private readonly HashSet<IPPtr<TextAsset>> _atlases = [];
 
         private void Initialize(GameObject game)
         {
+            foreach (var pptr in game.Components)
+            {
+                pptr.IsExclude = true;
+                if (!pptr.TryGet(out var instance))
+                {
+                    continue;
+                }
+                if (instance is not MonoBehaviour behaviour)
+                {
+                    continue;
+                }
+                if (!behaviour.Script.TryGet(out var script))
+                {
+                    continue;
+                }
+                var data = BehaviorExporter.Deserialize<SpineSkeletonGraphic>(pptr.Create<MonoBehaviour>(pptr), _assembly, _converter);
+                AddMaterial(data.AdditiveMaterial);
+                AddMaterial(data.MultiplyMaterial);
+                AddMaterial(data.Material);
+                data.SkeletonDataAsset.IsExclude = true;
+                var asset = BehaviorExporter.Deserialize<SpineSkeletonDataAsset>(data.SkeletonDataAsset, _assembly, _converter);
+                if (asset.SkeletonJSON?.IsNotNull == true)
+                {
+                    asset.SkeletonJSON.IsExclude = true;
+                    _skeleton = asset.SkeletonJSON;
+                }
+                AddMaterial(asset.BlendModeMaterials.MultiplyMaterials);
+                AddMaterial(asset.BlendModeMaterials.AdditiveMaterials);
+                AddMaterial(asset.BlendModeMaterials.ScreenMaterials);
+                foreach (var ptr in asset.AtlasAssets)
+                {
+                    if (!ptr.IsNotNull)
+                    {
+                        continue;
+                    }
+                    ptr.IsExclude = true;
+                    var item = BehaviorExporter.Deserialize<SpineAtlasAsset>(ptr, _assembly, _converter);
+                    AddMaterial(item.Materials);
+                    item.AtlasFile.IsExclude = true;
+                    if (item.AtlasFile?.IsNotNull == true)
+                    {
+                        _atlases.Add(item.AtlasFile);
+                    }
+                }
+            }
         }
-
-        public void SaveAs(string fileName, ArchiveExtractMode mode)
+        private void AddMaterial(SpineReplacementMaterial[] data)
         {
-            if (_resource[_entryId] is not TextAsset asset)
+            foreach (var item in data)
+            {
+                AddMaterial(item.Material);
+            }
+        }
+        private void AddMaterial(IPPtr<Material>[] items)
+        {
+            foreach (var item in items)
+            {
+                AddMaterial(item);
+            }
+        }
+        private void AddMaterial(IPPtr<Material> ptr)
+        {
+            if (ptr?.IsNotNull != true)
             {
                 return;
             }
-            SaveAs(asset, fileName, mode);
+            if (!ptr.TryGet(out var material))
+            {
+                return;
+            }
+            material.Shader.IsExclude = true;
+            if (material.Shader.IsNotNull == true)
+            {
+                _shaders.Add(material.Shader);
+            }
+            foreach (var item in material.SavedProperties.TexEnvs)
+            {
+                var pptr = item.Value.Texture;
+                pptr.IsExclude = true;
+                if (ptr.IsValid)
+                {
+                    _textures.Add(pptr.Create<Texture2D>(pptr));
+                }
+            }
+        }
+  
+        public void SaveAs(string fileName, ArchiveExtractMode mode)
+        {
+            if (IsEmpty)
+            {
+                return;
+            }
+            var folder = fileName;
+            var baseFileName = Path.Combine(folder, FileName);
+            if (_skeleton.TryGet(out var asset))
+            {
+                SaveAs(asset, baseFileName, mode);
+            }
+            foreach (var ptr in _shaders)
+            {
+                var exporter = new ShaderExporter(ptr.Index, (ISerializedFile)ptr.Resource);
+                exporter.SaveAs(Path.Combine(folder, 
+                    string.IsNullOrWhiteSpace(exporter.FileName) ? ptr.PathID.ToString() : exporter.FileName
+                    ), mode);
+            }
+            foreach (var ptr in _textures)
+            {
+                var exporter = new TextureExporter(ptr.Index, (ISerializedFile)ptr.Resource);
+                exporter.SaveAs(Path.Combine(folder, exporter.FileName), mode);
+            }
+            foreach (var ptr in _atlases)
+            {
+                if (!ptr.TryGet(out asset) || !LocationStorage.TryCreate(Path.Combine(folder, asset.Name), ".atlas", mode, out fileName))
+                {
+                    continue;
+                }
+                asset.Script.SaveAs(fileName);
+            }
+        }
+
+        public void Dispose()
+        {
         }
         public static void SaveAs(TextAsset asset, string fileName, ArchiveExtractMode mode)
         {
@@ -78,8 +194,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return buffer[0] == '{' && buffer.IndexOf(Encoding.ASCII.GetBytes("\"skeleton\"")) > 0;
         }
 
-        public void Dispose()
-        {
-        }
+
     }
 }

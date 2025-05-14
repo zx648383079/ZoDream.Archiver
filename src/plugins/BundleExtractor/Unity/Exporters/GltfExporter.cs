@@ -141,7 +141,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 _avatar = m_Avatar;
             }
-            _resource.AddExclude(animator.GameObject.PathID);
+            animator.GameObject.IsExclude = true;
             if (animator.GameObject.TryGet(out var game))
             {
                 AddGame(game);
@@ -176,7 +176,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void AddMeshRenderer(Transform transform, int meshParent = -1)
         {
-            _resource.AddExclude(transform.GameObject.PathID);
+            transform.GameObject.IsExclude = true;
             if (transform.GameObject.TryGet(out var game))
             {
                 foreach (var item in GameObjectConverter.ForEach<Component>(game))
@@ -218,7 +218,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             foreach (var pptr in transform.Children)
             {
-                _resource.AddExclude(pptr.PathID);
+                pptr.IsExclude = true;
                 if (pptr.TryGet(out var child))
                 {
                     AddMeshRenderer(child, meshParent);

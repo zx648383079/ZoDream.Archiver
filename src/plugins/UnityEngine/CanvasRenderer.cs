@@ -1,6 +1,6 @@
 ﻿namespace UnityEngine
 {
-    public class Texture : Object
+    public class CanvasRenderer : Object
     {
     }
 }

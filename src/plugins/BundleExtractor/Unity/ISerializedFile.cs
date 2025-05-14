@@ -32,14 +32,14 @@ namespace ZoDream.BundleExtractor.Unity
         /// <summary>
         /// 添加一个不需要导出
         /// </summary>
-        /// <param name="fileId"></param>
+        /// <param name="fileId">资源的编号</param>
         public void AddExclude(long fileId);
         /// <summary>
         /// 判断一个对象不需要导出
         /// </summary>
-        /// <param name="fileId"></param>
+        /// <param name="index">序号</param>
         /// <returns></returns>
-        public bool IsExclude(long fileId);
+        public bool IsExclude(int index);
 
         public new Object? this[int index] { get; set; }
   

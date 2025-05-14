@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using UnityEngine;
-using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.Live2d;
@@ -71,14 +69,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     continue;
                 }
-                _resource.AddExclude(item.GameObject.PathID);
+                item.GameObject.IsExclude = true;
                 if (item == transform)
                 {
                     FileName = obj.Name ?? string.Empty;
                 }
                 foreach (var pptr in obj.Components)
                 {
-                    _resource.AddExclude(pptr.PathID);
+                    pptr.IsExclude = true;
                     if (!pptr.TryGet(out var instance))
                     {
                         continue;
@@ -168,7 +166,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void GetFadeList(IPPtr<MonoBehaviour> ptr)
         {
-            var data = Deserialize(ptr); // CubismFadeMotionList
+            var data = BehaviorExporter.Deserialize(ptr, _assembly, _converter); // CubismFadeMotionList
             if (data["CubismFadeMotionObjects"] is not object[] items)
             {
                 return;
@@ -186,7 +184,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            var data = Deserialize(pptr);
+            var data = BehaviorExporter.Deserialize(pptr, _assembly, _converter);
             if (data["CubismExpressionObjects"] is not object[] items)
             {
                 return;
@@ -298,7 +296,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    var data = Deserialize<CubismFadeMotionData>(ptr);
+                    var data = BehaviorExporter.Deserialize<CubismFadeMotionData>(ptr, _assembly, _converter);
                     if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".motion3.json", mode, out fileName))
                     {
                         continue;
@@ -342,7 +340,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    var data = Deserialize<CubismExpressionData>(ptr);
+                    var data = BehaviorExporter.Deserialize<CubismExpressionData>(ptr, _assembly, _converter);
                     if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".exp3.json", mode, out fileName))
                     {
                         continue;
@@ -650,7 +648,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     continue;
                 }
-                var data = Deserialize(ptr);
+                var data = BehaviorExporter.Deserialize(ptr, _assembly, _converter);
                 if (data is null)
                 {
                     continue;
@@ -693,7 +691,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private void SavePhysics(Utf8JsonWriter writer)
         {
-            var res = Deserialize<CubismPhysics>(_physics)?.Rig;
+            var res = BehaviorExporter.Deserialize<CubismPhysics>(_physics, _assembly, _converter)?.Rig;
             if (res is null)
             {
                 return;
@@ -821,7 +819,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private string GetDisplayName(IPPtr<MonoBehaviour> ptr)
         {
-            var dict = Deserialize(ptr);
+            var dict = BehaviorExporter.Deserialize(ptr, _assembly, _converter);
             if (dict == null)
             {
                 return null;
@@ -839,7 +837,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private IPPtr<T>? GetChildToPPtr<T>(IPPtr<MonoBehaviour> ptr)
             where T : Object
         {
-            var data = Deserialize(ptr);
+            var data = BehaviorExporter.Deserialize(ptr, _assembly, _converter);
             if (data is null || !ptr.TryGet(out var behaviour))
             {
                 return null;
@@ -857,40 +855,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             return res;
         }
 
-        private OrderedDictionary? Deserialize(IPPtr<MonoBehaviour> ptr)
-        {
-            var doc = GetTypeNode(ptr);
-            if (doc is null)
-            {
-                return null;
-            }
-            return _converter.Read(doc, ptr.Resource.OpenRead(ptr.Index));
-        }
-        private T? Deserialize<T>(IPPtr<MonoBehaviour> ptr)
-            where T : MonoBehaviour, new()
-        {
-            var doc = GetTypeNode(ptr);
-            if (doc is null)
-            {
-                return default;
-            }
-            var instance = new T();
-            _converter.Read(doc, ptr.Resource.OpenRead(ptr.Index), instance);
-            return instance;
-        }
-        private VirtualDocument GetTypeNode(IPPtr<MonoBehaviour> ptr)
-        {
-            var doc = ptr.Resource.GetType(ptr.Index);
-            if (doc is null)
-            {
-                if (_resource[ptr.Index] is not MonoBehaviour behaviour)
-                {
-                    return null;
-                }
-                doc = BehaviorExporter.ConvertToTypeTree(behaviour, _assembly, _resource);
-            }
-            return doc;
-        }
 
         private static string GetFieldName(MonoBehaviour behaviour)
         {

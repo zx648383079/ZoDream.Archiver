@@ -7,7 +7,6 @@ namespace ZoDream.SourceGenerator
 {
     public class TypeNodeReader(Stream input)
     {
-
         public VirtualDocument Read()
         {
             var doc = JsonDocument.Parse(input);

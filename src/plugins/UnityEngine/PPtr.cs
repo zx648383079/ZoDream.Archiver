@@ -52,13 +52,24 @@ namespace UnityEngine
     public interface IPPtr<T> : IPPtr
         where T : Object
     {
+        /// <summary>
+        /// 从 FileID PathID 判断是否为空
+        /// </summary>
         public bool IsNotNull { get; }
+        /// <summary>
+        /// 判断已读取的是否是T
+        /// </summary>
+        public bool IsValid { get; }
         [MemberNotNullWhen(true, nameof(IsNotNull))]
         public IResourceEntry? Resource { get; }
         /// <summary>
         /// 获取在 Resource 中的序号
         /// </summary>
         public int Index { get; }
+        /// <summary>
+        /// 是否已排除，不能移除
+        /// </summary>
+        public bool IsExclude { get; set; }
 
         public bool TryGet([NotNullWhen(true)] out T? instance);
         public bool TryGet<K>([NotNullWhen(true)] out K? instance);

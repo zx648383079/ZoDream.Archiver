@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
@@ -82,7 +83,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public override readonly string ToString()
         {
-            return $"{ClassID}[{FileID}]";
+            return $"{(NativeClassID)ClassID}[{FileID}]";
         }
 
         public readonly SerializedType? GetSerializedType(ReadOnlySpan<SerializedType> types)
