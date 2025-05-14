@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
+using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -38,16 +42,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         private IPPtr<MonoBehaviour>? _moc;
         private IPPtr<MonoBehaviour>? _physics;
-        private readonly List<IPPtr<MonoBehaviour>> _poseParts = [];
-        private readonly List<IPPtr<MonoBehaviour>> _parametersCdi = [];
+        private readonly HashSet<IPPtr<MonoBehaviour>> _poseParts = [];
+        private readonly HashSet<IPPtr<MonoBehaviour>> _parametersCdi = [];
         private HashSet<string> _eyeBlinkParameters = [];
         private HashSet<string> _lipSyncParameters = [];
         private readonly HashSet<string> _parameterNames = [];
         private readonly HashSet<string> _partNames = [];
-        private readonly List<IPPtr<MonoBehaviour>> _partsCdi = [];
-        private readonly List<IPPtr<MonoBehaviour>> _motions = [];
-        private readonly List<IPPtr<MonoBehaviour>> _expressions = [];
-        private readonly List<IPPtr<Texture2D>> _textures = [];
+        private readonly HashSet<IPPtr<MonoBehaviour>> _partsCdi = [];
+        private readonly HashSet<IPPtr<MonoBehaviour>> _motions = [];
+        private readonly HashSet<IPPtr<MonoBehaviour>> _expressions = [];
+        private readonly HashSet<IPPtr<Texture2D>> _textures = [];
 
         private void Initialize(GameObject game)
         {
@@ -199,11 +203,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return;
             }
             // Texture2D
-            if (!_textures.Contains(res))
-            {
-                _textures.Add(res);
-            }
-            
+            _textures.Add(res);
         }
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
@@ -240,7 +240,27 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             if (_textures.Count > 0)
             {
                 writer.WritePropertyName("Textures");
-                writer.WriteStringValue(Path.GetFileName(fileName));
+                writer.WriteStartArray();
+                var childFolder = Path.Combine(folder, "textures");
+                foreach (var ptr in _textures)
+                {
+                    if (!ptr.TryGet(out var texture))
+                    {
+                        continue;
+                    }
+                    if (!LocationStorage.TryCreate(Path.Combine(childFolder, texture.Name), ".png", mode, out fileName))
+                    {
+                        continue;
+                    }
+                    using var image = TextureExporter.ToImage(texture, ptr.Resource, true);
+                    if (image is null)
+                    {
+                        continue;
+                    }
+                    image.SaveAs(fileName);
+                    writer.WriteStringValue($"textures/{Path.GetFileName(fileName)}");
+                }
+                writer.WriteEndArray();
             }
            
 
@@ -253,12 +273,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             if (_poseParts.Count > 0 && LocationStorage.TryCreate(baseFileName, ".pose3.json", mode, out fileName))
             {
+                using var sb = JsonExporter.OpenWrite(fileName);
+                SavePose(sb);
                 writer.WritePropertyName("Pose");
                 writer.WriteStringValue(Path.GetFileName(fileName));
             }
             if ((_parametersCdi.Count > 0 || _partsCdi.Count > 0)
                 && LocationStorage.TryCreate(baseFileName, ".cdi3.json", mode, out fileName))
             {
+                using var sb = JsonExporter.OpenWrite(fileName);
+                SavCdi(sb);
                 writer.WritePropertyName("DisplayInfo");
                 writer.WriteStringValue(Path.GetFileName(fileName));
             }
@@ -278,10 +302,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    if (!LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".exp3.json", mode, out fileName))
+                    var data = ParseMonoBehavior(ptr);
+                    if (data is null || !LocationStorage.TryCreate(Path.Combine(childFolder, behaviour.Name), ".exp3.json", mode, out fileName))
                     {
                         continue;
                     }
+                    using var sb = JsonExporter.OpenWrite(fileName);
+                    SaveExpression(sb, data);
                     writer.WriteStartObject();
                     writer.WritePropertyName("Name");
                     writer.WritePropertyName("File");
@@ -335,6 +362,140 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteEndObject();
             }
 
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        private void SaveExpression(Utf8JsonWriter writer, OrderedDictionary data)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("Type");
+            writer.WriteStringValue(data["Type"].ToString());
+            writer.WritePropertyName("FadeInTime");
+            writer.WriteNumberValue((float)data["FadeInTime"]);
+            writer.WritePropertyName("FadeOutTime");
+            writer.WriteNumberValue((float)data["FadeOutTime"]);
+            writer.WritePropertyName("Parameters");
+            writer.WriteStartArray();
+            foreach (var item in (data["Parameters"] as object[]).Cast<OrderedDictionary>())
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue(data["Id"].ToString());
+                writer.WritePropertyName("Value");
+                writer.WriteNumberValue((float)data["Value"]);
+                writer.WritePropertyName("Blend");
+                writer.WriteStringValue(data["Blend"].ToString());
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+            writer.WriteEndObject();
+        }
+
+        private void SavCdi(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("Version");
+            writer.WriteNumberValue(3);
+            writer.WritePropertyName("ParameterGroups");
+            writer.WriteStartArray();
+            writer.WriteEndArray();
+
+            writer.WritePropertyName("Parameters");
+            writer.WriteStartArray();
+            foreach (var ptr in _parametersCdi)
+            {
+                if (!ptr.TryGet(out var behaviour) || !behaviour.GameObject.TryGet(out var game))
+                {
+                    continue;
+                }
+                var displayName = GetDisplayName(ptr);
+                if (displayName is null)
+                {
+                    continue;
+                }
+                writer.WriteStartObject();
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue(game.Name);
+                writer.WritePropertyName("GroupId");
+                writer.WriteStringValue(string.Empty);
+                writer.WritePropertyName("Name");
+                writer.WriteStringValue(displayName);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+            writer.WritePropertyName("Parts");
+            writer.WriteStartArray();
+            foreach (var ptr in _partsCdi)
+            {
+                if (!ptr.TryGet(out var behaviour) || !behaviour.GameObject.TryGet(out var game))
+                {
+                    continue;
+                }
+                var displayName = GetDisplayName(ptr);
+                if (displayName is null)
+                {
+                    continue;
+                }
+                writer.WriteStartObject();
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue(game.Name);
+                writer.WritePropertyName("Name");
+                writer.WriteStringValue(displayName);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        private void SavePose(Utf8JsonWriter writer)
+        {
+            var groupDict = new SortedDictionary<int, List<KeyValuePair<string, string[]>>>();
+            foreach (var ptr in _poseParts)
+            {
+                if (!ptr.TryGet(out var behaviour) || !behaviour.GameObject.TryGet(out var game))
+                {
+                    continue;
+                }
+                var data = ParseMonoBehavior(ptr);
+                if (data is null)
+                {
+                    continue;
+                }
+                var node = new KeyValuePair<string, string[]>(game.Name, 
+                    Array.ConvertAll((object[])data["Link"], x => x?.ToString()));
+                var groupIndex = (int)data["GroupIndex"];
+                if (groupDict.ContainsKey(groupIndex))
+                {
+                    groupDict[groupIndex].Add(node);
+                }
+                else
+                {
+                    groupDict.Add(groupIndex, [node]);
+                }
+            }
+
+            writer.WriteStartObject();
+            writer.WritePropertyName("Type");
+            writer.WriteStringValue("Live2D Pose");
+            writer.WritePropertyName("Groups");
+            writer.WriteStartArray();
+            foreach (var items in groupDict.Values)
+            {
+                writer.WriteStartArray();
+                foreach (var item in items)
+                {
+                    writer.WriteStartObject();
+                    writer.WritePropertyName("Id");
+                    writer.WriteStringValue(item.Key);
+                    writer.WritePropertyName("Link");
+                    JsonExporter.Serialize(writer, item.Value);
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+            }
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
@@ -470,6 +631,23 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void Dispose()
         {
+        }
+
+        private string GetDisplayName(IPPtr<MonoBehaviour> ptr)
+        {
+            var dict = ParseMonoBehavior(ptr);
+            if (dict == null)
+            {
+                return null;
+            }
+
+            var name = (string)dict["Name"];
+            if (dict.Contains("DisplayName"))
+            {
+                var displayName = (string)dict["DisplayName"];
+                name = displayName != "" ? displayName : name;
+            }
+            return name;
         }
 
         private IPPtr<T>? ParseMonoBehavior<T>(IPPtr<MonoBehaviour> ptr)

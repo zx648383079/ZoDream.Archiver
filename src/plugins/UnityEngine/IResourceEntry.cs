@@ -9,6 +9,8 @@ namespace UnityEngine
         public int Count { get; }
         public Object? this[int index] { get; }
 
+        public Version Version { get; }
+
         public int IndexOf(long pathID);
         public int IndexOf(Object obj);
 

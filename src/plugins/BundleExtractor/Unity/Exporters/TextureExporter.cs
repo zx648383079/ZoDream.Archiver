@@ -39,9 +39,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            using var image = ToImage(texture, resource);
-            using var target = image?.Flip(false);
-            target?.SaveAs(fileName);
+            using var image = ToImage(texture, resource, true);
+            image?.SaveAs(fileName);
         }
 
         private void SaveAs(Sprite sprite, string fileName, ArchiveExtractMode mode)
@@ -53,8 +52,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             using var image = GetImage(sprite);
             image?.SaveAs(fileName);
         }
-
-        public static SKImage? ToImage(Texture2D res, ISerializedFile resource)
+        /// <summary>
+        /// 转换成图片
+        /// </summary>
+        /// <param name="res"></param>
+        /// <param name="resource"></param>
+        /// <param name="flip">是否应用翻转</param>
+        /// <returns></returns>
+        public static SKImage? ToImage(Texture2D res, IResourceEntry resource, bool flip = false)
         {
             if (res.ImageData is null)
             {
@@ -63,7 +68,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             res.ImageData.Position = 0;
             var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
                 res.Height, res.TextureFormat, resource.Version);
-            return data?.ToImage();
+            var image = data?.ToImage();
+            if (!flip || image == null)
+            {
+                return image;
+            }
+            var next = image.Flip(false);
+            image.Dispose();
+            return next;
         }
 
         #region CutImage

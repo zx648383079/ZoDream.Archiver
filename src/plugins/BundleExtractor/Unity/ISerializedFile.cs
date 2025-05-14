@@ -5,7 +5,6 @@ using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 using Object = UnityEngine.Object;
-using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity
 {
@@ -18,7 +17,6 @@ namespace ZoDream.BundleExtractor.Unity
 
         public FormatVersion Format { get; }
 
-        public Version Version { get; }
         public BuildTarget Platform { get; }
         public IList<string> Dependencies { get; }
         public string GetDependency(int index);
