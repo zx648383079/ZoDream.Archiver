@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.ViewModel;
@@ -19,10 +20,10 @@ namespace ZoDream.Archiver.ViewModels
     {
         public CompressViewModel()
         {
-            AddCommand = new RelayCommand(TapAdd);
-            AddFolderCommand = new RelayCommand(TapAddFolder);
-            DeleteCommand = new RelayCommand(TapDelete);
-            SaveCommand = new RelayCommand(TapSaveAs);
+            AddCommand = UICommand.Add(TapAdd);
+            AddFolderCommand = UICommand.AddFolder(TapAddFolder);
+            DeleteCommand = UICommand.Delete(TapDelete);
+            SaveCommand = UICommand.Save(TapSaveAs);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
         }
 

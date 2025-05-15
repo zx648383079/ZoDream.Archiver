@@ -29,28 +29,10 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <CommandBar HorizontalAlignment="Left" Background="Transparent">
-            <AppBarButton
-                Command="{Binding AddCommand}"
-                Icon="Add"
-                Label="Add"
-                ToolTipService.ToolTip="Add files" />
-            <AppBarButton
-                Command="{Binding AddFolderCommand}"
-                Icon="OpenLocal"
-                Label="Add Folder"
-                ToolTipService.ToolTip="Add folder" />
-            <AppBarButton
-                Command="{Binding SaveCommand}"
-                Icon="Save"
-                Label="Extract To">
-                <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="S" Modifiers="Control" />
-                </AppBarButton.KeyboardAccelerators>
-            </AppBarButton>
-            <AppBarButton
-                Command="{Binding ViewCommand}"
-                Icon="View"
-                Label="View" />
+            <AppBarButton Command="{Binding AddCommand}" />
+            <AppBarButton Command="{Binding AddFolderCommand}" />
+            <AppBarButton Command="{Binding SaveCommand}" />
+            <AppBarButton Command="{Binding ViewCommand}" />
             <AppBarToggleButton
                 IsChecked="{Binding IsMultipleSelect, Mode=TwoWay}"
                 Label="Multiple Select"
@@ -60,30 +42,11 @@
                 </AppBarToggleButton.Icon>
             </AppBarToggleButton>
             <AppBarButton Command="{Binding DeleteCommand}" />
-            <AppBarButton
-                Command="{Binding SettingCommand}"
-                Icon="Setting"
-                Label="Setting"
-                ToolTipService.ToolTip="System settings" />
+            <AppBarButton Command="{Binding SettingCommand}" />
             <CommandBar.SecondaryCommands>
-                <AppBarButton
-                    Command="{Binding ExplorerCommand}"
-                    Icon="Link"
-                    Label="资源目录"
-                    ToolTipService.ToolTip="根据依赖文件生成资源索引" />
-                <AppBarButton
-                    Command="{Binding CodeCommand}"
-                    Label="代码转化"
-                    ToolTipService.ToolTip="根据相关文件进行解析代码生成">
-                    <AppBarButton.Icon>
-                        <FontIcon Glyph="&#xE943;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
-                <AppBarButton
-                    Command="{Binding LogCommand}"
-                    Icon="CalendarDay"
-                    Label="日志文件"
-                    ToolTipService.ToolTip="查看日志文件" />
+                <AppBarButton Command="{Binding ExplorerCommand}" />
+                <AppBarButton Command="{Binding CodeCommand}" />
+                <AppBarButton Command="{Binding LogCommand}" />
             </CommandBar.SecondaryCommands>
         </CommandBar>
         <ListView

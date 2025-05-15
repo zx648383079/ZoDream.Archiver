@@ -25,31 +25,12 @@
         </Grid.RowDefinitions>
         <CommandBar HorizontalAlignment="Left" Background="Transparent">
             <AppBarButton Command="{Binding BackCommand}" Visibility="{Binding CanGoBack, Converter={StaticResource ToggleCvt}}" />
-            <AppBarButton
-                Command="{Binding AddCommand}"
-                Icon="Add"
-                Label="Add" />
-            <AppBarButton
-                Command="{Binding AddFolderCommand}"
-                Icon="OpenLocal"
-                Label="Add Folder" />
-            <AppBarButton
-                Command="{Binding SaveCommand}"
-                Icon="Save"
-                Label="Extract To">
-                <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="S" Modifiers="Control" />
-                </AppBarButton.KeyboardAccelerators>
-            </AppBarButton>
-            <AppBarButton
-                Command="{Binding ViewCommand}"
-                Icon="View"
-                Label="View" />
+            <AppBarButton Command="{Binding AddCommand}" />
+            <AppBarButton Command="{Binding AddFolderCommand}" />
+            <AppBarButton Command="{Binding SaveCommand}" />
+            <AppBarButton Command="{Binding ViewCommand}" />
             <AppBarButton Command="{Binding DeleteCommand}" />
-            <AppBarButton
-                Command="{Binding SettingCommand}"
-                Icon="Setting"
-                Label="Setting" />
+            <AppBarButton Command="{Binding SettingCommand}" />
         </CommandBar>
         <ListView
             Grid.Row="1"

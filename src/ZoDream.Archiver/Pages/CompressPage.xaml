@@ -23,30 +23,10 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <CommandBar HorizontalAlignment="Left" Background="Transparent">
-            <AppBarButton
-                Command="{Binding AddCommand}"
-                Icon="Add"
-                Label="Add" />
-            <AppBarButton
-                Command="{Binding AddFolderCommand}"
-                Icon="OpenLocal"
-                Label="Add Folder" />
-            <AppBarButton
-                Command="{Binding SaveCommand}"
-                Icon="Save"
-                Label="Save As">
-                <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="S" Modifiers="Control" />
-                </AppBarButton.KeyboardAccelerators>
-            </AppBarButton>
-            <AppBarButton
-                Command="{Binding DeleteCommand}"
-                Icon="Delete"
-                Label="Delete">
-                <AppBarButton.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="Delete" />
-                </AppBarButton.KeyboardAccelerators>
-            </AppBarButton>
+            <AppBarButton Command="{Binding AddCommand}" />
+            <AppBarButton Command="{Binding AddFolderCommand}" />
+            <AppBarButton Command="{Binding SaveCommand}" />
+            <AppBarButton Command="{Binding DeleteCommand}" />
         </CommandBar>
         <ListView
             Grid.Row="1"

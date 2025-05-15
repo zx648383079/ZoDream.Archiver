@@ -7,16 +7,29 @@
     xmlns:cvt="using:ZoDream.Archiver.Converters"
     xmlns:ivy="using:Microsoft.Xaml.Interactivity">
 
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-
+    <cvt:SizeConverter x:Key="SizeCvt" />
+    <cvt:ToggleConverter x:Key="ToggleCvt" />
     <cvt:IconConverter x:Key="IconCvt" />
     <cvt:StatusConverter x:Key="StatusCvt" />
     <cvt:DateTimeConverter x:Key="DateCvt" />
     <cvt:SpeedConverter x:Key="SpeedCvt" />
 
     <x:Double x:Key="MetaGap">16</x:Double>
+    <Style x:Name="HeaderIcon" TargetType="FontIcon">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Name="MetaLabelStyle" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="FontSize" Value="{StaticResource MetaFontSize}" />
+        <Setter Property="Foreground" Value="{ThemeResource SecondaryTextBrush}" />
+    </Style>
+    <Style x:Name="HeaderLabelStyle" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="FontWeight" Value="Black" />
+        <Setter Property="Foreground" Value="{ThemeResource BodyTextBrush}" />
+    </Style>
+
 
     <DataTemplate x:Key="DefaultTemaplate">
         <Grid Height="60">
@@ -24,12 +37,12 @@
                 <ColumnDefinition Width="48" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+            <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
                 <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
-                    <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
-                    <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
+                    <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                    <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
                 </StackPanel>
             </StackPanel>
         </Grid>
@@ -40,11 +53,11 @@
                 <ColumnDefinition Width="48" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+            <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
                 <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
-                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
             </StackPanel>
         </Grid>
     </DataTemplate>
@@ -59,7 +72,7 @@
                 </MenuFlyout>
             </UserControl.ContextFlyout>
             <Grid Height="60">
-                <SwipeControl x:Name="ListViewSwipeContainer">
+                <SwipeControl>
                     <SwipeControl.RightItems>
                         <SwipeItems Mode="Execute">
                             <SwipeItem Background="Red" Command="{Binding DeleteCommand}" />
@@ -70,13 +83,13 @@
                             <ColumnDefinition Width="48" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+                        <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                            <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
-                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding LastAt, Converter={StaticResource DateCvt}}" />
-                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
-                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding LastAt, Converter={StaticResource DateCvt}}" />
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel
@@ -119,6 +132,7 @@
     <Style x:Key="DownloadListBox" TargetType="ListBox">
         <Setter Property="ItemTemplateSelector" Value="{StaticResource ItemTemplateSelector}" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource FullListItem}" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
 </ResourceDictionary>

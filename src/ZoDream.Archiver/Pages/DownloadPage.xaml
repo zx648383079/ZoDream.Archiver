@@ -24,22 +24,13 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <CommandBar HorizontalAlignment="Left" Background="Transparent">
-            <AppBarButton
-                Command="{Binding AddCommand}"
-                Icon="Add"
-                Label="Add" />
+            <AppBarButton Command="{Binding AddCommand}" />
             <AppBarButton Command="{Binding PauseCommand}" />
             <AppBarButton Command="{Binding PlayCommand}" Label="Start" />
             <AppBarButton Command="{Binding StopCommand}" />
-            <AppBarButton
-                Command="{Binding ViewCommand}"
-                Icon="View"
-                Label="View" />
+            <AppBarButton Command="{Binding ViewCommand}" />
             <AppBarButton Command="{Binding DeleteCommand}" />
-            <AppBarButton
-                Command="{Binding SettingCommand}"
-                Icon="Setting"
-                Label="Setting" />
+            <AppBarButton Command="{Binding SettingCommand}" />
         </CommandBar>
         <ListBox
             Grid.Row="1"

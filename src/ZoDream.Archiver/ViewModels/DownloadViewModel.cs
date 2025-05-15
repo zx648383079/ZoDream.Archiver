@@ -1,11 +1,10 @@
-﻿using Microsoft.UI.Xaml.Input;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Windows.Storage;
+using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
-using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Net;
 using ZoDream.Shared.ViewModel;
 
@@ -16,26 +15,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public DownloadViewModel()
         {
-            AddCommand = new RelayCommand(TapAdd);
-            DeleteCommand = new StandardUICommand(StandardUICommandKind.Delete)
-            {
-                Command = new RelayCommand(TapDelete)
-            };
-            PlayCommand = new StandardUICommand(StandardUICommandKind.Play)
-            {
-                Command = new RelayCommand(TapPlay)
-            };
-            PauseCommand = new StandardUICommand(StandardUICommandKind.Pause)
-            {
-                Command = new RelayCommand(TapPause)
-            };
-            StopCommand = new StandardUICommand(StandardUICommandKind.Stop)
-            {
-                Command = new RelayCommand(TapStop)
-            };
+            AddCommand = UICommand.Add(TapAdd);
+            DeleteCommand = UICommand.Delete(TapDelete);
+            PlayCommand = UICommand.Play(TapPlay);
+            PauseCommand = UICommand.Pause(TapPause);
+            StopCommand = UICommand.Stop(TapStop);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
-            ViewCommand = new RelayCommand(TapView);
-            SettingCommand = new RelayCommand(TapSetting);
+            ViewCommand = UICommand.View(TapView);
+            SettingCommand = UICommand.Setting(TapSetting);
             Items.Add(new() { Name = "hh.zip" });
             Items.Add(new() { Name = "a.zip", Status = RequestStatus.Receiving, Length = 100, Value=40, Speed = 10 });
             Items.Add(new() { Name = "vh.zip", Status = RequestStatus.Finished });
@@ -52,9 +39,9 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _items, value);
         }
 
-        private IEntryItem[]? _selectedItems;
+        private object[]? _selectedItems;
 
-        public IEntryItem[]? SelectedItems {
+        public object[]? SelectedItems {
             get => _selectedItems;
             set => Set(ref _selectedItems, value);
         }

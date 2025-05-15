@@ -1,5 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Media;
@@ -19,25 +19,13 @@ namespace ZoDream.Archiver.ViewModels
     {
         public ExplorerViewModel()
         {
-            AddCommand = new RelayCommand(TapAdd);
-            AddFolderCommand = new RelayCommand(TapAddFolder);
-            DeleteCommand = new StandardUICommand(StandardUICommandKind.Delete)
-            {
-                Command = new RelayCommand(TapDelete)
-            };
-            SaveCommand = new StandardUICommand(StandardUICommandKind.Save) 
-            {
-                Command = new RelayCommand(TapSaveAs)
-            };
-            ViewCommand = new StandardUICommand(StandardUICommandKind.Open)
-            {
-                Command = new RelayCommand(TapView)
-            };
-            BackCommand = new StandardUICommand(StandardUICommandKind.Backward)
-            {
-                Command = new RelayCommand(TapBack)
-            };
-            SettingCommand = new RelayCommand(TapSetting);
+            AddCommand = UICommand.Add(TapAdd);
+            AddFolderCommand = UICommand.AddFolder(TapAddFolder);
+            DeleteCommand = UICommand.Delete(TapDelete);
+            SaveCommand = UICommand.Save(TapSaveAs);
+            ViewCommand = UICommand.View(TapView);
+            BackCommand = UICommand.Backward(TapBack);
+            SettingCommand = UICommand.Setting(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             _service = _app.Service;
             _storage = new StorageExplorer(_service);

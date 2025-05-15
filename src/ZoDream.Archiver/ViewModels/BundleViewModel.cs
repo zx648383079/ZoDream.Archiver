@@ -1,5 +1,4 @@
-﻿using Microsoft.UI.Xaml.Input;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
@@ -22,20 +22,17 @@ namespace ZoDream.Archiver.ViewModels
     {
         public BundleViewModel()
         {
-            AddCommand = new RelayCommand(TapAdd);
-            AddFolderCommand = new RelayCommand(TapAddFolder);
-            DeleteCommand = new StandardUICommand(StandardUICommandKind.Delete)
-            {
-               Command = new RelayCommand(TapDelete)
-            };
+            AddCommand = UICommand.Add(TapAdd);
+            AddFolderCommand = UICommand.AddFolder(TapAddFolder);
+            DeleteCommand = UICommand.Delete(TapDelete);
             
-            SaveCommand = new RelayCommand(TapSaveAs);
-            ViewCommand = new RelayCommand(TapView);
-            SettingCommand = new RelayCommand(TapSetting);
+            SaveCommand = UICommand.Save(TapSaveAs);
+            ViewCommand = UICommand.View(TapView);
+            SettingCommand = UICommand.Setting(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
-            ExplorerCommand = new RelayCommand(TapExplorer);
-            CodeCommand = new RelayCommand(TapCode);
-            LogCommand = new RelayCommand(TapLog);
+            ExplorerCommand = UICommand.Index(TapExplorer);
+            CodeCommand = UICommand.Code(TapCode);
+            LogCommand = UICommand.Log(TapLog);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -53,9 +50,9 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _fileItems, value);
         }
 
-        private IEntryItem[]? _selectedItems;
+        private object[]? _selectedItems;
 
-        public IEntryItem[]? SelectedItems {
+        public object[]? SelectedItems {
             get => _selectedItems;
             set => Set(ref _selectedItems, value);
         }

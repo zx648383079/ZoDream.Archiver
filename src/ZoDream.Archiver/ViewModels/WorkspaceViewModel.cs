@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
+using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
@@ -21,12 +22,12 @@ namespace ZoDream.Archiver.ViewModels
     {
         public WorkspaceViewModel()
         {
-            AddCommand = new RelayCommand(TapAdd);
-            DeleteCommand = new RelayCommand(TapDelete);
-            ViewCommand = new RelayCommand(TapView);
-            InfoCommand = new RelayCommand(TapInfo);
-            FindCommand = new RelayCommand(TapFind);
-            SaveCommand = new RelayCommand(TapSaveAs);
+            AddCommand = UICommand.Add(TapAdd);
+            DeleteCommand = UICommand.Delete(TapDelete);
+            ViewCommand = UICommand.View(TapView);
+            InfoCommand = UICommand.Info(TapInfo);
+            FindCommand = UICommand.Find(TapFind);
+            SaveCommand = UICommand.Save(TapSaveAs);
             DragCommand = new RelayCommand(TapDrag);
             StopFilterCommand = new RelayCommand(TapStopFilter);
         }
