@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Pages;
-using ZoDream.Shared.Drawing.PVRTC;
 using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
@@ -16,6 +11,7 @@ namespace ZoDream.Archiver.ViewModels
         public StartupViewModel()
         {
             OpenCommand = new RelayCommand(TapOpen);
+            DownloadCommand = new RelayCommand(TapDownload);
             OpenBundleCommand = new RelayCommand(TapOpenBundle);
             CreateCommand = new RelayCommand(TapCreate);
             ExplorerCommand = new RelayCommand(TapExplorer);
@@ -31,6 +27,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand OpenCommand { get; private set; }
         public ICommand OpenBundleCommand { get; private set; }
+        public ICommand DownloadCommand { get; private set; }
         public ICommand ExplorerCommand { get; private set; }
         public ICommand CreateCommand { get; private set; }
 
@@ -80,6 +77,10 @@ namespace ZoDream.Archiver.ViewModels
         private void TapOpenBundle(object? _)
         {
             App.ViewModel.Navigate<BundlePage>();
+        }
+        private void TapDownload(object? _)
+        {
+            App.ViewModel.Navigate<DownloadPage>();
         }
         private void TapCreate(object? _)
         {

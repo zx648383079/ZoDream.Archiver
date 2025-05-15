@@ -58,6 +58,16 @@
                 </win:SettingsCard.HeaderIcon>
             </win:SettingsCard>
             <win:SettingsCard
+                Command="{Binding DownloadCommand}"
+                Description="资源嗅探批量下载"
+                Header="资源下载"
+                IsActionIconVisible="False"
+                IsClickEnabled="True">
+                <win:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xEBD3;" />
+                </win:SettingsCard.HeaderIcon>
+            </win:SettingsCard>
+            <win:SettingsCard
                 Command="{Binding ExplorerCommand}"
                 Description="资源浏览"
                 Header="资源管理器"

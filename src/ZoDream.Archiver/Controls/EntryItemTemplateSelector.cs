@@ -2,7 +2,6 @@
 using Microsoft.UI.Xaml.Controls;
 using ZoDream.Archiver.ViewModels;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Archiver.Controls
 {

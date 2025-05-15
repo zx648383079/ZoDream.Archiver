@@ -5,7 +5,7 @@ using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class EntryViewModel: BindableBase, ISourceEntry
+    public class EntryViewModel: BindableBase, ISourceEntry, IEntryItem
     {
         private string _name = string.Empty;
 
@@ -30,6 +30,8 @@ namespace ZoDream.Archiver.ViewModels
             get => _fullPath;
             set => Set(ref _fullPath, value);
         }
+
+        public string Extension => Path.GetExtension(Name).ToLower();
 
         public EntryViewModel(string fullPath)
         {

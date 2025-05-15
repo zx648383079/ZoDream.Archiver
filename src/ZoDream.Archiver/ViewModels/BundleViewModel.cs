@@ -53,9 +53,9 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _fileItems, value);
         }
 
-        private EntryViewModel[]? _selectedItems;
+        private IEntryItem[]? _selectedItems;
 
-        public EntryViewModel[]? SelectedItems {
+        public IEntryItem[]? SelectedItems {
             get => _selectedItems;
             set => Set(ref _selectedItems, value);
         }
@@ -287,7 +287,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             foreach (var item in SelectedItems)
             {
-                FileItems.Remove(item);
+                FileItems.Remove(item as EntryViewModel);
             }
             SelectedItems = null;
         }

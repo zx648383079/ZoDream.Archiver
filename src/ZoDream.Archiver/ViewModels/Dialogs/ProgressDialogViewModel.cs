@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
@@ -16,62 +17,6 @@ namespace ZoDream.Archiver.ViewModels
                 logger.OnProgress += Logger_OnProgress;
             }
             StartTick();
-        }
-
-        private void Logger_OnProgress(ProgressLogger progress)
-        {
-            _messageRefreshToken.Cancel();
-            _app.DispatcherQueue.TryEnqueue(() => {
-                if (!progress.IsMaster)
-                {
-                    ChildTitle = progress.Title;
-                    ChildEnabled = progress.Max > 0;
-                    ChildProgress = (double)progress;
-                    return;
-                }
-                if (!string.IsNullOrEmpty(progress.Title))
-                {
-                    Message = progress.Title;
-                }
-                Progress = (double)progress;
-                if (progress.Max > 0)
-                {
-                    ProgressUnknow = false;
-                }
-            });
-        }
-
-        private void Logger_OnLog(string message, LogLevel level)
-        {
-            if (level == LogLevel.Warn)
-            {
-                return;
-            }
-            _messageRefreshToken.Cancel();
-            if (level == LogLevel.Info)
-            {
-                _lastInfoMessage = message;
-            }
-            _app.DispatcherQueue.TryEnqueue(() => {
-                Message = message;
-            });
-            // 错误信息只允许显示一次
-            if (level == LogLevel.Info)
-            {
-                return;
-            }
-            _messageRefreshToken = new();
-            var token = _messageRefreshToken.Token;
-            Task.Factory.StartNew(() => {
-                Thread.Sleep(10000);
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                _app.DispatcherQueue.TryEnqueue(() => {
-                    Message = _lastInfoMessage;
-                });
-            }, token);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
@@ -181,6 +126,62 @@ namespace ZoDream.Archiver.ViewModels
                         Computed();
                     });
                 }
+            }, token);
+        }
+
+        private void Logger_OnProgress(ProgressLogger progress)
+        {
+            _messageRefreshToken.Cancel();
+            _app.DispatcherQueue.TryEnqueue(() => {
+                if (!progress.IsMaster)
+                {
+                    ChildTitle = progress.Title;
+                    ChildEnabled = progress.Max > 0;
+                    ChildProgress = (double)progress;
+                    return;
+                }
+                if (!string.IsNullOrEmpty(progress.Title))
+                {
+                    Message = progress.Title;
+                }
+                Progress = (double)progress;
+                if (progress.Max > 0)
+                {
+                    ProgressUnknow = false;
+                }
+            });
+        }
+
+        private void Logger_OnLog(string message, LogLevel level)
+        {
+            if (level == LogLevel.Warn)
+            {
+                return;
+            }
+            _messageRefreshToken.Cancel();
+            if (level == LogLevel.Info)
+            {
+                _lastInfoMessage = message;
+            }
+            _app.DispatcherQueue.TryEnqueue(() => {
+                Message = message;
+            });
+            // 错误信息只允许显示一次
+            if (level == LogLevel.Info)
+            {
+                return;
+            }
+            _messageRefreshToken = new();
+            var token = _messageRefreshToken.Token;
+            Task.Factory.StartNew(() => {
+                Thread.Sleep(10000);
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                _app.DispatcherQueue.TryEnqueue(() => {
+                    Message = _lastInfoMessage;
+                });
             }, token);
         }
 

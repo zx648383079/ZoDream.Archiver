@@ -11,7 +11,7 @@
     <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &gt;= 8">win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &lt; 8">win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
-	  <LangVersion>12</LangVersion>
+	  <LangVersion>13</LangVersion>
 	  <Nullable>Enable</Nullable>
     <UseWinUI>true</UseWinUI>
 	  <Version>1.0.0</Version>
@@ -37,11 +37,13 @@
     <None Remove="Dialogs\SettingDialog.xaml" />
     <None Remove="Pages\BundlePage.xaml" />
     <None Remove="Pages\CompressPage.xaml" />
+    <None Remove="Pages\DownloadPage.xaml" />
     <None Remove="Pages\ExplorerPage.xaml" />
     <None Remove="Pages\StartupPage.xaml" />
     <None Remove="Pages\WorkspacePage.xaml" />
     <None Remove="Themes\BaseStyle.xaml" />
     <None Remove="Themes\DarkTheme.xaml" />
+    <None Remove="Themes\DownloadStyle.xaml" />
     <None Remove="Themes\EntryStyle.xaml" />
     <None Remove="Themes\Generic.xaml" />
     <None Remove="Themes\InputStyle.xaml" />
@@ -89,6 +91,7 @@
     <ProjectReference Include="..\ZoDream.Shared.Drawing\ZoDream.Shared.Drawing.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Encryption\ZoDream.Shared.Encryption.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Logging\ZoDream.Shared.Logging.csproj" />
+    <ProjectReference Include="..\ZoDream.Shared.Net\ZoDream.Shared.Net.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.RustWrapper\ZoDream.Shared.RustWrapper.csproj" />
     <ProjectReference Include="..\ZoDream.Shared\ZoDream.Shared.csproj" />
   </ItemGroup>
@@ -96,6 +99,12 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Themes\DownloadStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\DownloadPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\CodeDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

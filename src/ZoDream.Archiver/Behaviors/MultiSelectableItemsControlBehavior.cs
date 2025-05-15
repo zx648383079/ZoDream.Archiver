@@ -2,11 +2,9 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.Xaml.Interactivity;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ZoDream.Archiver.ViewModels;
-using ZoDream.Shared.Collections;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Archiver.Behaviors
 {
@@ -14,14 +12,14 @@ namespace ZoDream.Archiver.Behaviors
     {
 
 
-        public EntryViewModel[] SelectedItems {
-            get { return (EntryViewModel[])GetValue(SelectedItemsProperty); }
+        public IEntryItem[] SelectedItems {
+            get { return (IEntryItem[])GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for SelectedItems.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SelectedItemsProperty =
-            DependencyProperty.Register("SelectedItems", typeof(EntryViewModel[]), 
+            DependencyProperty.Register("SelectedItems", typeof(IEntryItem[]), 
                 typeof(MultiSelectableItemsControlBehavior), 
                 new PropertyMetadata(null, OnSelectionChanged));
 
@@ -61,11 +59,11 @@ namespace ZoDream.Archiver.Behaviors
         {
             if (sender is ListViewBase ctl)
             {
-                SelectedItems = ctl.SelectedItems.Select(i => (EntryViewModel)i).ToArray();
+                SelectedItems = [.. ctl.SelectedItems.Cast<IEntryItem>()];
             } 
             else if (sender is Selector selector && selector.SelectedItem is not null)
             {
-                SelectedItems = [(EntryViewModel)selector.SelectedItem];
+                SelectedItems = [(IEntryItem)selector.SelectedItem];
             }
         }
 

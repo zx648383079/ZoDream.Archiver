@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bhv="using:ZoDream.Archiver.Behaviors"
+    xmlns:ctl="using:ZoDream.Archiver.Controls"
+    xmlns:cvt="using:ZoDream.Archiver.Converters"
+    xmlns:ivy="using:Microsoft.Xaml.Interactivity">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <cvt:IconConverter x:Key="IconCvt" />
+    <cvt:StatusConverter x:Key="StatusCvt" />
+    <cvt:DateTimeConverter x:Key="DateCvt" />
+    <cvt:SpeedConverter x:Key="SpeedCvt" />
+
+    <x:Double x:Key="MetaGap">16</x:Double>
+
+    <DataTemplate x:Key="DefaultTemaplate">
+        <Grid Height="60">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
+                    <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                    <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="TransferTemaplate">
+        <Grid Height="60">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
+                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="FinishTemaplate">
+        <UserControl>
+            <ivy:Interaction.Behaviors>
+                <bhv:MouseHoverBehavior />
+            </ivy:Interaction.Behaviors>
+            <UserControl.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Command="{Binding DeleteCommand}" />
+                </MenuFlyout>
+            </UserControl.ContextFlyout>
+            <Grid Height="60">
+                <SwipeControl x:Name="ListViewSwipeContainer">
+                    <SwipeControl.RightItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Background="Red" Command="{Binding DeleteCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.RightItems>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="{Binding Icon}" Style="{ThemeResource HeaderIcon}" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
+                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding LastAt, Converter={StaticResource DateCvt}}" />
+                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                                <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel
+                            x:Name="PART_CommandPanel"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Visibility="Collapsed">
+                            <AppBarButton Command="{Binding DeleteCommand}" IsTabStop="False" />
+                        </StackPanel>
+                    </Grid>
+                </SwipeControl>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="HoveringStates">
+                        <VisualState x:Name="IsBlur" />
+                        <VisualState x:Name="IsHover">
+                            <VisualState.Setters>
+                                <Setter Target="PART_CommandPanel.Visibility" Value="Visible" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </UserControl>
+    </DataTemplate>
+
+
+    <ctl:DownloadItemTemplateSelector
+        x:Key="ItemTemplateSelector"
+        CanceledTemplate="{StaticResource FinishTemaplate}"
+        DefaultTemplate="{StaticResource DefaultTemaplate}"
+        FinishedTemplate="{StaticResource FinishTemaplate}"
+        OccurredTemplate="{StaticResource FinishTemaplate}"
+        PausedTemplate="{StaticResource TransferTemaplate}"
+        TransferTemplate="{StaticResource TransferTemaplate}" />
+
+    <Style x:Key="FullListItem" TargetType="ListBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style x:Key="DownloadListBox" TargetType="ListBox">
+        <Setter Property="ItemTemplateSelector" Value="{StaticResource ItemTemplateSelector}" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FullListItem}" />
+    </Style>
+
+</ResourceDictionary>
