@@ -22,17 +22,19 @@
         <PivotItem Header="基本">
             <StackPanel>
                 <TextBox
+                    MaxHeight="120"
                     AcceptsReturn="True"
                     Header="链接"
                     PlaceholderText="通过换行添加多个"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
                     Text="{Binding Link, Mode=TwoWay}" />
-                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Destination Path" />
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="保存至文件夹" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+                    <TextBox Text="{Binding OutputFolder, Mode=TwoWay}" />
                     <Button
                         Grid.Column="1"
                         Command="{Binding OpenCommand}"
@@ -50,6 +52,7 @@
                         SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
 
                     <ComboBox
+                        Grid.Column="1"
                         Header="Same File"
                         ItemsSource="{Binding TypeItems}"
                         SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
