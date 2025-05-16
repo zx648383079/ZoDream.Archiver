@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage;
 using ZoDream.Archiver.Controls;
@@ -62,9 +63,13 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand DragCommand { get; private set; }
         public ICommand ViewCommand { get; private set; }
         public ICommand SettingCommand { get; private set; }
-        private void TapAdd(object? _)
+        private async void TapAdd(object? _)
         {
-
+            var picker = new RequestDialog();
+            if (!await _app.OpenFormAsync(picker))
+            {
+                return;
+            }
         }
         private void TapDelete(object? _)
         {

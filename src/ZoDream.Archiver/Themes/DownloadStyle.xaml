@@ -9,7 +9,6 @@
 
     <cvt:SizeConverter x:Key="SizeCvt" />
     <cvt:ToggleConverter x:Key="ToggleCvt" />
-    <cvt:IconConverter x:Key="IconCvt" />
     <cvt:StatusConverter x:Key="StatusCvt" />
     <cvt:DateTimeConverter x:Key="DateCvt" />
     <cvt:SpeedConverter x:Key="SpeedCvt" />

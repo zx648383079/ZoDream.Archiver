@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="ZoDream.Archiver.Dialogs.RequestDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    Title="新建下载任务"
+    IsPrimaryButtonEnabled="{Binding IsValid}"
+    PrimaryButtonText="确认"
+    SecondaryButtonText="取消"
+    mc:Ignorable="d">
+    <ContentDialog.DataContext>
+        <vm:RequestDialogViewModel />
+    </ContentDialog.DataContext>
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
+    <Pivot>
+        <PivotItem Header="基本">
+            <StackPanel>
+                <TextBox
+                    AcceptsReturn="True"
+                    Header="链接"
+                    PlaceholderText="通过换行添加多个"
+                    Text="{Binding Link, Mode=TwoWay}" />
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Destination Path" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding FileName, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding OpenCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Header="Game Engine"
+                        ItemsSource="{Binding EngineItems}"
+                        SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
+
+                    <ComboBox
+                        Header="Same File"
+                        ItemsSource="{Binding TypeItems}"
+                        SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
+                </Grid>
+                <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />
+            </StackPanel>
+        </PivotItem>
+        <PivotItem Header="高级">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ToggleSwitch Header="Image" IsOn="{Binding EnabledImage, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="1"
+                        Header="Audio"
+                        IsOn="{Binding EnabledAudio, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="2"
+                        Header="Video"
+                        IsOn="{Binding EnabledVideo, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Header="Shader"
+                        IsOn="{Binding EnabledShader, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Header="Lua"
+                        IsOn="{Binding EnabledLua, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Header="Json"
+                        IsOn="{Binding EnabledJson, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="2"
+                        Header="Spine"
+                        IsOn="{Binding EnabledSpine, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="3"
+                        Header="Model"
+                        IsOn="{Binding EnabledModel, Mode=TwoWay}" />
+                    <ComboBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Header="3D格式"
+                        ItemsSource="{Binding ModelFormatItems}"
+                        SelectedItem="{Binding ModelFormat, Mode=TwoWay}"
+                        Visibility="{Binding EnabledModel, Converter={StaticResource ToggleCvt}}" />
+                    <NumberBox
+                        Grid.Row="4"
+                        Header="最大批处理数"
+                        Minimum="1"
+                        Value="{Binding MaxBatchCount, Mode=TwoWay}" />
+                </Grid>
+            </StackPanel>
+        </PivotItem>
+    </Pivot>
+</ContentDialog>
