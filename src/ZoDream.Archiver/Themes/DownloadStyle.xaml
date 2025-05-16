@@ -7,27 +7,16 @@
     xmlns:cvt="using:ZoDream.Archiver.Converters"
     xmlns:ivy="using:Microsoft.Xaml.Interactivity">
 
-    <cvt:SizeConverter x:Key="SizeCvt" />
-    <cvt:ToggleConverter x:Key="ToggleCvt" />
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <cvt:StatusConverter x:Key="StatusCvt" />
     <cvt:DateTimeConverter x:Key="DateCvt" />
     <cvt:SpeedConverter x:Key="SpeedCvt" />
 
     <x:Double x:Key="MetaGap">16</x:Double>
-    <Style x:Name="HeaderIcon" TargetType="FontIcon">
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-    <Style x:Name="MetaLabelStyle" TargetType="TextBlock">
-        <Setter Property="VerticalAlignment" Value="Top" />
-        <Setter Property="FontSize" Value="{StaticResource MetaFontSize}" />
-        <Setter Property="Foreground" Value="{ThemeResource SecondaryTextBrush}" />
-    </Style>
-    <Style x:Name="HeaderLabelStyle" TargetType="TextBlock">
-        <Setter Property="VerticalAlignment" Value="Bottom" />
-        <Setter Property="FontWeight" Value="Black" />
-        <Setter Property="Foreground" Value="{ThemeResource BodyTextBrush}" />
-    </Style>
+
 
 
     <DataTemplate x:Key="DefaultTemaplate">

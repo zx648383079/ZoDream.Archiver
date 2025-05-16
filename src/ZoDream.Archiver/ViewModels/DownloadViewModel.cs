@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Windows.Storage;
 using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Net;
 using ZoDream.Shared.ViewModel;
 
@@ -40,9 +41,9 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _items, value);
         }
 
-        private object[]? _selectedItems;
+        private IEntryItem[]? _selectedItems;
 
-        public object[]? SelectedItems {
+        public IEntryItem[]? SelectedItems {
             get => _selectedItems;
             set => Set(ref _selectedItems, value);
         }

@@ -5,6 +5,11 @@
     xmlns:ctl="using:ZoDream.Archiver.Controls"
     xmlns:cvt="using:ZoDream.Archiver.Converters"
     xmlns:vm="using:ZoDream.Archiver.ViewModels">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <cvt:IconConverter x:Key="IconCvt" />
     <cvt:BundleTypeConverter x:Key="BTCvt" />
 

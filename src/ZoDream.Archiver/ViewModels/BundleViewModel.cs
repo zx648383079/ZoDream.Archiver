@@ -50,9 +50,9 @@ namespace ZoDream.Archiver.ViewModels
             set => Set(ref _fileItems, value);
         }
 
-        private object[]? _selectedItems;
+        private IEntryItem[]? _selectedItems;
 
-        public object[]? SelectedItems {
+        public IEntryItem[]? SelectedItems {
             get => _selectedItems;
             set => Set(ref _selectedItems, value);
         }
