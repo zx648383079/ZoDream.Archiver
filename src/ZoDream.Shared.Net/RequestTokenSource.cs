@@ -11,9 +11,10 @@ namespace ZoDream.Shared.Net
         public bool IsCancellationRequested => _cancellationSource.IsCancellationRequested;
 
         public RequestToken Token => new(this);
-
-
         public CancellationToken CancellationToken => _cancellationSource.Token;
+
+        public event RequestChangedEventHandler? RequestChanged;
+        public event RequestProgressEventHandler? ProgressChanged;
 
         public void Cancel()
         {
@@ -45,6 +46,16 @@ namespace ZoDream.Shared.Net
         public Task WaitWhilePausedAsync()
         {
             return IsPaused && !IsCancellationRequested ? _paused!.Task : Task.CompletedTask;
+        }
+
+        internal void Emit(RequestChangedEventArgs args)
+        {
+            RequestChanged?.Invoke(args);
+        }
+
+        internal void Emit(long received)
+        {
+            ProgressChanged?.Invoke(received);
         }
     }
 }

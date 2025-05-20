@@ -4,10 +4,10 @@
     {
         None,
         Waiting,
+        Paused,
         Sending,
         Receiving,
         Finished,
-        Paused,
         Canceled,
         /// <summary>
         /// 出错了

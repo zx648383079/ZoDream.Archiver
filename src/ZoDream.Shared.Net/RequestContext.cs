@@ -9,6 +9,8 @@ namespace ZoDream.Shared.Net
 
         public Uri Source;
 
+        public string OutputFolder;
+
         public HttpMethod Method;
 
         public HttpContent? Body;

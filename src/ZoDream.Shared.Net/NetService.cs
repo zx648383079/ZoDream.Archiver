@@ -2,18 +2,16 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using ZoDream.Shared.Net;
 
-namespace ZoDream.Archiver.ViewModels.Explorers
+namespace ZoDream.Shared.Net
 {
-    public class NetService : INetService, IDisposable
+    public class NetService : INetService
     {
         const int CHUNK_SIZE = 8192;
 
@@ -76,10 +74,6 @@ namespace ZoDream.Archiver.ViewModels.Explorers
 
         public async Task<Stream> ReadAsStreamAsync(HttpResponseMessage response)
         {
-            if (response.Content.Headers.ContentEncoding.Contains("gzip"))
-            {
-                return new GZipStream(await response.Content.ReadAsStreamAsync(), mode: CompressionMode.Decompress);
-            }
             return await response.Content.ReadAsStreamAsync();
         }
 
@@ -88,6 +82,20 @@ namespace ZoDream.Archiver.ViewModels.Explorers
             using var input = await ReadAsStreamAsync(response);
             await CopyToWithMemoryAsync(output, input, token);
         }
+
+        public long GetContentLength(HttpResponseMessage response)
+        {
+            return response.Content.Headers.ContentLength ?? 0;
+        }
+        public string GetFileName(HttpResponseMessage response)
+        {
+            return response.Content.Headers.ContentDisposition?.FileName ?? string.Empty;
+        }
+        public bool GetAcceptRange(HttpResponseMessage response)
+        {
+            return response.Headers.AcceptRanges?.Count > 0;
+        }
+
         /// <summary>
         /// 直接保存
         /// </summary>
@@ -172,24 +180,21 @@ namespace ZoDream.Archiver.ViewModels.Explorers
 
         private HttpMessageHandler PrepareHandler()
         {
-            var handler = new HttpClientHandler()
+            var handler = new SocketsHttpHandler()
             {
+                AutomaticDecompression = DecompressionMethods.All,
                 AllowAutoRedirect = true,
                 UseCookies = true,
                 CookieContainer = Cookie,
                 Proxy = Proxy,
-                ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true
+                ConnectTimeout = _timeout,
             };
             return handler;
         }
 
         private HttpClient PrepareClient()
         {
-            var client = new HttpClient(PrepareHandler())
-            {
-                Timeout = _timeout
-            };
-            return client;
+            return new HttpClient(PrepareHandler());
         }
 
         private HttpRequestMessage PrepareRequest()

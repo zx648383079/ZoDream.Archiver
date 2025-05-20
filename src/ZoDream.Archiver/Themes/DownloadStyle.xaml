@@ -86,6 +86,7 @@
                             HorizontalAlignment="Right"
                             Orientation="Horizontal"
                             Visibility="Collapsed">
+                            <AppBarButton Command="{Binding ResumeCommand}" IsTabStop="False" />
                             <AppBarButton Command="{Binding DeleteCommand}" IsTabStop="False" />
                         </StackPanel>
                     </Grid>

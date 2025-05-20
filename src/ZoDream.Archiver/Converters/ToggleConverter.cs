@@ -38,6 +38,10 @@ namespace ZoDream.Archiver.Converters
                 {
                     return i > 0;
                 }
+                if (value.GetType().IsEnum)
+                {
+                    return System.Convert.ToInt32(value) > 0;
+                }
                 return string.IsNullOrWhiteSpace(value.ToString());
             }
             if (parameter is bool b)
@@ -45,7 +49,7 @@ namespace ZoDream.Archiver.Converters
                 return (bool)value == b;
             }
             var pStr = parameter.ToString();
-            var vStr = value.ToString();
+            var vStr = value.GetType().IsEnum ? System.Convert.ToInt32(value).ToString() : value.ToString();
             if (pStr == vStr)
             {
                 return true;

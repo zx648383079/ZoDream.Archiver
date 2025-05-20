@@ -12,7 +12,7 @@ using ZoDream.Shared.Logging;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class EntryService : IEntryService, IDisposable
+    public class EntryService : IEntryService
     {
         public EntryService(
             ILogger logger,

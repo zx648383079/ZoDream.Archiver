@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Net
 {
-    public interface INetService
+    public interface INetService : IDisposable
     {
 
         public CookieContainer Cookie { get; }
@@ -28,5 +28,9 @@ namespace ZoDream.Shared.Net
         public Task<Stream> ReadAsStreamAsync(HttpResponseMessage response);
         public Task SaveAsAsync(HttpResponseMessage response, Stream output, RequestToken token);
 
+
+        public long GetContentLength(HttpResponseMessage response);
+        public string GetFileName(HttpResponseMessage response);
+        public bool GetAcceptRange(HttpResponseMessage response);
     }
 }

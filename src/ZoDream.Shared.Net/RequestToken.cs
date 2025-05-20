@@ -15,5 +15,15 @@ namespace ZoDream.Shared.Net
         {
             return source.WaitWhilePausedAsync();
         }
+
+        public readonly void Emit(RequestChangedEventArgs args)
+        {
+            source.Emit(args);
+        }
+
+        public readonly void Emit(long received)
+        {
+            source.Emit(received);
+        }
     }
 }
