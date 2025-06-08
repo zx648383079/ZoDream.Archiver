@@ -57,8 +57,8 @@ namespace ZoDream.Shared.Net
                 });
                 using var fs = new ConcurrentStream(File.Create(output));
                 using INetReceiver receiver = length > 100000 && _service.GetAcceptRange(res) ?
-                new ChunkReceiver(_service, res, request) : new NetReceiver(res, request);
-                await receiver.StartAsync(_tokenSource.Token);
+                new ChunkReceiver(_service, res, request) : new NetReceiver(_service, res, request);
+                await receiver.StartAsync(request.Token);
             });
         }
 

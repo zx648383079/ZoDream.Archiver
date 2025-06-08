@@ -1,31 +1,43 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Net
 {
-    public class NetReceiver(HttpResponseMessage res, RequestContext request) : INetReceiver
+    public class NetReceiver(
+        INetService service,
+        HttpResponseMessage response, 
+        RequestContext request) : INetReceiver
     {
+    
 
         public void Pause()
         {
-            throw new NotImplementedException();
         }
 
         public void Resume()
         {
-            throw new NotImplementedException();
         }
 
-        public Task StartAsync(CancellationToken token = default)
+        public async Task StartAsync(RequestToken token = default)
         {
-            throw new NotImplementedException();
+            var fileName = service.GetFileName(response);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                // TODO
+            }
+            using var fs = File.Create(fileName);
+            await service.SaveAsAsync(response, fs, token);
         }
 
         public void Stop()
         {
-            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

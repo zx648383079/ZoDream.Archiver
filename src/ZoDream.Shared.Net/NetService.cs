@@ -77,7 +77,8 @@ namespace ZoDream.Shared.Net
             return await response.Content.ReadAsStreamAsync();
         }
 
-        public async Task SaveAsAsync(HttpResponseMessage response, Stream output, RequestToken token)
+        public async Task SaveAsAsync(HttpResponseMessage response, 
+            Stream output, RequestToken token)
         {
             using var input = await ReadAsStreamAsync(response);
             await CopyToWithMemoryAsync(output, input, token);
@@ -96,87 +97,7 @@ namespace ZoDream.Shared.Net
             return response.Headers.AcceptRanges?.Count > 0;
         }
 
-        /// <summary>
-        /// 直接保存
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="output"></param>
-        /// <param name="token"></param>
-        private static async Task CopyToAsync(Stream input, Stream output, RequestToken token)
-        {
-            var buffer = new byte[CHUNK_SIZE];
-            var byteReceived = 0L;
-            int size;
-            while (true)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    break;
-                }
-                // 检查暂停
-                await token.WaitWhilePausedAsync();
-                size = input.Read(buffer, 0, buffer.Length);
-                if (size == 0)
-                {
-                    break;
-                }
-                output.Write(buffer, 0, size);
-                byteReceived += size;
-            }
-        }
-
-        /// <summary>
-        /// 通过使用内存加速获取
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
-        private static async Task CopyToWithMemoryAsync(Stream input, Stream output, RequestToken token)
-        {
-            var pipe = new Pipe();
-            var writing = WritePipeAsync(input, pipe.Writer);
-            var reading = ReadPipeAsync(pipe.Reader, output);
-            await Task.WhenAll(writing, reading);
-        }
-
-        private static async Task WritePipeAsync(Stream stream, PipeWriter writer)
-        {
-            while (true)
-            {
-                var memory = writer.GetMemory(CHUNK_SIZE);
-                int bytesRead = await stream.ReadAsync(memory);
-                if (bytesRead == 0)
-                {
-                    break;
-                }
-                writer.Advance(bytesRead);
-                var result = await writer.FlushAsync();
-                if (result.IsCompleted)
-                {
-                    break;
-                }
-            }
-            await writer.CompleteAsync();
-        }
-
-        private static async Task ReadPipeAsync(PipeReader reader, Stream fileStream)
-        {
-            while (true)
-            {
-                var result = await reader.ReadAsync();
-                var buffer = result.Buffer;
-                foreach (var segment in buffer)
-                {
-                    await fileStream.WriteAsync(segment);
-                }
-                reader.AdvanceTo(buffer.End);
-                if (result.IsCompleted)
-                {
-                    break;
-                }
-            }
-            await reader.CompleteAsync();
-        }
+        
 
         private HttpMessageHandler PrepareHandler()
         {
@@ -209,6 +130,93 @@ namespace ZoDream.Shared.Net
 
         public void Dispose()
         {
+        }
+
+        /// <summary>
+        /// 直接保存
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <param name="token"></param>
+        public static async Task CopyToAsync(Stream input,
+            Stream output,
+            RequestToken token)
+        {
+            var buffer = new byte[CHUNK_SIZE];
+            var byteReceived = 0L;
+            int size;
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                // 检查暂停
+                await token.WaitWhilePausedAsync();
+                size = input.Read(buffer, 0, buffer.Length);
+                if (size == 0)
+                {
+                    break;
+                }
+                output.Write(buffer, 0, size);
+                byteReceived += size;
+            }
+        }
+
+        /// <summary>
+        /// 通过使用内存加速获取
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static async Task CopyToWithMemoryAsync(Stream input,
+            Stream output, RequestToken token)
+        {
+            var pipe = new Pipe();
+            var writing = WritePipeAsync(input, pipe.Writer);
+            var reading = ReadPipeAsync(pipe.Reader, output);
+            await Task.WhenAll(writing, reading);
+        }
+
+        private static async Task WritePipeAsync(Stream stream,
+            PipeWriter writer)
+        {
+            while (true)
+            {
+                var memory = writer.GetMemory(CHUNK_SIZE);
+                int bytesRead = await stream.ReadAsync(memory);
+                if (bytesRead == 0)
+                {
+                    break;
+                }
+                writer.Advance(bytesRead);
+                var result = await writer.FlushAsync();
+                if (result.IsCompleted)
+                {
+                    break;
+                }
+            }
+            await writer.CompleteAsync();
+        }
+
+        private static async Task ReadPipeAsync(PipeReader reader,
+            Stream fileStream)
+        {
+            while (true)
+            {
+                var result = await reader.ReadAsync();
+                var buffer = result.Buffer;
+                foreach (var segment in buffer)
+                {
+                    await fileStream.WriteAsync(segment);
+                }
+                reader.AdvanceTo(buffer.End);
+                if (result.IsCompleted)
+                {
+                    break;
+                }
+            }
+            await reader.CompleteAsync();
         }
     }
 }
