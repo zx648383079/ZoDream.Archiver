@@ -5,6 +5,7 @@ namespace ZoDream.Shared.Numerics
 {
     public static class NumericsExtension
     {
+
         /// <summary>
         /// 根据索引获取值
         /// </summary>
