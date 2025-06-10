@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor.Engines
             {
                 return new BlowfishReader(fileItems);
             }
-            throw new NotImplementedException();
+            return null;
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)

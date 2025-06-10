@@ -7,6 +7,7 @@ using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.Shared.Compression.Own
 {
@@ -122,11 +123,12 @@ namespace ZoDream.Shared.Compression.Own
             {
                 fileName = OwnHelper.RandomName(folder);
             }
-            var file = Path.Combine(folder, OwnHelper.GetSafePath(fileName));
-            var folderName = Path.GetDirectoryName(file);
-            if (!Directory.Exists(folderName))
+            if (!LocationStorage.TryCreate(Path.Combine(folder, OwnHelper.GetSafePath(fileName)), 
+                ArchiveExtractMode.Overwrite,
+                out var file
+                ))
             {
-                Directory.CreateDirectory(folderName!);
+                return fileName;
             }
             using var fs = File.Create(file);
             ReadStream(fs);
