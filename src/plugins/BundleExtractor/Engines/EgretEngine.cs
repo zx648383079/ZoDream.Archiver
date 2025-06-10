@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using ZoDream.BundleExtractor.Egret;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Engines
 {
@@ -59,7 +60,7 @@ namespace ZoDream.BundleExtractor.Engines
                 return;
             }
             using var fs = file.OpenRead();
-            var content = new StreamReader(fs).ReadToEnd();
+            var content = LocationStorage.ReadText(fs);
             if (string.IsNullOrWhiteSpace(content))
             {
                 return;

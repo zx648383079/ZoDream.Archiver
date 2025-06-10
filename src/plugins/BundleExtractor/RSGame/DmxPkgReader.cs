@@ -5,23 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.RSGame
 {
-    public class DmxPkgReader(Stream input) : IArchiveReader
+    public class DmxPkgReader(Stream input) : IBundleReader
     {
  
-
-        public void ExtractTo(IReadOnlyEntry entry, Stream output)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
+        public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
             using var archive = ZipArchive.Open(input);
             var dicItems = new Dictionary<string, ZipArchiveEntry>();
@@ -65,32 +59,6 @@ namespace ZoDream.BundleExtractor.RSGame
                         continue;
                     }
                     new PartialStream(fs, offset, size).SaveAs(fileName);
-                }
-            }
-        }
-
-        public IEnumerable<IReadOnlyEntry> ReadEntry()
-        {
-            using var archive = ZipArchive.Open(input);
-            foreach (var item in archive.Entries)
-            {
-                if (item.IsDirectory || string.IsNullOrEmpty(item.Key))
-                {
-                    continue;
-                }
-                if (!item.Key.EndsWith(".dic"))
-                {
-                    continue;
-                }
-                using var dic = new BinaryReader(item.OpenEntryStream());
-                var count = dic.ReadInt32();
-                for (var i = 0; i < count; i++)
-                {
-                    var nameLength = dic.ReadByte();
-                    var buffer = dic.ReadBytes(nameLength).Select(j => (byte)(j ^ nameLength)).ToArray();
-                    yield return new ArchiveEntry(Encoding.ASCII.GetString(buffer), 
-                        dic.ReadUInt32() - buffer[^6] - nameLength, 
-                        dic.ReadUInt32() - buffer[^7] - nameLength);
                 }
             }
         }

@@ -1,0 +1,128 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using ZoDream.BundleExtractor.RSGame;
+using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Storage;
+
+namespace ZoDream.BundleExtractor.Engines
+{
+    public class RSGameEngine(IEntryService service) : 
+        IBundleEngine, IBundleExecutor, IResourceScheme
+    {
+        internal const string EngineName = "RSGame";
+        public string AliasName => EngineName;
+
+        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
+        {
+            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+        }
+
+
+
+        public IDependencyBuilder GetBuilder(IBundleOptions options)
+        {
+            return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
+        }
+
+        public bool IsExclude(IBundleOptions options, string fileName)
+        {
+            return false;
+        }
+
+        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
+        {
+            return new ResourceReader(fileItems, this, service);
+        }
+
+        public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
+        {
+            if (fileItems.Glob("*.dmxpkg").Any())
+            {
+                options.Engine = EngineName;
+                return true;
+            }
+            return false;
+        }
+
+        public bool CanExecute(IBundleRequest request)
+        {
+            return request is IFileRequest;
+        }
+
+        public void Execute(IBundleRequest request, IBundleContext context)
+        {
+            if (request is not INetFileRequest file)
+            {
+                return;
+            }
+            if (file.Name == "game_static.js")
+            {
+                var content = LocationStorage.ReadText(file.OpenRead());
+                var host = string.Empty;
+                var path = string.Empty;
+                foreach (Match item in Regex.Matches(content, @"""(.+?)"""))
+                {
+                    var str = item.Groups[1].Value;
+                    if (string.IsNullOrWhiteSpace(str) || str.Contains("localhost") || str.Contains("test"))
+                    {
+                        continue;
+                    }
+                    if (str.Contains("://"))
+                    {
+                        host = str;
+                        continue;
+                    }
+                    path = str;
+                }
+                context.Enqueue(new NetRequest(new Uri(host + path)));
+            } else if (file.Name == "hash.dat")
+            {
+                using var r = new StreamReader(file.OpenRead());
+                while (true)
+                {
+                    var line = r.ReadLine();
+                    if (line == null)
+                    {
+                        break;
+                    }
+                    var i = line.LastIndexOf(':');
+                    if (i >= 0)
+                    {
+                        line = line[..(i - 1)];
+                    }
+                    if (string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+                    context.Enqueue(new NetRequest(new Uri(file.Source, line)));
+                }
+            }
+            else if (file.Name.EndsWith(".dmxpkg"))
+            {
+
+            }
+        }
+
+        public IBundleReader? Open(string fileName)
+        {
+            if (!fileName.EndsWith(".dmxpkg"))
+            {
+                return null;
+            }
+            return new DmxPkgReader(File.OpenRead(fileName));
+        }
+
+        public IBundleReader? Open(Stream stream, string fileName)
+        {
+            if (!fileName.EndsWith(".dmxpkg"))
+            {
+                return null;
+            }
+            return new DmxPkgReader(stream);
+        }
+    }
+}

@@ -92,6 +92,16 @@ namespace ZoDream.Shared.Storage
             var content = await reader.ReadToEndAsync();
             return content;
         }
+        /// <summary>
+        /// 直接读取内容
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ReadText(Stream input)
+        {
+            using var reader = new StreamReader(input);
+            return reader.ReadToEnd();
+        }
 
         public static async Task<string> ReadAsync(Stream input)
         {
