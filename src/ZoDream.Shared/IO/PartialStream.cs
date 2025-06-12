@@ -70,7 +70,7 @@ namespace ZoDream.Shared.IO
             {
                 return 0;
             }
-            BaseStream.Skip(_current - BaseStream.Position);
+            BaseStream.SeekSkip(_current - BaseStream.Position);
             var res = BaseStream.Read(buffer, offset, len);
             SyncPosition(_current + res);
             return res;
@@ -118,5 +118,6 @@ namespace ZoDream.Shared.IO
                 BaseStream.Dispose();
             }
         }
+
     }
 }

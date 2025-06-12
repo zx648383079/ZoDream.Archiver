@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZoDream.Shared.IO
 {
@@ -25,6 +24,37 @@ namespace ZoDream.Shared.IO
             var buffer = new byte[input.Length - input.Position];
             input.ReadExactly(buffer);
             return buffer;
+        }
+        /// <summary>
+        /// 从指定位置读取剩余部分
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public static Stream Skip(this Stream input, long offset)
+        {
+            return new PartialStream(input, offset, input.Length - offset);
+        }
+        /// <summary>
+        /// 从当前位置截取部分长度
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Stream Take(this Stream input, long length)
+        {
+            return new PartialStream(input, length);
+        }
+        /// <summary>
+        /// 从指定位置截取部分长度
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Stream Take(this Stream input, long offset, long length)
+        {
+            return new PartialStream(input, offset, length);
         }
         /// <summary>
         /// 停用缓存功能
@@ -51,8 +81,13 @@ namespace ZoDream.Shared.IO
             input.ReadExactly(buffer);
             return buffer;
         }
-
-        public static void Skip(this Stream input, long length)
+        /// <summary>
+        /// 从当前位置移动指定位置
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="length"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public static void SeekSkip(this Stream input, long length)
         {
             if (length == 0)
             {

@@ -3,6 +3,9 @@ using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.IO
 {
+    /// <summary>
+    /// 空的流
+    /// </summary>
     public sealed class EmptyStream : Stream, IReadOnlyStream
     {
         public override bool CanRead => true;
