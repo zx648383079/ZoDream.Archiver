@@ -19,18 +19,8 @@ namespace ZoDream.Shared.Interfaces
         
     }
 
-    public interface IEntryService : IDisposable
+    public interface IEntryService : IServiceCollection
     {
-        public void Add<T>(T instance);
-        public void Add(string key, object? instance);
-        public void AddIf<T>();
-        public T Get<T>();
-        public object Get(Type type);
-        public T Get<T>(string key);
-
-        public bool TryGet<T>([NotNullWhen(true)] out T? instance);
-        public bool TryGet<T>(string key, [NotNullWhen(true)] out T? instance);
-
         public Task<T?> AskAsync<T>();
         /// <summary>
         /// 判断存档点是否存在

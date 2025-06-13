@@ -34,10 +34,11 @@ namespace ZoDream.Shared.Net
                     await _semaphore.WaitAsync(token.Cancellation);
                     try
                     {
-                        using var fs = File.Create($"_temp{offset}");
+                        using var fs = File.Create($"_temp{offset}", 1024, FileOptions.DeleteOnClose);
                         if (currentOffset == 0)
                         {
-                            await service.SaveAsAsync(response, fs, token);
+                            using var input = await service.ReadAsStreamAsync(response);
+                            await NetService.CopyToAsync(input, currentLength, fs, token);
                         } else
                         {
                             using var chunk = await service.SendAsync(request,

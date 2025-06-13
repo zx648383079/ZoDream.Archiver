@@ -81,7 +81,7 @@ namespace ZoDream.Shared.Net
             Stream output, RequestToken token)
         {
             using var input = await ReadAsStreamAsync(response);
-            await CopyToWithMemoryAsync(output, input, token);
+            await CopyToWithMemoryAsync(input, output, token);
         }
 
         public long GetContentLength(HttpResponseMessage response)
@@ -142,24 +142,41 @@ namespace ZoDream.Shared.Net
             Stream output,
             RequestToken token)
         {
+            await CopyToAsync(input, 0, output, token);
+        }
+        /// <summary>
+        /// 直接保存
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="length">只读取指定长度的数据</param>
+        /// <param name="output"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static async Task CopyToAsync(Stream input,
+            long length,
+            Stream output,
+            RequestToken token)
+        {
             var buffer = new byte[CHUNK_SIZE];
             var byteReceived = 0L;
             int size;
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                if (token.IsCancellationRequested)
-                {
-                    break;
-                }
                 // 检查暂停
                 await token.WaitWhilePausedAsync();
-                size = input.Read(buffer, 0, buffer.Length);
+                var maxLength = Math.Min(buffer.Length, (int)(length - byteReceived));
+                size = input.Read(buffer, 0, maxLength);
                 if (size == 0)
                 {
                     break;
                 }
                 output.Write(buffer, 0, size);
                 byteReceived += size;
+                token.Emit(byteReceived);
+                if (byteReceived >= length)
+                {
+                    break;
+                }
             }
         }
 
@@ -173,18 +190,18 @@ namespace ZoDream.Shared.Net
             Stream output, RequestToken token)
         {
             var pipe = new Pipe();
-            var writing = WritePipeAsync(input, pipe.Writer);
-            var reading = ReadPipeAsync(pipe.Reader, output);
+            var writing = WritePipeAsync(input, pipe.Writer, token);
+            var reading = ReadPipeAsync(pipe.Reader, output, token);
             await Task.WhenAll(writing, reading);
         }
 
-        private static async Task WritePipeAsync(Stream stream,
-            PipeWriter writer)
+        private static async Task WritePipeAsync(Stream input,
+            PipeWriter writer, RequestToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 var memory = writer.GetMemory(CHUNK_SIZE);
-                int bytesRead = await stream.ReadAsync(memory);
+                int bytesRead = await input.ReadAsync(memory);
                 if (bytesRead == 0)
                 {
                     break;
@@ -200,15 +217,18 @@ namespace ZoDream.Shared.Net
         }
 
         private static async Task ReadPipeAsync(PipeReader reader,
-            Stream fileStream)
+            Stream output, RequestToken token)
         {
-            while (true)
+            var byteReceived = 0L;
+            while (!token.IsCancellationRequested)
             {
                 var result = await reader.ReadAsync();
                 var buffer = result.Buffer;
                 foreach (var segment in buffer)
                 {
-                    await fileStream.WriteAsync(segment);
+                    await output.WriteAsync(segment);
+                    byteReceived += segment.Length;
+                    token.Emit(byteReceived);
                 }
                 reader.AdvanceTo(buffer.End);
                 if (result.IsCompleted)
