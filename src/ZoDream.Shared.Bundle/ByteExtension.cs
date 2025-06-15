@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ZoDream.Shared.Bundle
 {
     public static class ByteExtension
     {
+        [DebuggerStepThrough] public static byte RotateLeft(this byte val, int count) => (byte)((val << count) | (val >> (8 - count)));
+        [DebuggerStepThrough] public static Span<T> As<T>(this Span<byte> val) where T : struct => MemoryMarshal.Cast<byte, T>(val);
+        [DebuggerStepThrough] public static Span<byte> AsBytes<T>(this Span<T> val) where T : struct => MemoryMarshal.Cast<T, byte>(val);
+        [DebuggerStepThrough] public static ReadOnlySpan<T> As<T>(this ReadOnlySpan<byte> val) where T : struct => MemoryMarshal.Cast<byte, T>(val);
+
         public static bool Equal(this byte[] buffer, byte[] value)
         {
             return buffer.Length == value.Length && StartsWith(buffer, value);
