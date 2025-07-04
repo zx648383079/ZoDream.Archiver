@@ -31,7 +31,7 @@ namespace ZoDream.BundleExtractor.EroLabs
                 {
                     foreach (var item in items.EnumerateObject())
                     {
-                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Name)));
+                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Name), string.Empty));
                     }
                 }
             }

@@ -30,6 +30,19 @@ namespace ZoDream.Tests
             var data = input.ToArray();
             Assert.AreEqual(Encoding.UTF8.GetString(data), str);
         }
+        [TestMethod]
+        public void TestLength()
+        {
+            var buffer = new byte[20];
+            var max = 1000;//Math.Pow(1024, 3);
+            for (int i = 251; i < max; i++)
+            {
+                var c = OwnHelper.WriteLength(i, buffer, 0);
+                var res = OwnHelper.ReadLength(buffer, 0, out var rc);
+                Assert.AreEqual(i, (int)res);
+                Assert.AreEqual(c, rc);
+            }
+        }
 
         //[TestMethod]
         public void TestFinder()

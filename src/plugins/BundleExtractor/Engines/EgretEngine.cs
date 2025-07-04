@@ -71,10 +71,10 @@ namespace ZoDream.BundleExtractor.Engines
                 {
                     foreach (var item in data.Resources)
                     {
-                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Url)));
+                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Url), string.Empty));
                         if (item.Url.EndsWith("_tex.json"))
                         {
-                            context.Enqueue(new NetRequest(new Uri(file.Source, item.Url.Replace("_tex.json", "_ske.json"))));
+                            context.Enqueue(new NetRequest(new Uri(file.Source, item.Url.Replace("_tex.json", "_ske.json")), string.Empty));
                         }
                     }
                 }
@@ -84,7 +84,7 @@ namespace ZoDream.BundleExtractor.Engines
                 var data = JsonSerializer.Deserialize<JsonFile>(content);
                 if (data is not null)
                 {
-                    context.Enqueue(new NetRequest(new Uri(file.Source, data.ImagePath)));
+                    context.Enqueue(new NetRequest(new Uri(file.Source, data.ImagePath), string.Empty));
                 }
             }
             else if (content.Contains("\"frames\""))
@@ -92,7 +92,7 @@ namespace ZoDream.BundleExtractor.Engines
                 var data = JsonSerializer.Deserialize<FrameSheetFile>(content);
                 if (data is not null)
                 {
-                    context.Enqueue(new NetRequest(new Uri(file.Source, data.File)));
+                    context.Enqueue(new NetRequest(new Uri(file.Source, data.File), string.Empty));
                 }
             }
         }

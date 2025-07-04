@@ -107,14 +107,62 @@ namespace ZoDream.Shared.Compression.Own
             input.Write(WriteLength(length));
         }
 
+        public static int WriteLength(long length, byte[] input, int offset)
+        {
+            if (length <= 250)
+            {
+                input[offset] = (byte)length;
+                return 1;
+            }
+
+            var basic = 250;
+            int i;
+            // 相加
+            for (i = 251; i <= 252; i++)
+            {
+                var plus = i * (i - basic);
+                if (length <= plus + 255)
+                {
+                    input[offset] = (byte)i;
+                    input[offset + 1] = (byte)(length - plus);
+                    return 2;
+                }
+            }
+            // 倍数
+            basic = 252;
+            i = 253;
+            for (; i <= 255; i++)
+            {
+                var len = i - basic + 1;
+                input[offset] = (byte)i;
+                var b = 0L;
+                for (var j = len - 2; j >= 0; j--)
+                {
+                    b += (long)Math.Pow(i, j);
+                }
+                var rate = length - b;
+                for (var j = 0; j < len; j++)
+                {
+                    input[offset + len - j] = (byte)(rate % 256);
+                    rate /= 256;
+                }
+                if (rate == 0)
+                {
+                    return len + 1;
+                }
+            }
+            throw new ArgumentOutOfRangeException();
+        }
+
         public static byte[] WriteLength(long length)
         {
             if (length <= 250)
             {
                 return [(byte)length];
             }
-            var i = 0;
+
             var basic = 250;
+            int i;
             // 相加
             for (i = 251; i <= 252; i++)
             {

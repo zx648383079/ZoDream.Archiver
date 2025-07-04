@@ -78,7 +78,7 @@ namespace ZoDream.BundleExtractor.Engines
                     }
                     path = str;
                 }
-                context.Enqueue(new NetRequest(new Uri(host + path)));
+                context.Enqueue(new NetRequest(new Uri(host + path), string.Empty));
             } else if (file.Name == "hash.dat")
             {
                 using var r = new StreamReader(file.OpenRead());
@@ -98,7 +98,7 @@ namespace ZoDream.BundleExtractor.Engines
                     {
                         continue;
                     }
-                    context.Enqueue(new NetRequest(new Uri(file.Source, line)));
+                    context.Enqueue(new NetRequest(new Uri(file.Source, line), string.Empty));
                 }
             }
             else if (file.Name.EndsWith(".dmxpkg"))
