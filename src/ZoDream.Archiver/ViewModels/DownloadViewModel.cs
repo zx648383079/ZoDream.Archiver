@@ -82,6 +82,7 @@ namespace ZoDream.Archiver.ViewModels
                 Items.Add(new(this, uri)
                 {
                     Name = uri.AbsolutePath,
+                    Target = model.OutputFolder,
                     Status = RequestStatus.Waiting,
                 });
             }

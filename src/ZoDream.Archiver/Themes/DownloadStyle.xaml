@@ -17,37 +17,123 @@
 
     <x:Double x:Key="MetaGap">16</x:Double>
 
-
-
     <DataTemplate x:Key="DefaultTemaplate">
-        <Grid Height="60">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="48" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
-                    <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
-                    <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
-                </StackPanel>
-            </StackPanel>
-        </Grid>
+        <UserControl>
+            <ivy:Interaction.Behaviors>
+                <bhv:MouseHoverBehavior />
+            </ivy:Interaction.Behaviors>
+            <UserControl.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Command="{Binding PlayCommand}" />
+                    <MenuFlyoutItem Command="{Binding DeleteCommand}" />
+                </MenuFlyout>
+            </UserControl.ContextFlyout>
+            <Grid Height="60">
+                <SwipeControl>
+                    <SwipeControl.LeftItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding PlayCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.LeftItems>
+                    <SwipeControl.RightItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Background="{ThemeResource DangerBrush}" Command="{Binding DeleteCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.RightItems>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel
+                            x:Name="PART_CommandPanel"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Visibility="Collapsed">
+                            <AppBarButton Command="{Binding PlayCommand}" IsTabStop="False" />
+                            <AppBarButton Command="{Binding DeleteCommand}" IsTabStop="False" />
+                        </StackPanel>
+                    </Grid>
+                </SwipeControl>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="HoveringStates">
+                        <VisualState x:Name="IsBlur" />
+                        <VisualState x:Name="IsHover">
+                            <VisualState.Setters>
+                                <Setter Target="PART_CommandPanel.Visibility" Value="Visible" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </UserControl>
     </DataTemplate>
     <DataTemplate x:Key="TransferTemaplate">
-        <Grid Height="60">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="48" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
-                <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
-                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
-            </StackPanel>
-        </Grid>
+        <UserControl>
+            <ivy:Interaction.Behaviors>
+                <bhv:MouseHoverBehavior />
+            </ivy:Interaction.Behaviors>
+            <UserControl.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Command="{Binding PauseCommand}" />
+                    <MenuFlyoutItem Command="{Binding StopCommand}" />
+                </MenuFlyout>
+            </UserControl.ContextFlyout>
+            <Grid Height="60">
+                <SwipeControl>
+                    <SwipeControl.LeftItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding PauseCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.LeftItems>
+                    <SwipeControl.RightItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource DangerBrush}" Command="{Binding StopCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.RightItems>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
+                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
+                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                        </StackPanel>
+                        <StackPanel
+                            x:Name="PART_CommandPanel"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Visibility="Collapsed">
+                            <AppBarButton Command="{Binding PauseCommand}" IsTabStop="False" />
+                            <AppBarButton Command="{Binding StopCommand}" IsTabStop="False" />
+                        </StackPanel>
+                    </Grid>
+                </SwipeControl>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="HoveringStates">
+                        <VisualState x:Name="IsBlur" />
+                        <VisualState x:Name="IsHover">
+                            <VisualState.Setters>
+                                <Setter Target="PART_CommandPanel.Visibility" Value="Visible" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </UserControl>
     </DataTemplate>
     <DataTemplate x:Key="FinishTemaplate">
         <UserControl>
@@ -56,14 +142,20 @@
             </ivy:Interaction.Behaviors>
             <UserControl.ContextFlyout>
                 <MenuFlyout>
+                    <MenuFlyoutItem Command="{Binding ResumeCommand}" />
                     <MenuFlyoutItem Command="{Binding DeleteCommand}" />
                 </MenuFlyout>
             </UserControl.ContextFlyout>
             <Grid Height="60">
                 <SwipeControl>
+                    <SwipeControl.LeftItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding ResumeCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.LeftItems>
                     <SwipeControl.RightItems>
                         <SwipeItems Mode="Execute">
-                            <SwipeItem Background="Red" Command="{Binding DeleteCommand}" />
+                            <SwipeItem Background="{ThemeResource DangerBrush}" Command="{Binding DeleteCommand}" />
                         </SwipeItems>
                     </SwipeControl.RightItems>
                     <Grid>
@@ -104,6 +196,64 @@
             </Grid>
         </UserControl>
     </DataTemplate>
+    <DataTemplate x:Key="PausedTemaplate">
+        <UserControl>
+            <ivy:Interaction.Behaviors>
+                <bhv:MouseHoverBehavior />
+            </ivy:Interaction.Behaviors>
+            <UserControl.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Command="{Binding ResumeCommand}" />
+                    <MenuFlyoutItem Command="{Binding StopCommand}" />
+                </MenuFlyout>
+            </UserControl.ContextFlyout>
+            <Grid Height="60">
+                <SwipeControl>
+                    <SwipeControl.LeftItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding ResumeCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.LeftItems>
+                    <SwipeControl.RightItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem Background="{ThemeResource DangerBrush}" Command="{Binding StopCommand}" />
+                        </SwipeItems>
+                    </SwipeControl.RightItems>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
+                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
+                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                        </StackPanel>
+                        <StackPanel
+                            x:Name="PART_CommandPanel"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Visibility="Collapsed">
+                            <AppBarButton Command="{Binding ResumeCommand}" IsTabStop="False" />
+                            <AppBarButton Command="{Binding StopCommand}" IsTabStop="False" />
+                        </StackPanel>
+                    </Grid>
+                </SwipeControl>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="HoveringStates">
+                        <VisualState x:Name="IsBlur" />
+                        <VisualState x:Name="IsHover">
+                            <VisualState.Setters>
+                                <Setter Target="PART_CommandPanel.Visibility" Value="Visible" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </UserControl>
+    </DataTemplate>
 
 
     <ctl:DownloadItemTemplateSelector
@@ -112,7 +262,7 @@
         DefaultTemplate="{StaticResource DefaultTemaplate}"
         FinishedTemplate="{StaticResource FinishTemaplate}"
         OccurredTemplate="{StaticResource FinishTemaplate}"
-        PausedTemplate="{StaticResource TransferTemaplate}"
+        PausedTemplate="{StaticResource PausedTemaplate}"
         TransferTemplate="{StaticResource TransferTemaplate}" />
 
     <Style x:Key="FullListItem" TargetType="ListBoxItem">

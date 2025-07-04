@@ -19,6 +19,10 @@ namespace ZoDream.Archiver.Converters
             {
                 return res ? ListViewSelectionMode.Extended : ListViewSelectionMode.Single;
             }
+            if (targetType == typeof(SelectionMode))
+            {
+                return res ? SelectionMode.Extended : SelectionMode.Single;
+            }
             return res;
         }
 

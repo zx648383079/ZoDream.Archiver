@@ -8,6 +8,8 @@
     <Color x:Key="PanelColor">#FFFFFF</Color>
     <Color x:Key="BodyTextColor">#333</Color>
     <Color x:Key="SecondaryTextColor">#747474</Color>
+    <Color x:Key="DangerColor">Red</Color>
+    <Color x:Key="SuccessColor">Green</Color>
 
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
@@ -17,5 +19,7 @@
     <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}" />
     <SolidColorBrush x:Key="BodyTextBrush" Color="{StaticResource BodyTextColor}" />
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
 
 </ResourceDictionary>

@@ -88,7 +88,17 @@ namespace ZoDream.Archiver.ViewModels
         }
         private void TapResume(object? _)
         {
-            _tokenSource.Resume();
+            if (Status == RequestStatus.Paused)
+            {
+                _tokenSource.Resume();
+                return;
+            }
+            if (Status is RequestStatus.Sending or RequestStatus.Receiving)
+            {
+                return;
+            }
+            _tokenSource.Cancel();
+            _host.PlayCommand.Execute(this);
         }
         private void TapPause(object? _)
         {
@@ -117,20 +127,25 @@ namespace ZoDream.Archiver.ViewModels
 
         private void Token_RequestChanged(RequestChangedEventArgs args)
         {
-            if (!string.IsNullOrEmpty(args.FileName))
-            {
-                Name = args.FileName;
-            }
-            if (args.Length != 0)
-            {
-                Length = args.Length;
-            }
-            Status = args.Status;
+            App.ViewModel.DispatcherQueue.TryEnqueue(() => {
+                if (!string.IsNullOrEmpty(args.FileName))
+                {
+                    Name = args.FileName;
+                }
+                if (args.Length != 0)
+                {
+                    Length = args.Length;
+                }
+                Status = args.Status;
+            });
         }
 
         private void Token_ProgressChanged(long received)
         {
-            Value = received;
+            App.ViewModel.DispatcherQueue.TryEnqueue(() => {
+                Value = received;
+            });
+            
         }
     }
 }

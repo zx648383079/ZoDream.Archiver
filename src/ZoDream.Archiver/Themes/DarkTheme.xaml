@@ -7,6 +7,8 @@
     <Color x:Key="BodyColor">#333</Color>
     <Color x:Key="BodyTextColor">#fff</Color>
     <Color x:Key="SecondaryTextColor">#767676</Color>
+    <Color x:Key="DangerColor">Red</Color>
+    <Color x:Key="SuccessColor">Green</Color>
 
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
@@ -15,4 +17,6 @@
     <SolidColorBrush x:Key="BodyBrush" Color="{StaticResource BodyColor}" />
     <SolidColorBrush x:Key="BodyTextBrush" Color="{StaticResource BodyTextColor}" />
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
 </ResourceDictionary>

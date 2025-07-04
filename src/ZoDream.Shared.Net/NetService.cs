@@ -90,7 +90,16 @@ namespace ZoDream.Shared.Net
         }
         public string GetFileName(HttpResponseMessage response)
         {
-            return response.Content.Headers.ContentDisposition?.FileName ?? string.Empty;
+            var res = response.Content.Headers.ContentDisposition?.FileName;
+            if (res?.Length > 0)
+            {
+                if (res[0] is '"' or '\'')
+                {
+                    return res[1..^1];
+                }
+                return res;
+            }
+            return string.Empty;
         }
         public bool GetAcceptRange(HttpResponseMessage response)
         {
