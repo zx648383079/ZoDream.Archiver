@@ -70,6 +70,10 @@ namespace ZoDream.Shared.Net
             _service, res, data, fs) 
             : new NetReceiver(_service, res, fs);
             await receiver.StartAsync(request.Token);
+            request.Token.Emit(new BundleChangedEventArgs()
+            {
+                Status = BundleStatus.Completed,
+            });
         }
     }
 }

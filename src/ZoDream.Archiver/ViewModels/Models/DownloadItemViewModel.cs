@@ -29,6 +29,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private readonly DownloadViewModel _host;
         private readonly BundleTokenSource _tokenSource = new();
+        private readonly Bandwidth _bandwidth = new();
         public Uri Source { get; private set; }
         public string Target { get; set; } = string.Empty;
 
@@ -65,12 +66,8 @@ namespace ZoDream.Archiver.ViewModels
             set => SetProperty(ref _value, value);
         }
 
-        private long _speed;
 
-        public long Speed {
-            get => _speed;
-            set => SetProperty(ref _speed, value);
-        }
+        public long Speed => (long)_bandwidth.Speed;
 
         public int ElapsedTime => Speed > 0 ? (int)((Length - Value) / Speed) : 0;
 
@@ -85,7 +82,21 @@ namespace ZoDream.Archiver.ViewModels
             set => SetProperty(ref _lastModified, value);
         }
 
+        private double _progress;
 
+        public double Progress {
+            get => _progress;
+            set => SetProperty(ref _progress, value);
+        }
+
+
+        private string _message = string.Empty;
+
+        public string Message {
+            get => _message;
+            set => SetProperty(ref _message, value);
+        }
+        
 
         public ICommand PlayCommand { get; private set; }
         public ICommand ResumeCommand { get; private set; }
@@ -133,7 +144,8 @@ namespace ZoDream.Archiver.ViewModels
                 Source = Source,
                 Token = _tokenSource.Token,
                 RequestId = GetHashCode(),
-                Output = Target
+                Output = Target,
+                SuggestedName = Name,
             };
         }
 
@@ -147,9 +159,11 @@ namespace ZoDream.Archiver.ViewModels
                 if (args.Length != 0)
                 {
                     Length = args.Length;
+                    Progress = 0;
                 }
                 Status = args.Status;
                 LastModified = DateTime.Now;
+                Message = ConverterHelper.FormatSpeed(this);
             });
         }
 
@@ -157,6 +171,9 @@ namespace ZoDream.Archiver.ViewModels
         {
             App.ViewModel.DispatcherQueue.TryEnqueue(() => {
                 Value = received;
+                _bandwidth.CalculateSpeed(Value);
+                Progress = Length > 0 ? (double)Value * 100 / Length : 0;
+                Message = ConverterHelper.FormatSpeed(this);
             });
             
         }

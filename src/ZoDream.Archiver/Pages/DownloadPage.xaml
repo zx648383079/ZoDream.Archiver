@@ -92,8 +92,8 @@
                                             <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{x:Bind cvt:ConverterHelper.Format(Status), Mode=OneWay}" />
                                         </StackPanel>
                                         <StackPanel Orientation="Vertical" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}">
-                                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
-                                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                                            <ProgressBar Maximum="100" Value="{x:Bind Progress, Mode=OneWay}" />
+                                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{x:Bind Message, Mode=OneWay}" />
                                         </StackPanel>
                                     </StackPanel>
                                     <StackPanel

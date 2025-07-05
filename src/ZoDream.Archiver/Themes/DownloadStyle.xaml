@@ -13,7 +13,6 @@
 
     <cvt:StatusConverter x:Key="StatusCvt" />
     <cvt:DateTimeConverter x:Key="DateCvt" />
-    <cvt:SpeedConverter x:Key="SpeedCvt" />
 
     <x:Double x:Key="MetaGap">16</x:Double>
 
@@ -108,8 +107,8 @@
                         <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
-                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
-                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                            <ProgressBar Maximum="100" Value="{Binding Progress}" />
+                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Message}" />
                         </StackPanel>
                         <StackPanel
                             x:Name="PART_CommandPanel"
@@ -227,8 +226,8 @@
                         <FontIcon Glyph="{Binding Icon}" Style="{StaticResource HeaderIcon}" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
-                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
-                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                            <ProgressBar Maximum="100" Value="{Binding Progress}" />
+                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Message}" />
                         </StackPanel>
                         <StackPanel
                             x:Name="PART_CommandPanel"

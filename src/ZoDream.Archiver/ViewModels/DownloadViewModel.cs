@@ -11,6 +11,7 @@ using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Net;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -89,7 +90,7 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 Items.Add(new(this, uri)
                 {
-                    Name = uri.AbsolutePath,
+                    Name = NetService.GetFileName(uri),
                     Target = model.OutputFolder,
                     Status = BundleStatus.Waiting,
                 });
