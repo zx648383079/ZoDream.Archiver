@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
+using ZoDream.Shared.Net;
 
 namespace ZoDream.Tests
 {
@@ -48,6 +49,11 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestCombine()
         {
+            var folder = NetService.Combine("D:\\a\\a\\d",
+                new Uri("https://zodream.cn/d/b"),
+                new Uri("https://zodream.cn/nav/c")
+                );
+            Assert.AreEqual(folder, "D:\\a\\a\\nav");
             var res = BundleStorage.Combine("D://hhh", "a.t");
             Assert.IsTrue(res.IndexOf('#') > 0);
         }

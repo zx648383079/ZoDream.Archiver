@@ -14,9 +14,11 @@ namespace ZoDream.Shared.Bundle
 
         public string Output => outputFolder;
 
-        public IBundleExecutor? Executor {  get; init; }
+        public IBundleExecutor? Executor { get; init; }
 
         public long RequestId => requestId;
+
+        public string? SuggestedName { get; init; }
 
         public IBundleToken Token => token;
     }

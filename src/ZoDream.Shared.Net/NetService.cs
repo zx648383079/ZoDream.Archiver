@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -140,6 +141,65 @@ namespace ZoDream.Shared.Net
 
         public void Dispose()
         {
+        }
+
+        /// <summary>
+        /// 获取文件名
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string GetFileName(Uri source)
+        {
+            var res = source.Segments.LastOrDefault()?.Trim('/');
+            if (string.IsNullOrWhiteSpace(res))
+            {
+                return "index.html";
+            }
+            return res; 
+        }
+        /// <summary>
+        /// 合成文件夹路径
+        /// </summary>
+        /// <param name="baseFolder"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string Combine(string baseFolder, Uri source)
+        {
+            if (source.Segments.Length <= 2)
+            {
+                return baseFolder;
+            }
+            return Path.Combine(baseFolder, string.Join(string.Empty, source.Segments[1..^1]));
+        }
+        /// <summary>
+        /// 根据原始网址及路径生成新的文件夹路径
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="baseUri"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string Combine(string folder, Uri baseUri, Uri source)
+        {
+            var i = baseUri.Segments.Length - 2;
+            for (; i > 0; i--)
+            {
+                if (source.Segments.Length > i && source.Segments[i] == baseUri.Segments[i])
+                {
+                    break;
+                }
+                var next = Path.GetDirectoryName(folder);
+                if (string.IsNullOrWhiteSpace(next))
+                {
+                    break;
+                }
+                folder = next;
+            }
+            if (i + 2 > source.Segments.Length)
+            {
+                return folder;
+            }
+            return Path.Combine(folder, 
+                string.Join(string.Empty, source.Segments[(i + 1)..^1]).TrimEnd('/'));
         }
 
         /// <summary>

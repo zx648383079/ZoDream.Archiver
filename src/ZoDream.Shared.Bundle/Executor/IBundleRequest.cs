@@ -25,6 +25,8 @@ namespace ZoDream.Shared.Bundle
         /// 保存的文件夹
         /// </summary>
         public string Output {  get; }
+
+        public string? SuggestedName { get; }
     }
 
     public interface INetFileRequest : IFileRequest

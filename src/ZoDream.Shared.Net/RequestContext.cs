@@ -31,6 +31,6 @@ namespace ZoDream.Shared.Net
 
         public IBundleToken Token { get; init; }
 
-
+        public string? SuggestedName { get; init; }
     }
 }

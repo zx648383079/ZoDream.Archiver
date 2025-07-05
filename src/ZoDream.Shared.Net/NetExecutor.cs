@@ -47,6 +47,10 @@ namespace ZoDream.Shared.Net
                 return;
             }
             var fileName = _service.GetFileName(res);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = request.SuggestedName ?? NetService.GetFileName(request.Source);
+            }
             var length = _service.GetContentLength(res);
             var output = Path.Combine(request.Output, fileName);
             request.Token.Emit(new BundleChangedEventArgs()
