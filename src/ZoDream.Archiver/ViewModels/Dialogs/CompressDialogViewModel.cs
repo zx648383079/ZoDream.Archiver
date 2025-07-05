@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using System;
 using System.IO;
 using System.Windows.Input;
@@ -10,11 +12,10 @@ using ZoDream.Shared.Compression.Zip;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class CompressDialogViewModel: BindableBase, IFormValidator
+    public class CompressDialogViewModel: ObservableObject, IFormValidator
     {
         public CompressDialogViewModel()
         {
@@ -29,7 +30,7 @@ namespace ZoDream.Archiver.ViewModels
         public int TypeIndex {
             get => _typeIndex;
             set {
-                Set(ref _typeIndex, value);
+                SetProperty(ref _typeIndex, value);
                 DictVisible = value == 3 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
@@ -40,14 +41,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public int VersionIndex {
             get => _versionIndex;
-            set => Set(ref _versionIndex, value);
+            set => SetProperty(ref _versionIndex, value);
         }
 
         private string[] _subVolumeItems = ["100MB", "500MB", "1GB", "4GB", "8GB"];
 
         public string[] SubVolumeItems {
             get => _subVolumeItems;
-            set => Set(ref _subVolumeItems, value);
+            set => SetProperty(ref _subVolumeItems, value);
         }
 
 
@@ -55,7 +56,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string SubVolumeText {
             get => _subVolumeText;
-            set => Set(ref _subVolumeText, value);
+            set => SetProperty(ref _subVolumeText, value);
         }
 
 
@@ -64,7 +65,7 @@ namespace ZoDream.Archiver.ViewModels
         public string FileName {
             get => _fileName;
             set {
-                Set(ref _fileName, value);
+                SetProperty(ref _fileName, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -74,21 +75,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Password {
             get => _password;
-            set => Set(ref _password, value);
+            set => SetProperty(ref _password, value);
         }
 
         private string _dictFileName = string.Empty;
 
         public string DictFileName {
             get => _dictFileName;
-            set => Set(ref _dictFileName, value);
+            set => SetProperty(ref _dictFileName, value);
         }
 
         private Visibility _dictVisible = Visibility.Collapsed;
 
         public Visibility DictVisible {
             get => _dictVisible;
-            set => Set(ref _dictVisible, value);
+            set => SetProperty(ref _dictVisible, value);
         }
 
 
@@ -98,7 +99,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FileSavePicker();
             picker.FileTypeChoices.Add("压缩文件", [ ".zip", ".tar", 
@@ -113,7 +114,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             FileName = res.Path;
         }
-        private async void TapDict(object? _)
+        private async void TapDict()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");

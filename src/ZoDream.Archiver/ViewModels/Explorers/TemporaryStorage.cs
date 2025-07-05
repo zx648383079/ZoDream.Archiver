@@ -16,20 +16,30 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         private readonly ConcurrentQueue<IDisposable> _items = [];
+        private readonly ConcurrentQueue<StorageFile> _fileItems = [];
 
         public Task<IStorageFileEntry> CreateAsync()
         {
-            return CreateAsync(Guid.NewGuid().ToString());
+            return CreateFileAsync(Guid.NewGuid().ToString());
         }
 
-        public async Task<IStorageFileEntry> CreateAsync(string guid)
+        public async Task<Stream> CreateAsync(string guid)
         {
-            return new StorageFileEntry(await folder.CreateFileAsync(guid));
+            var file = await folder.CreateFileAsync(guid);
+            _fileItems.Enqueue(file);
+            return await file.OpenStreamForWriteAsync();
+        }
+
+        public async Task<IStorageFileEntry> CreateFileAsync(string guid)
+        {
+            var file = await folder.CreateFileAsync(guid);
+            _fileItems.Enqueue(file);
+            return new StorageFileEntry(file);
         }
 
         public async Task ClearAsync()
         {
-            foreach (var item in await folder.GetItemsAsync())
+            while (_fileItems.TryDequeue(out var item))
             {
                 await item.DeleteAsync();
             }

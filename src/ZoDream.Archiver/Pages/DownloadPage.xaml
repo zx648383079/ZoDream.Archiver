@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:bhv="using:ZoDream.Archiver.Behaviors"
+    xmlns:cvt="using:ZoDream.Archiver.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ivy="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:ZoDream.Archiver.Pages"
@@ -43,6 +44,101 @@
                 <bhv:DragFileBehavior Command="{Binding DragCommand}" />
                 <bhv:ListItemDoubleClickBehavior Command="{Binding ViewCommand}" />
             </ivy:Interaction.Behaviors>
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:DownloadItemViewModel">
+                    <UserControl>
+                        <ivy:Interaction.Behaviors>
+                            <bhv:MouseHoverBehavior />
+                        </ivy:Interaction.Behaviors>
+                        <UserControl.ContextFlyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Command="{Binding PlayCommand}" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfNormal(Status), Mode=OneWay}" />
+                                <MenuFlyoutItem Command="{Binding ResumeCommand}" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorked(Status), Mode=OneWay}" />
+                                <MenuFlyoutItem Command="{Binding PauseCommand}" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}" />
+                                <MenuFlyoutItem Command="{Binding StopCommand}" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}" />
+                                <MenuFlyoutItem Command="{Binding DeleteCommand}" Visibility="{x:Bind cvt:ConverterHelper.CollapsedIfWorking(Status), Mode=OneWay}" />
+                            </MenuFlyout>
+                        </UserControl.ContextFlyout>
+                        <Grid Height="60">
+                            <SwipeControl>
+                                <SwipeControl.LeftItems>
+                                    <SwipeItems Mode="Reveal">
+                                        <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding PlayCommand}" />
+                                        <SwipeItem Background="{ThemeResource PrimaryBrush}" Command="{Binding PauseCommand}" />
+                                    </SwipeItems>
+                                </SwipeControl.LeftItems>
+                                <SwipeControl.RightItems>
+                                    <SwipeItems Mode="Execute">
+                                        <SwipeItem Background="{ThemeResource DangerBrush}" Command="{Binding DeleteCommand}" />
+                                    </SwipeItems>
+                                </SwipeControl.RightItems>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="48" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <FontIcon Glyph="{x:Bind Icon, Mode=OneWay}" Style="{StaticResource HeaderIcon}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
+                                        <StackPanel
+                                            Orientation="Horizontal"
+                                            Spacing="{StaticResource MetaGap}"
+                                            Visibility="{x:Bind cvt:ConverterHelper.CollapsedIfWorking(Status), Mode=OneWay}">
+                                            <TextBlock
+                                                Style="{StaticResource MetaLabelStyle}"
+                                                Text="{x:Bind cvt:ConverterHelper.Format(LastModified), Mode=OneWay}"
+                                                Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorked(Status), Mode=OneWay}" />
+                                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{x:Bind cvt:ConverterHelper.FormatSize(Length), Mode=OneWay}" />
+                                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{x:Bind cvt:ConverterHelper.Format(Status), Mode=OneWay}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Vertical" Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}">
+                                            <ProgressBar Maximum="{Binding Length}" Value="{Binding Value}" />
+                                            <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Converter={StaticResource SpeedCvt}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel
+                                        x:Name="PART_CommandPanel"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Orientation="Horizontal"
+                                        Visibility="Collapsed">
+                                        <AppBarButton
+                                            Command="{Binding PlayCommand}"
+                                            IsTabStop="False"
+                                            Visibility="{x:Bind cvt:ConverterHelper.VisibleIfNormal(Status), Mode=OneWay}" />
+                                        <AppBarButton
+                                            Command="{Binding ResumeCommand}"
+                                            IsTabStop="False"
+                                            Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorked(Status), Mode=OneWay}" />
+                                        <AppBarButton
+                                            Command="{Binding PauseCommand}"
+                                            IsTabStop="False"
+                                            Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}" />
+                                        <AppBarButton
+                                            Command="{Binding StopCommand}"
+                                            IsTabStop="False"
+                                            Visibility="{x:Bind cvt:ConverterHelper.VisibleIfWorking(Status), Mode=OneWay}" />
+                                        <AppBarButton
+                                            Command="{Binding DeleteCommand}"
+                                            IsTabStop="False"
+                                            Visibility="{x:Bind cvt:ConverterHelper.CollapsedIfWorking(Status), Mode=OneWay}" />
+                                    </StackPanel>
+                                </Grid>
+                            </SwipeControl>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="HoveringStates">
+                                    <VisualState x:Name="IsBlur" />
+                                    <VisualState x:Name="IsHover">
+                                        <VisualState.Setters>
+                                            <Setter Target="PART_CommandPanel.Visibility" Value="Visible" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </UserControl>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
     </Grid>
 </Page>

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Shared.Net
 {
@@ -51,7 +52,7 @@ namespace ZoDream.Shared.Net
             return await client.SendAsync(request, token);
         }
 
-        public async Task<HttpResponseMessage> SendAsync(RequestContext request)
+        public async Task<HttpResponseMessage> SendAsync(IRequestContext request)
         {
             using var message = PrepareRequest();
             using var client = PrepareClient();
@@ -61,7 +62,7 @@ namespace ZoDream.Shared.Net
             return await client.SendAsync(message, request.Token.Cancellation);
         }
 
-        public async Task<HttpResponseMessage> SendAsync(RequestContext request, RangeHeaderValue range)
+        public async Task<HttpResponseMessage> SendAsync(IRequestContext request, RangeHeaderValue range)
         {
             using var message = PrepareRequest();
             using var client = PrepareClient();
@@ -78,7 +79,7 @@ namespace ZoDream.Shared.Net
         }
 
         public async Task SaveAsAsync(HttpResponseMessage response, 
-            Stream output, RequestToken token)
+            Stream output, IBundleToken token)
         {
             using var input = await ReadAsStreamAsync(response);
             await CopyToWithMemoryAsync(input, output, token);
@@ -149,7 +150,7 @@ namespace ZoDream.Shared.Net
         /// <param name="token"></param>
         public static async Task CopyToAsync(Stream input,
             Stream output,
-            RequestToken token)
+            IBundleToken token)
         {
             await CopyToAsync(input, 0, output, token);
         }
@@ -164,7 +165,7 @@ namespace ZoDream.Shared.Net
         public static async Task CopyToAsync(Stream input,
             long length,
             Stream output,
-            RequestToken token)
+            IBundleToken token)
         {
             var buffer = new byte[CHUNK_SIZE];
             var byteReceived = 0L;
@@ -196,7 +197,7 @@ namespace ZoDream.Shared.Net
         /// <param name="output"></param>
         /// <returns></returns>
         public static async Task CopyToWithMemoryAsync(Stream input,
-            Stream output, RequestToken token)
+            Stream output, IBundleToken token)
         {
             var pipe = new Pipe();
             var writing = WritePipeAsync(input, pipe.Writer, token);
@@ -205,7 +206,7 @@ namespace ZoDream.Shared.Net
         }
 
         private static async Task WritePipeAsync(Stream input,
-            PipeWriter writer, RequestToken token)
+            PipeWriter writer, IBundleToken token)
         {
             while (!token.IsCancellationRequested)
             {
@@ -226,7 +227,7 @@ namespace ZoDream.Shared.Net
         }
 
         private static async Task ReadPipeAsync(PipeReader reader,
-            Stream output, RequestToken token)
+            Stream output, IBundleToken token)
         {
             var byteReceived = 0L;
             while (!token.IsCancellationRequested)

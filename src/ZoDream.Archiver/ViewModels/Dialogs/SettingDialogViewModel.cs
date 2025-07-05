@@ -1,13 +1,14 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class SettingDialogViewModel : BindableBase
+    public class SettingDialogViewModel : ObservableObject
     {
 
         public SettingDialogViewModel()
@@ -31,28 +32,28 @@ namespace ZoDream.Archiver.ViewModels
 
         public string FFmpegBin {
             get => _ffmpegBin;
-            set => Set(ref _ffmpegBin, value);
+            set => SetProperty(ref _ffmpegBin, value);
         }
 
         private string _temporaryFolder = string.Empty;
 
         public string TemporaryFolder {
             get => _temporaryFolder;
-            set => Set(ref _temporaryFolder, value);
+            set => SetProperty(ref _temporaryFolder, value);
         }
 
         private string _modelFormat;
 
         public string ModelFormat {
             get => _modelFormat;
-            set => Set(ref _modelFormat, value);
+            set => SetProperty(ref _modelFormat, value);
         }
 
         private int _maxBatchCount = 100;
 
         public int MaxBatchCount {
             get => _maxBatchCount;
-            set => Set(ref _maxBatchCount, value);
+            set => SetProperty(ref _maxBatchCount, value);
         }
 
 
@@ -60,7 +61,7 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand OpenTemporaryCommand { get; private set; }
         public ICommand ClearTemporaryCommand { get; private set; }
 
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -81,7 +82,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private async void TapOpenTemporary(object? _)
+        private async void TapOpenTemporary()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -94,7 +95,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             TemporaryFolder = folder.Path;
         }
-        private async void TapClearTemporary(object? _)
+        private async void TapClearTemporary()
         {
             ITemporaryStorage storage = string.IsNullOrWhiteSpace(TemporaryFolder) ? new TemporaryStorage() : new Shared.IO.TemporaryStorage(TemporaryFolder);
             await storage.ClearAsync();

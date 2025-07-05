@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Data;
 using System;
 using ZoDream.Archiver.ViewModels;
-using ZoDream.Shared.Net;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Archiver.Converters
 {
@@ -11,7 +11,7 @@ namespace ZoDream.Archiver.Converters
         {
             if (value is DownloadItemViewModel d)
             {
-                if (d.Status == RequestStatus.Paused)
+                if (d.Status == BundleStatus.Paused)
                 {
                     return $"{SizeConverter.FormatSize(d.Value)}/{SizeConverter.FormatSize(d.Length)}, {StatusConverter.Format(d.Status)}";
                 }

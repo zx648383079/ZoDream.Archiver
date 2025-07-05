@@ -8,6 +8,7 @@ namespace ZoDream.Shared.Interfaces
         public void Add<T>(T instance);
         public void Add(string key, object? instance);
         public void AddIf<T>();
+        public void AddIf<T>(T? instance);
         public T Get<T>();
         public object Get(Type type);
         public T Get<T>(string key);

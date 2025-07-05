@@ -25,7 +25,14 @@ namespace ZoDream.Shared.IO
             return Task.FromResult<IStorageFileEntry>(new StorageFileEntry(fullPath));
         }
 
-        public Task<IStorageFileEntry> CreateAsync(string guid)
+        public Task<Stream> CreateAsync(string guid)
+        {
+            var fullPath = Path.Combine(folder, SafePathRegex().Replace(guid, "_"));
+            _fileItems.Enqueue(fullPath);
+            return Task.FromResult<Stream>(File.Create(fullPath, 1024, FileOptions.DeleteOnClose));
+        }
+
+        public Task<IStorageFileEntry> CreateFileAsync(string guid)
         {
             var fullPath = Path.Combine(folder, SafePathRegex().Replace(guid, "_"));
             _fileItems.Enqueue(fullPath);

@@ -1,9 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace ZoDream.Shared.Net
+namespace ZoDream.Shared.Bundle
 {
-    public struct RequestToken(RequestTokenSource source)
+    public struct BundleToken(BundleTokenSource source) : IBundleToken
     {
         public readonly bool IsPaused => source.IsPaused;
 
@@ -16,7 +16,7 @@ namespace ZoDream.Shared.Net
             return source.WaitWhilePausedAsync();
         }
 
-        public readonly void Emit(RequestChangedEventArgs args)
+        public readonly void Emit(BundleChangedEventArgs args)
         {
             source.Emit(args);
         }

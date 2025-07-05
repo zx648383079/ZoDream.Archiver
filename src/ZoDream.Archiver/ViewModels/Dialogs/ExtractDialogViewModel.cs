@@ -1,13 +1,14 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using System;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ExtractDialogViewModel : BindableBase, IFormValidator
+    public class ExtractDialogViewModel : ObservableObject, IFormValidator
     {
         public ExtractDialogViewModel()
         {
@@ -19,7 +20,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string[] TypeItems {
             get => _typeItems;
-            set => Set(ref _typeItems, value);
+            set => SetProperty(ref _typeItems, value);
         }
 
         private int _typeIndex;
@@ -27,7 +28,7 @@ namespace ZoDream.Archiver.ViewModels
         public int TypeIndex {
             get => _typeIndex;
             set {
-                Set(ref _typeIndex, value);
+                SetProperty(ref _typeIndex, value);
             }
         }
 
@@ -38,7 +39,7 @@ namespace ZoDream.Archiver.ViewModels
         public string FileName {
             get => _fileName;
             set {
-                Set(ref _fileName, value);
+                SetProperty(ref _fileName, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -48,7 +49,7 @@ namespace ZoDream.Archiver.ViewModels
         public string Password {
             get => _password;
             set {
-                Set(ref _password, value);
+                SetProperty(ref _password, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -58,7 +59,7 @@ namespace ZoDream.Archiver.ViewModels
         public string DictFileName {
             get => _dictFileName;
             set {
-                Set(ref _dictFileName, value);
+                SetProperty(ref _dictFileName, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -67,21 +68,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public bool OnlySelected {
             get => _onlySelected;
-            set => Set(ref _onlySelected, value);
+            set => SetProperty(ref _onlySelected, value);
         }
 
         private Visibility _isSelected = Visibility.Collapsed;
 
         public Visibility IsSelected {
             get => _isSelected;
-            set => Set(ref _isSelected, value);
+            set => SetProperty(ref _isSelected, value);
         }
 
         private Visibility _isEncrypted = Visibility.Collapsed;
 
         public Visibility IsEncrypted {
             get => _isEncrypted;
-            set => Set(ref _isEncrypted, value);
+            set => SetProperty(ref _isEncrypted, value);
         }
 
         public bool IsValid {
@@ -103,7 +104,7 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }
 
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -117,7 +118,7 @@ namespace ZoDream.Archiver.ViewModels
             FileName = folder.Path;
         }
 
-        private async void TapDict(object? _)
+        private async void TapDict()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");

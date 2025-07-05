@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,11 +13,10 @@ using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Media;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ExplorerViewModel: BindableBase
+    public class ExplorerViewModel: ObservableObject
     {
         public ExplorerViewModel()
         {
@@ -23,7 +24,7 @@ namespace ZoDream.Archiver.ViewModels
             AddFolderCommand = UICommand.AddFolder(TapAddFolder);
             DeleteCommand = UICommand.Delete(TapDelete);
             SaveCommand = UICommand.Save(TapSaveAs);
-            ViewCommand = UICommand.View(TapView);
+            ViewCommand = UICommand.View<object>(TapView);
             BackCommand = UICommand.Backward(TapBack);
             SettingCommand = UICommand.Setting(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
@@ -51,14 +52,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public ObservableCollection<ISourceEntry> FileItems {
             get => _fileItems;
-            set => Set(ref _fileItems, value);
+            set => SetProperty(ref _fileItems, value);
         }
 
         private EntryViewModel? _selectedItem;
 
         public EntryViewModel? SelectedItem {
             get => _selectedItem;
-            set => Set(ref _selectedItem, value);
+            set => SetProperty(ref _selectedItem, value);
         }
 
         public bool CanGoBack => _routeItems.Count > 0;
@@ -75,7 +76,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand SettingCommand { get; private set; }
 
-        private async void TapSetting(object? _)
+        private async void TapSetting()
         {
             var picker = new SettingDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -98,7 +99,7 @@ namespace ZoDream.Archiver.ViewModels
                 _app.Setting.Get<string>(SettingNames.FFmpegPath));
         }
 
-        private void TapBack(object? _)
+        private void TapBack()
         {
             if (!CanGoBack)
             {
@@ -110,7 +111,7 @@ namespace ZoDream.Archiver.ViewModels
             Open(item);
         }
 
-        private async void TapAdd(object? _)
+        private async void TapAdd()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");
@@ -142,7 +143,7 @@ namespace ZoDream.Archiver.ViewModels
             Open(DirectoryEntry.Empty);
         }
 
-        private async void TapAddFolder(object? _)
+        private async void TapAddFolder()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -201,7 +202,8 @@ namespace ZoDream.Archiver.ViewModels
             }
             if (e is MediaEntryStream media)
             {
-                var file = await _service.Get<ITemporaryStorage>().CreateAsync(DateTime.Now.Ticks + media.Name);
+                var file = await _service.Get<ITemporaryStorage>()
+                    .CreateFileAsync(DateTime.Now.Ticks + media.Name);
                 using (var fs = await file.OpenWriteAsync())
                 {
                     media.SaveAs(fs);
@@ -224,7 +226,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private async void TapSaveAs(object? _)
+        private async void TapSaveAs()
         {
             if (FileItems.Count > 0)
             {
@@ -251,7 +253,7 @@ namespace ZoDream.Archiver.ViewModels
             }, token);
         }
 
-        private void TapDelete(object? _)
+        private void TapDelete()
         {
             if (SelectedItem is null || CanGoBack)
             {

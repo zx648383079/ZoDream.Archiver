@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Shared.Net
 {
     public class NetReceiver(
         INetService service,
-        HttpResponseMessage response, 
-        RequestContext request) : INetReceiver
+        HttpResponseMessage response, Stream output) : INetReceiver
     {
     
 
@@ -19,15 +19,9 @@ namespace ZoDream.Shared.Net
         {
         }
 
-        public async Task StartAsync(RequestToken token = default)
+        public async Task StartAsync(IBundleToken token)
         {
-            var fileName = service.GetFileName(response);
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                // TODO
-            }
-            using var fs = File.Create(fileName);
-            await service.SaveAsAsync(response, fs, token);
+            await service.SaveAsAsync(response, output, token);
         }
 
         public void Stop()

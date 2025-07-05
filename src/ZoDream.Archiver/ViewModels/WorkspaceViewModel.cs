@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,11 +16,10 @@ using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class WorkspaceViewModel : BindableBase
+    public class WorkspaceViewModel : ObservableObject
     {
         public WorkspaceViewModel()
         {
@@ -44,21 +45,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public ObservableCollection<IReadOnlyEntry> FilteredItems {
             get => _filteredItems;
-            set => Set(ref _filteredItems, value);
+            set => SetProperty(ref _filteredItems, value);
         }
 
         private IReadOnlyEntry? _selectedItem;
 
         public IReadOnlyEntry? SelectedItem {
             get => _selectedItem;
-            set => Set(ref _selectedItem, value);
+            set => SetProperty(ref _selectedItem, value);
         }
 
         private bool _isFiltered;
 
         public bool IsFiltered {
             get => _isFiltered;
-            set => Set(ref _isFiltered, value);
+            set => SetProperty(ref _isFiltered, value);
         }
 
 
@@ -75,7 +76,7 @@ namespace ZoDream.Archiver.ViewModels
 
 
 
-        private async void TapSaveAs(object? _)
+        private async void TapSaveAs()
         {
             if (!_entryItems.Any())
             {
@@ -125,24 +126,24 @@ namespace ZoDream.Archiver.ViewModels
             }, token);
         }
 
-        private void TapDelete(object? _)
+        private void TapDelete()
         {
 
         }
-        private void TapDrag(object? _)
+        private void TapDrag()
         {
 
         }
-        private void TapAdd(object? _)
+        private void TapAdd()
         {
 
         }
-        private async void TapView(object? _)
+        private async void TapView()
         {
             var dialog = new PropertyDialog();
             await _app.OpenDialogAsync(dialog);
         }
-        private async void TapInfo(object? _)
+        private async void TapInfo()
         {
             var picker = new SettingDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -152,7 +153,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             await picker.ViewModel.SaveAsync();
         }
-        private async void TapFind(object? _)
+        private async void TapFind()
         {
             var picker = new SearchDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -187,7 +188,7 @@ namespace ZoDream.Archiver.ViewModels
         }
 
 
-        private void TapStopFilter(object? _)
+        private void TapStopFilter()
         {
             IsFiltered = false;
             foreach (var item in _entryItems)
@@ -302,7 +303,7 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 _entryItems.Add(item);
             }
-            TapStopFilter(null);
+            TapStopFilter();
         }
     }
 }

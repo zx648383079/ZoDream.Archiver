@@ -135,7 +135,7 @@
             </Grid>
         </UserControl>
     </DataTemplate>
-    <DataTemplate x:Key="FinishTemaplate">
+    <DataTemplate x:Key="CompletedTemaplate">
         <UserControl>
             <ivy:Interaction.Behaviors>
                 <bhv:MouseHoverBehavior />
@@ -167,7 +167,7 @@
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource HeaderLabelStyle}" Text="{Binding Name}" />
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource MetaGap}">
-                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding LastAt, Converter={StaticResource DateCvt}}" />
+                                <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding LastModified, Converter={StaticResource DateCvt}}" />
                                 <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
                                 <TextBlock Style="{StaticResource MetaLabelStyle}" Text="{Binding Status, Converter={StaticResource StatusCvt}}" />
                             </StackPanel>
@@ -258,10 +258,10 @@
 
     <ctl:DownloadItemTemplateSelector
         x:Key="ItemTemplateSelector"
-        CanceledTemplate="{StaticResource FinishTemaplate}"
+        CancelledTemplate="{StaticResource CompletedTemaplate}"
+        CompletedTemplate="{StaticResource CompletedTemaplate}"
         DefaultTemplate="{StaticResource DefaultTemaplate}"
-        FinishedTemplate="{StaticResource FinishTemaplate}"
-        OccurredTemplate="{StaticResource FinishTemaplate}"
+        FailedTemplate="{StaticResource CompletedTemaplate}"
         PausedTemplate="{StaticResource PausedTemaplate}"
         TransferTemplate="{StaticResource TransferTemaplate}" />
 
@@ -269,7 +269,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
     <Style x:Key="DownloadListBox" TargetType="ListBox">
-        <Setter Property="ItemTemplateSelector" Value="{StaticResource ItemTemplateSelector}" />
+        <!--<Setter Property="ItemTemplateSelector" Value="{StaticResource ItemTemplateSelector}" />-->
         <Setter Property="ItemContainerStyle" Value="{StaticResource FullListItem}" />
         <Setter Property="Background" Value="Transparent" />
     </Style>

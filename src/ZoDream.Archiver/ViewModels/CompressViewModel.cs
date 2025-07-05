@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,11 +14,10 @@ using Windows.Storage.Pickers;
 using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.Shared.Compression.Own;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class CompressViewModel : BindableBase
+    public class CompressViewModel : ObservableObject
     {
         public CompressViewModel()
         {
@@ -31,14 +32,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public ObservableCollection<EntryViewModel> FileItems {
             get => _fileItems;
-            set => Set(ref _fileItems, value);
+            set => SetProperty(ref _fileItems, value);
         }
 
         private EntryViewModel? _selectedItem;
 
         public EntryViewModel? SelectedItem {
             get => _selectedItem;
-            set => Set(ref _selectedItem, value);
+            set => SetProperty(ref _selectedItem, value);
         }
 
 
@@ -49,7 +50,7 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand SaveCommand { get; private set; }
         public ICommand DragCommand { get; private set; }
 
-        private async void TapAdd(object? _)
+        private async void TapAdd()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");
@@ -114,7 +115,7 @@ namespace ZoDream.Archiver.ViewModels
             AddFile(items.Select(x => x.Path));
         }
 
-        private async void TapAddFolder(object? _)
+        private async void TapAddFolder()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -128,7 +129,7 @@ namespace ZoDream.Archiver.ViewModels
             AddFile([folder.Path]);
         }
 
-        private async void TapSaveAs(object? _)
+        private async void TapSaveAs()
         {
             var picker = new CompressDialog();
             var app = App.ViewModel;
@@ -176,7 +177,7 @@ namespace ZoDream.Archiver.ViewModels
             
         }
 
-        private void TapDelete(object? _)
+        private void TapDelete()
         {
             if (SelectedItem is null)
             {

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Shared.Net
 {
@@ -22,11 +23,11 @@ namespace ZoDream.Shared.Net
         public Task<HttpResponseMessage> PostAsync(Uri url, HttpContent body, CancellationToken token = default);
         public Task<HttpResponseMessage> DeleteAsync(Uri url, CancellationToken token = default);
 
-        public Task<HttpResponseMessage> SendAsync(RequestContext request);
-        public Task<HttpResponseMessage> SendAsync(RequestContext request, RangeHeaderValue range);
+        public Task<HttpResponseMessage> SendAsync(IRequestContext request);
+        public Task<HttpResponseMessage> SendAsync(IRequestContext request, RangeHeaderValue range);
 
         public Task<Stream> ReadAsStreamAsync(HttpResponseMessage response);
-        public Task SaveAsAsync(HttpResponseMessage response, Stream output, RequestToken token);
+        public Task SaveAsAsync(HttpResponseMessage response, Stream output, IBundleToken token);
 
 
         public long GetContentLength(HttpResponseMessage response);

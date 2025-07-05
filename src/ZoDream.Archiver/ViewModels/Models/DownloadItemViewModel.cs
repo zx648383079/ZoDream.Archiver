@@ -1,16 +1,17 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Windows.Input;
 using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Converters;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Net;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class DownloadItemViewModel : BindableBase, IEntryItem
+    public class DownloadItemViewModel : ObservableObject, IEntryItem
     {
 
         public DownloadItemViewModel(DownloadViewModel host, Uri source)
@@ -27,7 +28,7 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         private readonly DownloadViewModel _host;
-        private readonly RequestTokenSource _tokenSource = new();
+        private readonly BundleTokenSource _tokenSource = new();
         public Uri Source { get; private set; }
         public string Target { get; set; } = string.Empty;
 
@@ -38,37 +39,37 @@ namespace ZoDream.Archiver.ViewModels
         public string Name {
             get => _name;
             set {
-                Set(ref _name, value);
+                SetProperty(ref _name, value);
                 OnPropertyChanged(nameof(Icon));
             }
         }
 
-        private RequestStatus _status;
+        private BundleStatus _status;
 
-        public RequestStatus Status {
+        public BundleStatus Status {
             get => _status;
-            set => Set(ref _status, value);
+            set => SetProperty(ref _status, value);
         }
 
         private long _length;
 
         public long Length {
             get => _length;
-            set => Set(ref _length, value);
+            set => SetProperty(ref _length, value);
         }
 
         private long _value;
 
         public long Value {
             get => _value;
-            set => Set(ref _value, value);
+            set => SetProperty(ref _value, value);
         }
 
         private long _speed;
 
         public long Speed {
             get => _speed;
-            set => Set(ref _speed, value);
+            set => SetProperty(ref _speed, value);
         }
 
         public int ElapsedTime => Speed > 0 ? (int)((Length - Value) / Speed) : 0;
@@ -77,66 +78,78 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Extension => string.IsNullOrWhiteSpace(Name) ? string.Empty : Path.GetExtension(Name).ToLower();
 
+        private DateTime _lastModified = DateTime.MinValue;
+
+        public DateTime LastModified {
+            get => _lastModified;
+            set => SetProperty(ref _lastModified, value);
+        }
+
+
+
         public ICommand PlayCommand { get; private set; }
         public ICommand ResumeCommand { get; private set; }
         public ICommand PauseCommand { get; private set; }
         public ICommand StopCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
-        private void TapPlay(object? _)
+        private void TapPlay()
         {
             _host.PlayCommand.Execute(this);
         }
-        private void TapResume(object? _)
+        private void TapResume()
         {
-            if (Status == RequestStatus.Paused)
+            if (Status == BundleStatus.Paused)
             {
                 _tokenSource.Resume();
                 return;
             }
-            if (Status is RequestStatus.Sending or RequestStatus.Receiving)
+            if (Status is BundleStatus.Sending or BundleStatus.Receiving)
             {
                 return;
             }
             _tokenSource.Cancel();
             _host.PlayCommand.Execute(this);
         }
-        private void TapPause(object? _)
+        private void TapPause()
         {
             _tokenSource.Pause();
+            Status = BundleStatus.Paused;
         }
-        private void TapStop(object? _)
+        private void TapStop()
         {
             _tokenSource.Cancel();
+            Status = BundleStatus.Cancelled;
         }
-        private void TapDelete(object? _)
+        private void TapDelete()
         {
             _host.DeleteCommand.Execute(this);
         }
 
-        public RequestContext CreateRequest()
+        public IBundleRequest CreateRequest()
         {
             return new RequestContext()
             {
                 Method = HttpMethod.Get,
                 Source = Source,
                 Token = _tokenSource.Token,
-                SourceId = GetHashCode(),
-                OutputFolder = Target
+                RequestId = GetHashCode(),
+                Output = Target
             };
         }
 
-        private void Token_RequestChanged(RequestChangedEventArgs args)
+        private void Token_RequestChanged(BundleChangedEventArgs args)
         {
             App.ViewModel.DispatcherQueue.TryEnqueue(() => {
-                if (!string.IsNullOrEmpty(args.FileName))
+                if (!string.IsNullOrEmpty(args.Name))
                 {
-                    Name = args.FileName;
+                    Name = args.Name;
                 }
                 if (args.Length != 0)
                 {
                     Length = args.Length;
                 }
                 Status = args.Status;
+                LastModified = DateTime.Now;
             });
         }
 

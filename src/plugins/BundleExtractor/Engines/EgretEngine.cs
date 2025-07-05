@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Egret;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Storage;
@@ -52,7 +53,7 @@ namespace ZoDream.BundleExtractor.Engines
             return request is IFileRequest f && f.Name.EndsWith(".json");
         }
 
-        public void Execute(IBundleRequest request, IBundleContext context)
+        public async Task ExecuteAsync(IBundleRequest request, IBundleContext context)
         {
             if (request is not INetFileRequest file)
             {
@@ -71,10 +72,10 @@ namespace ZoDream.BundleExtractor.Engines
                 {
                     foreach (var item in data.Resources)
                     {
-                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Url), string.Empty));
+                        context.Enqueue(new NetRequest(request, new Uri(file.Source, item.Url), string.Empty));
                         if (item.Url.EndsWith("_tex.json"))
                         {
-                            context.Enqueue(new NetRequest(new Uri(file.Source, item.Url.Replace("_tex.json", "_ske.json")), string.Empty));
+                            context.Enqueue(new NetRequest(request, new Uri(file.Source, item.Url.Replace("_tex.json", "_ske.json")), string.Empty));
                         }
                     }
                 }
@@ -84,7 +85,7 @@ namespace ZoDream.BundleExtractor.Engines
                 var data = JsonSerializer.Deserialize<JsonFile>(content);
                 if (data is not null)
                 {
-                    context.Enqueue(new NetRequest(new Uri(file.Source, data.ImagePath), string.Empty));
+                    context.Enqueue(new NetRequest(request, new Uri(file.Source, data.ImagePath), string.Empty));
                 }
             }
             else if (content.Contains("\"frames\""))
@@ -92,7 +93,7 @@ namespace ZoDream.BundleExtractor.Engines
                 var data = JsonSerializer.Deserialize<FrameSheetFile>(content);
                 if (data is not null)
                 {
-                    context.Enqueue(new NetRequest(new Uri(file.Source, data.File), string.Empty));
+                    context.Enqueue(new NetRequest(request, new Uri(file.Source, data.File), string.Empty));
                 }
             }
         }

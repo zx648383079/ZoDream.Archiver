@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.EroLabs
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.EroLabs
             return request is IFileRequest;
         }
 
-        public void Execute(IBundleRequest request, IBundleContext context)
+        public async Task ExecuteAsync(IBundleRequest request, IBundleContext context)
         {
             if (request is not INetFileRequest file)
             {
@@ -31,7 +32,7 @@ namespace ZoDream.BundleExtractor.EroLabs
                 {
                     foreach (var item in items.EnumerateObject())
                     {
-                        context.Enqueue(new NetRequest(new Uri(file.Source, item.Name), string.Empty));
+                        context.Enqueue(new NetRequest(request, new Uri(file.Source, item.Name), string.Empty));
                     }
                 }
             }

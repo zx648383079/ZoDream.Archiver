@@ -1,13 +1,13 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.Shared.Logging;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class ProgressDialogViewModel: BindableBase, IDisposable
+    public class ProgressDialogViewModel: ObservableObject, IDisposable
     {
         public ProgressDialogViewModel()
         {
@@ -29,21 +29,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public int ElapsedTime {
             get => _elapsedTime;
-            set => Set(ref _elapsedTime, value);
+            set => SetProperty(ref _elapsedTime, value);
         }
 
         private int _timeLeft;
 
         public int TimeLeft {
             get => _timeLeft;
-            set => Set(ref _timeLeft, value);
+            set => SetProperty(ref _timeLeft, value);
         }
 
         private bool _progressUnknow = true;
 
         public bool ProgressUnknow {
             get => _progressUnknow;
-            set => Set(ref _progressUnknow, value);
+            set => SetProperty(ref _progressUnknow, value);
         }
 
 
@@ -54,7 +54,7 @@ namespace ZoDream.Archiver.ViewModels
         public double Progress {
             get => _progress;
             set {
-                if (Set(ref _progress, value) && (value > 0 || !ProgressUnknow))
+                if (SetProperty(ref _progress, value) && (value > 0 || !ProgressUnknow))
                 {
                     ProgressUnknow = false;
                     Computed(true);
@@ -67,7 +67,7 @@ namespace ZoDream.Archiver.ViewModels
         public string Message {
             get => _message;
             set {
-                Set(ref _message, value);
+                SetProperty(ref _message, value);
             }
         }
 
@@ -75,21 +75,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public string ChildTitle {
             get => _childTitle;
-            set => Set(ref _childTitle, value);
+            set => SetProperty(ref _childTitle, value);
         }
 
         private bool _childEnabled;
 
         public bool ChildEnabled {
             get => _childEnabled;
-            set => Set(ref _childEnabled, value);
+            set => SetProperty(ref _childEnabled, value);
         }
 
         private double _childProgress;
 
         public double ChildProgress {
             get => _childProgress;
-            set => Set(ref _childProgress, value);
+            set => SetProperty(ref _childProgress, value);
         }
 
         /// <summary>

@@ -1,12 +1,16 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
+using ZoDream.BundleExtractor.Engines;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
-using ZoDream.Shared.ViewModel;
+using ZoDream.Shared.Net;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class RequestDialogViewModel: BindableBase, IFormValidator
+    public class RequestDialogViewModel: ObservableObject, IFormValidator
     {
         public RequestDialogViewModel()
         {
@@ -17,28 +21,28 @@ namespace ZoDream.Archiver.ViewModels
 
         public string[] TypeItems {
             get => _typeItems;
-            set => Set(ref _typeItems, value);
+            set => SetProperty(ref _typeItems, value);
         }
 
         private int _typeIndex;
 
         public int TypeIndex {
             get => _typeIndex;
-            set => Set(ref _typeIndex, value);
+            set => SetProperty(ref _typeIndex, value);
         }
 
-        private string[] _engineItems = ["Auto",];
+        private string[] _engineItems = ["Auto", "Egret"];
 
         public string[] EngineItems {
             get => _engineItems;
-            set => Set(ref _engineItems, value);
+            set => SetProperty(ref _engineItems, value);
         }
 
         private int _engineIndex;
 
         public int EngineIndex {
             get => _engineIndex;
-            set => Set(ref _engineIndex, value);
+            set => SetProperty(ref _engineIndex, value);
         }
 
         public ArchiveExtractMode ExtractMode {
@@ -51,7 +55,7 @@ namespace ZoDream.Archiver.ViewModels
         public string Link {
             get => _link;
             set {
-                Set(ref _link, value);
+                SetProperty(ref _link, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -62,7 +66,7 @@ namespace ZoDream.Archiver.ViewModels
         public string OutputFolder {
             get => _outputFolder;
             set {
-                Set(ref _outputFolder, value);
+                SetProperty(ref _outputFolder, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -71,49 +75,49 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Password {
             get => _password;
-            set => Set(ref _password, value);
+            set => SetProperty(ref _password, value);
         }
 
         private bool _enabledImage;
 
         public bool EnabledImage {
             get => _enabledImage;
-            set => Set(ref _enabledImage, value);
+            set => SetProperty(ref _enabledImage, value);
         }
 
         private bool _enabledVideo;
 
         public bool EnabledVideo {
             get => _enabledVideo;
-            set => Set(ref _enabledVideo, value);
+            set => SetProperty(ref _enabledVideo, value);
         }
 
         private bool _enabledAudio;
 
         public bool EnabledAudio {
             get => _enabledAudio;
-            set => Set(ref _enabledAudio, value);
+            set => SetProperty(ref _enabledAudio, value);
         }
 
         private bool _enabledShader;
 
         public bool EnabledShader {
             get => _enabledShader;
-            set => Set(ref _enabledShader, value);
+            set => SetProperty(ref _enabledShader, value);
         }
 
         private bool _enabledLua;
 
         public bool EnabledLua {
             get => _enabledLua;
-            set => Set(ref _enabledLua, value);
+            set => SetProperty(ref _enabledLua, value);
         }
 
         private bool _enabledJson;
 
         public bool EnabledJson {
             get => _enabledJson;
-            set => Set(ref _enabledJson, value);
+            set => SetProperty(ref _enabledJson, value);
         }
 
 
@@ -121,14 +125,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public bool EnabledSpine {
             get => _enabledSpine;
-            set => Set(ref _enabledSpine, value);
+            set => SetProperty(ref _enabledSpine, value);
         }
 
         private bool _enabledModel;
 
         public bool EnabledModel {
             get => _enabledModel;
-            set => Set(ref _enabledModel, value);
+            set => SetProperty(ref _enabledModel, value);
         }
 
         public string[] ModelFormatItems { get; private set; } = ["gltf", "glb", "fbx"];
@@ -137,21 +141,27 @@ namespace ZoDream.Archiver.ViewModels
 
         public string ModelFormat {
             get => _modelFormat;
-            set => Set(ref _modelFormat, value);
+            set => SetProperty(ref _modelFormat, value);
         }
 
         private int _maxBatchCount = 100;
 
         public int MaxBatchCount {
             get => _maxBatchCount;
-            set => Set(ref _maxBatchCount, value);
+            set => SetProperty(ref _maxBatchCount, value);
         }
 
         public bool IsValid => !string.IsNullOrWhiteSpace(OutputFolder) && !string.IsNullOrWhiteSpace(Link);
 
         public ICommand OpenCommand { get; private set; }
 
-        private async void TapOpen(object? _)
+        public IBundleExecutor Executor => EngineIndex switch
+        {
+            1 => new EgretEngine(),
+            _ => new NetExecutor(),
+        };
+
+        private async void TapOpen()
         {
             var picker = new FolderPicker();
             App.ViewModel.InitializePicker(picker);

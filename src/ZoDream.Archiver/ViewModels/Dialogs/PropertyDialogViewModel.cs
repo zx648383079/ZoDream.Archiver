@@ -1,15 +1,15 @@
-﻿using ZoDream.Shared.ViewModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class PropertyDialogViewModel: BindableBase
+    public class PropertyDialogViewModel: ObservableObject
     {
 
         private string? _typeName;
 
         public string? TypeName {
             get => _typeName;
-            set => Set(ref _typeName, value);
+            set => SetProperty(ref _typeName, value);
         }
 
 
@@ -17,21 +17,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public string? Version {
             get => _version;
-            set => Set(ref _version, value);
+            set => SetProperty(ref _version, value);
         }
 
         private bool _isEncrypted;
 
         public bool IsEncrypted {
             get => _isEncrypted;
-            set => Set(ref _isEncrypted, value);
+            set => SetProperty(ref _isEncrypted, value);
         }
 
         private long _length;
 
         public long Length {
             get => _length;
-            set => Set(ref _length, value);
+            set => SetProperty(ref _length, value);
         }
 
 

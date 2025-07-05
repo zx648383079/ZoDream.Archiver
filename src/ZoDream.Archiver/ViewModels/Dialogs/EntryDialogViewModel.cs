@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Input;
 using ZoDream.Shared.Bundle;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class EntryDialogViewModel : BindableBase
+    public class EntryDialogViewModel : ObservableObject
     {
         public EntryDialogViewModel()
         {
@@ -19,14 +20,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Keywords {
             get => _keywords;
-            set => Set(ref _keywords, value);
+            set => SetProperty(ref _keywords, value);
         }
 
         private object[] _entryItems = [];
 
         public object[] EntryItems {
             get => _entryItems;
-            set => Set(ref _entryItems, value);
+            set => SetProperty(ref _entryItems, value);
         }
 
         public ICommand SearchCommand { get; private set; }

@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using ZoDream.Shared.Interfaces;
 
-namespace ZoDream.Shared.Net
+namespace ZoDream.Shared.Bundle
 {
-    public class LimitedScheduler : TaskScheduler, IRequestScheduler
+    public class LimitedScheduler : TaskScheduler, IBundleScheduler
     {
 
-        public LimitedScheduler(INetService service, int maxDegreeOfParallelism)
+        public LimitedScheduler(IEntryService service, int maxDegreeOfParallelism)
         {
-            _service = service;
             _maxDegreeOfParallelism = maxDegreeOfParallelism;
             _factory = new(this);
         }
@@ -24,43 +22,9 @@ namespace ZoDream.Shared.Net
         private int _delegatesQueuedOrRunning = 0;
         private readonly ConcurrentQueue<Task> _tasks = new();
         private readonly TaskFactory _factory;
-        private readonly INetService _service;
         private readonly CancellationTokenSource _tokenSource = new();
         protected override IEnumerable<Task> GetScheduledTasks() => [.. _tasks];
         public override int MaximumConcurrencyLevel => _maxDegreeOfParallelism;
-
-        public void Execute(RequestContext request)
-        {
-            Execute(async () => {
-                request.Token.Emit(new RequestChangedEventArgs()
-                {
-                    Status = RequestStatus.Sending
-                });
-                var res = await _service.SendAsync(request);
-                if (res.StatusCode != HttpStatusCode.OK)
-                {
-                    request.Token.Emit(new RequestChangedEventArgs()
-                    {
-                        Status = RequestStatus.Occurred
-                    });
-                    return;
-                }
-                var fileName = _service.GetFileName(res);
-                var length = _service.GetContentLength(res);
-                var output = Path.Combine(request.OutputFolder, fileName);
-                request.Token.Emit(new RequestChangedEventArgs()
-                {
-                    Length = length,
-                    FileName = fileName,
-                    OutputPath = output,
-                    Status = RequestStatus.Receiving
-                });
-                using var fs = new ConcurrentStream(File.Create(output));
-                using INetReceiver receiver = length > 100000 && _service.GetAcceptRange(res) ?
-                new ChunkReceiver(_service, res, request) : new NetReceiver(_service, res, request);
-                await receiver.StartAsync(request.Token);
-            });
-        }
 
         public void Execute(Action action)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+﻿using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -10,7 +11,6 @@ using Windows.ApplicationModel;
 using WinRT.Interop;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -18,9 +18,7 @@ namespace ZoDream.Archiver.ViewModels
     {
         public AppViewModel()
         {
-            BackCommand = new RelayCommand(_ => {
-                NavigateBack();
-            });
+            BackCommand = new RelayCommand(NavigateBack);
         }
         private Window _baseWindow;
         private IntPtr _baseWindowHandle;

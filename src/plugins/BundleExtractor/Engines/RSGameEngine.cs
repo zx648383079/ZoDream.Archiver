@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using ZoDream.BundleExtractor.RSGame;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -53,7 +54,7 @@ namespace ZoDream.BundleExtractor.Engines
             return request is IFileRequest;
         }
 
-        public void Execute(IBundleRequest request, IBundleContext context)
+        public async Task ExecuteAsync(IBundleRequest request, IBundleContext context)
         {
             if (request is not INetFileRequest file)
             {
@@ -78,7 +79,7 @@ namespace ZoDream.BundleExtractor.Engines
                     }
                     path = str;
                 }
-                context.Enqueue(new NetRequest(new Uri(host + path), string.Empty));
+                context.Enqueue(new NetRequest(request, new Uri(host + path), string.Empty));
             } else if (file.Name == "hash.dat")
             {
                 using var r = new StreamReader(file.OpenRead());
@@ -98,7 +99,7 @@ namespace ZoDream.BundleExtractor.Engines
                     {
                         continue;
                     }
-                    context.Enqueue(new NetRequest(new Uri(file.Source, line), string.Empty));
+                    context.Enqueue(new NetRequest(request, new Uri(file.Source, line), string.Empty));
                 }
             }
             else if (file.Name.EndsWith(".dmxpkg"))

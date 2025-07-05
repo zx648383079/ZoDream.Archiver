@@ -1,12 +1,13 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Archiver.Pages;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class StartupViewModel : BindableBase
+    public class StartupViewModel : ObservableObject
     {
         public StartupViewModel()
         {
@@ -22,7 +23,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Version {
             get => version;
-            set => Set(ref version, value);
+            set => SetProperty(ref version, value);
         }
 
         public ICommand OpenCommand { get; private set; }
@@ -31,12 +32,12 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand ExplorerCommand { get; private set; }
         public ICommand CreateCommand { get; private set; }
 
-        private void TapExplorer(object? _)
+        private void TapExplorer()
         {
             App.ViewModel.Navigate<ExplorerPage>();
         }
 
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FileOpenPicker();
             //foreach (var ext in ReaderFactory.FileFilterItems)
@@ -53,7 +54,7 @@ namespace ZoDream.Archiver.ViewModels
             App.ViewModel.Navigate<WorkspacePage>(items);
         }
 
-        private void TapOpenFolder(object? _)
+        private void TapOpenFolder()
         {
             //var picker = new FolderPicker();
             //picker.FileTypeFilter.Add("*");
@@ -74,15 +75,15 @@ namespace ZoDream.Archiver.ViewModels
             //await App.GetService<AppViewModel>().InitializeWorkspaceAsync(folder);
             //App.GetService<IRouter>().GoToAsync(Router.HomeRoute);
         }
-        private void TapOpenBundle(object? _)
+        private void TapOpenBundle()
         {
             App.ViewModel.Navigate<BundlePage>();
         }
-        private void TapDownload(object? _)
+        private void TapDownload()
         {
             App.ViewModel.Navigate<DownloadPage>();
         }
-        private void TapCreate(object? _)
+        private void TapCreate()
         {
             App.ViewModel.Navigate<CompressPage>();
         }

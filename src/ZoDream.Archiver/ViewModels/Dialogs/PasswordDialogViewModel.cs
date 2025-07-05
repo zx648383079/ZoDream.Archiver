@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class PasswordDialogViewModel: BindableBase, IFormValidator, IEntryConfiguration
+    public class PasswordDialogViewModel: ObservableObject, IFormValidator, IEntryConfiguration
     {
         public PasswordDialogViewModel()
         {
@@ -22,7 +19,7 @@ namespace ZoDream.Archiver.ViewModels
         public string Password {
             get => _password;
             set {
-                Set(ref _password, value);
+                SetProperty(ref _password, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -32,7 +29,7 @@ namespace ZoDream.Archiver.ViewModels
         public string DictFileName {
             get => _dictFileName;
             set {
-                Set(ref _dictFileName, value);
+                SetProperty(ref _dictFileName, value);
                 OnPropertyChanged(nameof(IsValid));
             }
         }
@@ -41,7 +38,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand OpenCommand { get; private set; }
 
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");

@@ -5,8 +5,10 @@ namespace ZoDream.Shared.Bundle
 {
     public interface IBundleRequest
     {
-
+        public long RequestId { get; }
         public IBundleExecutor? Executor { get; }
+
+        public IBundleToken Token { get; }
     }
 
     public interface IFileRequest : IBundleRequest

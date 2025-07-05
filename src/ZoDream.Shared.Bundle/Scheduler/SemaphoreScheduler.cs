@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Threading;
 
-namespace ZoDream.Shared.Net
+namespace ZoDream.Shared.Bundle
 {
-    public class SemaphoreScheduler : IRequestScheduler
+    public class SemaphoreScheduler : IBundleScheduler
     {
-        public SemaphoreScheduler(INetService service, int maxDegreeOfParallelism)
+        public SemaphoreScheduler(int maxDegreeOfParallelism)
         {
-            _service = service;
             _semaphore = new(maxDegreeOfParallelism);
         }
 
         private readonly SemaphoreSlim _semaphore;
-        private readonly INetService _service;
         private readonly CancellationTokenSource _tokenSource = new();
 
-        public void Execute(RequestContext request)
-        {
-            Execute(() => {
-                _service.SendAsync(request);
-            });
-        }
 
         public void Execute(Action action)
         {

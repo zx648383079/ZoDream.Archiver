@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,11 +16,10 @@ using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Media;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class BundleViewModel : BindableBase
+    public class BundleViewModel : ObservableObject
     {
         public BundleViewModel()
         {
@@ -47,21 +48,21 @@ namespace ZoDream.Archiver.ViewModels
 
         public ObservableCollection<EntryViewModel> FileItems {
             get => _fileItems;
-            set => Set(ref _fileItems, value);
+            set => SetProperty(ref _fileItems, value);
         }
 
         private IEntryItem[]? _selectedItems;
 
         public IEntryItem[]? SelectedItems {
             get => _selectedItems;
-            set => Set(ref _selectedItems, value);
+            set => SetProperty(ref _selectedItems, value);
         }
 
         private bool _isMultipleSelect;
 
         public bool IsMultipleSelect {
             get => _isMultipleSelect;
-            set => Set(ref _isMultipleSelect, value);
+            set => SetProperty(ref _isMultipleSelect, value);
         }
 
 
@@ -79,12 +80,12 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand CodeCommand {  get; private set; }
         public ICommand LogCommand {  get; private set; }
 
-        private void TapLog(object? _)
+        private void TapLog()
         {
             Process.Start("explorer", $"/select,{AppViewModel.LogFileName}");
         }
 
-        private async void TapCode(object? _)
+        private async void TapCode()
         {
             var picker = new CodeDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -99,7 +100,7 @@ namespace ZoDream.Archiver.ViewModels
 
         }
 
-        private async void TapExplorer(object? _)
+        private async void TapExplorer()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".bin");
@@ -115,7 +116,7 @@ namespace ZoDream.Archiver.ViewModels
             await _app.OpenDialogAsync(dialog);
         }
 
-        private async void TapSetting(object? _)
+        private async void TapSetting()
         {
             var picker = new SettingDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -151,7 +152,7 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
-        private async void TapView(object? _)
+        private async void TapView()
         {
             if (FileItems.Count == 0)
             {
@@ -164,7 +165,7 @@ namespace ZoDream.Archiver.ViewModels
             await _app.OpenDialogAsync(dialog);
         }
 
-        private async void TapAdd(object? _)
+        private async void TapAdd()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add("*");
@@ -217,7 +218,7 @@ namespace ZoDream.Archiver.ViewModels
             AddFile(items.Select(x => x.Path));
         }
 
-        private async void TapAddFolder(object? _)
+        private async void TapAddFolder()
         {
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
@@ -231,7 +232,7 @@ namespace ZoDream.Archiver.ViewModels
             AddFile([folder.Path]);
         }
 
-        private async void TapSaveAs(object? _)
+        private async void TapSaveAs()
         {
             var fileItems = FileItems.Select(i => i.FullPath).ToArray();
             if (fileItems.Length == 0)
@@ -276,7 +277,7 @@ namespace ZoDream.Archiver.ViewModels
             }, token);
         }
 
-        private void TapDelete(object? _)
+        private void TapDelete()
         {
             if (SelectedItems is null)
             {

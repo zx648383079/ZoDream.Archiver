@@ -1,14 +1,15 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.IO;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Converters;
-using ZoDream.Shared.ViewModel;
 using ZoDream.SourceGenerator;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class CodeDialogViewModel : BindableBase, IFormValidator
+    public class CodeDialogViewModel : ObservableObject, IFormValidator
     {
         public CodeDialogViewModel()
         {
@@ -20,7 +21,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string[] LanguageItems {
             get => _languageItems;
-            set => Set(ref _languageItems, value);
+            set => SetProperty(ref _languageItems, value);
         }
 
 
@@ -29,7 +30,7 @@ namespace ZoDream.Archiver.ViewModels
         public string FileName {
             get => _fileName;
             set {
-                Set(ref _fileName, value);
+                SetProperty(ref _fileName, value);
                 OnPropertyChanged(nameof(IsValid));
                 if (!value.EndsWith(".json"))
                 {
@@ -42,14 +43,14 @@ namespace ZoDream.Archiver.ViewModels
 
         public int LanguageIndex {
             get => _languageIndex;
-            set => Set(ref _languageIndex, value);
+            set => SetProperty(ref _languageIndex, value);
         }
 
         private string _packageName = string.Empty;
 
         public string PackageName {
             get => _packageName;
-            set => Set(ref _packageName, value);
+            set => SetProperty(ref _packageName, value);
         }
 
 
@@ -57,7 +58,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public string Version {
             get => _version;
-            set => Set(ref _version, value);
+            set => SetProperty(ref _version, value);
         }
 
         private string _outputFileName = string.Empty;
@@ -65,7 +66,7 @@ namespace ZoDream.Archiver.ViewModels
         public string OutputFileName {
             get => _outputFileName;
             set {
-                Set(ref _outputFileName, value);
+                SetProperty(ref _outputFileName, value);
                 OnPropertyChanged(nameof(IsValid));
                 LanguageIndex = value.EndsWith(".cs") ? 0 : 1;
             }
@@ -77,7 +78,7 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand OpenCommand { get; private set; }
         public ICommand OpenOutputCommand { get; private set; }
 
-        private async void TapOpen(object? _)
+        private async void TapOpen()
         {
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".json");
@@ -92,7 +93,7 @@ namespace ZoDream.Archiver.ViewModels
             FileName = res.Path;
         }
 
-        private async void TapOpenOutput(object? _)
+        private async void TapOpenOutput()
         {
             var picker = new FileSavePicker();
             picker.FileTypeChoices.Add("C#", [".cs"]);

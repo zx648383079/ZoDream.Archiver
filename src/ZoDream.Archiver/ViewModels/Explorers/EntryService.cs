@@ -62,6 +62,16 @@ namespace ZoDream.Archiver.ViewModels
             Add(key);
         }
 
+        public void AddIf<T>(T? instance)
+        {
+            var key = typeof(T).Name;
+            if (_instanceItems.ContainsKey(key))
+            {
+                return;
+            }
+            Add(key, instance);
+        }
+
         private bool Has(Type type)
         {
             if (type == typeof(IEntryService))

@@ -1,55 +1,55 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Windows.Input;
 using Windows.System;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.Controls
 {
     internal static class UICommand
     {
-        public static ICommand Delete(Action<object?> execute) => Delete(new RelayCommand(execute));
+        public static ICommand Delete(Action execute) => Delete(new RelayCommand(execute));
         public static ICommand Delete(ICommand command) => new StandardUICommand(StandardUICommandKind.Delete)
         {
             Command = command
         };
-        public static ICommand Play(Action<object?> execute) => Play(new RelayCommand(execute));
+        public static ICommand Play(Action execute) => Play(new RelayCommand(execute));
         public static ICommand Play(ICommand command) => new StandardUICommand(StandardUICommandKind.Play)
         {
             Command = command
         };
-        public static ICommand Pause(Action<object?> execute) => Pause(new RelayCommand(execute));
+        public static ICommand Pause(Action execute) => Pause(new RelayCommand(execute));
         public static ICommand Pause(ICommand command) => new StandardUICommand(StandardUICommandKind.Pause)
         {
             Command = command
         };
-        public static ICommand Stop(Action<object?> execute) => Stop(new RelayCommand(execute));
+        public static ICommand Stop(Action execute) => Stop(new RelayCommand(execute));
         public static ICommand Stop(ICommand command) => new StandardUICommand(StandardUICommandKind.Stop)
         {
             Command = command
         };
-        public static ICommand Resume(Action<object?> execute) => Resume(new RelayCommand(execute));
+        public static ICommand Resume(Action execute) => Resume(new RelayCommand(execute));
         public static ICommand Resume(ICommand command) => new StandardUICommand(StandardUICommandKind.Redo)
         {
             Command = command
         };
-        public static ICommand Save(Action<object?> execute) => Save(new RelayCommand(execute));
+        public static ICommand Save(Action execute) => Save(new RelayCommand(execute));
         public static ICommand Save(ICommand command) => new StandardUICommand(StandardUICommandKind.Save)
         {
             Command = command
         };
-        public static ICommand SelectAll(Action<object?> execute) => SelectAll(new RelayCommand(execute));
+        public static ICommand SelectAll(Action execute) => SelectAll(new RelayCommand(execute));
         public static ICommand SelectAll(ICommand command) => new StandardUICommand(StandardUICommandKind.SelectAll)
         {
             Command = command
         };
-        public static ICommand Backward(Action<object?> execute) => Backward(new RelayCommand(execute));
+        public static ICommand Backward(Action execute) => Backward(new RelayCommand(execute));
         public static ICommand Backward(ICommand command) => new StandardUICommand(StandardUICommandKind.Backward)
         {
             Command = command
         };
-        public static ICommand Info(Action<object?> execute) => Info(new RelayCommand(execute));
+        public static ICommand Info(Action execute) => Info(new RelayCommand(execute));
         public static ICommand Info(ICommand command) => new XamlUICommand()
         {
             Label = "Info",
@@ -69,7 +69,8 @@ namespace ZoDream.Archiver.Controls
             Command = command
         };
 
-        public static ICommand View(Action<object?> execute) => View(new RelayCommand(execute));
+        public static ICommand View(Action execute) => View(new RelayCommand(execute));
+        public static ICommand View<T>(Action<T?> execute) => View(new RelayCommand<T>(execute));
         public static ICommand View(ICommand command) => new XamlUICommand()
         {
             Label = "View",
@@ -80,7 +81,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand Add(Action<object?> execute) => Add(new RelayCommand(execute));
+        public static ICommand Add(Action execute) => Add(new RelayCommand(execute));
         public static ICommand Add(ICommand command) => new XamlUICommand()
         {
             Label = "Add",
@@ -99,7 +100,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand AddFolder(Action<object?> execute) => AddFolder(new RelayCommand(execute));
+        public static ICommand AddFolder(Action execute) => AddFolder(new RelayCommand(execute));
         public static ICommand AddFolder(ICommand command) => new XamlUICommand()
         {
             Label = "Add",
@@ -110,7 +111,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand Find(Action<object?> execute) => Find(new RelayCommand(execute));
+        public static ICommand Find(Action execute) => Find(new RelayCommand(execute));
         public static ICommand Find(ICommand command) => new XamlUICommand()
         {
             Label = "Find",
@@ -129,7 +130,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand Setting(Action<object?> execute) => Setting(new RelayCommand(execute));
+        public static ICommand Setting(Action execute) => Setting(new RelayCommand(execute));
         public static ICommand Setting(ICommand command) => new XamlUICommand()
         {
             Label = "Setting",
@@ -148,7 +149,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand Index(Action<object?> execute) => Index(new RelayCommand(execute));
+        public static ICommand Index(Action execute) => Index(new RelayCommand(execute));
         public static ICommand Index(ICommand command) => new XamlUICommand()
         {
             Label = "资源目录",
@@ -159,7 +160,7 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
-        public static ICommand Log(Action<object?> execute) => Log(new RelayCommand(execute));
+        public static ICommand Log(Action execute) => Log(new RelayCommand(execute));
         public static ICommand Log(ICommand command) => new XamlUICommand()
         {
             Label = "日志文件",
@@ -171,7 +172,7 @@ namespace ZoDream.Archiver.Controls
             Command = command
         };
 
-        public static ICommand Code(Action<object?> execute) => Code(new RelayCommand(execute));
+        public static ICommand Code(Action execute) => Code(new RelayCommand(execute));
         public static ICommand Code(ICommand command) => new XamlUICommand()
         {
             Label = "代码转化",

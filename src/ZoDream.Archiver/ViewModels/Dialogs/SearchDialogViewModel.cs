@@ -1,10 +1,10 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Text.RegularExpressions;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class SearchDialogViewModel: BindableBase
+    public class SearchDialogViewModel: ObservableObject
     {
 
         private Regex? _computedRegex;
@@ -13,7 +13,7 @@ namespace ZoDream.Archiver.ViewModels
         public string Pattern {
             get => _pattern;
             set {
-                Set(ref _pattern, value);
+                SetProperty(ref _pattern, value);
                 _computedRegex = null;
             }
         }
@@ -23,7 +23,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public bool UseRegex {
             get => _useRegex;
-            set => Set(ref _useRegex, value);
+            set => SetProperty(ref _useRegex, value);
         }
 
 

@@ -1,18 +1,20 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows.Input;
 using Windows.Storage;
 using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.Net;
-using ZoDream.Shared.ViewModel;
 
 namespace ZoDream.Archiver.ViewModels
 {
-    public class DownloadViewModel : BindableBase
+    public class DownloadViewModel : ObservableObject, IBundleContext
     {
 
         public DownloadViewModel()
@@ -26,32 +28,34 @@ namespace ZoDream.Archiver.ViewModels
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
             ViewCommand = UICommand.View(TapView);
             SettingCommand = UICommand.Setting(TapSetting);
-            _service = new NetService();
+            _service = _app.Service;
             _scheduler = new LimitedScheduler(_service, 5);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
-        private readonly INetService _service;
-        private readonly IRequestScheduler _scheduler;
+        private readonly IEntryService _service;
+        private readonly IBundleScheduler _scheduler;
+
+        public IEntryService Service => _service;
 
         private ObservableCollection<DownloadItemViewModel> _items = [];
         public ObservableCollection<DownloadItemViewModel> Items {
             get => _items;
-            set => Set(ref _items, value);
+            set => SetProperty(ref _items, value);
         }
 
         private IEntryItem[]? _selectedItems;
 
         public IEntryItem[]? SelectedItems {
             get => _selectedItems;
-            set => Set(ref _selectedItems, value);
+            set => SetProperty(ref _selectedItems, value);
         }
 
         private bool _isMultipleSelect;
 
         public bool IsMultipleSelect {
             get => _isMultipleSelect;
-            set => Set(ref _isMultipleSelect, value);
+            set => SetProperty(ref _isMultipleSelect, value);
         }
 
 
@@ -64,7 +68,10 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand DragCommand { get; private set; }
         public ICommand ViewCommand { get; private set; }
         public ICommand SettingCommand { get; private set; }
-        private async void TapAdd(object? _)
+
+        
+
+        private async void TapAdd()
         {
             var picker = new RequestDialog();
             var model = picker.ViewModel;
@@ -72,6 +79,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
+            _service.AddIf(model.Executor);
             foreach (var item in model.Link.Split('\n'))
             {
                 if (string.IsNullOrWhiteSpace(item) || 
@@ -83,7 +91,7 @@ namespace ZoDream.Archiver.ViewModels
                 {
                     Name = uri.AbsolutePath,
                     Target = model.OutputFolder,
-                    Status = RequestStatus.Waiting,
+                    Status = BundleStatus.Waiting,
                 });
             }
         }
@@ -110,11 +118,11 @@ namespace ZoDream.Archiver.ViewModels
             }
             foreach (var item in items)
             {
-                if (item.Status is RequestStatus.Sending or RequestStatus.Receiving)
+                if (item.Status is BundleStatus.Sending or BundleStatus.Receiving)
                 {
                     continue;
                 }
-                _scheduler.Execute(item.CreateRequest());
+                Enqueue(item.CreateRequest());
             }
         }
         private void TapResume(DownloadItemViewModel? arg)
@@ -126,7 +134,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             foreach (var item in items)
             {
-                if (item.Status is not RequestStatus.Paused)
+                if (item.Status is not BundleStatus.Paused)
                 {
                     continue;
                 }
@@ -143,7 +151,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             foreach (var item in items)
             {
-                if (item.Status is RequestStatus.Sending or RequestStatus.Receiving)
+                if (item.Status is BundleStatus.Sending or BundleStatus.Receiving)
                 {
                     item.PauseCommand.Execute(null);
                 }
@@ -158,7 +166,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             foreach (var item in items)
             {
-                if (item.Status >= RequestStatus.Finished)
+                if (item.Status >= BundleStatus.Completed)
                 {
                     continue;
                 }
@@ -169,12 +177,12 @@ namespace ZoDream.Archiver.ViewModels
         {
 
         }
-        private void TapView(object? _)
+        private void TapView()
         {
 
         }
 
-        private async void TapSetting(object? _)
+        private async void TapSetting()
         {
             var picker = new SettingDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -196,6 +204,24 @@ namespace ZoDream.Archiver.ViewModels
             _scheduler.Cancel();
             _scheduler.Dispose();
             _service.Dispose();
+        }
+
+        public void Enqueue(IBundleRequest request)
+        {
+            var executor = _service.Get<IBundleExecutor>();
+            if (!executor.CanExecute(request))
+            {
+                return;
+            }
+            _scheduler.Execute(async () => {
+                await executor.ExecuteAsync(request, this);
+            });
+        }
+
+        public bool TryDequeue([NotNullWhen(true)] out IBundleRequest? request)
+        {
+            request = null;
+            return false;
         }
     }
 }

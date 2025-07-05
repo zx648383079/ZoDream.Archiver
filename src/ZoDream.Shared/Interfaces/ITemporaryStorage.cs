@@ -11,7 +11,13 @@ namespace ZoDream.Shared.Interfaces
     {
 
         public Task<IStorageFileEntry> CreateAsync();
-        public Task<IStorageFileEntry> CreateAsync(string guid);
+        public Task<IStorageFileEntry> CreateFileAsync(string guid);
+        /// <summary>
+        /// 创建临时读写流
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public Task<Stream> CreateAsync(string guid);
         /// <summary>
         /// 创建内存流
         /// </summary>

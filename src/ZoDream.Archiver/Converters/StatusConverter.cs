@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Data;
 using System;
-using ZoDream.Shared.Net;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Archiver.Converters
 {
@@ -10,7 +10,7 @@ namespace ZoDream.Archiver.Converters
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is RequestStatus request)
+            if (value is BundleStatus request)
             {
                 return Format(request);
             }
@@ -22,17 +22,18 @@ namespace ZoDream.Archiver.Converters
             throw new NotImplementedException();
         }
 
-        public static string Format(RequestStatus status)
+        public static string Format(BundleStatus status)
         {
             return status switch
             {
-                RequestStatus.Waiting => "Waiting",
-                RequestStatus.Sending => "Sending",
-                RequestStatus.Receiving => "Receiving",
-                RequestStatus.Finished => "Finished",
-                RequestStatus.Paused => "Paused",
-                RequestStatus.Canceled => "Canceled",
-                RequestStatus.Occurred => "Occurred",
+                BundleStatus.Waiting => "Waiting",
+                BundleStatus.Sending => "Sending",
+                BundleStatus.Receiving => "Receiving",
+                BundleStatus.Working => "Working",
+                BundleStatus.Completed => "Completed",
+                BundleStatus.Paused => "Paused",
+                BundleStatus.Cancelled => "Cancelled",
+                BundleStatus.Failed => "Occurred",
                 _ => string.Empty,
             };
         }

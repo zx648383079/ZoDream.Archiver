@@ -8,7 +8,7 @@ namespace ZoDream.Shared.Net
     /// </summary>
     public class PauseTokenSource
     {
-        private volatile TaskCompletionSource<bool> _tcsPaused;
+        private volatile TaskCompletionSource<bool>? _tcsPaused;
 
         /// <summary>
         /// Gets the pause token associated with this source.
@@ -40,10 +40,12 @@ namespace ZoDream.Shared.Net
             // and the time we did the compare-exchange, repeat.
             while (true)
             {
-                TaskCompletionSource<bool> tcs = _tcsPaused;
+                TaskCompletionSource<bool>? tcs = _tcsPaused;
 
                 if (tcs == null)
+                {
                     return;
+                }
 
                 // if(tcsPaused == tcs) tcsPaused = null;
                 if (Interlocked.CompareExchange(ref _tcsPaused, null, tcs) == tcs)

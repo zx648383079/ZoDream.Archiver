@@ -1,20 +1,36 @@
 ﻿using System;
 using System.Net.Http;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Shared.Net
 {
-    public struct RequestContext
+    public interface IRequestContext
     {
-        public int SourceId;
+        public Uri Source { get; }
 
-        public Uri Source;
+        public HttpMethod Method { get; }
 
-        public string OutputFolder;
+        public HttpContent? Body { get; }
 
-        public HttpMethod Method;
+        public IBundleToken Token { get; }
+    }
 
-        public HttpContent? Body;
+    public struct RequestContext : INetRequest, IRequestContext
+    {
+        public long RequestId { get; init; }
 
-        public RequestToken Token;
+        public Uri Source { get; init; }
+
+        public string Output { get; init; }
+
+        public IBundleExecutor? Executor { get; init; }
+
+        public HttpMethod Method { get; init; }
+
+        public HttpContent? Body { get; init; }
+
+        public IBundleToken Token { get; init; }
+
+
     }
 }
