@@ -41,7 +41,7 @@ namespace ZoDream.BundleExtractor
                             }
                         }
                     }
-                    PreExport(i, asset);
+                    PrepareExport(i, asset);
                 }
                 if (progress is not null)
                 {

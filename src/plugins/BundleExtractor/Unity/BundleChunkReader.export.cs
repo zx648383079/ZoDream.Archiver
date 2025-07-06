@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
-using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
@@ -92,6 +91,7 @@ namespace ZoDream.BundleExtractor
                 {
                     progress.Value++;
                 }
+                Shared.Clear();
             }
         }
         /// <summary>
@@ -100,7 +100,7 @@ namespace ZoDream.BundleExtractor
         /// <param name="entryId"></param>
         /// <param name="resource"></param>
         /// <returns></returns>
-        private bool PreExport(int entryId, ISerializedFile resource)
+        private bool PrepareExport(int entryId, ISerializedFile resource)
         {
             if (resource.IsExclude(entryId))
             {

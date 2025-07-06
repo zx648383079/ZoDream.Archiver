@@ -9,6 +9,8 @@ namespace ZoDream.BundleExtractor.Unity
         public ILogger? Logger { get; }
 
         public IAssemblyReader Assembly { get; }
+
+        public IBundleSharedBag Shared { get; }
         public IBundleExtractOptions Options { get; }
 
         /// <summary>

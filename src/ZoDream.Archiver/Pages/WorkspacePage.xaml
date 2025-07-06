@@ -60,7 +60,7 @@
                             Glyph="&#xE8A5;"
                             Style="{ThemeResource HeaderIcon}" />
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <TextBlock Style="{ThemeResource HeaderTb}" Text="{Binding Name}" />
+                            <TextBlock Style="{ThemeResource HeaderLabelStyle}" Text="{Binding Name}" />
                             <FontIcon
                                 Glyph="&#xE72E;"
                                 Style="{ThemeResource HeaderStamp}"
@@ -71,9 +71,9 @@
                             Grid.Column="1"
                             Orientation="Horizontal"
                             Spacing="8">
-                            <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
-                            <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding CompressedLength, Converter={StaticResource SizeCvt}}" />
-                            <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding CreatedTime}" />
+                            <TextBlock Style="{ThemeResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                            <TextBlock Style="{ThemeResource MetaLabelStyle}" Text="{Binding CompressedLength, Converter={StaticResource SizeCvt}}" />
+                            <TextBlock Style="{ThemeResource MetaLabelStyle}" Text="{Binding CreatedTime}" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

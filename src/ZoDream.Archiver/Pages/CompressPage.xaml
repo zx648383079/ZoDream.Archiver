@@ -54,15 +54,15 @@
                             Style="{ThemeResource HeaderIcon}" />
                         <TextBlock
                             Grid.Column="1"
-                            Style="{ThemeResource HeaderTb}"
+                            Style="{ThemeResource HeaderLabelStyle}"
                             Text="{Binding Name}" />
                         <StackPanel
                             Grid.Row="1"
                             Grid.Column="1"
                             Orientation="Horizontal"
                             Spacing="8">
-                            <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
-                            <TextBlock Style="{ThemeResource MetaTb}" Text="{Binding CreatedTime}" />
+                            <TextBlock Style="{ThemeResource MetaLabelStyle}" Text="{Binding Length, Converter={StaticResource SizeCvt}}" />
+                            <TextBlock Style="{ThemeResource MetaLabelStyle}" Text="{Binding CreatedTime}" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

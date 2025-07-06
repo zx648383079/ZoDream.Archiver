@@ -8,6 +8,7 @@ using UnityEngine;
 using ZoDream.BundleExtractor.Producers;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -40,7 +41,6 @@ namespace ZoDream.BundleExtractor
         private readonly IDependencyBuilder? _dependency;
         private ArchiveExtractMode _extractMode;
         private string _extractFolder = string.Empty;
-
         private readonly List<ISerializedFile> _assetItems = [];
         private readonly ConcurrentDictionary<string, int> _assetIndexItems = [];
         private readonly ConcurrentDictionary<string, Stream> _resourceItems = [];
@@ -49,6 +49,7 @@ namespace ZoDream.BundleExtractor
         private readonly HashSet<string> _importFileHash = [];
         private readonly HashSet<string> _assetFileHash = [];
 
+        public IBundleSharedBag Shared { get; private set; } = new BundleSharedBag();
         public IAssemblyReader Assembly 
         {
             get {
@@ -267,6 +268,7 @@ namespace ZoDream.BundleExtractor
 
         public void Dispose()
         {
+            Shared.Dispose();
             foreach (var item in _assetItems)
             {
                 item.Dispose();

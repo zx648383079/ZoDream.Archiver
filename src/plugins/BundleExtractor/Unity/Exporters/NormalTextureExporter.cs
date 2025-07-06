@@ -11,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
-            using var s = TextureExporter.ToImage(texture, resource);
+            var s = TextureExporter.ToImage(texture, resource);
             if (s is null)
             {
                 return;

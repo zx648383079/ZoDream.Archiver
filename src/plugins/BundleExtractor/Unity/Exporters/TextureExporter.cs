@@ -14,7 +14,9 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class TextureExporter(int entryId, ISerializedFile resource) : IBundleExporter
+    internal class TextureExporter(
+        int entryId, 
+        ISerializedFile resource) : IBundleExporter
     {
         public string FileName => resource[entryId].Name;
 
@@ -65,16 +67,34 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return null;
             }
-            res.ImageData.Position = 0;
-            var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
-                res.Height, res.TextureFormat, resource.Version);
-            var image = data?.ToImage();
+            SKImage? image;
+            var isCached = false;
+            if (resource is ISerializedFile s)
+            {
+                isCached = true;
+                image = s.Container?.Shared?.GetOrAdd(res.GetHashCode(), () => {
+                    res.ImageData.Position = 0;
+                    var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
+                        res.Height, res.TextureFormat, resource.Version);
+                    return data?.ToImage();
+                });
+            } else
+            {
+                res.ImageData.Position = 0;
+                var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
+                    res.Height, res.TextureFormat, resource.Version);
+                image = data?.ToImage();
+            }
+            
             if (!flip || image == null)
             {
                 return image;
             }
             var next = image.Flip(false);
-            image.Dispose();
+            if (!isCached)
+            {
+                image.Dispose();
+            }
             return next;
         }
 
@@ -111,9 +131,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 var width = (int)(m_Texture2D.Width / downscaleMultiplier);
                 var height = (int)(m_Texture2D.Height / downscaleMultiplier);
-                temp = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
-                originalImage.Dispose();
-                originalImage = temp;
+                originalImage = originalImage.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
                 isUpdated = true;
             }
             if (originalImage is null)
@@ -131,7 +149,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 var rect = new SKRectI(rectX, rectY, rectRight, rectBottom);
                 temp = originalImage.Subset(rect);
-                originalImage.Dispose();
+                if (isUpdated)
+                {
+                    originalImage.Dispose();
+                }
                 originalImage = temp;
                 isUpdated = true;
             }
@@ -139,28 +160,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             if (settingsRaw.Packed == 1)
             {
                 //RotateAndFlip
-                switch (settingsRaw.PackingRotation)
+                temp = settingsRaw.PackingRotation switch
                 {
-                    case SpritePackingRotation.FlipHorizontal:
-                        temp = originalImage.Flip();
-                        break;
-                    case SpritePackingRotation.FlipVertical:
-                        temp = originalImage.Flip(false);
-                        break;
-                    case SpritePackingRotation.Rotate180:
-                        temp = originalImage.Rotate(180);
-                        break;
-                    case SpritePackingRotation.Rotate90:
-                        temp = originalImage.Rotate(270);
-                        break;
-                    default:
-                        temp = null;
-                        break;
-                }
+                    SpritePackingRotation.FlipHorizontal => originalImage.Flip(),
+                    SpritePackingRotation.FlipVertical => originalImage.Flip(false),
+                    SpritePackingRotation.Rotate180 => originalImage.Rotate(180),
+                    SpritePackingRotation.Rotate90 => originalImage.Rotate(270),
+                    _ => null,
+                };
                 if (temp is not null)
                 {
+                    if (isUpdated)
+                    {
+                        originalImage.Dispose();
+                    }
                     isUpdated = true;
-                    originalImage.Dispose();
                     originalImage = temp;
                 }
             }
@@ -180,7 +194,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                     path.Transform(matrix.AsMatrix());
                     temp = originalImage?.ClipAndFlip(path, false);
-                    originalImage?.Dispose();
+                    if (isUpdated)
+                    {
+                        originalImage?.Dispose();
+                    }
                     return temp;
                 }
                 catch
@@ -195,7 +212,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 originalImage?.Dispose();
                 return temp;
             }
-            originalImage?.Dispose();
+            // originalImage?.Dispose();
             return null;
         }
 
