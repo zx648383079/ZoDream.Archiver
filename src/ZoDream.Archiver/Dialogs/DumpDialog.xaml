@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="ZoDream.Archiver.Dialogs.DumpDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ZoDream.Archiver.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ZoDream.Archiver.ViewModels"
+    Title="提取文件"
+    IsPrimaryButtonEnabled="{Binding IsValid}"
+    PrimaryButtonText="确认"
+    SecondaryButtonText="取消"
+    mc:Ignorable="d">
+
+    <ContentDialog.DataContext>
+        <vm:DumpDialogViewModel />
+    </ContentDialog.DataContext>
+
+    <ContentDialog.Resources>
+        <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
+    </ContentDialog.Resources>
+    <Pivot>
+        <PivotItem Header="基本">
+            <StackPanel>
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Destination Path" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding OutputFolder, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding OpenCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Metadata" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding MetadataPath, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding MetadataCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+                <TextBlock Style="{StaticResource InputHeaderTb}" Text="Il2cpp" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding Il2cppPath, Mode=TwoWay}" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding Il2cppCommand}"
+                        Content="&#xE8DA;"
+                        Style="{StaticResource IconBtn}" />
+                </Grid>
+            </StackPanel>
+        </PivotItem>
+        <PivotItem Header="高级">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ToggleSwitch Header="DumpMethod" IsOn="{Binding DumpMethod, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="1"
+                        Header="DumpMethodOffset"
+                        IsOn="{Binding DumpMethodOffset, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="2"
+                        Header="DumpField"
+                        IsOn="{Binding DumpField, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Column="3"
+                        Header="DumpFieldOffset"
+                        IsOn="{Binding DumpFieldOffset, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Header="DumpProperty"
+                        IsOn="{Binding DumpProperty, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Header="DumpAttribute"
+                        IsOn="{Binding DumpAttribute, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Header="DumpTypeDefIndex"
+                        IsOn="{Binding DumpTypeDefIndex, Mode=TwoWay}" />
+
+                    <ToggleSwitch
+                        Grid.Row="2"
+                        Header="GenerateDummyDll"
+                        IsOn="{Binding GenerateDummyDll, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Header="GenerateStruct"
+                        IsOn="{Binding GenerateStruct, Mode=TwoWay}" />
+
+
+                    <ToggleSwitch
+                        Grid.Row="3"
+                        Header="DummyDllAddToken"
+                        IsOn="{Binding DummyDllAddToken, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Header="RequireAnyKey"
+                        IsOn="{Binding RequireAnyKey, Mode=TwoWay}" />
+
+                    <ToggleSwitch
+                        Grid.Row="4"
+                        Header="ForceIl2CppVersion"
+                        IsOn="{Binding ForceIl2CppVersion, Mode=TwoWay}" />
+                    <ToggleSwitch
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Header="ForceDump"
+                        IsOn="{Binding ForceDump, Mode=TwoWay}" />
+
+                    <ToggleSwitch
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Header="NoRedirectedPointer"
+                        IsOn="{Binding NoRedirectedPointer, Mode=TwoWay}" />
+
+                    <NumberBox
+                        Grid.Row="4"
+                        Grid.Column="3"
+                        Header="ForceVersion"
+                        Value="{Binding ForceVersion}" />
+                </Grid>
+            </StackPanel>
+        </PivotItem>
+    </Pivot>
+</ContentDialog>

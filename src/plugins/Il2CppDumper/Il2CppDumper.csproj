@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <LangVersion>13</LangVersion>
+	  <Nullable>enable</Nullable>
+	  <Version>1.0.0</Version>
+	  <EnableDynamicLoading>true</EnableDynamicLoading>
+	  <BaseOutputPath>..\..\bin</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ZoDream.Shared.Bundle\ZoDream.Shared.Bundle.csproj" />
+    <ProjectReference Include="..\..\ZoDream.Shared.Language\ZoDream.Shared.Language.csproj" />
+  </ItemGroup>
+
+</Project>

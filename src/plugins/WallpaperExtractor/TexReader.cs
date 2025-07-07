@@ -29,7 +29,7 @@ namespace ZoDream.WallpaperExtractor
         {
             var extension = header.IsGift ? "gif" : header.ImageFormat.GetFileExtension(); ;
             outputFile = PackageExtension.CombineExtension(outputFile, extension);
-            LocationStorage.CreateDirectory(outputFile);
+            LocationStorage.CreateParent(outputFile);
             return File.Create(outputFile);
         }
 

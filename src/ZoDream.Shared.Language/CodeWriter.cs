@@ -8,9 +8,15 @@ namespace ZoDream.Shared.Language
     {
         private const char IndentChar = ' ';
         public CodeWriter(Stream output)
-            : this(new StreamWriter(output, Encoding.UTF8))
+            : this(output, Encoding.UTF8)
         {
             
+        }
+
+        public CodeWriter(Stream output, Encoding encoding)
+            : this(new StreamWriter(output, encoding))
+        {
+
         }
 
         public CodeWriter(StringBuilder builder)
@@ -109,6 +115,11 @@ namespace ZoDream.Shared.Language
         {
             writer.Write(val);
             return this;
+        }
+
+        public ICodeWriter Write(StringBuilder val)
+        {
+            return Write(val.ToString());
         }
 
         public ICodeWriter Write(ICodeWriter val)

@@ -34,6 +34,7 @@ namespace ZoDream.Archiver.ViewModels
             ExplorerCommand = UICommand.Index(TapExplorer);
             CodeCommand = UICommand.Code(TapCode);
             LogCommand = UICommand.Log(TapLog);
+            DumpCommand = UICommand.Dump(TapDump);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -75,6 +76,7 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand ViewCommand { get; private set; }
 
         public ICommand SettingCommand { get; private set; }
+        public ICommand DumpCommand { get; private set; }
 
         public ICommand ExplorerCommand {  get; private set; }
         public ICommand CodeCommand {  get; private set; }
@@ -98,6 +100,18 @@ namespace ZoDream.Archiver.ViewModels
                 _app.Success("已完成代码生成！");
             }
 
+        }
+
+        private async void TapDump()
+        {
+            var picker = new DumpDialog();
+            var model = picker.ViewModel;
+            model.Load(_options);
+            if (!await _app.OpenFormAsync(picker))
+            {
+                return;
+            }
+            await model.SaveAsAsync();
         }
 
         private async void TapExplorer()

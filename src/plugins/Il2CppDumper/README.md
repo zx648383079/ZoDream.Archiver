@@ -1,0 +1,1 @@
+﻿fork form https://github.com/Perfare/Il2CppDumper

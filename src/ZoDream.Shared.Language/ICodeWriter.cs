@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace ZoDream.Shared.Language
 {
@@ -34,6 +35,7 @@ namespace ZoDream.Shared.Language
         public ICodeWriter Write(float val);
         public ICodeWriter Write(long val);
         public ICodeWriter Write(double val);
+        public ICodeWriter Write(StringBuilder val);
         public ICodeWriter Write(object? val);
         public ICodeWriter Write(ICodeWriter val);
         /// <summary>

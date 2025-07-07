@@ -12,13 +12,29 @@ namespace ZoDream.Shared.Storage
         /// 根据文件路径创建缺少的文件夹
         /// </summary>
         /// <param name="fileName"></param>
-        public static void CreateDirectory(string fileName)
+        public static void CreateParent(string fileName)
         {
             var folder = Path.GetDirectoryName(fileName);
             if (!string.IsNullOrWhiteSpace(folder) && !Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
+        }
+        /// <summary>
+        /// 直接创建文件夹
+        /// </summary>
+        /// <param name="folder"></param>
+        public static void CreateDirectory(string folder)
+        {
+            if (Directory.Exists(folder))
+            {
+                return;
+            }
+            if (File.Exists(folder))
+            {
+                return;
+            }
+            Directory.CreateDirectory(folder);
         }
 
         /// <summary>
@@ -53,7 +69,7 @@ namespace ZoDream.Shared.Storage
             fullPath = fileName + extension;
             if (mode == ArchiveExtractMode.Overwrite || !File.Exists(fullPath))
             {
-                CreateDirectory(fullPath);
+                CreateParent(fullPath);
                 return true;
             }
             if (mode == ArchiveExtractMode.Skip)
@@ -67,7 +83,7 @@ namespace ZoDream.Shared.Storage
                     fullPath = $"{fileName}({i}){extension}";
                     if (!File.Exists(fullPath))
                     {
-                        CreateDirectory(fullPath);
+                        CreateParent(fullPath);
                         return true;
                     }
                 }

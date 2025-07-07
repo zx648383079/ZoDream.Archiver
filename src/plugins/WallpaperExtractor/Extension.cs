@@ -133,7 +133,7 @@ namespace ZoDream.WallpaperExtractor
             }
             var extension = imageFormat.GetFileExtension();
             fileName = CombineExtension(fileName, extension);
-            LocationStorage.CreateDirectory(fileName);
+            LocationStorage.CreateParent(fileName);
             using var fs = File.Create(fileName);
             bitmap.Encode(fs, imageFormat.Parse(), 100);
         }

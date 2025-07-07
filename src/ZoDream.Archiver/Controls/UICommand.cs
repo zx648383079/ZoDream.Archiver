@@ -183,5 +183,17 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
+
+        public static ICommand Dump(Action execute) => Dump(new RelayCommand(execute));
+        public static ICommand Dump(ICommand command) => new XamlUICommand()
+        {
+            Label = "il2cpp分离",
+            Description = "对 il2cpp 进行分离",
+            IconSource = new FontIconSource()
+            {
+                Glyph = "\uE78B"
+            },
+            Command = command
+        };
     }
 }
