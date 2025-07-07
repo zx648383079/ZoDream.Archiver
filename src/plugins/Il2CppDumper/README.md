@@ -1,1 +1,1 @@
-﻿fork form https://github.com/Perfare/Il2CppDumper
+﻿fork from [Il2CppDumper](https://github.com/Perfare/Il2CppDumper)
