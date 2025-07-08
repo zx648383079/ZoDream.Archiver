@@ -17,7 +17,10 @@ namespace Il2CppDumper
 
        
 
-        public void Initialize(string il2cppPath, string metadataPath)
+        public void Initialize(
+            string il2cppPath, 
+            string metadataPath,
+            ulong dumpAddress = 0)
         {
             _isInitialized = true;
             logger.Info("Initializing metadata...");
@@ -101,15 +104,18 @@ namespace Il2CppDumper
                     //logger.Info("Detected this may be a dump file.");
                     //logger.Info("Input il2cpp dump address or input 0 to force continue:");
                     //var DumpAddr = Convert.ToUInt64(Console.ReadLine(), 16);
-                    //if (DumpAddr != 0)
-                    //{
-                    //    _il2Cpp.ImageBase = DumpAddr;
-                    //    _il2Cpp.IsDumped = true;
-                    //    if (!options.NoRedirectedPointer)
-                    //    {
-                    //        elf.Reload();
-                    //    }
-                    //}
+                    if (dumpAddress != 0)
+                    {
+                        _il2Cpp.ImageBase = dumpAddress;
+                        _il2Cpp.IsDumped = true;
+                        if (!options.NoRedirectedPointer)
+                        {
+                            elf.Reload();
+                        }
+                    } else
+                    {
+                        throw new Exception("ERROR: This file may be protected.");
+                    }
                 }
                 else
                 {

@@ -63,6 +63,10 @@
                         Content="&#xE8DA;"
                         Style="{StaticResource IconBtn}" />
                 </Grid>
+                <TextBox
+                    Header="Il2cpp Offset"
+                    PlaceholderText="提取自内存的Il2cpp需要偏移地址(十六进制)"
+                    Text="{Binding DumpAddress}" />
             </StackPanel>
         </PivotItem>
         <PivotItem Header="高级">

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Il2CppDumper;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,6 +82,13 @@ namespace ZoDream.Archiver.ViewModels
             }
         }
 
+        private string _dumpAddress = string.Empty;
+
+        public string DumpAddress {
+            get => _dumpAddress;
+            set => SetProperty(ref _dumpAddress, value);
+        }
+
         private string _outputFolder = string.Empty;
 
         public string OutputFolder {
@@ -155,11 +163,19 @@ namespace ZoDream.Archiver.ViewModels
                 return false;
             }
             var token = _app.OpenProgress("解压中...");
+            if (!ulong.TryParse(DumpAddress, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var dumpAddress))
+            {
+                dumpAddress = 0;
+            }
+            if (dumpAddress > 0)
+            {
+                ForceDump = true;
+            }
             await Task.Factory.StartNew(() => {
                 try
                 {
                     using var dumper = new ConvertDumper(_app.Logger, this);
-                    dumper.Initialize(Il2cppPath, MetadataPath);
+                    dumper.Initialize(Il2cppPath, MetadataPath, dumpAddress);
                     dumper.SaveAs(OutputFolder, Shared.Models.ArchiveExtractMode.Overwrite);
                 }
                 catch (Exception ex)
