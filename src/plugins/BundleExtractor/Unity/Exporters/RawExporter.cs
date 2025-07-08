@@ -58,7 +58,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 //        new VertexMapReader().Read(asset.Script);
                 //    }
                 //}
-                SaveAs(input, fileName, ".txt", mode);
+                var extension = Path.GetExtension(fileName).ToLower();
+
+                SaveAs(input, fileName, extension switch
+                {
+                    ".lua" or ".atlas" => extension,
+                    _ => ".txt"
+                }, mode);
             }
             finally
             {
