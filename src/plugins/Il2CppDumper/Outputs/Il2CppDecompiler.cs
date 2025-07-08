@@ -110,13 +110,14 @@ namespace Il2CppDumper
                         if (extends.Count > 0)
                             writer.Write($" : {string.Join(", ", extends)}");
                         if (config.DumpTypeDefIndex)
-                            writer.Write($" // TypeDefIndex: {typeDefIndex}\n{{");
-                        else
-                            writer.Write("\n{");
+                        {
+                            writer.Write($" // TypeDefIndex: {typeDefIndex}");
+                        }
+                        writer.WriteLine().Write("{");
                         //dump field
                         if (config.DumpField && typeDef.field_count > 0)
                         {
-                            writer.Write("\n\t// Fields\n");
+                            writer.WriteLine().WriteLine("\t// Fields");
                             var fieldEnd = typeDef.fieldStart + typeDef.field_count;
                             for (var i = typeDef.fieldStart; i < fieldEnd; ++i)
                             {
@@ -196,7 +197,8 @@ namespace Il2CppDumper
                                     }
                                 }
                                 if (config.DumpFieldOffset && !isConst)
-                                    writer.WriteFormat("; // 0x{0:X}\n", il2Cpp.GetFieldOffsetFromIndex(typeDefIndex, i - typeDef.fieldStart, i, typeDef.IsValueType, isStatic));
+                                    writer.WriteFormat("; // 0x{0:X}", il2Cpp.GetFieldOffsetFromIndex(typeDefIndex, i - typeDef.fieldStart, i, typeDef.IsValueType, isStatic))
+                                        .WriteLine();
                                 else
                                     writer.WriteLine(";");
                             }

@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <Description>Il2CppDumper Dependencies</Description>
+	  <Version>1.0.0</Version>
+	  <BaseOutputPath>..\..\bin</BaseOutputPath>
+  </PropertyGroup>
+
+</Project>

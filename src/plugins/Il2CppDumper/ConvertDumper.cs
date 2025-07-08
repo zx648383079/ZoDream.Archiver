@@ -112,9 +112,6 @@ namespace Il2CppDumper
                         {
                             elf.Reload();
                         }
-                    } else
-                    {
-                        throw new Exception("ERROR: This file may be protected.");
                     }
                 }
                 else

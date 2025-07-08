@@ -33,7 +33,7 @@ namespace Il2CppDumper
 
             //Il2CppDummyDll
             var il2CppDummyDll = AssemblyDefinition.ReadAssembly(File.OpenRead(
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Il2CppDumper.dll")));
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Il2CppDummy.dll")));
             Assemblies.Add(il2CppDummyDll);
             var dummyMD = il2CppDummyDll.MainModule;
             var addressAttribute = dummyMD.Types.First(x => x.Name == "AddressAttribute").Methods[0];

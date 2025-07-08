@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using ZoDream.Shared.Compression.Lz4;
+using ZoDream.Shared.IO;
 using static Il2CppDumper.ElfConstants;
 
 namespace Il2CppDumper
@@ -274,47 +276,35 @@ namespace Il2CppDumper
                 writer.Write(header.DataHash);
                 writer.BaseStream.Position = header.TextSegment.FileOffset;
                 Position = header.TextSegment.FileOffset;
-                var textBytes = ReadBytes((int)header.TextCompressedSize);
+                var textBytes = new PartialStream(Reader.BaseStream, header.TextCompressedSize);
                 if (isTextCompressed)
                 {
-                    var unCompressedData = new byte[header.TextSegment.DecompressedSize];
-                    using (var decoder = new Lz4DecoderStream(new MemoryStream(textBytes)))
-                    {
-                        decoder.Read(unCompressedData, 0, unCompressedData.Length);
-                    }
-                    writer.Write(unCompressedData);
+                    new Lz4Decompressor(header.TextSegment.DecompressedSize)
+                        .Decompress(textBytes, writer.BaseStream);
                 }
                 else
                 {
-                    writer.Write(textBytes);
+                    textBytes.CopyTo(writer.BaseStream);
                 }
-                var roDataBytes = ReadBytes((int)header.RoDataCompressedSize);
+                var roDataBytes = new PartialStream(Reader.BaseStream, header.RoDataCompressedSize);
                 if (isRoDataCompressed)
                 {
-                    var unCompressedData = new byte[header.RoDataSegment.DecompressedSize];
-                    using (var decoder = new Lz4DecoderStream(new MemoryStream(roDataBytes)))
-                    {
-                        decoder.Read(unCompressedData, 0, unCompressedData.Length);
-                    }
-                    writer.Write(unCompressedData);
+                    new Lz4Decompressor(header.RoDataSegment.DecompressedSize)
+                        .Decompress(roDataBytes, writer.BaseStream);
                 }
                 else
                 {
-                    writer.Write(roDataBytes);
+                    roDataBytes.CopyTo(writer.BaseStream);
                 }
-                var dataBytes = ReadBytes((int)header.DataCompressedSize);
+                var dataBytes = new PartialStream(Reader.BaseStream, header.DataCompressedSize);
                 if (isDataCompressed)
                 {
-                    var unCompressedData = new byte[header.DataSegment.DecompressedSize];
-                    using (var decoder = new Lz4DecoderStream(new MemoryStream(dataBytes)))
-                    {
-                        decoder.Read(unCompressedData, 0, unCompressedData.Length);
-                    }
-                    writer.Write(unCompressedData);
+                    new Lz4Decompressor(header.DataSegment.DecompressedSize)
+                        .Decompress(dataBytes, writer.BaseStream);
                 }
                 else
                 {
-                    writer.Write(dataBytes);
+                    dataBytes.CopyTo(writer.BaseStream);
                 }
                 writer.Flush();
                 unCompressedStream.Position = 0;

@@ -172,6 +172,7 @@ namespace ZoDream.Archiver.ViewModels
                 ForceDump = true;
             }
             await Task.Factory.StartNew(() => {
+                var finishTip = "已完成操作！";
                 try
                 {
                     using var dumper = new ConvertDumper(_app.Logger, this);
@@ -181,9 +182,10 @@ namespace ZoDream.Archiver.ViewModels
                 catch (Exception ex)
                 {
                     _app.Logger.Log(ex);
+                    finishTip = "出现错误未完成！";
                 }
                 _app.CloseProgress();
-                _app.Success("已完成操作！");
+                _app.Success(finishTip);
                 _app.Logger.Flush();
             }, token);
             
