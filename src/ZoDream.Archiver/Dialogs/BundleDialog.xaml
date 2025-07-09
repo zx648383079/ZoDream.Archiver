@@ -153,6 +153,13 @@
                         ItemsSource="{Binding ModelFormatItems}"
                         SelectedItem="{Binding ModelFormat, Mode=TwoWay}"
                         Visibility="{Binding EnabledModel, Converter={StaticResource ToggleCvt}}" />
+                    <ToggleSwitch
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        Header="独立模型"
+                        IsOn="{Binding EnabledMesh, Mode=TwoWay}"
+                        ToolTipService.ToolTip="单独的 Mesh obj 格式 "
+                        Visibility="{Binding EnabledModel, Converter={StaticResource ToggleCvt}}" />
                     <NumberBox
                         Grid.Row="4"
                         Header="最大批处理数"

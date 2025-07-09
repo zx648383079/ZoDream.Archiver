@@ -176,6 +176,14 @@ namespace ZoDream.Archiver.ViewModels
             set => SetProperty(ref _modelFormat, value);
         }
 
+        private bool _enabledMesh;
+
+        public bool EnabledMesh {
+            get => _enabledMesh;
+            set => SetProperty(ref _enabledMesh, value);
+        }
+
+
         private int _maxBatchCount = 100;
 
         public int MaxBatchCount {

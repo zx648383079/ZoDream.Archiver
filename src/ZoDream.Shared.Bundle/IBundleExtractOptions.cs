@@ -24,6 +24,7 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         public bool EnabledSpine { get; }
         public bool EnabledModel { get; }
+        public bool EnabledMesh { get; }
         public string ModelFormat { get; }
         /// <summary>
         /// 当前是否只执行建立依赖关系任务

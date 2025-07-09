@@ -139,7 +139,7 @@ namespace ZoDream.BundleExtractor
             //IMultipartExporter? instance;
             var info = asset.Get(objIndex);
             var cls = (NativeClassID)info.ClassID;
-            if (cls is NativeClassID.GameObject or NativeClassID.Mesh
+            if (cls is NativeClassID.GameObject
                 or NativeClassID.Animator or NativeClassID.AnimationClip)
             {
                 var instance = TryParseModel(asset);
@@ -148,6 +148,10 @@ namespace ZoDream.BundleExtractor
                     instance.Append(objIndex);
                     return instance;
                 }
+            }
+            if (cls is NativeClassID.Mesh && Options.EnabledMesh)
+            {
+                return new MeshExporter(objIndex, asset);
             }
             if (!_exportItems.TryGetValue(cls, out var targetType))
             {

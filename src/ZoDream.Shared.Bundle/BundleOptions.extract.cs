@@ -27,6 +27,10 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         public bool EnabledSpine { get; set; } = true;
         public bool EnabledModel { get; set; } = true;
+        /// <summary>
+        /// 单独的 Mesh obj 格式 
+        /// </summary>
+        public bool EnabledMesh { get; set; } = true;
         public string ModelFormat { get; set; } = "glb";
 
         #region 依赖关系
