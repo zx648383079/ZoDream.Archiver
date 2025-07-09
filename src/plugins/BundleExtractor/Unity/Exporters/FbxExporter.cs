@@ -14,7 +14,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
-    internal class FbxExporter(ISerializedFile resource) : IFbxImported, IMultipartExporter
+    internal class FbxExporter(ISerializedFile resource) : IFbxImported, IMultipartBuilder
     {
 
         public FbxImportedFrame RootFrame { get; protected set; }

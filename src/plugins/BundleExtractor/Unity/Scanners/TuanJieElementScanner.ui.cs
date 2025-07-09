@@ -303,7 +303,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 {
                     if (version.GreaterThanOrEquals(2019)) //2019 and up
                     {
-                        var m_BonesAABBSize = reader.ReadInt32();
                         var m_BonesAABB = reader.ReadArray<MinMaxAABB>(serializer);
 
                         var m_VariableBoneCountWeights = reader.ReadArray(r => r.ReadUInt32());
@@ -331,7 +330,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         var ResourceFlags = reader.ReadUInt32();
 
                         var RootClusterPage = reader.ReadInt32();
-                        res.IndexBuffer = reader.ReadArray(RootClusterPage / 4, (r, _) => r.ReadUInt32());
+                        res.IndexBuffer = reader.ReadArray(RootClusterPage / 4, r => r.ReadUInt32());
 
                         var ImposterAtlas = reader.ReadArray(_ => reader.ReadUInt16());
                         reader.ReadArray<VGPackedHierarchyNode>(serializer);
@@ -347,102 +346,37 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     reader.ReadInt32();
 
                     //Unity fixed it in 2017.3.1p1 and later versions
-                    if (version.GreaterThanOrEquals(2017, 3, 1, VersionType.Patch, 1) && m_MeshCompression == 0)//2017.3.xfx with no compression
+                    if (
+                    version.GreaterThanOrEquals(2017, 4) ||
+                    version.Equals(2017, 3, 1, VersionType.Patch, 1) || 
+                    (version.Equals(2017, 3) && m_MeshCompression == 0))//2017.3.xfx with no compression
                     {
                         var m_IndexFormat = reader.ReadInt32();
                         res.Use16BitIndices = m_IndexFormat == 0;
-                    }
-
-                    int m_IndexBuffer_size = reader.ReadInt32();
-                    if (res.Use16BitIndices)
-                    {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
-                        reader.AlignStream();
-                    }
-                    else
-                    {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
-                    }
-                }
-
-                if (version.LessThan(3, 5)) //3.4.2 and earlier
-                {
-                    res.VertexCount = reader.ReadInt32();
-                    res.Vertices = reader.ReadArray(res.VertexCount * 3, r => r.ReadSingle()); //Vector3
-
-                    res.Skin = reader.ReadArray<BoneWeights4>(serializer);
-
-                    res.BindPose = reader.ReadMatrixArray();
-
-                    res.UV0 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
-
-                    res.UV1 = reader.ReadArray(reader.ReadInt32() * 2, r => r.ReadSingle()); //Vector2
-
-                    if (version.LessThanOrEquals(2, 5)) //2.5 and down
-                    {
-                        int m_TangentSpace_size = reader.ReadInt32();
-                        res.Normals = new float[m_TangentSpace_size * 3];
-                        res.Tangents = new float[m_TangentSpace_size * 4];
-                        for (int v = 0; v < m_TangentSpace_size; v++)
+                        int m_IndexBuffer_size = reader.ReadInt32();
+                        if (res.Use16BitIndices)
                         {
-                            res.Normals[v * 3] = reader.ReadSingle();
-                            res.Normals[v * 3 + 1] = reader.ReadSingle();
-                            res.Normals[v * 3 + 2] = reader.ReadSingle();
-                            res.Tangents[v * 3] = reader.ReadSingle();
-                            res.Tangents[v * 3 + 1] = reader.ReadSingle();
-                            res.Tangents[v * 3 + 2] = reader.ReadSingle();
-                            res.Tangents[v * 3 + 3] = reader.ReadSingle(); //handedness
+                            res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
+                            reader.AlignStream();
+                        }
+                        else
+                        {
+                            res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
                         }
                     }
-                    else //2.6.0 and later
-                    {
-                        res.Tangents = reader.ReadArray(reader.ReadInt32() * 4, r => r.ReadSingle()); //Vector4
 
-                        res.Normals = reader.ReadArray(reader.ReadInt32() * 3, r => r.ReadSingle()); //Vector3
-                    }
-                }
-                else
-                {
-                    if (version.LessThan(2018, 2)) //2018.2 down
-                    {
-                        res.Skin = reader.ReadArray<BoneWeights4>(serializer);
-                    }
-
-                    if (version.LessThanOrEquals(4, 2)) //4.2 and down
-                    {
-                        res.BindPose = reader.ReadMatrixArray();
-                    }
-
-                    res.VertexData = serializer.Deserialize<VertexData>(reader);
-                    reader.AlignStream();
+                    
                 }
 
+                res.VertexData = serializer.Deserialize<VertexData>(reader);
 
-                if (version.GreaterThanOrEquals(2022, 3) && m_MeshCompression > 0)
-                {
-                    reader.Position += 44; // TODO 不知道是什么
-                }
-
-                if (version.GreaterThanOrEquals(2, 6) && !res.CollisionMeshBaked) //2.6.0 and later
+                if (version.GreaterThanOrEquals(2, 6)) //2.6.0 and later
                 {
                     res.CompressedMesh = serializer.Deserialize<CompressedMesh>(reader);
                 }
 
+
                 reader.Position += 24; //AABB m_LocalAABB
-
-                if (version.LessThanOrEquals(3, 4, 2)) //3.4.2 and earlier
-                {
-                    int m_Colors_size = reader.ReadInt32();
-                    res.Colors = new float[m_Colors_size * 4];
-                    for (int v = 0; v < m_Colors_size * 4; v++)
-                    {
-                        res.Colors[v] = (float)reader.ReadByte() / 0xFF;
-                    }
-
-                    int m_CollisionTriangles_size = reader.ReadInt32();
-                    reader.Position += m_CollisionTriangles_size * 4; //UInt32 indices
-                    int m_CollisionVertexCount = reader.ReadInt32();
-                }
 
 
                 int m_MeshUsageFlags = reader.ReadInt32();
@@ -452,21 +386,14 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     int m_CookingOptions = reader.ReadInt32();
                 }
 
-                if (version.GreaterThanOrEquals(5)) //5.0 and up
-                {
-                    var m_BakedConvexCollisionMesh = reader.ReadArray(r => r.ReadByte());
-                    reader.AlignStream();
-                    var m_BakedTriangleCollisionMesh = reader.ReadArray(r => r.ReadByte());
-                    reader.AlignStream();
-                }
+                var m_BakedConvexCollisionMesh = reader.ReadArray(r => r.ReadByte());
+                reader.AlignStream();
+                var m_BakedTriangleCollisionMesh = reader.ReadArray(r => r.ReadByte());
+                reader.AlignStream();
 
-
-                if (version.GreaterThanOrEquals(2018, 2)) //2018.2 and up
-                {
-                    var m_MeshMetrics = new float[2];
-                    m_MeshMetrics[0] = reader.ReadSingle();
-                    m_MeshMetrics[1] = reader.ReadSingle();
-                }
+                var m_MeshMetrics = new float[2];
+                m_MeshMetrics[0] = reader.ReadSingle();
+                m_MeshMetrics[1] = reader.ReadSingle();
 
             });
             return res;

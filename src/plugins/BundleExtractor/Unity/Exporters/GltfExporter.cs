@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
     /// <summary>
     /// unity 使用的时 y up 坐标 gltf 使用 z up 坐标
     /// </summary>
-    internal class GltfExporter : IMultipartExporter
+    internal class GltfExporter : IMultipartBuilder
     {
         public GltfExporter(ISerializedFile resource)
         {

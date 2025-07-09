@@ -11,4 +11,13 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public string SourcePath { get; }
         public bool IsEmpty { get; }
     }
+
+    internal interface IMultipartBuilder : IMultipartExporter
+    {
+        /// <summary>
+        /// 追加
+        /// </summary>
+        /// <param name="entryId"></param>
+        public void Append(int entryId);
+    }
 }

@@ -125,7 +125,7 @@ namespace ZoDream.BundleExtractor
             return false;
         }
 
-        private IMultipartExporter? TryParseModel(ISerializedFile asset)
+        private IMultipartBuilder? TryParseModel(ISerializedFile asset)
         {
             return Options?.ModelFormat.ToLower() switch
             {
@@ -139,16 +139,16 @@ namespace ZoDream.BundleExtractor
             //IMultipartExporter? instance;
             var info = asset.Get(objIndex);
             var cls = (NativeClassID)info.ClassID;
-            //if (cls is NativeClassID.GameObject or NativeClassID.Mesh 
-            //    or NativeClassID.Animator or NativeClassID.AnimationClip)
-            //{
-            //    instance = TryParseModel(asset);
-            //    if (instance is not null)
-            //    {
-            //        TryAppend(instance, objIndex);
-            //        return instance;
-            //    }
-            //}
+            if (cls is NativeClassID.GameObject or NativeClassID.Mesh
+                or NativeClassID.Animator or NativeClassID.AnimationClip)
+            {
+                var instance = TryParseModel(asset);
+                if (instance is not null)
+                {
+                    instance.Append(objIndex);
+                    return instance;
+                }
+            }
             if (!_exportItems.TryGetValue(cls, out var targetType))
             {
                 return null;

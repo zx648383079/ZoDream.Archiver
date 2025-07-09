@@ -49,7 +49,11 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     reader.AlignStream();
 
                     //Unity fixed it in 2017.3.1p1 and later versions
-                    if (version.GreaterThanOrEquals(2017, 3, 1, VersionType.Patch, 1) && m_MeshCompression == 0)//2017.3.xfx with no compression
+                    if (
+                        version.GreaterThanOrEquals(2017, 4) ||
+                        version.Equals(2017, 3, 1, VersionType.Patch, 1) ||
+                        (version.Equals(2017, 3) && m_MeshCompression == 0)
+                    )//2017.3.xfx with no compression
                     {
                         var m_IndexFormat = reader.ReadInt32();
                         res.Use16BitIndices = m_IndexFormat == 0;
@@ -224,6 +228,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 reader.AlignStream();
                 res.StreamData = serializer.Deserialize<ResourceSource>(reader);
+
+                // var m_GenerateGeometryBuffer = reader.ReadBoolean();
                 if (reader.TryGet<IDependencyBuilder>(out var builder))
                 {
                     var container = reader.Get<ISerializedFile>();

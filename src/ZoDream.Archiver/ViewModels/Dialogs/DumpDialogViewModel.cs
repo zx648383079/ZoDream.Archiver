@@ -151,6 +151,7 @@ namespace ZoDream.Archiver.ViewModels
             OutputFolder = options.OutputFolder;
             if (options is IBundleOptions b && !string.IsNullOrWhiteSpace(b.Entrance))
             {
+                OutputFolder = Path.GetDirectoryName(b.Entrance) ?? options.OutputFolder;
                 MetadataPath = Directory.GetFiles(b.Entrance, "global-metadata.dat", SearchOption.AllDirectories).FirstOrDefault() ?? string.Empty;
                 Il2cppPath = Directory.GetFiles(b.Entrance, "*il2cpp.*", SearchOption.AllDirectories).FirstOrDefault() ?? string.Empty;
             }

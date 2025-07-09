@@ -60,9 +60,9 @@ namespace ZoDream.BundleExtractor
                 instance = new AssemblyReader();
                 if (!string.IsNullOrWhiteSpace(_options.Entrance))
                 {
-                    instance.Load(_options.Entrance);
+                    instance.Load(Path.Combine(Path.GetDirectoryName(_options.Entrance), "DummyDll"));
                 }
-                _service.Add<IAssemblyReader>(instance);
+                _service.Add(instance);
                 return instance;
             }
         }

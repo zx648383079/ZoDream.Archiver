@@ -19,7 +19,7 @@
         <ResourceDictionary Source="ms-appx:///Themes/InputStyle.xaml" />
     </ContentDialog.Resources>
     <Pivot>
-        <PivotItem Header="基本">
+        <PivotItem Header="基本" ScrollViewer.VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock Style="{StaticResource InputHeaderTb}" Text="Destination Path" />
                 <Grid>
@@ -79,7 +79,7 @@
                 <TextBox Header="Key" Text="{Binding Password, Mode=TwoWay}" />
             </StackPanel>
         </PivotItem>
-        <PivotItem Header="高级">
+        <PivotItem Header="高级" ScrollViewer.VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock Style="{StaticResource InputHeaderTb}" Text="Dependency Path" />
                 <Grid>
