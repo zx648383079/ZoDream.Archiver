@@ -127,7 +127,11 @@ namespace ZoDream.BundleExtractor
 
         private IMultipartBuilder? TryParseModel(ISerializedFile asset)
         {
-            return Options?.ModelFormat.ToLower() switch
+            if (Options?.EnabledModel != true)
+            {
+                return null;
+            }
+            return Options?.ModelFormat?.ToLower() switch
             {
                 "fbx" => new FbxExporter(asset),
                 _ => new GltfExporter(asset),
@@ -149,7 +153,7 @@ namespace ZoDream.BundleExtractor
                     return instance;
                 }
             }
-            if (cls is NativeClassID.Mesh && Options.EnabledMesh)
+            if (cls is NativeClassID.Mesh && Options?.EnabledMesh == true)
             {
                 return new MeshExporter(objIndex, asset);
             }
