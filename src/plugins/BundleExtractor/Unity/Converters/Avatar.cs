@@ -33,10 +33,13 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        public static string FindBonePath(Avatar res, uint hash)
+        public static string FindBonePath(Avatar? res, uint hash)
         {
-            res.TOS.TryGetValue(hash, out string path);
-            return path;
+            if (res is null)
+            {
+                return string.Empty;
+            }
+            return res.TOS.TryGetValue(hash, out var path) ? path : string.Empty;
         }
     }
 }

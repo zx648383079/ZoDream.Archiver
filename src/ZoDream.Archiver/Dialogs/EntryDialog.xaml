@@ -36,35 +36,36 @@
         <ListBox
             Grid.Row="1"
             ItemTemplateSelector="{StaticResource EntryIndexTemplateSelector}"
-            ItemsSource="{Binding EntryItems, Mode=OneWay}">
+            ItemsSource="{Binding EntryItems, Mode=OneWay}"
+            SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
             <ListBox.ContextFlyout>
                 <MenuFlyout>
-                    <MenuFlyoutItem Text="只显示此文件">
+                    <MenuFlyoutItem Command="{Binding OnlyCommand}" Text="只显示此文件">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE7B3;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="查看此文件依赖">
+                    <MenuFlyoutItem Command="{Binding LinkFromCommand}" Text="查看此文件依赖">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE723;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="查看此文件引用">
+                    <MenuFlyoutItem Command="{Binding LinkToCommand}" Text="查看此文件引用">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE71B;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="浏览文件">
+                    <MenuFlyoutItem Command="{Binding ViewFileCommand}" Text="浏览文件">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE838;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="复制文件路径">
+                    <MenuFlyoutItem Command="{Binding CopyPathCommand}" Text="复制文件路径">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xF413;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="复制文件ID">
+                    <MenuFlyoutItem Command="{Binding CopyIDCommand}" Text="复制文件ID">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE8C8;" />
                         </MenuFlyoutItem.Icon>

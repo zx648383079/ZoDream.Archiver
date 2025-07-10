@@ -39,5 +39,8 @@ namespace ZoDream.Shared.Bundle
         public string Name { get; private set; } = Path.GetFileName(fileName);
 
         public string FullPath => fileName;
+
+        public long[] LinkedItems { get; set; } = [];
+        public string[] LinkedPartItems { get; set; } = [];
     }
 }

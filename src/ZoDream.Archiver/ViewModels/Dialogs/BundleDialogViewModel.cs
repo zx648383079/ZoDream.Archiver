@@ -164,7 +164,13 @@ namespace ZoDream.Archiver.ViewModels
 
         public bool EnabledModel {
             get => _enabledModel;
-            set => SetProperty(ref _enabledModel, value);
+            set {
+                SetProperty(ref _enabledModel, value);
+                if (!value)
+                {
+                    EnabledMesh = false;
+                }
+            }
         }
 
         public string[] ModelFormatItems { get; private set; } = ["gltf", "glb", "fbx"];
@@ -316,6 +322,7 @@ namespace ZoDream.Archiver.ViewModels
                 EnabledVideo = b.EnabledVideo;
                 EnabledJson = b.EnabledJson;
                 ModelFormat = b.ModelFormat;
+                EnabledMesh = b.EnabledMesh && b.EnabledModel;
                 MaxBatchCount = b.MaxBatchCount;
             }
         }
@@ -342,6 +349,7 @@ namespace ZoDream.Archiver.ViewModels
                 o.EnabledJson = EnabledJson;
                 o.DependencySource = DependencySource;
                 o.MaxBatchCount = MaxBatchCount;
+                o.EnabledMesh = EnabledMesh && EnabledModel;
                 o.OnlyDependencyTask = _isCreateDependencyTask;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))

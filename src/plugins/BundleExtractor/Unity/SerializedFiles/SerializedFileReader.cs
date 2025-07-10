@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using UnityEngine;
-using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
-using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 using Object = UnityEngine.Object;
-using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -34,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             CombineFormats(_header.Version, _metadata);
             foreach (var item in _metadata.Externals)
             {
-                Dependencies.Add(FileNameHelper.CombineBrother(fullPath, item.PathName));
+                AddDependency(FileNameHelper.CombineBrother(fullPath, item.PathName));
             }
             _children = new Object?[_metadata.Object.Length];
             _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));

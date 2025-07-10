@@ -27,8 +27,17 @@ namespace ZoDream.BundleExtractor.Unity
             return Path.Combine(folder!, name);
         }
 
+        private static string CombineIf(string? folder, string name)
+        {
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                return name;
+            }
+            return Path.Combine(folder, name);
+        }
+
         /// <summary>
-        /// 根据
+        /// 根据当前路径生成兄弟节点路径
         /// </summary>
         /// <param name="fullPath"></param>
         /// <param name="brotherName"></param>
@@ -36,19 +45,12 @@ namespace ZoDream.BundleExtractor.Unity
         public static string CombineBrother(string fullPath, string brotherName)
         {
             fullPath = BundleStorage.Separate(fullPath, out var entryName);
-            string? folder;
-            if (!string.IsNullOrEmpty(entryName))
+            if (string.IsNullOrEmpty(entryName))
             {
-                folder = Path.GetDirectoryName(entryName);
-            } else
-            {
-                folder = Path.GetDirectoryName(fullPath);
+                return CombineIf(Path.GetDirectoryName(fullPath), brotherName);
             }
-            if (string.IsNullOrWhiteSpace(folder))
-            {
-                return brotherName;
-            }
-            return Path.Combine(folder, brotherName);
+            return BundleStorage.Combine(fullPath,
+                CombineIf(Path.GetDirectoryName(entryName), brotherName));
         }
 
         public static string GetFileName(string fullPath)

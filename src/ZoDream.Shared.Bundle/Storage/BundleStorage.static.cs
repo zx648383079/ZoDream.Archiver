@@ -275,14 +275,16 @@ namespace ZoDream.Shared.Bundle
                     item.Add(new BundleEntry(id, reader.ReadString(), type));
                 }
                 count = reader.ReadInt32();
+                item.LinkedItems = new long[count];
                 for (var i = 0; i < count; i++)
                 {
-                    reader.ReadInt64();
+                    item.LinkedItems[i] = reader.ReadInt64();
                 }
                 count = reader.ReadInt32();
+                item.LinkedPartItems = new string[count];
                 for (var i = 0; i < count; i++)
                 {
-                    reader.ReadString();
+                    item.LinkedPartItems[i] = reader.ReadString();
                 }
                 yield return item;
             }

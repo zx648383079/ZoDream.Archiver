@@ -70,26 +70,56 @@ namespace ZoDream.BundleExtractor
 
         public IBundleExtractOptions Options => (IBundleExtractOptions)_options;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName">{触发依赖路径}#{依赖内容}</param>
+        /// <returns></returns>
         public int IndexOf(string fileName)
         {
+            // # 前面的触发路径不一定准确
             if (_assetIndexItems.TryGetValue(fileName, out var index))
             {
                 return index;
             }
             var i = _assetItems.FindIndex(x => x.FullPath.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+            if (i == -1)
+            {
+                BundleStorage.Separate(fileName, out var entryName);
+                if (!string.IsNullOrEmpty(entryName))
+                {
+                    i = _assetItems.FindIndex(x => x.FullPath.EndsWith(entryName, StringComparison.OrdinalIgnoreCase));
+                }
+            }
             _assetIndexItems.TryAdd(fileName, i);
             return i;
         }
+        /// <summary>
+        /// 注册依赖
+        /// </summary>
+        /// <param name="fileItems">依赖项</param>
+        /// <param name="entryPath">来源文件</param>
         private void AddDependency(IEnumerable<string> fileItems, string entryPath)
         {
             foreach (var item in fileItems)
             {
-                _dependency?.AddDependency(entryPath, item);
-                AddDependency(Path.GetFileName(item), item);
+                var target = BundleStorage.Separate(item, out var targetEntry);
+                if (!string.IsNullOrEmpty(targetEntry))
+                {
+                    _dependency?.AddDependencyEntry(entryPath, targetEntry);
+                } else
+                {
+                    _dependency?.AddDependency(entryPath, target);
+                }
+                EnqueueImportQueue(Path.GetFileName(target), target);
             }
         }
-
-        private void AddDependency(string name, string fullPath)
+        /// <summary>
+        /// 添加文件到需要导入的队列
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="fullPath"></param>
+        private void EnqueueImportQueue(string name, string fullPath)
         {
             if (_importFileHash.Contains(name))
             {
