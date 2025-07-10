@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -227,8 +228,11 @@ namespace ZoDream.Shared.Bundle
         {
             _writer?.Dispose();
         }
-
         public IDependencyDictionary ToDictionary()
+        {
+            return ToDictionary(StringComparison.Ordinal);
+        }
+        public IDependencyDictionary ToDictionary(StringComparison comparisonType)
         {
             var res = new DependencyDictionary();
             foreach (var item in _items)
@@ -240,7 +244,7 @@ namespace ZoDream.Shared.Bundle
                     {
                         continue;
                     }
-                    if (item.Value.Contains(target.Value) || target.Value.Contains(item.Value))
+                    if (item.Value.Contains(target.Value, comparisonType) || target.Value.Contains(item.Value, comparisonType))
                     {
                         items.Add(target.Key);
                     }
@@ -283,8 +287,11 @@ namespace ZoDream.Shared.Bundle
             private readonly HashSet<string> _partItems = [];
             private readonly HashSet<long> _linked = [];
             private readonly HashSet<string> _linkedPart = [];
-
             public bool Contains(DependencyEntry target)
+            {
+                return Contains(target, StringComparison.Ordinal);
+            }
+            public bool Contains(DependencyEntry target, StringComparison comparisonType)
             {
                 if (this == target)
                 {
@@ -292,7 +299,7 @@ namespace ZoDream.Shared.Bundle
                 }
                 foreach (var item in target._linkedPart)
                 {
-                    if (Contains(item))
+                    if (Contains(item, comparisonType))
                     {
                         return true;
                     }
@@ -307,9 +314,27 @@ namespace ZoDream.Shared.Bundle
                 return false;
             }
 
+
+
             public bool Contains(string child)
             {
                 return _partItems.Contains(child);
+            }
+
+            public bool Contains(string child, StringComparison comparisonType)
+            {
+                if (comparisonType == StringComparison.Ordinal)
+                {
+                    return Contains(child);
+                }
+                foreach (var item in _partItems)
+                {
+                    if (item.Equals(child, comparisonType))
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
 
             public bool Contains(long child)

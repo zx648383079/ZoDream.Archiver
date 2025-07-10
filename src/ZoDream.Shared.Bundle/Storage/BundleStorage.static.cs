@@ -229,6 +229,9 @@ namespace ZoDream.Shared.Bundle
         {
             return $"{source}#{entry}";
         }
+
+        
+
         /// <summary>
         /// 获取真实路径
         /// </summary>
@@ -238,6 +241,24 @@ namespace ZoDream.Shared.Bundle
         {
             return Separate(fullPath, out _);
         }
+
+        /// <summary>
+        /// 判断是否是子路径的名
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="entry"></param>
+        /// <param name="comparison"></param>
+        /// <returns></returns>
+        public static bool IsEntryName(string source, string entry, StringComparison comparison)
+        {
+            var i = source.LastIndexOf('#');
+            if (i < 0)
+            {
+                return false;
+            }
+            return source[(i + 1)..].Equals(entry, comparison);
+        }
+
         /// <summary>
         /// 获取真实路径
         /// </summary>

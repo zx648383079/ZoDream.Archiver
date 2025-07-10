@@ -88,7 +88,7 @@ namespace ZoDream.BundleExtractor
                 BundleStorage.Separate(fileName, out var entryName);
                 if (!string.IsNullOrEmpty(entryName))
                 {
-                    i = _assetItems.FindIndex(x => x.FullPath.EndsWith(entryName, StringComparison.OrdinalIgnoreCase));
+                    i = _assetItems.FindIndex(x => BundleStorage.IsEntryName(x.FullPath, entryName, StringComparison.OrdinalIgnoreCase));
                 }
             }
             _assetIndexItems.TryAdd(fileName, i);

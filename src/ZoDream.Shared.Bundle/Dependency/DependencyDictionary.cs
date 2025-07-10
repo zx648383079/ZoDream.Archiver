@@ -70,7 +70,7 @@ namespace ZoDream.Shared.Bundle
             //return items.Length > 0;
             #endregion
 
-            #region 复制版 // 获取全部的依赖
+            #region 复杂版 // 获取全部的依赖
             var res = new HashSet<string>();
             var source = files.ToArray();
             var data = source;

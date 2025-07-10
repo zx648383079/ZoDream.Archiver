@@ -38,7 +38,7 @@ namespace ZoDream.BundleExtractor.Engines
                 } else
                 {
                     using var builder = DependencyBuilder.Load(o.DependencySource);
-                    dict = builder.ToDictionary();
+                    dict = builder.ToDictionary(StringComparison.OrdinalIgnoreCase);
                     if (dict is DependencyDictionary s)
                     {
                         s.FileName = o.DependencySource;
