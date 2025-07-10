@@ -145,7 +145,9 @@ namespace ZoDream.Shared.Bundle
                     yield return item;
                     continue;
                 }
-                yield return new BundleChunk(item.Entrance, [.. item, .. items]);
+                yield return new BundleChunk(item.Entrance, [.. item, 
+                    // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
+                    .. items.Where(i => !exclude.Contains(i))]);
                 foreach (var it in items)
                 {
                     exclude.Add(it);

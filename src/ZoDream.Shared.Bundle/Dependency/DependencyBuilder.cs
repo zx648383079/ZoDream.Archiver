@@ -237,21 +237,79 @@ namespace ZoDream.Shared.Bundle
             var res = new DependencyDictionary();
             foreach (var item in _items)
             {
-                var items = new List<string>();
+                res.Add(item.Key, GetDependency(item.Key, 
+                    item.Value.LinkedItems, 
+                    item.Value.LinkedPartItems, comparisonType));
+            }
+            return res;
+        }
+
+        /// <summary>
+        /// 获取双向依赖的文件，可能存在新旧多个文件存在相同的内容
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="sourceBag"></param>
+        /// <param name="comparisonType"></param>
+        /// <returns></returns>
+        private string[] GetDependency(string source, DependencyEntry sourceBag, StringComparison comparisonType)
+        {
+            var res = new HashSet<string>();
+            foreach (var target in _items)
+            {
+                if (source == target.Key || res.Contains(target.Key))
+                {
+                    continue;
+                }
+                if (sourceBag.Contains(target.Value, comparisonType) 
+                    || target.Value.Contains(sourceBag, comparisonType))
+                {
+                    res.Add(target.Key);
+                }
+            }
+            return res.ToArray();
+        }
+        /// <summary>
+        /// 根据依赖部分获取依赖的文件，只取第一个包含的依赖文件
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="linkedItems"></param>
+        /// <param name="linkedPartItems"></param>
+        /// <param name="comparisonType"></param>
+        /// <returns></returns>
+        private string[] GetDependency(string source, 
+            IEnumerable<long> linkedItems,
+            IEnumerable<string> linkedPartItems, StringComparison comparisonType)
+        {
+            var res = new HashSet<string>();
+            foreach (var item in linkedItems)
+            {
                 foreach (var target in _items)
                 {
-                    if (item.Key == target.Key)
+                    if (source == target.Key || res.Contains(target.Key))
                     {
                         continue;
                     }
-                    if (item.Value.Contains(target.Value, comparisonType) || target.Value.Contains(item.Value, comparisonType))
+                    if (target.Value.Contains(item))
                     {
-                        items.Add(target.Key);
+                        res.Add(target.Key);
                     }
                 }
-                res.Add(item.Key, [..items]);
             }
-            return res;
+            foreach (var item in linkedPartItems)
+            {
+                foreach (var target in _items)
+                {
+                    if (source == target.Key || res.Contains(target.Key))
+                    {
+                        continue;
+                    }
+                    if (target.Value.Contains(item, comparisonType))
+                    {
+                        res.Add(target.Key);
+                    }
+                }
+            }
+            return [..res];
         }
 
         public static DependencyBuilder Load(string fileName)
@@ -287,6 +345,10 @@ namespace ZoDream.Shared.Bundle
             private readonly HashSet<string> _partItems = [];
             private readonly HashSet<long> _linked = [];
             private readonly HashSet<string> _linkedPart = [];
+
+            public IEnumerable<long> LinkedItems => _linked;
+            public IEnumerable<string> LinkedPartItems => _linkedPart;
+
             public bool Contains(DependencyEntry target)
             {
                 return Contains(target, StringComparison.Ordinal);
