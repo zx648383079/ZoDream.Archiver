@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +37,28 @@ namespace ZoDream.Shared.Storage
                 return;
             }
             Directory.CreateDirectory(folder);
+        }
+        /// <summary>
+        /// 创建安全文件名
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="replacement"></param>
+        /// <returns></returns>
+        public static string CreateSafeFileName(string fileName, string replacement = "_")
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return string.Empty;
+            }
+            // 替换非法字符
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sb = new StringBuilder();
+
+            foreach (var c in fileName)
+            {
+                sb.Append(invalidChars.Contains(c) ? replacement : c);
+            }
+            return sb.ToString();
         }
 
         /// <summary>

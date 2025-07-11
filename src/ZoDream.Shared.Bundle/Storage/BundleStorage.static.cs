@@ -192,6 +192,34 @@ namespace ZoDream.Shared.Bundle
             }
         }
 
+        public static IEnumerable<string> GetFiles(
+            string folder,
+            string pattern)
+        {
+            var options = new EnumerationOptions()
+            {
+                RecurseSubdirectories = true,
+                MatchType = MatchType.Win32,
+                AttributesToSkip = FileAttributes.None,
+                IgnoreInaccessible = false,
+            };
+            var res = new FileSystemEnumerable<string>(folder, delegate (ref FileSystemEntry entry)
+            {
+                return entry.ToSpecifiedFullPath();
+            }, options)
+            {
+                ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
+                {
+                    if (entry.IsDirectory)
+                    {
+                        return false;
+                    }
+                    return FileSystemName.MatchesSimpleExpression(
+                        entry.FileName, pattern, true);
+                }
+            };
+            return res;
+        }
 
         /// <summary>
         /// 请先排好序
@@ -219,63 +247,6 @@ namespace ZoDream.Shared.Bundle
             return ToHashCode([value]);
         }
 
-        /// <summary>
-        /// 生成一个文件内部的子路径虚拟路径
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="entry"></param>
-        /// <returns></returns>
-        public static string Combine(string source, string entry)
-        {
-            return $"{source}#{entry}";
-        }
-
-        
-
-        /// <summary>
-        /// 获取真实路径
-        /// </summary>
-        /// <param name="fullPath"></param>
-        /// <returns></returns>
-        public static string Separate(string fullPath)
-        {
-            return Separate(fullPath, out _);
-        }
-
-        /// <summary>
-        /// 判断是否是子路径的名
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="entry"></param>
-        /// <param name="comparison"></param>
-        /// <returns></returns>
-        public static bool IsEntryName(string source, string entry, StringComparison comparison)
-        {
-            var i = source.LastIndexOf('#');
-            if (i < 0)
-            {
-                return false;
-            }
-            return source[(i + 1)..].Equals(entry, comparison);
-        }
-
-        /// <summary>
-        /// 获取真实路径
-        /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="entry">内部子文件的文件名</param>
-        /// <returns></returns>
-        public static string Separate(string fullPath, out string entry)
-        {
-            var i = fullPath.LastIndexOf('#');
-            if (i >= 0)
-            {
-                entry = fullPath[(i + 1)..];
-                return fullPath[..i];
-            }
-            entry = string.Empty;
-            return fullPath;
-        }
 
         public static IEnumerable<IBundleEntrySource> LoadEntry(Stream input)
         {

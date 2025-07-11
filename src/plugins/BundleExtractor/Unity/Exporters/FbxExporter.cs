@@ -9,6 +9,7 @@ using System.Text;
 using UnityEngine;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Unity.Converters;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
@@ -33,7 +34,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly Dictionary<uint, string> _morphChannelNames = [];
         public bool IsEmpty => MeshList.Count == 0 || RootFrame is null;
         public string FileName { get; private set; } = string.Empty;
-        public string SourcePath => resource.FullPath;
+        public IFilePath SourcePath => resource.FullPath;
 
         public void Append(int entryId)
         {

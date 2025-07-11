@@ -13,6 +13,7 @@ using ZoDream.KhronosExporter;
 using ZoDream.KhronosExporter.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Collections;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Numerics;
 using ZoDream.Shared.Storage;
@@ -21,9 +22,9 @@ using Material = ZoDream.KhronosExporter.Models.Material;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 using Mesh = ZoDream.KhronosExporter.Models.Mesh;
 using Node = ZoDream.KhronosExporter.Models.Node;
+using UnityAnimation = UnityEngine.Animation;
 using UnityMaterial = UnityEngine.Material;
 using UnityMesh = UnityEngine.Mesh;
-using UnityAnimation = UnityEngine.Animation;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -70,7 +71,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public bool IsEmpty => _root.Nodes.Count == 0;
         public string FileName { get; private set; } = string.Empty;
 
-        public string SourcePath => _resource.FullPath;
+        public IFilePath SourcePath => _resource.FullPath;
 
         public void Append(int entryId)
         {

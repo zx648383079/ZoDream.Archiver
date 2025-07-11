@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
-using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity
 {
@@ -9,25 +10,24 @@ namespace ZoDream.BundleExtractor.Unity
         /// <summary>
         /// 创建新的路径
         /// </summary>
-        /// <param name="fullPath"></param>
+        /// <param name="source"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string Create(string fullPath, string name)
+        public static string Create(IFilePath source, string name)
         {
-            fullPath = BundleStorage.Separate(fullPath, out var entryName);
+            if (string.IsNullOrWhiteSpace(name) && source is IEntryPath e)
+            {
+                name = e.Name;
+            }
+            var filePath = FilePath.GetFilePath(source);
             if (string.IsNullOrWhiteSpace(name))
             {
-                name = entryName;
+                return filePath;
             }
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return fullPath;
-            }
-            var folder = Path.GetDirectoryName(fullPath);
-            return Path.Combine(folder!, name);
+            return CombineIf(Path.GetDirectoryName(filePath), name);
         }
 
-        private static string CombineIf(string? folder, string name)
+        public static string CombineIf(string? folder, string name)
         {
             if (string.IsNullOrWhiteSpace(folder))
             {
@@ -36,32 +36,6 @@ namespace ZoDream.BundleExtractor.Unity
             return Path.Combine(folder, name);
         }
 
-        /// <summary>
-        /// 根据当前路径生成兄弟节点路径
-        /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="brotherName"></param>
-        /// <returns></returns>
-        public static string CombineBrother(string fullPath, string brotherName)
-        {
-            fullPath = BundleStorage.Separate(fullPath, out var entryName);
-            if (string.IsNullOrEmpty(entryName))
-            {
-                return CombineIf(Path.GetDirectoryName(fullPath), brotherName);
-            }
-            return BundleStorage.Combine(fullPath,
-                CombineIf(Path.GetDirectoryName(entryName), brotherName));
-        }
-
-        public static string GetFileName(string fullPath)
-        {
-            fullPath = BundleStorage.Separate(fullPath, out var entryName);
-            if (string.IsNullOrEmpty(entryName))
-            {
-                return Path.GetFileName(fullPath);
-            }
-            return Path.GetFileName(entryName);
-        }
 
         public static string GetExtension(string fileName)
         {

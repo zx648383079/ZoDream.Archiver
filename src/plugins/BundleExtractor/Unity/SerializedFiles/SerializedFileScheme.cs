@@ -36,7 +36,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             {
                 return null;
             }
-            return new SerializedFileReader(r, filePath, options);
+            return new SerializedFileReader(r, FilePath.Parse(filePath), options);
         }
 
         private static bool IsReadable(IBundleBinaryReader reader)
@@ -70,13 +70,13 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 && headerDefinedFileSize == reader.BaseStream.Length;
         }
 
-        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        public IArchiveReader? Open(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options = null)
         {
             if (!IsReadable(reader))
             {
                 return null;
             }
-            return new SerializedFileReader(reader, filePath, options);
+            return new SerializedFileReader(reader, sourcePath, options);
         }
     }
 }

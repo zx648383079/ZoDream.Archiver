@@ -4,7 +4,7 @@ namespace ZoDream.Shared.Bundle
 {
     public interface IBundleArchiveScheme
     {
-        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null);
+        public IArchiveReader? Open(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options = null);
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
 
 namespace ZoDream.BundleExtractor.Unity
@@ -18,7 +19,7 @@ namespace ZoDream.BundleExtractor.Unity
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public int IndexOf(string fileName);
+        public int IndexOf(IFileName fileName);
 
         public ISerializedFile? this[int index] { get; }
         /// <summary>

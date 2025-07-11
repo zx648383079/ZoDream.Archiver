@@ -74,9 +74,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var container = reader.Get<ISerializedFile>();
                 if (reader.TryGet<IDependencyBuilder>(out var builder))
                 {
-                    var fileName = container.FullPath;
+                    var sourcePath = container.FullPath;
                     var fileId = reader.Get<ObjectInfo>().FileID;
-                    builder.AddDependencyEntry(fileName,
+                    builder.AddDependencyEntry(sourcePath,
                         fileId,
                         res.Source);
                 }

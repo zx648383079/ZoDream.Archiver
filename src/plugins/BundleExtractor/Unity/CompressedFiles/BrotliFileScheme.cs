@@ -69,9 +69,9 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 options);
         }
 
-        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        public IArchiveReader? Open(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options = null)
         {
-            return Open(reader.BaseStream, filePath, fileName, options);
+            return Open(reader.BaseStream, sourcePath.FullPath, sourcePath.Name, options);
         }
 
         public Task<IArchiveReader?> OpenAsync(Stream stream,

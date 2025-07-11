@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -38,22 +40,30 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddDependency(FilePath.Parse(fileName), FilePath.Parse(dependencyFileName));
+        }
+
+        public void AddDependency(IFilePath source, IFilePath dependencyPath)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
             }
-            dependencyFileName = BundleStorage.Separate(dependencyFileName, out entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            if (dependencyPath is IEntryPath d)
             {
-                AddVerifyEntry(dependencyFileName, entryName);
-                item.AddLink(entryName);
+                AddVerifyEntry(d.FilePath, d.EntryPath);
+                item.AddLink(d.EntryPath);
             }
-            item.AddLink(dependencyFileName);
+            item.AddLink(FilePath.GetFilePath(dependencyPath));
         }
 
         public void AddDependencyEntry(string fileName, long dependencyEntryId)
@@ -62,11 +72,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddDependencyEntry(FilePath.Parse(fileName), dependencyEntryId);
+        }
+
+        public void AddDependencyEntry(IFilePath source, long dependencyEntryId)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -80,11 +99,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddDependencyEntry(FilePath.Parse(fileName), entryId, dependencyEntryId);
+        }
+
+        public void AddDependencyEntry(IFilePath source, long entryId, long dependencyEntryId)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -92,17 +120,27 @@ namespace ZoDream.Shared.Bundle
             item.Add(entryId);
             item.AddLink(dependencyEntryId);
         }
+
         public void AddDependencyEntry(string fileName, long entryId, string dependencyEntryName)
         {
             if (_writer is null)
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddDependencyEntry(FilePath.Parse(fileName), entryId, dependencyEntryName);
+        }
+
+        public void AddDependencyEntry(IFilePath source, long entryId, string dependencyEntryName)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -116,11 +154,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entry);
-            if (!string.IsNullOrEmpty(entry))
+            AddDependencyEntry(FilePath.Parse(fileName), entryName, dependencyEntryName);
+        }
+
+        public void AddDependencyEntry(IFilePath source, string entryName, string dependencyEntryName)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entry);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -135,11 +182,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddDependencyEntry(FilePath.Parse(fileName), dependencyEntryName);
+        }
+
+        public void AddDependencyEntry(IFilePath source, string dependencyEntryName)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -153,11 +209,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entryName);
-            if (!string.IsNullOrEmpty(entryName))
+            AddEntry(FilePath.Parse(fileName), entryId);
+        }
+
+        public void AddEntry(IFilePath source, long entryId)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entryName);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -171,11 +236,20 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entry);
-            if (!string.IsNullOrEmpty(entry))
+            AddEntry(FilePath.Parse(fileName), entryId, entryName, entryType);
+        }
+
+        public void AddEntry(IFilePath source, long entryId, string entryName, int entryType)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entry);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
@@ -189,16 +263,32 @@ namespace ZoDream.Shared.Bundle
             {
                 return;
             }
-            fileName = BundleStorage.Separate(fileName, out var entry);
-            if (!string.IsNullOrEmpty(entry))
+            AddEntry(FilePath.Parse(fileName), entryName);
+        }
+        public void AddEntry(IFilePath source, string entryName)
+        {
+            if (_writer is null)
             {
-                AddVerifyEntry(fileName, entry);
+                return;
             }
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
+            var fileName = FilePath.GetFilePath(source);
             if (!_items.TryGetValue(fileName, out var item))
             {
                 _items.Add(fileName, item = new());
             }
             item.Add(entryName);
+        }
+
+        public void AddEntry(IFilePath source)
+        {
+            if (source is IEntryPath e)
+            {
+                AddVerifyEntry(e.FilePath, e.EntryPath);
+            }
         }
         private void AddVerifyEntry(string fileName, string entryName)
         {

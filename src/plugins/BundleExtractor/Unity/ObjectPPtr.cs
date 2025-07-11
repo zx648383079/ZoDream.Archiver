@@ -75,7 +75,7 @@ namespace ZoDream.BundleExtractor.Unity
         {
             var name = instanceSource.FullPath;
             var source = _resource is null ? instanceSource : _resource;
-            if (string.Equals(source.FullPath, name, StringComparison.OrdinalIgnoreCase))
+            if (source.FullPath.Equals(name, StringComparison.OrdinalIgnoreCase))
             {
                 FileID = 0;
             }

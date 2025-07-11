@@ -230,9 +230,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 if (reader.TryGet<IDependencyBuilder>(out var builder))
                 {
                     var container = reader.Get<ISerializedFile>();
-                    var fileName = container.FullPath;
+                    var sourcePath = container.FullPath;
                     var fileId = reader.Get<ObjectInfo>().FileID;
-                    builder.AddDependencyEntry(fileName,
+                    builder.AddDependencyEntry(sourcePath,
                         fileId,
                         res.StreamData.Source);
                 }

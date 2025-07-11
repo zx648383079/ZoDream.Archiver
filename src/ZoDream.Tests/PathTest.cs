@@ -50,15 +50,11 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestCombine()
         {
-            var p = FileNameHelper.CombineBrother("D:\\dd\\c.t#cab-aaa", "cd-ccc");
-            Assert.AreEqual(p, "D:\\dd\\c.t#cd-ccc");
             var folder = NetService.Combine("D:\\a\\a\\d",
                 new Uri("https://zodream.cn/d/b"),
                 new Uri("https://zodream.cn/nav/c")
                 );
             Assert.AreEqual(folder, "D:\\a\\a\\nav");
-            var res = BundleStorage.Combine("D://hhh", "a.t");
-            Assert.IsTrue(res.IndexOf('#') > 0);
         }
 
     }

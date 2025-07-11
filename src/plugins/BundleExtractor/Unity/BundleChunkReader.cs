@@ -41,7 +41,7 @@ namespace ZoDream.BundleExtractor
         private ArchiveExtractMode _extractMode;
         private string _extractFolder = string.Empty;
         private readonly List<ISerializedFile> _assetItems = [];
-        private readonly ConcurrentDictionary<string, int> _assetIndexItems = [];
+        private readonly ConcurrentDictionary<IFileName, int> _assetIndexItems = [];
         private readonly ConcurrentDictionary<string, Stream> _resourceItems = [];
         private readonly List<string> _importItems = [];
         private readonly HashSet<string> _resourceFileHash = [];
@@ -59,7 +59,7 @@ namespace ZoDream.BundleExtractor
                 instance = new AssemblyReader();
                 if (!string.IsNullOrWhiteSpace(_options.Entrance))
                 {
-                    instance.Load(Path.Combine(Path.GetDirectoryName(_options.Entrance), "DummyDll"));
+                    instance.Load(FileNameHelper.CombineIf(Path.GetDirectoryName(_options.Entrance), "DummyDll"));
                 }
                 _service.Add(instance);
                 return instance;
@@ -73,24 +73,15 @@ namespace ZoDream.BundleExtractor
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="fileName">{触发依赖路径}#{依赖内容}</param>
+        /// <param name="fileName">文件名/entryName</param>
         /// <returns></returns>
-        public int IndexOf(string fileName)
+        public int IndexOf(IFileName fileName)
         {
-            // # 前面的触发路径不一定准确
             if (_assetIndexItems.TryGetValue(fileName, out var index))
             {
                 return index;
             }
             var i = _assetItems.FindIndex(x => x.FullPath.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            if (i == -1)
-            {
-                BundleStorage.Separate(fileName, out var entryName);
-                if (!string.IsNullOrEmpty(entryName))
-                {
-                    i = _assetItems.FindIndex(x => BundleStorage.IsEntryName(x.FullPath, entryName, StringComparison.OrdinalIgnoreCase));
-                }
-            }
             _assetIndexItems.TryAdd(fileName, i);
             return i;
         }
@@ -99,20 +90,53 @@ namespace ZoDream.BundleExtractor
         /// </summary>
         /// <param name="fileItems">依赖项</param>
         /// <param name="entryPath">来源文件</param>
-        private void AddDependency(IEnumerable<string> fileItems, string entryPath)
+        private void AddDependency(IEnumerable<IFileName> fileItems, IFilePath entryPath)
         {
             foreach (var item in fileItems)
             {
-                var target = BundleStorage.Separate(item, out var targetEntry);
-                if (!string.IsNullOrEmpty(targetEntry))
-                {
-                    _dependency?.AddDependencyEntry(entryPath, targetEntry);
-                } else
-                {
-                    _dependency?.AddDependency(entryPath, target);
-                }
-                EnqueueImportQueue(Path.GetFileName(target), target);
+                AddDependency(entryPath, item);
             }
+        }
+        /// <summary>
+        /// 注册依赖
+        /// </summary>
+        /// <param name="entryPath">来源文件</param>
+        /// <param name="dependency">依赖项</param>
+        private void AddDependency(IFilePath entryPath, IFileName dependency)
+        {
+            if (dependency is IEntryPath e)
+            {
+                _dependency?.AddDependency(entryPath, e);
+                EnqueueImportQueue(e.FilePath);
+                return;
+            }
+            if (dependency is IFilePath f)
+            {
+                _dependency?.AddDependency(entryPath, f);
+                EnqueueImportQueue(f.FullPath);
+                return;
+            }
+            if (dependency is IEntryName n)
+            {
+                _dependency?.AddDependencyEntry(entryPath, n.Name);
+                return;
+            }
+            if (_importFileHash.Contains(dependency.Name))
+            {
+                return;
+            }
+            var dependencyPath = FindFile(dependency.Name, entryPath);
+            if (string.IsNullOrEmpty(dependencyPath))
+            {
+                return;
+            }
+            _dependency?.AddDependency(entryPath, new FilePath(dependencyPath));
+            EnqueueImportQueue(dependencyPath);
+        }
+
+        private void EnqueueImportQueue(string fullPath)
+        {
+            EnqueueImportQueue(Path.GetFileName(fullPath), fullPath);
         }
         /// <summary>
         /// 添加文件到需要导入的队列
@@ -139,8 +163,7 @@ namespace ZoDream.BundleExtractor
             _extractFolder = folder;
             foreach (var item in _fileItems)
             {
-                _importItems.Add(item);
-                _importFileHash.Add(Path.GetFileName(item));
+                EnqueueImportQueue(item);
             }
             var progress = Logger?.CreateSubProgress("Load file...", _importItems.Count);
             for (int i = 0; i < _importItems.Count; i++)
@@ -175,7 +198,7 @@ namespace ZoDream.BundleExtractor
             }
             try
             {
-                LoadFile(reader, fullName, token);
+                LoadFile(reader, new FilePath(fullName), token);
             }
             catch (Exception e)
             {
@@ -184,7 +207,7 @@ namespace ZoDream.BundleExtractor
             }
         }
 
-        private void LoadFile(Stream stream, string fullName, CancellationToken token)
+        private void LoadFile(Stream stream, IFilePath fullName, CancellationToken token)
         {
             var reader = _service.Get<IBundleStorage>().OpenRead(stream, fullName);
             if (reader is null || reader.Length == 0)
@@ -203,14 +226,13 @@ namespace ZoDream.BundleExtractor
             }
         }
         private void LoadFile(IBundleBinaryReader stream, 
-            string fullName, 
+            IFilePath fullName, 
             CancellationToken token)
         {
             var temporary = _service.Get<ITemporaryStorage>();
             temporary.Add(stream.BaseStream);
             stream.Add(_service.Get<IBundleCodec>());
-            var name = FileNameHelper.GetFileName(fullName);
-            using var reader = _scheme.Open(stream, fullName, name, new ArchiveOptions()
+            using var reader = _scheme.Open(stream, fullName, new ArchiveOptions()
             {
                 LeaveStreamOpen = true
             });
@@ -221,8 +243,8 @@ namespace ZoDream.BundleExtractor
             }
             if (reader is null)
             {
-                _dependency?.AddEntry(fullName, name);
-                _resourceItems.TryAdd(name, stream.BaseStream);
+                _dependency?.AddEntry(fullName);
+                _resourceItems.TryAdd(fullName.Name, stream.BaseStream);
                 // stream.Dispose();
                 return;
             }
@@ -256,7 +278,7 @@ namespace ZoDream.BundleExtractor
                 var ms = temporary.Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-                LoadFile(ms, BundleStorage.Combine(fullName, item.Name), token);
+                LoadFile(ms, fullName.Combine(item.Name), token);
             }
             stream.BaseStream.Dispose();
             stream.Dispose();
@@ -269,16 +291,7 @@ namespace ZoDream.BundleExtractor
             {
                 return stream;
             }
-            var assetsFileDirectory = Path.GetDirectoryName(source.FullPath);
-            var resourceFilePath = Path.Combine(assetsFileDirectory, fileName);
-            if (!File.Exists(resourceFilePath))
-            {
-                var findFiles = Directory.GetFiles(assetsFileDirectory, fileName, SearchOption.AllDirectories);
-                if (findFiles.Length > 0)
-                {
-                    resourceFilePath = findFiles[0];
-                }
-            }
+            var resourceFilePath = FindFile(fileName, source.FullPath);
             if (File.Exists(resourceFilePath))
             {
                 if (_resourceItems.TryGetValue(fileName, out stream))
@@ -292,6 +305,38 @@ namespace ZoDream.BundleExtractor
             }
             Logger?.Warning($"Need: {fileName}");
             return new EmptyStream();
+        }
+
+        /// <summary>
+        /// 查找文件, 从 source 所在文件下找，从入口文件下找
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="source">触发文件</param>
+        /// <returns></returns>
+        private string FindFile(string name, IFilePath source)
+        {
+            var folder = Path.GetDirectoryName(FilePath.GetFilePath(source));
+            if (!string.IsNullOrEmpty(folder))
+            {
+                var filePath = Path.Combine(folder, name);
+                if (File.Exists(filePath))
+                {
+                    return filePath;
+                }
+                foreach (var item in BundleStorage.GetFiles(folder, name))
+                {
+                    return item;
+                }
+            }
+            folder = _options.Entrance;
+            if (!string.IsNullOrEmpty(folder))
+            {
+                foreach (var item in BundleStorage.GetFiles(folder, name))
+                {
+                    return item;
+                }
+            }
+            return string.Empty;
         }
 
 

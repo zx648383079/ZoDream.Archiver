@@ -1,5 +1,6 @@
 ﻿using System;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -8,7 +9,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         /// <summary>
         /// 原始路径
         /// </summary>
-        public string SourcePath { get; }
+        public IFilePath SourcePath { get; }
         public bool IsEmpty { get; }
     }
 

@@ -13,9 +13,9 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     internal partial class SerializedFileReader : IArchiveReader
     {
-        public SerializedFileReader(IBundleBinaryReader reader, string fullPath, IArchiveOptions? options)
+        public SerializedFileReader(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options)
         {
-            FullPath = fullPath;
+            FullPath = sourcePath;
             _reader = reader;
             _options = options;
             _header.Read(reader);
@@ -27,7 +27,13 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             CombineFormats(_header.Version, _metadata);
             foreach (var item in _metadata.Externals)
             {
-                AddDependency(FileNameHelper.CombineBrother(fullPath, item.PathName));
+                if (item.PathNameOrigin.StartsWith("Library/"))
+                {
+                    AddDependency(new FilePathName(item.PathName));
+                } else if (item.PathNameOrigin.StartsWith("archive:/"))
+                {
+                    AddDependency(new EntryName(item.PathName));
+                }
             }
             _children = new Object?[_metadata.Object.Length];
             _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));

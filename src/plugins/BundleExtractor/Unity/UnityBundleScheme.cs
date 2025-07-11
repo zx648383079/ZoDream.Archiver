@@ -28,7 +28,7 @@ namespace ZoDream.BundleExtractor
         }
         public IArchiveReader? Open(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
         {
-            return Open(new BundleBinaryReader(stream, EndianType.BigEndian), filePath, fileName, options);
+            return Open(new BundleBinaryReader(stream, EndianType.BigEndian), new FilePath(filePath), options);
         }
 
         public Task<IArchiveReader?> OpenAsync(Stream stream, string filePath, string fileName, IArchiveOptions? options = null)
@@ -41,7 +41,7 @@ namespace ZoDream.BundleExtractor
             return Task.FromResult(Create(stream, options));
         }
 
-        public IArchiveReader? Open(IBundleBinaryReader reader, string filePath, string fileName, IArchiveOptions? options = null)
+        public IArchiveReader? Open(IBundleBinaryReader reader, IFilePath filePath, IArchiveOptions? options = null)
         {
             var r = OpenBundle(reader);
             if (r is not null)
@@ -56,7 +56,7 @@ namespace ZoDream.BundleExtractor
             ];
             foreach (var scheme in schemes) 
             {
-                r = scheme.Open(reader, filePath, fileName, options);
+                r = scheme.Open(reader, filePath, options);
                 if (r is not null)
                 {
                     return r;

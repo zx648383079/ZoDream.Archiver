@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
@@ -28,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         public IBundleContainer? Container { get; set; }
 
         public ILogger? Logger => Container?.Logger;
-        public string FullPath { get; private set; }
+        public IFilePath FullPath { get; private set; }
         public FormatVersion Format => _header.Version;
         public Version Version => _metadata.Version;
 
@@ -39,7 +38,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// 依赖的完整路径
         /// </summary>
-        public IList<string> Dependencies { get; private set; } = [];
+        public IList<IFileName> Dependencies { get; private set; } = [];
 
         public Object? this[int index] 
         {
@@ -112,18 +111,18 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return _excludeItems.Contains(index);
         }
 
-        public string GetDependency(int index)
+        public IFileName GetDependency(int index)
         {
             return Dependencies[index];
         }
 
-        public int AddDependency(string dependency)
+        public int AddDependency(IFileName dependency)
         {
             Dependencies.Add(dependency);
             return Dependencies.Count - 1;
         }
 
-        public int IndexOf(string dependency)
+        public int IndexOf(IFileName dependency)
         {
             for (int i = 0; i < Dependencies.Count; i++)
             {

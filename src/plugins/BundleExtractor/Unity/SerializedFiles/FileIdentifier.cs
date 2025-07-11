@@ -69,6 +69,8 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// Actual file path. This path is relative to the path of the current file.
         /// The folder "library" often needs to be translated to "resources" in order to find the file on the file system.
+        /// example: Library/{fileName}
+        ///          archive:/{directory}/{PathName}
         /// </summary>
         public string PathNameOrigin { get; set; }
 

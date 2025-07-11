@@ -7,6 +7,7 @@ using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor
 {
@@ -38,7 +39,7 @@ namespace ZoDream.BundleExtractor
                 if(!exporter.IsEmpty)
                 {
                     exporter.SaveAs(_fileItems.Create(FileNameHelper.Create(exporter.SourcePath,
-                            exporter.FileName
+                            LocationStorage.CreateSafeFileName(exporter.FileName)
                         ), folder), mode);
                 }
                 exporter.Dispose();
@@ -68,10 +69,12 @@ namespace ZoDream.BundleExtractor
                             // 默认 object 不做转化
                             continue;
                         }
-                        var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() : obj.Name;
+                        var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() 
+                            : LocationStorage.CreateSafeFileName(obj.Name);
                         var exporter = TryParse(asset, i);
                         exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
-                            string.IsNullOrEmpty(exporter.FileName) ? fileName : exporter.FileName
+                            string.IsNullOrEmpty(exporter.FileName) ? fileName : 
+                            LocationStorage.CreateSafeFileName(exporter.FileName)
                         ), folder), mode);
                         if (exporter is IDisposable d)
                         {

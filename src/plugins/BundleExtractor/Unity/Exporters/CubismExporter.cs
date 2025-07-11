@@ -9,6 +9,7 @@ using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.Live2d;
 using ZoDream.Shared.Drawing;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -41,7 +42,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public bool IsEmpty => _moc is null;
         public string FileName { get; private set; }
-        public string SourcePath => _resource.FullPath;
+        public IFilePath SourcePath => _resource.FullPath;
 
         private IPPtr<MonoBehaviour>? _moc;
         private IPPtr<MonoBehaviour>? _physics;

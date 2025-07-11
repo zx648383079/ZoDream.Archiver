@@ -7,6 +7,7 @@ using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.Spine;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -38,7 +39,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly ISerializedFile _resource;
 
         public string FileName { get; private set; }
-        public string SourcePath => _resource.FullPath;
+        public IFilePath SourcePath => _resource.FullPath;
         public bool IsEmpty => _skeleton is null;
 
         private IPPtr<TextAsset>? _skeleton;
