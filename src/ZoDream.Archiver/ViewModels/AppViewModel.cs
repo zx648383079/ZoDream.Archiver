@@ -82,9 +82,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public static ILogger CreateFileLog()
         {
-            var fs = File.OpenWrite(LogFileName);
-            fs.Seek(0, SeekOrigin.End);
-            return new FileLogger(fs);
+            return new FileLogger(LogFileName);
         }
 
         public static string LogFileName =>

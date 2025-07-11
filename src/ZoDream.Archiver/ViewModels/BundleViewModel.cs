@@ -84,6 +84,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private void TapLog()
         {
+            _app.Logger?.Dispose();
             Process.Start("explorer", $"/select,{AppViewModel.LogFileName}");
         }
 

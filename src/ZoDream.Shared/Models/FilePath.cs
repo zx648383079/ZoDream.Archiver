@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ZoDream.Shared.Interfaces;
 using IOPath = System.IO.Path;
 
@@ -57,7 +58,7 @@ namespace ZoDream.Shared.Models
     public struct FilePath(string path) : IFilePath
     {
         public readonly string FullPath => path;
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public readonly string Name => IOPath.GetFileName(FullPath);
 
         public override readonly string ToString()
@@ -167,8 +168,13 @@ namespace ZoDream.Shared.Models
     public struct EntryName(string name) : IEntryName
     {
         public readonly string EntryPath => name;
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public readonly string Name => EntryPath;
+
+        public readonly override string ToString()
+        {
+            return $"{FileEntryPath.Separator}{EntryPath}";
+        }
 
         public readonly bool Equals(IEntryName? other, StringComparison comparisonType)
         {
@@ -244,14 +250,15 @@ namespace ZoDream.Shared.Models
     public struct FileEntryPath(string filePath, string entryName) : IEntryPath
     {
         public const string Separator = "#";
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public readonly string FilePath => filePath;
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public readonly string EntryPath => entryName;
 
         public readonly string FullPath => string.IsNullOrWhiteSpace(EntryPath) ?
             FilePath : $"{FilePath}{Separator}{EntryPath}";
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public readonly string Name => IOPath.GetFileName(EntryPath);
 
         public readonly override string ToString()

@@ -4,7 +4,6 @@ namespace ZoDream.Shared.Logging
 {
     public interface ILogger : IDisposable
     {
-
         public void Log(LogLevel level, string message, string source);
         public void Log(LogLevel level, Exception message, string source);
         public void Log(Exception message);

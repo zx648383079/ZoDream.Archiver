@@ -271,6 +271,8 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
+                var entryPath = fullName.Combine(item.Name);
+                _dependency?.AddEntry(entryPath);
                 if (reader is IRawEntryReader r && r.TryExtractTo(item, _extractFolder, _extractMode))
                 {
                     continue;
@@ -278,7 +280,8 @@ namespace ZoDream.BundleExtractor
                 var ms = temporary.Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-                LoadFile(ms, fullName.Combine(item.Name), token);
+
+                LoadFile(ms, entryPath, token);
             }
             stream.BaseStream.Dispose();
             stream.Dispose();
@@ -303,7 +306,7 @@ namespace ZoDream.BundleExtractor
                 _service.Get<ITemporaryStorage>().Add(stream);
                 return stream;
             }
-            Logger?.Warning($"Need: {fileName}");
+            Logger?.Warning($"Need<{source.FullPath}>: {fileName}");
             return new EmptyStream();
         }
 

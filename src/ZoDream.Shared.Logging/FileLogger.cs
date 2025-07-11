@@ -4,11 +4,28 @@ using System.Text;
 
 namespace ZoDream.Shared.Logging
 {
-    public class FileLogger(Stream output, LogLevel level = LogLevel.Debug) : ILogger
+    public class FileLogger(string filePath, LogLevel level = LogLevel.Debug) : ILogger
     {
-        private readonly StreamWriter _writer = new(output, Encoding.UTF8);
+        private StreamWriter? _writer;
 
         public LogLevel Level => level;
+
+        private void TryOpen()
+        {
+            if (_writer is not null)
+            {
+                return;
+            }
+            var fs = File.OpenWrite(filePath);
+            fs.Seek(0, SeekOrigin.End);
+            _writer = new(fs, Encoding.UTF8);
+        }
+
+        private void WriteLine(string content)
+        {
+            TryOpen();
+            _writer!.WriteLine(content);
+        }
 
 
         public void Error(string message)
@@ -47,7 +64,7 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-            _writer.WriteLine($"[{DateTime.Now}] {level}: {message}");
+            WriteLine($"[{DateTime.Now}] {level}: {message}");
         }
 
         public void Log(LogLevel level, string message, string source)
@@ -56,7 +73,7 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-            _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
+            WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
         }
 
         public void Log(Exception message)
@@ -70,17 +87,12 @@ namespace ZoDream.Shared.Logging
             {
                 return;
             }
-            _writer.WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
+            WriteLine($"[{DateTime.Now}] {level}: {message} in {source}");
             if (!string.IsNullOrEmpty(message.Source))
             {
-                _writer.WriteLine(message.Source);
+                WriteLine(message.Source);
             }
         }
-
-
-
-  
-
     
 
         public void Progress(long current, long total)
@@ -108,12 +120,13 @@ namespace ZoDream.Shared.Logging
 
         public void Flush()
         {
-            _writer.Flush();
+            _writer?.Flush();
         }
 
         public void Dispose()
         {
-            _writer.Dispose();
+            _writer?.Dispose();
+            _writer = null;
         }
 
     }

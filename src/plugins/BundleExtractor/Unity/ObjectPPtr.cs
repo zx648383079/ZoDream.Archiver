@@ -118,7 +118,7 @@ namespace ZoDream.BundleExtractor.Unity
                 var index = assetsManager.IndexOf(name);
                 if (index < 0)
                 {
-                    resource.Logger?.Warning($"Need: {name}[{fileId}]");
+                    resource.Logger?.Warning($"Need<{resource.FullPath}>: {name}[{fileId}]");
                     return null;
                 }
                 else
