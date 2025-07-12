@@ -13,9 +13,11 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         public int Index { get; }
         /// <summary>
-        /// 入口
+        /// 生成输出文件夹的新路径
         /// </summary>
-        public string Entrance { get; }
+        /// <param name="sourcePath"></param>
+        /// <param name="outputFolder"></param>
+        /// <returns></returns>
         public string Create(string sourcePath, string outputFolder);
     }
 }

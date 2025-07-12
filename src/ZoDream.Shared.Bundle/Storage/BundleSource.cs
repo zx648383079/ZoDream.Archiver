@@ -9,6 +9,10 @@ namespace ZoDream.Shared.Bundle
 {
     public class BundleSource : IBundleSource
     {
+        /// <summary>
+        /// 限制一下单次依赖的数量，避免一些不必要的重复依赖
+        /// </summary>
+        internal const int CHUNK_MAX_DEPENDENCY = 20;
         public BundleSource(IEnumerable<string> fileItems)
         {
             _entryItems = [.. fileItems.Order()];
@@ -145,9 +149,12 @@ namespace ZoDream.Shared.Bundle
                     yield return item;
                     continue;
                 }
-                yield return new BundleChunk(item.Entrance, [.. item, 
+                if (items.Length > CHUNK_MAX_DEPENDENCY)
+                {
                     // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
-                    .. items.Where(i => !exclude.Contains(i))]);
+                    items = [..items.Where(i => !exclude.Contains(i))];
+                }
+                yield return new BundleChunk(_entryItems, [.. item, ..items]);
                 foreach (var it in items)
                 {
                     exclude.Add(it);

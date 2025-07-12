@@ -23,24 +23,34 @@ namespace ZoDream.Shared.Bundle
             }
             if (!File.Exists(fileName))
             {
-                Entrance = fileName;
+                _entranceItems = [fileName];
                 return;
             }
-            Entrance = Path.GetDirectoryName(fileName)!;
+            _entranceItems = [Path.GetDirectoryName(fileName)!];
             _fileItems = [fileName];
             _count = _fileItems.Count();
         }
 
         public BundleChunk(string baseFolder, IEnumerable<string> items)
         {
-            Entrance = baseFolder;
+            _entranceItems = [baseFolder];
+            _fileItems = items;
+            _count = _fileItems.Count();
+        }
+
+        public BundleChunk(string[] entranceItems, IEnumerable<string> items)
+        {
+            _entranceItems = entranceItems;
             _fileItems = items;
             _count = _fileItems.Count();
         }
 
         private readonly IEnumerable<string>? _fileItems;
         private readonly string _globPattern = "*.*";
-        public string Entrance { get; private set; }
+        /// <summary>
+        /// 可能的入口文件
+        /// </summary>
+        private readonly string[] _entranceItems;
 
         private int _count = -1;
         public int Count 
@@ -51,24 +61,41 @@ namespace ZoDream.Shared.Bundle
                     return _count;
                 }
                 _count = 0;
-                _count = (int)BundleStorage.FileCount([Entrance], _globPattern);
+                _count = (int)BundleStorage.FileCount(_entranceItems, _globPattern);
                 return _count;
             }
         }
 
         public int Index { get; private set; }
+        /// <summary>
+        /// 根据入口获取路径
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        private string GetRelativePath(string fullPath)
+        {
+            foreach (var item in _entranceItems)
+            {
+                if (!fullPath.StartsWith(item))
+                {
+                    continue;
+                }
+                if (fullPath.Length == item.Length)
+                {
+                    break;
+                }
+                return Path.GetRelativePath(item, fullPath);
+            }
+            return Path.GetFileName(fullPath);
+        }
 
         public string Create(string sourcePath, string outputFolder)
         {
-            if (sourcePath.StartsWith(Entrance))
-            {
-                return Path.Combine(outputFolder, Path.GetRelativePath(Entrance, sourcePath));
-            }
             if (sourcePath.StartsWith(outputFolder))
             {
                 return sourcePath;
             }
-            return Path.Combine(outputFolder, Path.GetFileName(sourcePath)); ;
+            return Path.Combine(outputFolder, GetRelativePath(sourcePath));
         }
 
         public IEnumerator<string> GetEnumerator()
@@ -90,7 +117,7 @@ namespace ZoDream.Shared.Bundle
                 AttributesToSkip = FileAttributes.None,
                 IgnoreInaccessible = false
             };
-            var res = new FileSystemEnumerable<string>(Entrance, delegate (ref FileSystemEntry entry)
+            var res = new FileSystemEnumerable<string>(_entranceItems[0], delegate (ref FileSystemEntry entry)
             {
                 return entry.ToSpecifiedFullPath();
             }, options)

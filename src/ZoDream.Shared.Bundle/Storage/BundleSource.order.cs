@@ -158,7 +158,7 @@ namespace ZoDream.Shared.Bundle
         {
             var index = 0u;
             var begin = Index;
-            var excludeItems = new HashSet<int>();
+            var exclude = new HashSet<string>();
             for (int i = 0; i < _cacheItems.Length; i++)
             {
                 if (_cacheItems[i].Length == 0)
@@ -175,7 +175,7 @@ namespace ZoDream.Shared.Bundle
                 while (offset < _cacheItems[i].Length)
                 {
                     var item = _cacheItems[i][offset ++];
-                    if (excludeItems.Contains(item.GetHashCode()))
+                    if (exclude.Contains(item))
                     {
                         continue;
                     }
@@ -185,10 +185,15 @@ namespace ZoDream.Shared.Bundle
                         yield return new BundleChunk(_entryItems[i], [item]);
                         continue;
                     }
-                    yield return new BundleChunk(_entryItems[i], [item, ..items]);
+                    if (items.Length > BundleSource.CHUNK_MAX_DEPENDENCY)
+                    {
+                        // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
+                        items = [.. items.Where(i => !exclude.Contains(i))];
+                    }
+                    yield return new BundleChunk(_entryItems, [item, .. items]);
                     foreach (var it in items)
                     {
-                        excludeItems.Add(item.GetHashCode());
+                        exclude.Add(item);
                     }
                 }
                 index = end;
