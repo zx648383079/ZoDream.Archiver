@@ -13,6 +13,7 @@ namespace ZoDream.Shared.Bundle
         /// 获取文件的数量，必须先调用 Analyze 方法
         /// </summary>
         public uint Count { get; }
+
         /// <summary>
         /// 重新计算文件的数量
         /// </summary>
@@ -47,5 +48,20 @@ namespace ZoDream.Shared.Bundle
         /// <param name="dependencies"></param>
         /// <returns></returns>
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies);
+    }
+
+    public interface IBundleSourceFilter
+    {
+        /// <summary>
+        /// 在执行的过程中需要排除一些重复执行的文件
+        /// </summary>
+        /// <param name="filePath"></param>
+        public void Exclude(string filePath);
+        /// <summary>
+        /// 判断文件是否是需要排除的已执行过的
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public bool IsExclude(string filePath);
     }
 }

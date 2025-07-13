@@ -31,26 +31,32 @@ namespace ZoDream.Shared.Bundle
             _count = _fileItems.Count();
         }
 
-        public BundleChunk(string baseFolder, IEnumerable<string> items)
+        public BundleChunk(string baseFolder, string[] items)
         {
             _entranceItems = [baseFolder];
             _fileItems = items;
             _count = _fileItems.Count();
         }
 
-        public BundleChunk(string[] entranceItems, IEnumerable<string> items)
+        public BundleChunk(string[] entranceItems, string[] items, int effectiveCount)
         {
             _entranceItems = entranceItems;
             _fileItems = items;
-            _count = _fileItems.Count();
+            _count = _fileItems.Length;
+            _effectiveCount = effectiveCount;
         }
 
-        private readonly IEnumerable<string>? _fileItems;
+        private readonly string[]? _fileItems;
         private readonly string _globPattern = "*.*";
         /// <summary>
         /// 可能的入口文件
         /// </summary>
         private readonly string[] _entranceItems;
+        private readonly int _effectiveCount;
+
+        public IBundleSourceFilter? Filter { get; set; }
+
+        public int EffectiveCount => _effectiveCount > 0 ? _effectiveCount : Index;
 
         private int _count = -1;
         public int Count 
@@ -88,9 +94,12 @@ namespace ZoDream.Shared.Bundle
             }
             return Path.GetFileName(fullPath);
         }
-
         public bool IsExportable(string sourcePath)
         {
+            if (Filter is not null)
+            {
+                return !Filter.IsExclude(sourcePath);
+            }
             foreach (var item in _entranceItems)
             {
                 if (sourcePath.StartsWith(item))
@@ -100,7 +109,6 @@ namespace ZoDream.Shared.Bundle
             }
             return false;
         }
-
         public string Create(string sourcePath, string outputFolder)
         {
             if (sourcePath.StartsWith(outputFolder))
@@ -112,7 +120,7 @@ namespace ZoDream.Shared.Bundle
 
         public IBundleChunk Repack(IEnumerable<string> fileItems)
         {
-            return new BundleChunk(_entranceItems, fileItems);
+            return new BundleChunk(_entranceItems, [.. fileItems], _effectiveCount);
         }
 
         public IEnumerator<string> GetEnumerator()

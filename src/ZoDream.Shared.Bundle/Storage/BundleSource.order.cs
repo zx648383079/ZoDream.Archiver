@@ -118,7 +118,8 @@ namespace ZoDream.Shared.Bundle
                 }
                 var offset = Math.Max(begin - index, 0);
                 var count = _cacheItems[i].Length - offset;
-                yield return new BundleChunk(_entryItems[i], _cacheItems[i].Skip(offset).Take(count));
+                yield return new BundleChunk(_entryItems[i],
+                    [.. _cacheItems[i].Skip(offset).Take(count)]);
                 index = end;
             }
         }
@@ -190,7 +191,7 @@ namespace ZoDream.Shared.Bundle
                     //    // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
                     //    items = [.. items.Where(i => !exclude.Contains(i))];
                     //}
-                    yield return new BundleChunk(_entryItems[i], [item, .. items]);
+                    yield return new BundleChunk(_entryItems, [item, .. items], 1);
                     //foreach (var it in items)
                     //{
                     //    exclude.Add(it);

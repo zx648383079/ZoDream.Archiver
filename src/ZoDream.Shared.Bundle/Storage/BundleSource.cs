@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace ZoDream.Shared.Bundle
 {
-    public class BundleSource : IBundleSource
+    public class BundleSource : IBundleSource, IBundleSourceFilter
     {
         /// <summary>
         /// 限制一下单次依赖的数量，避免一些不必要的重复依赖
@@ -22,6 +22,7 @@ namespace ZoDream.Shared.Bundle
         private readonly int _hasCode;
         private IBundleFilter? _filter;
         private readonly string[] _entryItems;
+        private readonly HashSet<string> _excludeItems = [];
 
         public uint Index { get; set; }
 
@@ -36,13 +37,29 @@ namespace ZoDream.Shared.Bundle
         /// <returns></returns>
         public uint Analyze(CancellationToken token = default)
         {
+            _excludeItems.Clear();
             return Count = BundleStorage.FileCount(_entryItems, token);
         }
 
         public uint Analyze(IBundleFilter filter, CancellationToken token = default)
         {
+            _excludeItems.Clear();
             _filter = filter;
             return Analyze(token);
+        }
+
+        /// <summary>
+        /// 在执行的过程中需要排除一些重复执行的文件
+        /// </summary>
+        /// <param name="filePath"></param>
+        public void Exclude(string filePath)
+        {
+            _excludeItems.Add(filePath);
+        }
+
+        public bool IsExclude(string filePath)
+        {
+            return _excludeItems.Contains(filePath);
         }
 
 
@@ -154,7 +171,7 @@ namespace ZoDream.Shared.Bundle
                 //    // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
                 //    items = [..items.Where(i => !exclude.Contains(i))];
                 //}
-                yield return item.Repack([.. item, ..items]);
+                yield return new BundleChunk(_entryItems, [.. item, ..items], 5);
                 //foreach (var it in items)
                 //{
                 //    exclude.Add(it);

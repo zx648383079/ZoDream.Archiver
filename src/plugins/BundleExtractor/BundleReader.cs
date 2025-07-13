@@ -63,6 +63,10 @@ namespace ZoDream.BundleExtractor
                 {
                     break;
                 }
+                if (fileItems is IBundleSourceFilter f)
+                {
+                    items.Filter = f;
+                }
                 logger.Info($"Extract {items.Count} files ...");
                 try
                 {
@@ -75,7 +79,7 @@ namespace ZoDream.BundleExtractor
                 }
                 temporary.Clear();
                 builder?.Flush();
-                progress.Value += items.Index;
+                progress.Value += items.EffectiveCount;
                 if (!onlyDependencyTask)
                 {
                     service?.SavePoint(fileItems.GetHashCode(), fileItems.Index);

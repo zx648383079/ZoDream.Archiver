@@ -48,7 +48,8 @@ namespace ZoDream.BundleExtractor
             progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
-                if (!_fileItems.IsExportable(FilePath.GetFilePath(asset.FullPath)))
+                var sourcePath = FilePath.GetFilePath(asset.FullPath);
+                if (!_fileItems.IsExportable(sourcePath))
                 {
                     continue;
                 }
@@ -94,6 +95,7 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
+                _fileItems.Filter?.Exclude(sourcePath);
                 if (progress is not null)
                 {
                     progress.Value++;
