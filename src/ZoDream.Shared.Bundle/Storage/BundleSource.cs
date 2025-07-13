@@ -158,24 +158,14 @@ namespace ZoDream.Shared.Bundle
         }
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
         {
-            var exclude = new HashSet<string>();
-            foreach (var item in EnumerateChunk(5, exclude))
+            foreach (var item in EnumerateChunk(5))
             {
                 if (!dependencies.TryGet(item, out var items))
                 {
                     yield return item;
                     continue;
                 }
-                //if (items.Length > CHUNK_MAX_DEPENDENCY)
-                //{
-                //    // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
-                //    items = [..items.Where(i => !exclude.Contains(i))];
-                //}
                 yield return new BundleChunk(_entryItems, [.. item, ..items], 5);
-                //foreach (var it in items)
-                //{
-                //    exclude.Add(it);
-                //}
             }
         }
 
