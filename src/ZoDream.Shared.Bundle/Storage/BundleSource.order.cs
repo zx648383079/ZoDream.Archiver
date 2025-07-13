@@ -185,16 +185,16 @@ namespace ZoDream.Shared.Bundle
                         yield return new BundleChunk(_entryItems[i], [item]);
                         continue;
                     }
-                    if (items.Length > BundleSource.CHUNK_MAX_DEPENDENCY)
-                    {
-                        // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
-                        items = [.. items.Where(i => !exclude.Contains(i))];
-                    }
-                    yield return new BundleChunk(_entryItems, [item, .. items]);
-                    foreach (var it in items)
-                    {
-                        exclude.Add(item);
-                    }
+                    //if (items.Length > BundleSource.CHUNK_MAX_DEPENDENCY)
+                    //{
+                    //    // 存在一些旧的文件依赖新的文件导致存在重复引用，所以干脆放弃部分导出的
+                    //    items = [.. items.Where(i => !exclude.Contains(i))];
+                    //}
+                    yield return new BundleChunk(_entryItems[i], [item, .. items]);
+                    //foreach (var it in items)
+                    //{
+                    //    exclude.Add(it);
+                    //}
                 }
                 index = end;
             }

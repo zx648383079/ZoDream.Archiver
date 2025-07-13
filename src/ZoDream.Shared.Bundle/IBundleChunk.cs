@@ -19,5 +19,18 @@ namespace ZoDream.Shared.Bundle
         /// <param name="outputFolder"></param>
         /// <returns></returns>
         public string Create(string sourcePath, string outputFolder);
+        /// <summary>
+        /// 路径是否能够进行导出，可以用来排除依赖的导出
+        /// </summary>
+        /// <param name="sourcePath"></param>
+        /// <returns></returns>
+
+        public bool IsExportable(string sourcePath);
+        /// <summary>
+        /// 继承原本的入口，包装文件
+        /// </summary>
+        /// <param name="fileItems"></param>
+        /// <returns></returns>
+        public IBundleChunk Repack(IEnumerable<string> fileItems);
     }
 }

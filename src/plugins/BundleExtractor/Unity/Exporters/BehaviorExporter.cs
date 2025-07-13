@@ -31,7 +31,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            
             var data = Deserialize(entryId, resource);
             using var fs = File.Create(fileName);
             JsonSerializer.Serialize(fs, data, JsonExporter.Options);
@@ -62,16 +61,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public static OrderedDictionary? Deserialize(int entryId, ISerializedFile resource)
         {
-            var doc = resource.GetType(entryId);
-            if (doc is null)
-            {
-                if (resource[entryId] is not MonoBehaviour behaviour)
+            return resource.Container.Shared.GetOrAdd(entryId, () => {
+                var doc = resource.GetType(entryId);
+                if (doc is null)
                 {
-                    return null;
+                    if (resource[entryId] is not MonoBehaviour behaviour)
+                    {
+                        return null;
+                    }
+                    doc = GetTypeNode(behaviour, resource.Container.Assembly, resource);
                 }
-                doc = GetTypeNode(behaviour, resource.Container.Assembly, resource);
-            }
-            return new DocumentReader(resource).Read(doc, resource.OpenRead(entryId));
+                return new DocumentReader(resource).Read(doc, resource.OpenRead(entryId));
+            });
         }
 
         public static OrderedDictionary? Deserialize(IPPtr<MonoBehaviour> ptr, 

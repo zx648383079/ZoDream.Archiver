@@ -89,6 +89,18 @@ namespace ZoDream.Shared.Bundle
             return Path.GetFileName(fullPath);
         }
 
+        public bool IsExportable(string sourcePath)
+        {
+            foreach (var item in _entranceItems)
+            {
+                if (sourcePath.StartsWith(item))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public string Create(string sourcePath, string outputFolder)
         {
             if (sourcePath.StartsWith(outputFolder))
@@ -96,6 +108,11 @@ namespace ZoDream.Shared.Bundle
                 return sourcePath;
             }
             return Path.Combine(outputFolder, GetRelativePath(sourcePath));
+        }
+
+        public IBundleChunk Repack(IEnumerable<string> fileItems)
+        {
+            return new BundleChunk(_entranceItems, fileItems);
         }
 
         public IEnumerator<string> GetEnumerator()

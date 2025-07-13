@@ -48,6 +48,10 @@ namespace ZoDream.BundleExtractor
             progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
+                if (!_fileItems.IsExportable(FilePath.GetFilePath(asset.FullPath)))
+                {
+                    continue;
+                }
                 for (var i = 0; i < asset.Count; i++)
                 {
                     if (token.IsCancellationRequested)
@@ -105,7 +109,8 @@ namespace ZoDream.BundleExtractor
         /// <returns></returns>
         private bool PrepareExport(int entryId, ISerializedFile resource)
         {
-            if (resource.IsExclude(entryId))
+            if (resource.IsExclude(entryId) || 
+                !_fileItems.IsExportable(FilePath.GetFilePath(resource.FullPath)))
             {
                 return false;
             }
@@ -123,6 +128,11 @@ namespace ZoDream.BundleExtractor
             if (script.NameSpace.StartsWith("Spine."))
             {
                 _exporterItems.Add(new SpineExporter(behaviour.GameObject));
+                return true;
+            }
+            if (script.NameSpace.StartsWith("Utage"))
+            {
+                _exporterItems.Add(new UtageExporter(entryId, resource));
                 return true;
             }
             return false;

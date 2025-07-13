@@ -9,6 +9,7 @@ using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -73,6 +74,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     continue;
                 }
+                if (!LocationStorage.TryCreate(
+                    Path.Combine(folder, texture.Name), ".u.png", mode, out var outputPath))
+                {
+                    continue;
+                }
                 var source = TextureExporter.ToImage(texture, _resource, false);
                 if (source is null)
                 {
@@ -82,7 +88,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 var cols = (int)Math.Ceiling((double)item.Width / contentSize);
                 var rows = (int)Math.Ceiling((double)item.Height / contentSize);
                 var cellsPerRow = source.Width / cellSize;
-
+                
                 using var target = SkiaExtension.MutateImage(item.Width, item.Height, canvas => {
                     canvas.Clear(SKColors.Transparent);
 
@@ -111,6 +117,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         }
                     }
                 });
+                target.SaveAs(outputPath);
             }
         }
 
