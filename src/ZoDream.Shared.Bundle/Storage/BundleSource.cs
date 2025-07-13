@@ -158,14 +158,17 @@ namespace ZoDream.Shared.Bundle
         }
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies)
         {
-            foreach (var item in EnumerateChunk(5))
+            var maxCount = 5;
+            foreach (var item in EnumerateChunk(maxCount))
             {
                 if (!dependencies.TryGet(item, out var items))
                 {
                     yield return item;
                     continue;
                 }
-                yield return new BundleChunk(_entryItems, [.. item, ..items], 5);
+                yield return new BundleChunk(_entryItems, [.. item, ..items],
+                   // 方便保存载入进度
+                   maxCount);
             }
         }
 
