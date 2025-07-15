@@ -106,6 +106,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
 
         private static VirtualNode[] BuildTree(VirtualNode[] items, ref int offset)
         {
+            if (offset >= items.Length)
+            {
+                return [];
+            }
             var depth = items[offset].Depth;
             var res = new List<VirtualNode>()
             {

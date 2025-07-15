@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Mono.Cecil;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document.Cecil;
 
 namespace ZoDream.BundleExtractor.Unity.Document
 {
-    internal class DocumentBuilder(Version version)
+    public class DocumentBuilder(Version version)
     {
         private readonly List<VirtualNode> _items = [];
 
@@ -12,6 +14,13 @@ namespace ZoDream.BundleExtractor.Unity.Document
         {
             _items.Add(item);
         }
+
+        public void Add(TypeDefinition definition, int indent = 0)
+        {
+            var typeDefinitionConverter = new TypeDefinitionConverter(definition, this, indent);
+            typeDefinitionConverter.ConvertTo();
+        }
+
         public VirtualNode[] ToArray()
         {
             return DocumentConverter.BuildTree([.._items]);
@@ -22,6 +31,9 @@ namespace ZoDream.BundleExtractor.Unity.Document
             return new(version, DocumentConverter.BuildTree([.. _items]));
         }
 
+        
+
+        #region 内置格式
         public void AddMonoBehavior(int indent)
         {
             Add(new("MonoBehaviour", "Base", indent, false));
@@ -288,7 +300,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             Add(new("PropertyName", name, indent, false));
             AddString("id", indent + 1);
         }
-
+        #endregion
 
         #region CubismLive2D
         public void AddMonoCubismModel(int indent)

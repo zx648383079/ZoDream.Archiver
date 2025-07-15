@@ -49,8 +49,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     string.IsNullOrEmpty(script.NameSpace) ? script.ClassName : $"{script.NameSpace}.{script.ClassName}");
                 if (typeDef != null)
                 {
-                    var typeDefinitionConverter = new TypeDefinitionConverter(typeDef, builder, 1);
-                    typeDefinitionConverter.ConvertTo();
+                    builder.Add(typeDef, 1);
                 } else
                 {
                     CubismExporter.ConvertToTypeTree(builder, script);

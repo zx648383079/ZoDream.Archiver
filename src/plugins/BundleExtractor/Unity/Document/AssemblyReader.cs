@@ -36,25 +36,37 @@ namespace ZoDream.BundleExtractor.Unity.Document
             IsLoaded = true;
         }
 
+        public IEnumerable<TypeDefinition> GetType(string assemblyName)
+        {
+            if (!_moduleItems.TryGetValue(assemblyName, out var module))
+            {
+                yield break;
+            }
+            foreach (var item in module.Types)
+            {
+                yield return item;
+            }
+        }
+
         public TypeDefinition? GetType(string assemblyName, string fullName)
         {
-            if (_moduleItems.TryGetValue(assemblyName, out var module))
+            if (!_moduleItems.TryGetValue(assemblyName, out var module))
             {
-                var typeDef = module.GetType(fullName);
-                if (typeDef == null && assemblyName == "UnityEngine.dll")
+                return null;
+            }
+            var typeDef = module.GetType(fullName);
+            if (typeDef == null && assemblyName == "UnityEngine.dll")
+            {
+                foreach (var pair in _moduleItems)
                 {
-                    foreach (var pair in _moduleItems)
+                    typeDef = pair.Value.GetType(fullName);
+                    if (typeDef != null)
                     {
-                        typeDef = pair.Value.GetType(fullName);
-                        if (typeDef != null)
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
-                return typeDef;
             }
-            return null;
+            return typeDef;
         }
 
         public void Dispose()
