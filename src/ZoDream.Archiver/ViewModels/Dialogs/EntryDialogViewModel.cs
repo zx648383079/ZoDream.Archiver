@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage.Pickers;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Archiver.ViewModels
@@ -21,7 +22,11 @@ namespace ZoDream.Archiver.ViewModels
             ViewFileCommand = new RelayCommand(TapViewFile);
             CopyIDCommand = new RelayCommand(TapCopyID);
             CopyPathCommand = new RelayCommand(TapCopyPath);
+            CombineCommand = new RelayCommand(TapCombine);
         }
+
+        private readonly AppViewModel _app;
+        private string _dependencyPath =  string.Empty;
 
         private IBundleEntrySource[] _items = [];
 
@@ -54,6 +59,35 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand ViewFileCommand { get; private set; }
         public ICommand CopyPathCommand { get; private set; }
         public ICommand CopyIDCommand { get; private set; }
+        public ICommand CombineCommand { get; private set; }
+
+        private async void TapCombine()
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".log");
+            _app.InitializePicker(picker);
+            var res = await picker.PickSingleFileAsync();
+            if (res is null)
+            {
+                return;
+            }
+            if (!await _app.ConfirmAsync("确定从日志中合并缺失的依赖？"))
+            {
+                return;
+            }
+            using (var fs = File.OpenWrite(_dependencyPath))
+            using (var builder = new DependencyBuilder(fs))
+            {
+                builder.Load(fs);
+                fs.Seek(0, SeekOrigin.Begin);
+                using var log = File.OpenRead(res.Path);
+                builder.Combine(log);
+                builder.Flush();
+            }
+            await _app.ConfirmAsync("合并日志成功！");
+            Load(_dependencyPath);
+        }
+
         private void TapOnly()
         {
             var arg = GetSource(SelectedItem);
@@ -235,6 +269,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public void Load(string fileName)
         {
+            _dependencyPath = fileName;
             using var fs = File.OpenRead(fileName);
             _items = [.. BundleStorage.LoadEntry(fs)];
             Refresh();

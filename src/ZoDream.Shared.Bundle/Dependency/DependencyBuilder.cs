@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.Shared.Bundle
 {
-    public class DependencyBuilder : IDependencyBuilder
+    public partial class DependencyBuilder : IDependencyBuilder
     {
         /// <summary>
         /// 不做任何处理
@@ -256,6 +257,15 @@ namespace ZoDream.Shared.Bundle
             }
             item.Add(entryId, entryName, entryType);
         }
+        /// <summary>
+        /// 判断是否包含文件路径
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public bool Contains(IFilePath source)
+        {
+            return _items.ContainsKey(FilePath.GetFilePath(source));
+        }
 
         public void AddEntry(string fileName, string entryName)
         {
@@ -290,6 +300,8 @@ namespace ZoDream.Shared.Bundle
                 AddVerifyEntry(e.FilePath, e.EntryPath);
             }
         }
+
+
         private void AddVerifyEntry(string fileName, string entryName)
         {
             if (!_items.TryGetValue(fileName, out var item))
@@ -297,6 +309,54 @@ namespace ZoDream.Shared.Bundle
                 _items.Add(fileName, item = new());
             }
             item.Add(entryName);
+        }
+
+
+
+        public void Load(Stream input)
+        {
+            var reader = new BinaryReader(input);
+            while (input.Position < input.Length)
+            {
+                var fileName = reader.ReadString();
+                var item = new DependencyEntry();
+                item.Read(reader);
+                _items.TryAdd(fileName, item);
+            }
+        }
+        /// <summary>
+        /// 从日志文件中提取缺失的依赖
+        ///     日志规则: Need<{原文件路径}>: 依赖文件[依赖ID]
+        /// </summary>
+        /// <param name="input"></param>
+        public void Combine(Stream input)
+        {
+            using var reader = new StreamReader(input);
+            while (true)
+            {
+                var line = reader.ReadLine();
+                if (line == null)
+                {
+                    break;
+                }
+                var match = LogDependencyRegex().Match(line);
+                if (!match.Success)
+                {
+                    continue;
+                }
+                var sourcePath = FilePath.Parse(match.Groups[1].Value);
+                if (!Contains(sourcePath))
+                {
+                    continue;
+                }
+                var dependency = match.Groups[2].Value.Trim();
+                if (dependency.StartsWith('#'))
+                {
+                    AddDependencyEntry(sourcePath, dependency[1..]);
+                    continue;
+                }
+                AddDependency(sourcePath, FilePath.Parse(dependency));
+            }
         }
 
         public void Flush()
@@ -401,24 +461,16 @@ namespace ZoDream.Shared.Bundle
             }
             return [..res];
         }
-
+        /// <summary>
+        /// 只读取现有的，无法进行写入
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public static DependencyBuilder Load(string fileName)
         {
             using var fs = File.OpenRead(fileName);
-            return Load(fs);
-        }
-
-        public static DependencyBuilder Load(Stream input)
-        {
             var builder = new DependencyBuilder();
-            var reader = new BinaryReader(input);
-            while (input.Position < input.Length)
-            {
-                var fileName = reader.ReadString();
-                var item = new DependencyEntry();
-                item.Read(reader);
-                builder._items.TryAdd(fileName, item);
-            }
+            builder.Load(fs);
             return builder;
         }
 
@@ -599,5 +651,8 @@ namespace ZoDream.Shared.Bundle
                 }
             }
         }
+
+        [GeneratedRegex(@"Need\<(\S+?)\>:\s(\S+?)\[\d+\]")]
+        private static partial Regex LogDependencyRegex();
     }
 }

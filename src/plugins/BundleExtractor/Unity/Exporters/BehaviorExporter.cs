@@ -94,13 +94,21 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return default;
             }
+            if (ptr.Index < 0)
+            {
+                return default;
+            }
             var instance = new T();
             converter.Read(doc, ptr.Resource.OpenRead(ptr.Index), instance);
             return instance;
         }
-        public static VirtualDocument GetTypeNode(IPPtr<MonoBehaviour> ptr, IAssemblyReader assembly)
+        public static VirtualDocument? GetTypeNode(IPPtr<MonoBehaviour> ptr, IAssemblyReader assembly)
         {
-            var doc = ptr.Resource.GetType(ptr.Index);
+            if (ptr.Index < 0)
+            {
+                return null;
+            }
+            var doc = ptr.Resource?.GetType(ptr.Index);
             if (doc is null)
             {
                 if (!ptr.TryGet(out var behaviour))

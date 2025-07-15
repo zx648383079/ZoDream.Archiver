@@ -55,6 +55,11 @@
                             <FontIcon Glyph="&#xE71B;" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
+                    <MenuFlyoutItem Command="{Binding CombineCommand}" Text="合并缺失记录">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8AF;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
                     <MenuFlyoutItem Command="{Binding ViewFileCommand}" Text="浏览文件">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE838;" />
