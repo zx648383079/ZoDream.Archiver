@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using ZoDream.ShaderDecompiler.Smolv;
 using ZoDream.ShaderDecompiler.SpirV;
+using ZoDream.Shared;
 
 namespace ZoDream.ShaderDecompiler
 {
@@ -20,7 +21,7 @@ namespace ZoDream.ShaderDecompiler
             }
             var reader = new BinaryReader(input, Encoding.UTF8);
             var magic = reader.ReadUInt32(); // HeaderMagic
-            Debug.Assert(magic == Signature);
+            Expectation.ThrowIfNotSignature(magic == Signature);
             var data = new SpvBytecode();
             var version = reader.ReadUInt32();
             var smolVersion = version >> 24;

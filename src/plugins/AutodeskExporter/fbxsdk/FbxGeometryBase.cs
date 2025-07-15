@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -189,7 +190,7 @@ namespace ZoDream.AutodeskExporter
         internal FbxLayerElementMaterial CreateElementMaterial()
         {
             var ptr = CreateElementMaterialInternal(Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxLayerElementMaterial(ptr);
         }
 
@@ -198,21 +199,21 @@ namespace ZoDream.AutodeskExporter
         internal FbxLayerElementVertexColor CreateElementVertexColor()
         {
             var ptr = CreateElementVertexColorInternal(Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxLayerElementVertexColor(ptr);
         }
 
         internal FbxLayerElementNormal CreateElementNormal()
         {
             var ptr = CreateElementNormalInternal(Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxLayerElementNormal(ptr);
         }
 
         internal FbxLayerElementTangent CreateElementTangent()
         {
             var ptr = CreateElementTangentInternal(Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxLayerElementTangent(ptr);
         }
 
@@ -220,7 +221,7 @@ namespace ZoDream.AutodeskExporter
         {
             //using var namePtr = new FbxString(pUVSetName);
             var ptr = CreateElementUVInternal(Handle, pUVSetName, pTypeIdentifier);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxLayerElementUV(ptr);
         }
     }

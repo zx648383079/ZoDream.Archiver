@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.Spine;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -28,7 +29,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _assembly = _resource.Container!.Assembly;
             _converter = new(resource);
             var obj = _resource[_entryId] as GameObject;
-            Debug.Assert(obj is not null);
+            Expectation.ThrowIfNot(obj is not null);
             FileName = obj.Name ?? string.Empty;
             Initialize(obj);
         }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using ZoDream.KhronosExporter.Models;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -30,16 +31,16 @@ namespace ZoDream.KhronosExporter
             var reader = new BundleBinaryReader(input, EndianType.LittleEndian);
             var beginPosition = reader.Position;
             var magic = reader.ReadUInt32();
-            Debug.Assert(magic == GLTFHEADER);
+            Expectation.ThrowIfNotSignature(magic == GLTFHEADER);
             var version = reader.ReadUInt32();
-            Debug.Assert(version == GLTFVERSION2);
+            Expectation.ThrowIfNotVersion(version == GLTFVERSION2);
             var bodyLength = reader.ReadUInt32();
-            Debug.Assert(bodyLength == input.Length - beginPosition);
+            Expectation.ThrowIfNot(bodyLength == input.Length - beginPosition);
             var chunkItems = new Dictionary<uint, Stream>();
             while (reader.Position - beginPosition < bodyLength)
             {
                 var chunkLength = reader.ReadUInt32();
-                Debug.Assert(chunkLength > 0 && chunkLength % 4 == 0);
+                Expectation.ThrowIfNot(chunkLength > 0 && chunkLength % 4 == 0);
                 var chunkId = reader.ReadUInt32();
                 chunkItems.TryAdd(chunkId, new PartialStream(
                     reader.BaseStream,

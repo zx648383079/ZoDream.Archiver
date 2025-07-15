@@ -67,7 +67,7 @@ namespace ZoDream.Shared.Compression.Lz4
                     }
                 }
             } while (input.Position < input.Length && outputPos < outputLength);
-            Debug.Assert(outputPos == outputLength);
+            Expectation.ThrowIfNot(outputPos == outputLength);
             return outputPos;
         }
 

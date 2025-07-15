@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -95,14 +96,14 @@ namespace ZoDream.AutodeskExporter
         internal FbxAMatrix Inverse()
         {
             var ptr = InverseInternal(Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxAMatrix(ptr);
         }
 
         public static FbxAMatrix operator *(FbxAMatrix a, FbxAMatrix b)
         {
             var ptr = MultiplyInternal(a.Handle, b.Handle);
-            Debug.Assert(ptr != nint.Zero);
+            Expectation.ThrowIfNot(ptr != nint.Zero);
             return new FbxAMatrix(ptr);
         }
     }

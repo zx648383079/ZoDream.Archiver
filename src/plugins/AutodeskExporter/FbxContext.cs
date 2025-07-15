@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -86,7 +87,7 @@ namespace ZoDream.AutodeskExporter
         internal void ExportFrame(List<FbxImportedMesh> meshList, List<FbxImportedFrame> meshFrames, FbxImportedFrame rootFrame)
         {
             var rootNode = _scene?.RootNode;
-            Debug.Assert(rootNode is not null);
+            Expectation.ThrowIfNot(rootNode is not null);
 
             var nodeStack = new Stack<FbxNode>();
             var frameStack = new Stack<FbxImportedFrame>();
@@ -150,7 +151,7 @@ namespace ZoDream.AutodeskExporter
 
                 if (_frameToNode.TryGetValue(frame, out var node))
                 {
-                    Debug.Assert(node is not null);
+                    Expectation.ThrowIfNot(node is not null);
 
                     if (castToBone)
                     {
@@ -164,7 +165,7 @@ namespace ZoDream.AutodeskExporter
                     }
                     else
                     {
-                        Debug.Assert(bonePaths != null);
+                        Expectation.ThrowIfNot(bonePaths != null);
 
                         if (bonePaths.Contains(frame.Path))
                         {

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using UnityEngine.Document;
+using ZoDream.Shared;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.SourceGenerator
@@ -161,14 +162,14 @@ namespace ZoDream.SourceGenerator
         private string WriteMap(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?[0].Children?[1].Children?.ToArray() ?? [];
-            Debug.Assert(children.Length == 2);
+            Expectation.ThrowIfNot(children.Length == 2);
             return $"zodream::Map<{string.Join(", ", children.Select(i => WriteType(writer, i)))}>";
         }
 
         private string WriteMapPair(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?.ToArray() ?? [];
-            Debug.Assert(children.Length == 2);
+            Expectation.ThrowIfNot(children.Length == 2);
             return $"zodream::MapPair<{string.Join(", ", children.Select(i => WriteType(writer, i)))}>";
         }
 

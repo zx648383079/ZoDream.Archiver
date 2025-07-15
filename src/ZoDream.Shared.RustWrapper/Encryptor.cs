@@ -115,7 +115,7 @@ namespace ZoDream.Shared.RustWrapper
                 }
             };
             var res = cb.Invoke(inputRef, outputRef);
-            Debug.Assert(res == memory.Length);
+            Expectation.ThrowIfNot(res == memory.Length);
             return memory.ToArray();
         }
 
@@ -146,7 +146,7 @@ namespace ZoDream.Shared.RustWrapper
                 }
             };
             var res = cb.Invoke(inputRef, outputRef);
-            Debug.Assert(res == output.Length);
+            Expectation.ThrowIfNot(res == output.Length);
         }
     }
 }

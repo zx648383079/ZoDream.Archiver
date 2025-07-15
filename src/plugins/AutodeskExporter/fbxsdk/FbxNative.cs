@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -23,7 +23,7 @@ namespace ZoDream.AutodeskExporter
         public FbxNative(nint InHandle)
         {
             _handle = InHandle;
-            Debug.Assert(Handle != nint.Zero);
+            Expectation.ThrowIfNot(Handle != nint.Zero);
         }
 
 

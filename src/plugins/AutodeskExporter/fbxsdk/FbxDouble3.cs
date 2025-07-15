@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -30,11 +31,11 @@ namespace ZoDream.AutodeskExporter
 
         public unsafe double this[int index] {
             get {
-                Debug.Assert(index is >= 0 and < 3);
+                Expectation.ThrowIfNot(index is >= 0 and < 3);
                 return *(double*)(Handle + (index * 8));
             }
             set {
-                Debug.Assert(index is >= 0 and < 3);
+                Expectation.ThrowIfNot(index is >= 0 and < 3);
                 *(double*)(Handle + (index * 8)) = value;
             }
         }

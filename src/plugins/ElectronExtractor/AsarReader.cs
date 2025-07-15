@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using ZoDream.Shared;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
@@ -54,7 +55,7 @@ namespace ZoDream.ElectronExtractor
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
             var signature = reader.ReadBytes(4);
-            Debug.Assert(signature.SequenceEqual(Signature));
+            Expectation.ThrowIfNotSignature(signature.SequenceEqual(Signature));
             var headerSize = reader.ReadUInt32();
             reader.BaseStream.Seek(4, SeekOrigin.Current);
             var headerMetadataSize = reader.ReadUInt32();

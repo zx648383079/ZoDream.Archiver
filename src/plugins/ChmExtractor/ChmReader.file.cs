@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using ZoDream.ChmExtractor.Models;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.ChmExtractor
@@ -91,7 +91,7 @@ namespace ZoDream.ChmExtractor
         {
             var header = _header.ControlData;
             header.Size = _reader.ReadUInt32();
-            Debug.Assert(_reader.ReadBytes(4).Equal(ChmLzxcControlData.Signature));
+            Expectation.ThrowIfNotSignature(_reader.ReadBytes(4).Equal(ChmLzxcControlData.Signature));
             header.Version = _reader.ReadUInt32();
             header.ResetInterval = _reader.ReadUInt32();
             header.WindowSize = _reader.ReadUInt32();
@@ -178,7 +178,7 @@ namespace ZoDream.ChmExtractor
             var header = _header.ItspHeader;
             if (hasSignature)
             {
-                Debug.Assert(_reader.ReadBytes(4).Equal(ChmItspHeader.Signature));
+                Expectation.ThrowIfNotSignature(_reader.ReadBytes(4).Equal(ChmItspHeader.Signature));
             }
             header.Version = _reader.ReadInt32();
             header.DirectoryHeaderLength1 = _reader.ReadInt32();
@@ -208,7 +208,7 @@ namespace ZoDream.ChmExtractor
             var header = _header.Header;
             if (hasSignature)
             {
-                Debug.Assert(_reader.ReadBytes(4).Equal(ChmFileHeader.Signature));
+                Expectation.ThrowIfNotSignature(_reader.ReadBytes(4).Equal(ChmFileHeader.Signature));
             }
             header.Version = _reader.ReadInt32();
             header.HeaderLen = _reader.ReadInt32();
@@ -240,7 +240,7 @@ namespace ZoDream.ChmExtractor
             var header = new ChmPmgiHeader();
             if (hasSignature)
             {
-                Debug.Assert(_reader.ReadBytes(4).Equal(ChmPmgiHeader.Signature));
+                Expectation.ThrowIfNotSignature(_reader.ReadBytes(4).Equal(ChmPmgiHeader.Signature));
             }
             header.FreeSpaceLength = _reader.ReadUInt32();
             return header;
@@ -250,7 +250,7 @@ namespace ZoDream.ChmExtractor
             var header = new ChmPmglHeader();
             if (hasSignature)
             {
-                Debug.Assert(_reader.ReadBytes(4).Equal(ChmPmglHeader.Signature));
+                Expectation.ThrowIfNotSignature(_reader.ReadBytes(4).Equal(ChmPmglHeader.Signature));
             }
             header.FreeSpaceLength = _reader.ReadUInt32();
             header.Unknown_0008 = _reader.ReadUInt32();

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -57,7 +58,7 @@ namespace ZoDream.BundleExtractor.Unity.WebFiles
         {
             reader.BaseStream.Seek(_basePosition, SeekOrigin.Begin);
             var signature = reader.ReadStringZeroTerm();
-            Debug.Assert(signature is Signature or CNSignature, $"Signature '{signature}' doesn't match to '{Signature}'");
+            Expectation.ThrowIfNotSignature(signature is Signature or CNSignature, $"Signature '{signature}' doesn't match to '{Signature}'");
 
             var headerLength = reader.ReadInt32(); //total size of the header including the signature and all the entries.
             while (reader.BaseStream.Position - _basePosition < headerLength)

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Document;
+using ZoDream.Shared;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -21,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _resource = resource;
             _converter = new(resource);
             var obj = _resource[_entryId] as MonoBehaviour;
-            Debug.Assert(obj is not null);
+            Expectation.ThrowIfNot(obj is not null);
             FileName = obj.Name ?? string.Empty;
             Initialize(obj);
         }

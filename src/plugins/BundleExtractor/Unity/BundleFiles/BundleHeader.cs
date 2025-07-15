@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -18,9 +18,9 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public virtual void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
-            Debug.Assert(signature == MagicString);
+            Expectation.ThrowIfNotSignature(signature == MagicString);
             Version = (UnityBundleVersion)reader.ReadInt32();
-            Debug.Assert(Version >= 0);
+            Expectation.ThrowIfNotVersion(Version >= 0);
             UnityWebBundleVersion = reader.ReadStringZeroTerm();
             UnityWebMinimumRevision = reader.ReadStringZeroTerm();
         }

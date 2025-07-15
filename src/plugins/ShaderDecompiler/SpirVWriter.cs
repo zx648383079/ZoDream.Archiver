@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ZoDream.ShaderDecompiler.SpirV;
+using ZoDream.Shared;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.ShaderDecompiler
@@ -114,8 +115,8 @@ namespace ZoDream.ShaderDecompiler
 
                         {
                             var t = instruction.ResultType;
-                            Debug.Assert(t != null);
-                            Debug.Assert(t is SpvScalarType);
+                            Expectation.ThrowIfNot(t != null);
+                            Expectation.ThrowIfNot(t is SpvScalarType);
 
                             object? constant = ConvertConstant(t as SpvScalarType, instruction.Words, 3);
                             instruction.Operands[2].Value = constant;
@@ -361,8 +362,8 @@ namespace ZoDream.ShaderDecompiler
                             // a forward reference. The storage type must
                             // match
                             var pt = (SpvPointerType)i.ResultType;
-                            Debug.Assert(pt != null);
-                            Debug.Assert(pt.StorageClass == (StorageClass)i.Words[2]);
+                            Expectation.ThrowIfNot(pt != null);
+                            Expectation.ThrowIfNot(pt.StorageClass == (StorageClass)i.Words[2]);
                             pt.ResolveForwardReference(_instructionMaps[i.Words[3]].ResultType);
                         }
                         else

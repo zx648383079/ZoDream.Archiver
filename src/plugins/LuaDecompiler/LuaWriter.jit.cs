@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using ZoDream.LuaDecompiler.Models;
+using ZoDream.Shared;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.LuaDecompiler
@@ -223,7 +223,7 @@ namespace ZoDream.LuaDecompiler
                         if (chunk.MoveNext())
                         {
                             var next = (JitOperandCode)chunk.CurrentOpcode;
-                            Debug.Assert(next.Operand == JitOperand.GSET);
+                            Expectation.ThrowIfNot(next.Operand == JitOperand.GSET);
                             fn = chunk.ConstantItems[next.D].Value.ToString();
                         }
                         var sub = chunk.PrototypeItems[(int)chunk.ConstantItems[cd].Value];

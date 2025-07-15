@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Document;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -71,7 +72,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public ObjectInfo Get(int index)
         {
-            Debug.Assert(index >= 0 && index < Count);
+            Expectation.ThrowIfNot(index >= 0 && index < Count);
             return _metadata.Object[index];
         }
 
@@ -79,7 +80,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public VirtualDocument? GetType(int index)
         {
-            Debug.Assert(index >= 0 && index < Count);
+            if (index < 0 || index >= Count)
+            {
+                return null;
+            }
             var i = _metadata.Object[index].SerializedTypeIndex;
             return i < 0 ? null : _metadata.Types[i].OldType;
         }
@@ -136,7 +140,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public IBundleBinaryReader OpenRead(int index)
         {
-            Debug.Assert(index >= 0 && index < Count);
+            Expectation.ThrowIfNot(index >= 0 && index < Count);
             return OpenRead(_metadata.Object[index]);
         }
 

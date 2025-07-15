@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection.PortableExecutable;
 using System.Threading;
+using ZoDream.Shared;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -64,7 +65,7 @@ namespace ZoDream.WallpaperExtractor
                 return;
             }
             var magic = reader.ReadNZeroString(16);
-            Debug.Assert(magic is "TEXS0001" or "TEXS0002" or "TEXS0003");
+            Expectation.ThrowIfNotSignature(magic is "TEXS0001" or "TEXS0002" or "TEXS0003");
             var frameCount = reader.ReadInt32();
             var giftWidth = 0;
             var giftHeight = 0;
@@ -125,9 +126,9 @@ namespace ZoDream.WallpaperExtractor
         {
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
             var magic = reader.ReadNZeroString(16);
-            Debug.Assert(magic == "TEXV0005");
+            Expectation.ThrowIfNotSignature(magic == "TEXV0005");
             magic = reader.ReadNZeroString(16);
-            Debug.Assert(magic == "TEXI0001");
+            Expectation.ThrowIfNotSignature(magic == "TEXI0001");
             var header = new TexHeader()
             {
                 Format = (TexFormat)reader.ReadInt32(),
@@ -139,7 +140,7 @@ namespace ZoDream.WallpaperExtractor
                 UnkInt0 = reader.ReadUInt32()
             };
             magic = reader.ReadNZeroString(16);
-            Debug.Assert(magic is "TEXB0001" or "TEXB0002" or "TEXB0003");
+            Expectation.ThrowIfNotSignature(magic is "TEXB0001" or "TEXB0002" or "TEXB0003");
             header.BVersion = int.Parse(magic[4..]);
             var imageCount = reader.ReadInt32();
             header.ImageFormat = header.BVersion == 3 ? (FreeImageFormat)reader.ReadInt32() : FreeImageFormat.FIF_UNKNOWN;

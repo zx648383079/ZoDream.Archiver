@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using ZoDream.Shared;
 
 namespace ZoDream.BundleExtractor.Unity.Exporters
 {
@@ -13,7 +14,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public object Read(Stream input)
         {
             var reader = new BinaryReader(input);
-            Debug.Assert(reader.ReadByte() == 0xA);
+            Expectation.ThrowIfNot(reader.ReadByte() == 0xA);
             var dataSize = reader.Read7BitEncodedInt();
             var start = reader.BaseStream.Position;
             var nameItems = new List<string>();
@@ -25,7 +26,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     break;
                 }
-                Debug.Assert(signature is 0xA or 0x12);
+                Expectation.ThrowIfNot(signature is 0xA or 0x12);
                 var len = reader.Read7BitEncodedInt();
                 nameItems.Add(Encoding.ASCII.GetString(reader.ReadBytes(len)));
             }
@@ -47,7 +48,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 }
                 signature = reader.ReadByte();
             }
-            Debug.Assert(reader.BaseStream.Position - start == dataSize);
+            Expectation.ThrowIfNot(reader.BaseStream.Position - start == dataSize);
             return true;
         }
 

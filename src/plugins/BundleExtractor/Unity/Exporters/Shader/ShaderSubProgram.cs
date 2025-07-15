@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using UnityEngine;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Language;
 using Version = UnityEngine.Version;
@@ -21,7 +22,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _version = reader.Get<Version>();
             var versionNo = reader.ReadInt32();
-            Debug.Assert(GetExpectedProgramVersion(_version) == versionNo);
+            Expectation.ThrowIfNotVersion(GetExpectedProgramVersion(_version) == versionNo);
             m_ProgramType = (ShaderGpuProgramType)reader.ReadInt32();
             var statsALU = reader.ReadInt32();
             var statsTEX = reader.ReadInt32();

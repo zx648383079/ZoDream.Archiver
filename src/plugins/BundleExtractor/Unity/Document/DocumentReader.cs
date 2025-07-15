@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Document;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Converters;
 using Object = UnityEngine.Object;
@@ -107,7 +108,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                         }
                         int size = reader.ReadInt32();
                         var childNode = node.Children[0].Children[1].Children;
-                        Debug.Assert(childNode.Length == 2);
+                        Expectation.ThrowIfNot(childNode.Length == 2);
                         Type childType = null;
                         var inType = typeof(IEnumerable<>);
                         foreach (var item in type.GetInterfaces())
@@ -118,7 +119,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                                 break;
                             }
                         }
-                        Debug.Assert(childType is not null);
+                        Expectation.ThrowIfNot(childType is not null);
                         value = ReadArray(childType, size, () =>
                                 Activator.CreateInstance(childType, 
                                     ReadType(childType.GenericTypeArguments[0], childNode[0], reader),

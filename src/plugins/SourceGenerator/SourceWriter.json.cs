@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine.Document;
+using ZoDream.Shared;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.SourceGenerator
@@ -213,7 +214,7 @@ namespace ZoDream.SourceGenerator
         private KeyValuePair<string, string> WriteMapPair(ICodeWriter writer, VirtualNode node)
         {
             var children = node.Children?.ToArray() ?? [];
-            Debug.Assert(children.Length == 2);
+            Expectation.ThrowIfNot(children.Length == 2);
             var key = string.Empty;
             var value = string.Empty;
             for (int i = 0; i < children.Length; i++)

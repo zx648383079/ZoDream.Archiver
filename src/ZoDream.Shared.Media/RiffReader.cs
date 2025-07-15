@@ -14,7 +14,7 @@ namespace ZoDream.Shared.Media
             var pos = input.Position;
             var reader = new BinaryReader(input);
             var magic = Encoding.ASCII.GetString(reader.ReadBytes(4));
-            Debug.Assert(magic == "RIFF");
+            Expectation.ThrowIfNotSignature(magic == "RIFF");
             input.Position = pos;
             return (RiffChunk)Read(reader);
         }

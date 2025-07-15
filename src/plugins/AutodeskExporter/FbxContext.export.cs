@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using ZoDream.Shared;
 
 namespace ZoDream.AutodeskExporter
 {
@@ -82,7 +83,7 @@ namespace ZoDream.AutodeskExporter
                 return;
             }
 
-            Debug.Assert(imported.MeshList != null);
+            Expectation.ThrowIfNot(imported.MeshList != null);
 
             var bonePaths = new HashSet<string>();
 

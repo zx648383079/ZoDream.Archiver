@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles
@@ -34,11 +35,11 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         {
             base.Read(reader);
             Size = reader.ReadInt64();
-            Debug.Assert(Size >= 0);
+            Expectation.ThrowIfNot(Size >= 0);
             CompressedBlocksInfoSize = reader.ReadInt32();
-            Debug.Assert(CompressedBlocksInfoSize >= 0);
+            Expectation.ThrowIfNot(CompressedBlocksInfoSize >= 0);
             UncompressedBlocksInfoSize = reader.ReadInt32();
-            Debug.Assert(UncompressedBlocksInfoSize >= 0);
+            Expectation.ThrowIfNot(UncompressedBlocksInfoSize >= 0);
             Flags = (BundleFlags)reader.ReadInt32();
         }
     }

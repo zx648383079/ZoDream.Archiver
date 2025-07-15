@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
@@ -17,7 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public override void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
-            Debug.Assert(signature == MagicString);
+            Expectation.ThrowIfNotSignature(signature == MagicString);
             Version = UnityBundleVersion.BF_520_x;
             UnityWebBundleVersion = "5.x.x";
             UnityWebMinimumRevision = "2017.4.30f1";
