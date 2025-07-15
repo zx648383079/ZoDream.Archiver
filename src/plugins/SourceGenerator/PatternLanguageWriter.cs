@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using UnityEngine.Document;
@@ -34,10 +33,20 @@ namespace ZoDream.SourceGenerator
                 .WriteLine()
                 .WriteLine("import zodream.io;");
 
+            VirtualNode? firstNode = null;
             foreach (VirtualNode node in input)
             {
+                firstNode = node;
                 WriteStruct(writer, node);
             }
+            if (firstNode is not null)
+            {
+                writer.WriteLine()
+                    .WriteFormat("{0} {1} @ 0x0;", firstNode.Type, firstNode.Name)
+                    .WriteLine();
+            }
+            
+            writer.Flush();
         }
 
         private string WriteType(ICodeWriter writer, VirtualNode node)
@@ -117,7 +126,7 @@ namespace ZoDream.SourceGenerator
                 }
                 if (maps.TryGetValue(name, out var type))
                 {
-                    var field = name.Replace(' ', '_');
+                    var field = name.Replace(' ', '_').Replace('<', '_').Replace('>', '_');
                     if (match.Success)
                     {
                         writer.WriteFormat("Array<{0}, {1}> {2};", type, arrayItems[name] + 1, field).WriteLine(true);
@@ -128,7 +137,7 @@ namespace ZoDream.SourceGenerator
                 }
                 WriteProperty(writer, item);
             }
-            writer.WriteOutdentLine().Write('}').WriteLine(true);
+            writer.WriteOutdentLine().Write("};").WriteLine(true);
         }
 
 

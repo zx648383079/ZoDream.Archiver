@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ZoDream.LuaDecompiler.Models;
+using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 
@@ -36,7 +37,7 @@ namespace ZoDream.LuaDecompiler
             if (!data.Header.Flags!.IsStripped)
             {
                 name = Encoding.UTF8.GetString(
-                    reader.ReadBytes(reader.Read7BitEncodedInt()));
+                    reader.ReadBytes((int)reader.Read7BitEncodedUInt()));
             }
             var extractor = new JitOperandExtractor(data.Header.Version);
             var items = new Stack<LuaChunk>();
@@ -64,7 +65,7 @@ namespace ZoDream.LuaDecompiler
             Stack<LuaChunk> protoItems,
             JitOperandExtractor extractor)
         {
-            var size = reader.Read7BitEncodedInt();
+            var size = reader.Read7BitEncodedUInt();
             var nextPosition = reader.Position + size;
             if (size == 0)
             {
@@ -73,26 +74,26 @@ namespace ZoDream.LuaDecompiler
             var chunk = new LuaChunk
             {
                 Flags = new LuaProtoFlags(reader.ReadByte()),
-                ParameterCount = reader.ReadByte(),
+                ParameterCount = reader.ReadByte(), // numparams
                 MaxStack = reader.ReadByte(), // framesize
-                UpValueCount = reader.ReadByte()
+                UpValueCount = reader.ReadByte() // sizeuv
             };
-            var constantsCount = reader.Read7BitEncodedInt();
-            var numericConstantsCount = reader.Read7BitEncodedInt();
-            var instructionsCount = reader.Read7BitEncodedInt();
-            var debugInfoSize = 0L;
+            var constantsCount = reader.Read7BitEncodedUInt(); // sizekgc
+            var numericConstantsCount = reader.Read7BitEncodedUInt(); // sizekn
+            var instructionsCount = reader.Read7BitEncodedUInt(); // sizebc
+            var debugInfoSize = 0UL;
             if (!header.Flags!.IsStripped)
             {
-                debugInfoSize = reader.Read7BitEncodedInt64();
+                debugInfoSize = reader.Read7BitEncodedUInt64();
             }
             var lineCount = 0UL;
             if (debugInfoSize > 0)
             {
-                chunk.LineDefined = (ulong)reader.Read7BitEncodedInt64();
-                lineCount = (ulong)reader.Read7BitEncodedInt64();
+                chunk.LineDefined = reader.Read7BitEncodedUInt64();
+                lineCount = reader.Read7BitEncodedUInt64();
             }
             chunk.LastLineDefined = chunk.LineDefined + lineCount;
-            chunk.OpcodeItems = reader.ReadArray(instructionsCount, (_, _) => {
+            chunk.OpcodeItems = reader.ReadArray((int)instructionsCount, (_, _) => {
                 return extractor.Extract(reader.ReadBytes(4));
             });
             chunk.DebugInfo.UpValueItems = reader.ReadArray(chunk.UpValueCount, (_, _) => {
@@ -103,22 +104,23 @@ namespace ZoDream.LuaDecompiler
                     Idx = (byte)(code & 0x7FFF),
                 };
             });
+            
             var prototypeItems = new List<LuaChunk>();
-            chunk.ConstantItems = reader.ReadArray(constantsCount, (_, _) => {
-                var type = reader.Read7BitEncodedInt();
+            chunk.ConstantItems = reader.ReadArray((int)constantsCount, (_, _) => {
+                var type = (int)reader.Read7BitEncodedUInt();
                 switch (type)
                 {
                     case BCDUMP_KGC_COMPLEX:
                         return new LuaConstant(LuaConstantType.Complex,
-                            (CombineUInt((uint)reader.Read7BitEncodedInt(), (uint)reader.Read7BitEncodedInt(), header),
-                            CombineUInt((uint)reader.Read7BitEncodedInt(), (uint)reader.Read7BitEncodedInt(), header))
+                            (CombineUInt(reader.Read7BitEncodedUInt(), reader.Read7BitEncodedUInt(), header),
+                            CombineUInt(reader.Read7BitEncodedUInt(), reader.Read7BitEncodedUInt(), header))
                         );
                     case BCDUMP_KGC_U64:
                         return new LuaConstant(LuaConstantType.Number, 
-                            CombineUInt((uint)reader.Read7BitEncodedInt(), (uint)reader.Read7BitEncodedInt(), header));
+                            CombineUInt(reader.Read7BitEncodedUInt(), reader.Read7BitEncodedUInt(), header));
                     case BCDUMP_KGC_I64:
                         return new LuaConstant(LuaConstantType.Number,
-                            CombineInt((uint)reader.Read7BitEncodedInt(), (uint)reader.Read7BitEncodedInt64(), header));
+                            CombineInt(reader.Read7BitEncodedUInt(), reader.Read7BitEncodedUInt(), header));
                     case BCDUMP_KGC_TAB:
                         return ReadTable(reader, header);
                     case BCDUMP_KGC_CHILD:
@@ -134,19 +136,19 @@ namespace ZoDream.LuaDecompiler
                         throw new ArgumentException($"BCDUMP_KGC: {type}");
                 }
             }).Reverse().ToArray();
-            chunk.NumberConstantItems = reader.ReadArray(numericConstantsCount, (_, _) => {
-                var (isNum, lo) = Read7BitEncodedUInt(reader);
+            chunk.NumberConstantItems = reader.ReadArray((int)numericConstantsCount, (_, _) => {
+                var (isNum, lo) = Read7BitEncodedUIntPair(reader);
                 if (!isNum)
                 {
                     return new LuaConstant(LuaConstantType.Number, ToInt64(lo));
                 }
-                return new LuaConstant(LuaConstantType.Number, CombineFloat((uint)lo, (uint)reader.Read7BitEncodedInt(), header));
+                return new LuaConstant(LuaConstantType.Number, CombineFloat((uint)lo, reader.Read7BitEncodedUInt(), header));
             });
             chunk.PrototypeItems = [..prototypeItems];
             if (debugInfoSize > 0)
             {
                 // reader.BaseStream.Seek(debugInfoSize, SeekOrigin.Current);
-                chunk.DebugInfo.AbsoluteLineItems = reader.ReadArray(instructionsCount, (_, _) => {
+                chunk.DebugInfo.AbsoluteLineItems = reader.ReadArray((int)instructionsCount, (_, _) => {
                     return new LuaLineInfo(chunk.LineDefined + lineCount switch
                     {
                         >= 65536 => reader.ReadUInt32(),
@@ -172,14 +174,15 @@ namespace ZoDream.LuaDecompiler
                         reader.Position--;
                         item.Name = reader.ReadStringZeroTerm();
                     }
-                    item.StartPc = lastPc + (ulong)reader.Read7BitEncodedInt64();
-                    item.EndPc = item.StartPc + (ulong)reader.Read7BitEncodedInt64();
+                    item.StartPc = lastPc + reader.Read7BitEncodedUInt64();
+                    item.EndPc = item.StartPc + reader.Read7BitEncodedUInt64();
                     lastPc = item.StartPc;
                     localItems.Add(item);
                 }
                 chunk.DebugInfo.LocalItems = [.. localItems];
             }
-            reader.BaseStream.Seek(nextPosition, SeekOrigin.Begin);
+            Expectation.ThrowIfNot(reader.Position == nextPosition);
+            // reader.BaseStream.Seek(nextPosition, SeekOrigin.Begin);
             return chunk;
         }
 
@@ -192,8 +195,8 @@ namespace ZoDream.LuaDecompiler
             }
             return (long)val;
         }
- 
-        private static (bool, ulong) Read7BitEncodedUInt(BinaryReader reader)
+
+        private static (bool, ulong) Read7BitEncodedUIntPair(BinaryReader reader)
         {
             var b = reader.ReadByte();
             var isNum = (b & 0x1) != 0;
@@ -219,12 +222,12 @@ namespace ZoDream.LuaDecompiler
 
         private LuaConstant ReadTable(BundleBinaryReader reader, LuaHeader header)
         {
-            var nArray = reader.Read7BitEncodedInt();
-            var nHash = reader.Read7BitEncodedInt();
-            var items = reader.ReadArray(nArray, (_, _) => {
+            var nArray = reader.Read7BitEncodedUInt();
+            var nHash = reader.Read7BitEncodedUInt();
+            var items = reader.ReadArray((int)nArray, (_, _) => {
                 return ReadTableValue(reader, header);
             });
-            var hashItems = reader.ReadArray(nArray, (_, _) => {
+            var hashItems = reader.ReadArray((int)nHash, (_, _) => {
                 return (ReadTableValue(reader, header), ReadTableValue(reader, header));
             });
             return new LuaConstant(LuaConstantType.Table, new LuaConstantTable()
@@ -236,14 +239,14 @@ namespace ZoDream.LuaDecompiler
 
         private LuaConstant ReadTableValue(BundleBinaryReader reader, LuaHeader header)
         {
-            var type = reader.Read7BitEncodedInt();
+            var type = (int)reader.Read7BitEncodedUInt();
             return type switch
             {
                 BCDUMP_KTAB_NIL => new LuaConstant(),
                 BCDUMP_KTAB_FALSE => new LuaConstant(false),
                 BCDUMP_KTAB_TRUE => new LuaConstant(true),
-                BCDUMP_KTAB_INT => new LuaConstant(LuaConstantType.Number, reader.Read7BitEncodedInt()),
-                BCDUMP_KTAB_NUM => new LuaConstant(LuaConstantType.Number, CombineFloat((uint)reader.Read7BitEncodedInt(), (uint)reader.Read7BitEncodedInt(), header)),
+                BCDUMP_KTAB_INT => new LuaConstant(LuaConstantType.Number, reader.Read7BitEncodedUInt()),
+                BCDUMP_KTAB_NUM => new LuaConstant(LuaConstantType.Number, CombineFloat(reader.Read7BitEncodedUInt(), reader.Read7BitEncodedUInt(), header)),
                 >= BCDUMP_KTAB_STR => new LuaConstant(Encoding.UTF8.GetString(reader.ReadBytes(type - BCDUMP_KTAB_STR))),
                 _ => throw new ArgumentException($"BCDUMP_KTAB: {type}")
             };

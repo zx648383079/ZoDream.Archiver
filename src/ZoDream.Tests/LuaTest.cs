@@ -13,7 +13,7 @@ namespace ZoDream.Tests
     public class LuaTest
     {
 
-        //[TestMethod]
+        [TestMethod]
         public void TestDecompiler()
         {
             var root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../zodream/tests"));

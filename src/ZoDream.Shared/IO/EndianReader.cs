@@ -171,53 +171,19 @@ namespace ZoDream.Shared.IO
             return ReadString(length);
         }
 
-        public string ReadLeb128String()
+        public string Read7BitEncodedString()
         {
             return base.ReadString();
         }
 
         public uint Read7BitEncodedUInt()
         {
-            var val = (uint)ReadByte();
-            if (val < 0x80)
-            {
-                return val;
-            }
-            var bitShift = 0;
-            val &= 0x7f;
-            while (true)
-            {
-                var b = ReadByte();
-                bitShift += 7;
-                val |= (uint)(b & 0x7f) << bitShift;
-                if (b < 0x80)
-                {
-                    break;
-                }
-            }
-            return val;
+            return StreamExtension.Read7BitEncodedUInt(this);
         }
 
         public ulong Read7BitEncodedUInt64()
         {
-            var val = (ulong)ReadByte();
-            if (val < 0x80)
-            {
-                return val;
-            }
-            var bitShift = 0;
-            val &= 0x7f;
-            while (true)
-            {
-                var b = ReadByte();
-                bitShift += 7;
-                val |= (ulong)(b & 0x7f) << bitShift;
-                if (b < 0x80)
-                {
-                    break;
-                }
-            }
-            return val;
+            return StreamExtension.Read7BitEncodedUInt64(this);
         }
 
         public string ReadString(int length)

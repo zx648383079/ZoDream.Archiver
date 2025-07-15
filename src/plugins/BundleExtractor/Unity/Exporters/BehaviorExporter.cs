@@ -4,7 +4,6 @@ using System.Text.Json;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
-using ZoDream.BundleExtractor.Unity.Document.Cecil;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;

@@ -282,5 +282,58 @@ namespace ZoDream.Shared.IO
             }
             return false;
         }
+
+        /// <summary>
+        /// >= 0x80 则 有多个字节
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static uint Read7BitEncodedUInt(this BinaryReader reader)
+        {
+            var val = (uint)reader.ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = reader.ReadByte();
+                bitShift += 7;
+                val |= (uint)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
+        }
+        /// <summary>
+        /// >= 0x80 则 有多个字节
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static ulong Read7BitEncodedUInt64(this BinaryReader reader)
+        {
+            var val = (ulong)reader.ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = reader.ReadByte();
+                bitShift += 7;
+                val |= (ulong)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
+        }
     }
 }

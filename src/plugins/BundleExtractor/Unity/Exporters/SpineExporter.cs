@@ -69,8 +69,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 AddMaterial(data.AdditiveMaterial);
                 AddMaterial(data.MultiplyMaterial);
                 AddMaterial(data.Material);
+                if (data.SkeletonDataAsset is null)
+                {
+                    continue;
+                }
                 data.SkeletonDataAsset.IsExclude = true;
                 var asset = BehaviorExporter.Deserialize<SpineSkeletonDataAsset>(data.SkeletonDataAsset, _assembly, _converter);
+                if (asset is null)
+                {
+                    continue;
+                }
                 if (asset.SkeletonJSON?.IsNotNull == true)
                 {
                     asset.SkeletonJSON.IsExclude = true;
@@ -87,6 +95,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     }
                     ptr.IsExclude = true;
                     var item = BehaviorExporter.Deserialize<SpineAtlasAsset>(ptr, _assembly, _converter);
+                    if (item is null)
+                    {
+                        continue;
+                    }
                     AddMaterial(item.Materials);
                     item.AtlasFile.IsExclude = true;
                     if (item.AtlasFile?.IsNotNull == true)

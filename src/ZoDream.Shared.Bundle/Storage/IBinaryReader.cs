@@ -54,7 +54,7 @@ namespace ZoDream.Shared.Bundle
         /// 前读取 leb128 的长度，再读取字符
         /// </summary>
         /// <returns></returns>
-        public string ReadLeb128String();
+        public string Read7BitEncodedString();
         public ushort ReadUInt16();
         public uint ReadUInt32();
         public ulong ReadUInt64();

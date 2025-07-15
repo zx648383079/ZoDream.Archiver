@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -85,7 +86,12 @@ namespace ZoDream.Archiver.ViewModels
         private void TapLog()
         {
             _app.Logger?.Dispose();
-            Process.Start("explorer", $"/select,{AppViewModel.LogFileName}");
+            var fileName = AppViewModel.LogFileName;
+            if (!File.Exists(fileName))
+            {
+                fileName = Path.GetDirectoryName(fileName);
+            }
+            Process.Start("explorer", $"/select,{fileName}");
         }
 
         private async void TapCode()
