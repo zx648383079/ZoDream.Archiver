@@ -156,6 +156,7 @@ namespace ZoDream.BundleExtractor
                 NativeClassID.Transform => typeof(Transform),
                 NativeClassID.VideoClip => typeof(VideoClip),
                 NativeClassID.ResourceManager => typeof(ResourceManager),
+                NativeClassID.AssetBundleManifest => typeof(AssetBundleManifest),
                 _ => typeof(Object),
             };
         }

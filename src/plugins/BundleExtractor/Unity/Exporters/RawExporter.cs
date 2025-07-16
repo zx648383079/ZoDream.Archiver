@@ -62,7 +62,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
                 SaveAs(input, fileName, extension switch
                 {
-                    ".lua" or ".atlas" or ".skel" => extension,
+                    ".lua" or ".atlas" or ".skel" or ".dll" => extension,
                     _ => ".txt"
                 }, mode);
             }
