@@ -29,6 +29,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 return new BundleBinaryReader(new EeabStream(input, FilePath.GetFilePath(sourcePath)), EndianType.BigEndian);
             }
+            if (buffer.Equal("euab"))
+            {
+                return new BundleBinaryReader(input.Skip(EeabStream.EuabParse(
+                    FilePath.GetFilePath(sourcePath))), EndianType.BigEndian);
+            }
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
     }

@@ -9,7 +9,7 @@ namespace ZoDream.Shared.IO
     /// <summary>
     /// 乱序流重排
     /// </summary>
-    public class OrderedStream(Stream input, Tuple<long, long>[] partItems) : Stream, IReadOnlyStream
+    public class OrderedStream(Stream input, Tuple<long, long>[] partItems) : Stream, IReadOnlyStream, IStreamOrigin
     {
 
         private long _current = 0;

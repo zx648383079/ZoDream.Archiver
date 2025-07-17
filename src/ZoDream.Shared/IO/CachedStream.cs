@@ -8,7 +8,7 @@ namespace ZoDream.Shared.IO
     /// 有缓存的只读流
     /// </summary>
     /// <param name="cacheSize"></param>
-    public class CachedStream(Stream input, int cacheSize = 1024) : Stream, IReadOnlyStream
+    public class CachedStream(Stream input, int cacheSize = 1024) : Stream, IReadOnlyStream, IStreamOrigin
     {
 
         private readonly byte[] _buffer = new byte[cacheSize];

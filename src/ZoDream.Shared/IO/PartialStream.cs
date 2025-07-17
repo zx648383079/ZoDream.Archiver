@@ -7,7 +7,7 @@ namespace ZoDream.Shared.IO
     /// <summary>
     /// 嵌套使用请手动更新源进度
     /// </summary>
-    public class PartialStream: Stream, IReadOnlyStream
+    public class PartialStream: Stream, IReadOnlyStream, IStreamOrigin
     {
         /// <summary>
         /// 从当前位置获取剩余部分
@@ -29,17 +29,17 @@ namespace ZoDream.Shared.IO
             _byteLength = byteLength;
             if (stream is not PartialStream ps)
             {
-                BaseStream = stream;
+                _baseStream = stream;
                 _current = _beginPosition = beginPosition;
                 return;
             }
             _syncStream = ps;
-            BaseStream = ps.BaseStream;
+            _baseStream = ps.BaseStream;
             _current = _beginPosition = beginPosition + ps._beginPosition;
         }
-
+        private readonly Stream _baseStream;
         private readonly PartialStream? _syncStream;
-        public readonly Stream BaseStream;
+        public Stream BaseStream => _baseStream;
         private readonly bool _leaveStreamOpen = true;
         private readonly long _beginPosition;
         private readonly long _byteLength;
@@ -48,9 +48,9 @@ namespace ZoDream.Shared.IO
 
         private long EndPosition => _beginPosition + _byteLength;
 
-        public override bool CanRead => BaseStream.CanRead;
+        public override bool CanRead => _baseStream.CanRead;
 
-        public override bool CanSeek => BaseStream.CanSeek;
+        public override bool CanSeek => _baseStream.CanSeek;
 
         public override bool CanWrite => false;
 
@@ -70,8 +70,8 @@ namespace ZoDream.Shared.IO
             {
                 return 0;
             }
-            BaseStream.SeekSkip(_current - BaseStream.Position);
-            var res = BaseStream.Read(buffer, offset, len);
+            _baseStream.SeekSkip(_current - _baseStream.Position);
+            var res = _baseStream.Read(buffer, offset, len);
             SyncPosition(_current + res);
             return res;
         }
@@ -82,7 +82,7 @@ namespace ZoDream.Shared.IO
             var max = _beginPosition + _byteLength;
             var pos = origin switch
             {
-                SeekOrigin.Current => BaseStream.Position + offset,
+                SeekOrigin.Current => _baseStream.Position + offset,
                 SeekOrigin.End => _beginPosition + _byteLength + offset,
                 _ => _beginPosition + offset,
             };
@@ -115,7 +115,7 @@ namespace ZoDream.Shared.IO
             base.Dispose(disposing);
             if (_leaveStreamOpen == false)
             {
-                BaseStream.Dispose();
+                _baseStream.Dispose();
             }
         }
 

@@ -118,7 +118,22 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 offset += 4;
             }
         }
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static int EuabParse(string fileName)
+        {
+            var hash = Encoding.ASCII.GetBytes(Sha1Hashed(Path.GetFileNameWithoutExtension(fileName)));
+            var minSize = 8;
+            var maxSize = 16;
+            int data = 0;
+            for (int i = 0; i < hash.Length; i++)
+            {
+                data += hash[i];
+            }
+            return Math.Max(minSize, data % maxSize);
+        }
     }
 }

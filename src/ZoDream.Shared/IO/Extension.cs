@@ -35,6 +35,19 @@ namespace ZoDream.Shared.IO
         {
             return new PartialStream(input, offset, input.Length - offset);
         }
+
+        public static bool IsSameOrigin(this Stream input, Stream other)
+        {
+            while (input is IStreamOrigin o)
+            {
+                input = o.BaseStream;
+            }
+            while (other is IStreamOrigin o)
+            {
+                other = o.BaseStream;
+            }
+            return input == other;
+        }
         /// <summary>
         /// 从当前位置截取部分长度
         /// </summary>
