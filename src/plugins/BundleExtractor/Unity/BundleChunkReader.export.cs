@@ -38,9 +38,9 @@ namespace ZoDream.BundleExtractor
             {
                 if(!exporter.IsEmpty)
                 {
-                    exporter.SaveAs(_fileItems.Create(FileNameHelper.Create(exporter.SourcePath,
-                            LocationStorage.CreateSafeFileName(exporter.FileName)
-                        ), folder), mode);
+                    exporter.SaveAs(_fileItems.Create(exporter.SourcePath,
+                            exporter.FileName
+                        , folder), mode);
                 }
                 exporter.Dispose();
             }
@@ -75,12 +75,12 @@ namespace ZoDream.BundleExtractor
                             continue;
                         }
                         var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() 
-                            : LocationStorage.CreateSafeFileName(obj.Name);
+                            : obj.Name;
                         var exporter = TryParse(asset, i);
-                        exporter?.SaveAs(_fileItems.Create(FileNameHelper.Create(asset.FullPath,
+                        exporter?.SaveAs(_fileItems.Create(asset.FullPath,
                             string.IsNullOrEmpty(exporter.FileName) ? fileName : 
-                            LocationStorage.CreateSafeFileName(exporter.FileName)
-                        ), folder), mode);
+                            exporter.FileName
+                        , folder), mode);
                         if (exporter is IDisposable d)
                         {
                             d?.Dispose();
@@ -95,7 +95,7 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                _fileItems.Filter?.Exclude(sourcePath);
+                _fileItems.Filter?.Exclude(sourcePath, BundleExcludeFlag.Export);
                 if (progress is not null)
                 {
                     progress.Value++;

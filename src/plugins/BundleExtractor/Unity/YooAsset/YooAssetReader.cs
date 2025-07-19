@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using ZoDream.Shared;
@@ -11,7 +12,7 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         public const uint Signature = 0x594F4F; // OOY\0
         private readonly PackageManifest _data = Deserialize(input);
 
-        public void Read()
+        public IEnumerable<KeyValuePair<string, string>> Read()
         {
             var folder = Path.GetDirectoryName(fileName);
             if (assetType == YooAssetType.Hotfix)
@@ -24,12 +25,22 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
                 {
                     var sourcePath = Path.Combine(folder, item.FileHash[..2], item.FileHash, "__data");
                     var outputPath = ConvertPath(item.BundleName);
+                    yield return new KeyValuePair<string, string>(sourcePath, outputPath);
                 }
                 else
                 {
                     var sourcePath = Path.Combine(folder, item.FileHash + ".bundle"); // 后缀不确定
                     var outputPath = Path.Combine("Updates", ConvertPath(item.BundleName));
+                    yield return new KeyValuePair<string, string>(sourcePath, outputPath);
                 }
+            }
+        }
+
+        public void Write(IBundleMapper mapper)
+        {
+            foreach (var item in Read())
+            {
+                mapper.Add(item.Key, item.Value);
             }
         }
 
@@ -128,6 +139,8 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         {
             return Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadUInt16()));
         }
+
+        
     }
 
     public enum YooAssetType

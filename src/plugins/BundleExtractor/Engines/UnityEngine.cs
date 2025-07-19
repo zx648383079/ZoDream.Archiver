@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
@@ -46,11 +47,14 @@ namespace ZoDream.BundleExtractor.Engines
                 }
                 service.Add(dict);
             }
+            if (YooAssetScheme.TryGet(fileItems, out var mapper))
+            {
+                service.Add(mapper);
+            }
             return fileItems.EnumerateChunk(dict);
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
-
             return new DependencyBuilder(options is IBundleExtractOptions o && o.OnlyDependencyTask ? o.DependencySource : string.Empty);
         }
         public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)

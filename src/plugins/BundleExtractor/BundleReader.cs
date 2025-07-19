@@ -9,16 +9,9 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    public class BundleReader(IBundleSource fileItems, 
-        IBundleOptions options, BundleScheme scheme) : IBundleReader, IBundleFilter
+    public partial class BundleReader(IBundleSource fileItems, 
+        IBundleOptions options, BundleScheme scheme) : IBundleReader
     {
-
-        private IBundleEngine? _engine;
-
-        public bool IsExclude(string fileName)
-        {
-            return _engine?.IsExclude(options, fileName) == true;
-        }
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
@@ -63,9 +56,10 @@ namespace ZoDream.BundleExtractor
                 {
                     break;
                 }
-                if (fileItems is IBundleSourceFilter f)
+                items.Filter = this;
+                if (service!.TryGet<IBundleMapper>(out var mapper))
                 {
-                    items.Filter = f;
+                    items.Mapper = mapper;
                 }
                 logger.Info($"Extract {items.Count} files ...");
                 try

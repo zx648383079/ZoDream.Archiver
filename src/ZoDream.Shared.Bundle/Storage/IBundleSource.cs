@@ -50,18 +50,5 @@ namespace ZoDream.Shared.Bundle
         public IEnumerable<IBundleChunk> EnumerateChunk(IDependencyDictionary dependencies);
     }
 
-    public interface IBundleSourceFilter
-    {
-        /// <summary>
-        /// 在执行的过程中需要排除一些重复执行的文件
-        /// </summary>
-        /// <param name="filePath"></param>
-        public void Exclude(string filePath);
-        /// <summary>
-        /// 判断文件是否是需要排除的已执行过的
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public bool IsExclude(string filePath);
-    }
+
 }

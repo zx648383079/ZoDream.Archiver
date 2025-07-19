@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -54,7 +57,9 @@ namespace ZoDream.Shared.Bundle
         private readonly string[] _entranceItems;
         private readonly int _effectiveCount;
 
-        public IBundleSourceFilter? Filter { get; set; }
+        public IBundleFilter? Filter { get; set; }
+
+        public IBundleMapper? Mapper { get; set; }
 
         public int EffectiveCount => _effectiveCount > 0 ? _effectiveCount : Index;
 
@@ -111,11 +116,34 @@ namespace ZoDream.Shared.Bundle
         }
         public string Create(string sourcePath, string outputFolder)
         {
+            if (Mapper?.TryGet(sourcePath, out var toPath) == true)
+            {
+                sourcePath = toPath;
+            }
             if (sourcePath.StartsWith(outputFolder))
             {
                 return sourcePath;
             }
             return Path.Combine(outputFolder, GetRelativePath(sourcePath));
+        }
+
+        public string Create(IFilePath sourcePath, string fileName, string outputFolder)
+        {
+            var fullPath = FilePath.GetFilePath(sourcePath);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = sourcePath.Name;
+            }
+            if (Mapper?.TryGet(fullPath, out var toPath) == true)
+            {
+                fullPath = toPath;
+            }
+            var sourceFolder = Path.GetDirectoryName(fullPath);
+            if (sourceFolder?.StartsWith(outputFolder) == true)
+            {
+                return Path.Combine(sourceFolder, LocationStorage.CreateSafeFileName(fileName));
+            }
+            return Path.Combine(outputFolder, GetRelativePath(sourceFolder), LocationStorage.CreateSafeFileName(fileName));
         }
 
         public IBundleChunk Repack(IEnumerable<string> fileItems)

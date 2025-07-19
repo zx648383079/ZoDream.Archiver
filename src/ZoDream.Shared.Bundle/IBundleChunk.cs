@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -17,7 +18,8 @@ namespace ZoDream.Shared.Bundle
         /// </summary>
         public int EffectiveCount { get; }
 
-        public IBundleSourceFilter? Filter { get; set; }
+        public IBundleFilter? Filter { get; set; }
+        public IBundleMapper? Mapper { get; set; }
         /// <summary>
         /// 生成输出文件夹的新路径
         /// </summary>
@@ -25,6 +27,7 @@ namespace ZoDream.Shared.Bundle
         /// <param name="outputFolder"></param>
         /// <returns></returns>
         public string Create(string sourcePath, string outputFolder);
+        public string Create(IFilePath sourcePath, string fileName, string outputFolder);
 
         /// <summary>
         /// 路径是否能够进行导出，可以用来排除依赖的导出
