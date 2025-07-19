@@ -42,7 +42,7 @@ namespace ZoDream.BundleExtractor
         private string _extractFolder = string.Empty;
         private readonly List<ISerializedFile> _assetItems = [];
         private readonly ConcurrentDictionary<IFileName, int> _assetIndexItems = [];
-        private readonly ConcurrentDictionary<string, Stream> _resourceItems = [];
+        private readonly ConcurrentDictionary<string, KeyValuePair<IFilePath, Stream>> _resourceItems = [];
         private readonly List<string> _importItems = [];
         private readonly HashSet<string> _resourceFileHash = [];
         private readonly HashSet<string> _importFileHash = [];
@@ -186,6 +186,7 @@ namespace ZoDream.BundleExtractor
             ReadAssets(token);
             ProcessAssets(token);
             ExportAssets(folder, mode, token);
+            ExportResource(folder, mode, token);
         }
 
         private void LoadFile(string fullName, CancellationToken token)
@@ -244,7 +245,7 @@ namespace ZoDream.BundleExtractor
             if (reader is null)
             {
                 _dependency?.AddEntry(fullName);
-                _resourceItems.TryAdd(fullName.Name, stream.BaseStream);
+                _resourceItems.TryAdd(fullName.Name, new KeyValuePair<IFilePath, Stream>(fullName, stream.BaseStream));
                 // stream.Dispose();
                 return;
             }
@@ -290,19 +291,21 @@ namespace ZoDream.BundleExtractor
         public Stream OpenResource(string fileName, ISerializedFile source)
         {
             fileName = Path.GetFileName(fileName);
-            if (_resourceItems.TryGetValue(fileName, out var stream))
+            if (_resourceItems.TryGetValue(fileName, out var target))
             {
-                return stream;
+                return target.Value;
             }
             var resourceFilePath = FindFile(fileName, source.FullPath);
             if (File.Exists(resourceFilePath))
             {
-                if (_resourceItems.TryGetValue(fileName, out stream))
+                if (_resourceItems.TryGetValue(fileName, out target))
                 {
-                    return stream;
+                    return target.Value;
                 }
-                stream = File.OpenRead(resourceFilePath);
-                _resourceItems.TryAdd(fileName, stream);
+                var stream = File.OpenRead(resourceFilePath);
+                _resourceItems.TryAdd(fileName, new KeyValuePair<IFilePath, Stream>(
+                    new FilePath(resourceFilePath),
+                    stream));
                 _service.Get<ITemporaryStorage>().Add(stream);
                 return stream;
             }
@@ -352,7 +355,7 @@ namespace ZoDream.BundleExtractor
             }
             foreach (var item in _resourceItems)
             {
-                item.Value.Dispose();
+                item.Value.Value.Dispose();
             }
             _assetItems.Clear();
             _resourceItems.Clear();

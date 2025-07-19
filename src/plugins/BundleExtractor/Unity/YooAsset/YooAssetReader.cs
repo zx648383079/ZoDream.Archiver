@@ -19,20 +19,23 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
             {
                 folder = Path.Combine(Path.GetDirectoryName(folder), "CacheBundleFiles");
             }
+            var sourcePath = string.Empty;
+            var outputPath = string.Empty;
             foreach (var item in _data.BundleList)
             {
+
                 if (assetType == YooAssetType.Hotfix)
                 {
-                    var sourcePath = Path.Combine(folder, item.FileHash[..2], item.FileHash, "__data");
-                    var outputPath = ConvertPath(item.BundleName);
-                    yield return new KeyValuePair<string, string>(sourcePath, outputPath);
+                    sourcePath = Path.Combine(folder, item.FileHash[..2], item.FileHash, "__data");
+                    outputPath = ConvertPath(item.BundleName);
+                    
                 }
                 else
                 {
-                    var sourcePath = Path.Combine(folder, item.FileHash + ".bundle"); // 后缀不确定
-                    var outputPath = Path.Combine("Updates", ConvertPath(item.BundleName));
-                    yield return new KeyValuePair<string, string>(sourcePath, outputPath);
+                    sourcePath = Path.Combine(folder, item.FileHash + ".bundle"); // 后缀不确定
+                    outputPath = Path.Combine("Updates", ConvertPath(item.BundleName));
                 }
+                yield return new KeyValuePair<string, string>(sourcePath, outputPath);
             }
         }
 
@@ -50,9 +53,9 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
             var i = bundleName.LastIndexOf('.');
             if (i >= 0)
             {
-                return bundleName[..i].Replace('_', Path.PathSeparator) + bundleName[i..];
+                return bundleName[..i].Replace('_', Path.DirectorySeparatorChar) + bundleName[i..];
             }
-            return bundleName.Replace('_', Path.PathSeparator);
+            return bundleName.Replace('_', Path.DirectorySeparatorChar);
         }
 
         private static PackageManifest Deserialize(Stream input)

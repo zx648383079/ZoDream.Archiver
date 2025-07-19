@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Exporters;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
@@ -29,8 +31,32 @@ namespace ZoDream.BundleExtractor
             {NativeClassID.Sprite, typeof(TextureExporter)},
         };
         private readonly List<IMultipartExporter> _exporterItems = [];
-
-
+        /// <summary>
+        /// 导出资源
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="mode"></param>
+        /// <param name="token"></param>
+        internal void ExportResource(string folder, ArchiveExtractMode mode, CancellationToken token)
+        {
+            var progress = Logger?.CreateSubProgress("Export resources...", _resourceItems.Count);
+            foreach (var item in _resourceItems.Values)
+            {
+                if (item.Value.Position > 0)
+                {
+                    continue;
+                }
+                var fileName = _fileItems.Create(item.Key, string.Empty, folder);
+                if (!string.IsNullOrEmpty(Path.GetExtension(fileName)) && LocationStorage.TryCreate(fileName, ArchiveExtractMode.Skip, out fileName))
+                {
+                    item.Value.SaveAs(fileName);
+                }
+                if (progress is not null)
+                {
+                    progress.Value++;
+                }
+            }
+        }
         internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             var progress = Logger?.CreateSubProgress("Batch Export ...", _exporterItems.Count);

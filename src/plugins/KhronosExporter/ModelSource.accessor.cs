@@ -236,10 +236,14 @@ namespace ZoDream.KhronosExporter
         public int CreateVectorAccessor(string name, 
             float[] values, int vectorCount, bool isNotVector = false)
         {
+            if (vectorCount < 1)
+            {
+                throw new ArgumentException(nameof(vectorCount));
+            }
             var step = values.Length / vectorCount;
             if (step < 2 || step > 4)
             {
-                throw new ArgumentException();
+                throw new ArgumentException(nameof(step));
             }
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Vectors_" + step, () => new BufferView()
             {

@@ -38,6 +38,15 @@ namespace ZoDream.Shared.Storage
             }
             Directory.CreateDirectory(folder);
         }
+
+        public static bool IsFullPath(string fullPath)
+        {
+            if (fullPath.StartsWith(Path.DirectorySeparatorChar))
+            {
+                return true;
+            }
+            return fullPath.Contains(Path.VolumeSeparatorChar);
+        }
         /// <summary>
         /// 创建安全文件名
         /// </summary>

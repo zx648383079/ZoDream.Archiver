@@ -24,6 +24,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
         public OrderedDictionary Read(VirtualDocument doc, IBundleBinaryReader reader)
         {
             reader.Position = 0; // 回到开始
+            if (doc.Children.Length == 0)
+            {
+                return [];
+            }
             return ReadDict(doc.Children[0].Children, reader);
         }
         /// <summary>

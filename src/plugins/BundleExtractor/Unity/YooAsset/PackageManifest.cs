@@ -70,6 +70,11 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         /// 资源包列表
         /// </summary>
         public PackageBundle[] BundleList { get; set; } = [];
+
+        public override string ToString()
+        {
+            return $"[{FileVersion}]{PackageName} {PackageVersion}";
+        }
     }
 
     /// <summary>
@@ -131,7 +136,11 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         /// 2.3.12版本字段
         /// </summary>
         public int[] DependBundleIDs { get; set; }
-  
+
+        public override string ToString()
+        {
+            return FileHash;
+        }
     }
 
     public class PackageAsset
@@ -171,5 +180,10 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         /// 仅在1.5.2版本中使用
         /// </summary>
         public int[] DependIDs { get; set; }
+
+        public override string ToString()
+        {
+            return AssetPath;
+        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
-using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Language;
 using Version = UnityEngine.Version;
@@ -22,7 +20,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             _version = reader.Get<Version>();
             var versionNo = reader.ReadInt32();
-            Expectation.ThrowIfNotVersion(GetExpectedProgramVersion(_version) == versionNo);
+            // Expectation.ThrowIfNotVersion(GetExpectedProgramVersion(_version) == versionNo);
             m_ProgramType = (ShaderGpuProgramType)reader.ReadInt32();
             var statsALU = reader.ReadInt32();
             var statsTEX = reader.ReadInt32();
@@ -40,7 +38,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             var pos = reader.Position;
             reader.Position++;
-            if (reader.ReadByte() != 0)
+            if (reader.RemainingLength == 0 || reader.ReadByte() != 0)
             {
                 _hasError = true;
                 // TODO 遇到不合规的
@@ -210,7 +208,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 _ when version.LessThan(2018, 2) => 201708220,
                 _ when version.LessThan(2019) => 201802150,
                 _ when version.LessThan(2021, 2) => 201806140,
-                _ when version.LessThan(2022, 3) => 202012090,
+                _ when version.LessThanOrEquals(2022, 3) => 202012090,
                 _ => 202310270,
             };
         }

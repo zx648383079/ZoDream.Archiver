@@ -8,6 +8,7 @@ using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Logging;
 
 namespace ZoDream.BundleExtractor.Engines
 {
@@ -50,6 +51,7 @@ namespace ZoDream.BundleExtractor.Engines
             if (YooAssetScheme.TryGet(fileItems, out var mapper))
             {
                 service.Add(mapper);
+                service.Get<ILogger>().Info("YooAsset Mapper");
             }
             return fileItems.EnumerateChunk(dict);
         }

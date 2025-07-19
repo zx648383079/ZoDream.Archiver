@@ -120,6 +120,10 @@ namespace ZoDream.Shared.Bundle
             {
                 sourcePath = toPath;
             }
+            if (!LocationStorage.IsFullPath(sourcePath))
+            {
+                return Path.Combine(outputFolder, sourcePath);
+            }
             if (sourcePath.StartsWith(outputFolder))
             {
                 return sourcePath;
@@ -139,6 +143,10 @@ namespace ZoDream.Shared.Bundle
                 fullPath = toPath;
             }
             var sourceFolder = Path.GetDirectoryName(fullPath);
+            if (!LocationStorage.IsFullPath(fullPath))
+            {
+                return Path.Combine(outputFolder, sourceFolder, LocationStorage.CreateSafeFileName(fileName));
+            }
             if (sourceFolder?.StartsWith(outputFolder) == true)
             {
                 return Path.Combine(sourceFolder, LocationStorage.CreateSafeFileName(fileName));
