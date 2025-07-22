@@ -9,6 +9,15 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 {
     internal static class TextureExtension
     {
+        public static TextureFormat Convert(TextureFormat_23 format)
+        {
+            if (Enum.TryParse<TextureFormat>(Enum.GetName(format), out var res))
+            {
+                return res;
+            }
+            throw new NotSupportedException(nameof(format));
+        }
+
         public static BitmapFormat Convert(TextureFormat textureFormat)
         {
             return textureFormat switch

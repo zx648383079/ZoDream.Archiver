@@ -17,17 +17,8 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public IBundleBinaryReader Decode(IBundleBinaryReader input, BundleCodecType codecType, long compressedSize, long uncompressedSize)
         {
-            Stream stream = new PartialStream(input.BaseStream, compressedSize);
-            if (_cipher is not null && codecType == BundleCodecType.Lz4Mr0k)
-            {
-                var ms = new MemoryStream();
-                _cipher.Decrypt(stream, ms);
-                stream = ms;
-            }
             return new BundleBinaryReader(
-                BundleCodec.Decode(
-                    stream,
-                    codecType, uncompressedSize), input, false);
+                Decode(input.BaseStream, codecType, compressedSize, uncompressedSize), input, false);
         }
 
         public Stream Decode(Stream input, BundleCodecType codecType, long compressedSize, long uncompressedSize)

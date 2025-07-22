@@ -80,7 +80,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 var m_MipsStripped = reader.ReadInt32();
             }
-            res.TextureFormat = (TextureFormat)reader.ReadInt32();
+            res.TextureFormat = version.GreaterThanOrEquals(2023, 2, 0) ? 
+                TextureExtension.Convert((TextureFormat_23)reader.ReadInt32()) 
+                : (TextureFormat)reader.ReadInt32();
             if (version.LessThan(5, 2)) //5.2 down
             {
                 res.MipMap = reader.ReadBoolean();

@@ -12,10 +12,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public Stream Open(string fullPath)
         {
-            if (IsPerpetualNovelty)
-            {
-                return DecryptPerpetualNovelty(File.OpenRead(fullPath));
-            }
+            //if (IsPerpetualNovelty)
+            //{
+            //    return DecryptPerpetualNovelty(File.OpenRead(fullPath));
+            //}
             return File.OpenRead(fullPath);
         }
 

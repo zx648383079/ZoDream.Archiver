@@ -1,9 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal partial class CiPaiBundleElementScanner
     {
+        /// <summary>
+        /// 过时的
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [Obsolete(">= 2.0.0", true)]
         private Stream DecryptPerpetualNovelty(Stream input)
         {
             var output = new MemoryStream();

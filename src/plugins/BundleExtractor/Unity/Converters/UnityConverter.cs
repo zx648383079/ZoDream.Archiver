@@ -168,16 +168,17 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 var m_PrefabInternal = serializer.Deserialize<PPtr>(reader);
             }
             res.Name = reader.ReadAlignedString();
-            if (version.GreaterThanOrEquals(2017, 3)) //2017.3 and up
+            if (version.GreaterThanOrEquals(2017, 3) && version.Major < 6000) //2017.3 and up
             {
                 var m_ForcedFallbackFormat = reader.ReadInt32();
                 var m_DownscaleFallback = reader.ReadBoolean();
-                if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
-                {
-                    var m_IsAlphaChannelOptional = reader.ReadBoolean();
-                }
-                reader.AlignStream();
+                
             }
+            if (version.GreaterThanOrEquals(2020, 2)) //2020.2 and up
+            {
+                var m_IsAlphaChannelOptional = reader.ReadBoolean();
+            }
+            reader.AlignStream();
         }
 
         public static DenseClip ReadDenseClip(IBundleBinaryReader reader, IBundleSerializer serializer)
