@@ -39,6 +39,10 @@ namespace ZoDream.BundleExtractor
         /// <param name="token"></param>
         internal void ExportResource(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
+            if (!Options.EnabledResource)
+            {
+                return;
+            }
             var progress = Logger?.CreateSubProgress("Export resources...", _resourceItems.Count);
             foreach (var item in _resourceItems.Values)
             {

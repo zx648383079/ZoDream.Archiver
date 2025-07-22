@@ -189,6 +189,14 @@ namespace ZoDream.Archiver.ViewModels
             set => SetProperty(ref _enabledMesh, value);
         }
 
+        private bool _enabledResource;
+
+        public bool EnabledResource {
+            get => _enabledResource;
+            set => SetProperty(ref _enabledResource, value);
+        }
+
+
 
         private int _maxBatchCount = 100;
 
@@ -324,6 +332,7 @@ namespace ZoDream.Archiver.ViewModels
                 ModelFormat = b.ModelFormat;
                 EnabledMesh = b.EnabledMesh && b.EnabledModel;
                 MaxBatchCount = b.MaxBatchCount;
+                EnabledResource = b.EnabledResource;
             }
         }
 
@@ -351,6 +360,7 @@ namespace ZoDream.Archiver.ViewModels
                 o.MaxBatchCount = MaxBatchCount;
                 o.EnabledMesh = EnabledMesh && EnabledModel;
                 o.OnlyDependencyTask = _isCreateDependencyTask;
+                o.EnabledResource = EnabledResource;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))
             {
