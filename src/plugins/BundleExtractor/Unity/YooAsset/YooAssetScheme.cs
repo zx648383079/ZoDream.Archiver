@@ -20,6 +20,11 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
             foreach (var item in items.Glob("*.bytes"))
             {
                 var fs = File.OpenRead(item);
+                if (fs.Length < 10)
+                {
+                    fs.Dispose();
+                    continue;
+                }
                 fs.ReadExactly(buffer);
                 fs.Seek(0, SeekOrigin.Begin);
                 if (BitConverter.ToUInt32(buffer) != YooAssetReader.Signature)
