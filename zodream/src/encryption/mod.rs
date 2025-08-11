@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub mod blowfish;
 pub mod own;
 pub mod threeway;

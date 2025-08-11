@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 // pub mod lua;
 
 pub mod reader;
