@@ -132,5 +132,16 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             bytes = MD5.HashData(bytes);
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
+
+        public static Stream DecryptLua(Stream input)
+        {
+            var key = Encoding.UTF8.GetBytes(CalculateMD5("qdiazawh")[^8..]);
+            var context = DES.Create();
+            context.IV = Convert.FromBase64String("6F9732CD7BDEB92D");
+            context.Key = key;
+            context.Mode = CipherMode.CBC;
+            var decryptor = context.CreateDecryptor();
+            return new CryptoStream(input, decryptor, CryptoStreamMode.Read);
+        }
     }
 }
