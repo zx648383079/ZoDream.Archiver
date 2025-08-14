@@ -29,6 +29,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 return ReadMesh(reader, serializer);
             }
+            if (objectType == typeof(Clip))
+            {
+                return ReadClip(reader, serializer);
+            }
             if (objectType == typeof(ClipMuscleConstant))
             {
                 return ReadClipMuscleConstant(reader, serializer);
@@ -228,6 +232,72 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     }
                 }
             });
+            return res;
+        }
+
+        private Clip ReadClip(IBundleBinaryReader reader,
+            IBundleSerializer serializer)
+        {
+            var res = new Clip();
+            var version = reader.Get<Version>();
+            res.StreamedClip = serializer.Deserialize<StreamedClip>(reader);
+            res.DenseClip = UnityConverter.ReadDenseClip(reader, serializer);
+            if (version.GreaterThanOrEquals(4, 3)) //4.3 and up
+            {
+                res.ConstantClip = serializer.Deserialize<ConstantClip>(reader);
+            }
+            if (IsGuiLongChao)
+            {
+                res.ACLClip = ReadQuantizedClip(reader, serializer);
+                _ = ReadPredictClip(reader, serializer);
+            }
+            if (version.LessThan(2018, 3)) //2018.3 down
+            {
+                res.Binding = serializer.Deserialize<ValueArrayConstant>(reader);
+            }
+            return res;
+        }
+
+        private TuanJiePredictClip ReadPredictClip(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new TuanJiePredictClip
+            {
+                m_FrameCount = reader.ReadInt32(),
+                m_CurveCount = reader.ReadUInt32(),
+                m_SampleRate = reader.ReadSingle(),
+                m_BeginTime = reader.ReadSingle(),
+                m_NumStatic = reader.ReadUInt32(),
+                m_NumDynamic = reader.ReadUInt32(),
+                m_TypeOffset = reader.ReadUInt32(),
+                m_IndicesOffset = reader.ReadUInt32(),
+                m_StaticOffset = reader.ReadUInt32(),
+                m_RangeOffset = reader.ReadUInt32(),
+                m_BitCntOffset = reader.ReadUInt32(),
+                m_PredictBlockOffset = reader.ReadUInt32(),
+                m_ValueOffsetPerCurveOffset = reader.ReadUInt32(),
+                m_ValueOffset = reader.ReadUInt32(),
+                m_Data = reader.ReadAsStream()
+            };
+            return res;
+        }
+
+        private TuanJieQuantizedClip ReadQuantizedClip(IBundleBinaryReader reader, IBundleSerializer serializer)
+        {
+            var res = new TuanJieQuantizedClip
+            {
+                m_FrameCount = reader.ReadInt32(),
+                m_CurveCount = reader.ReadUInt32(),
+                m_SampleRate = reader.ReadSingle(),
+                m_BeginTime = reader.ReadSingle(),
+                m_NumStatic = reader.ReadUInt32(),
+                m_NumDynamic = reader.ReadUInt32(),
+                m_TypeOffset = reader.ReadUInt32(),
+                m_IndicesOffset = reader.ReadUInt32(),
+                m_StaticOffset = reader.ReadUInt32(),
+                m_FrameSize = reader.ReadUInt32(),
+                m_DynamicOffset = reader.ReadUInt32(),
+                m_Data = reader.ReadAsStream()
+            };
             return res;
         }
 
