@@ -5,7 +5,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(string package, IBundleOptions options) : IBundleStorage
+    internal partial class OtherBundleElementScanner(ICommandArguments package, IBundleOptions options) : IBundleStorage
     {
 
         public bool IsCounterSide => package.Contains("cs");
@@ -25,6 +25,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public bool IsEnsembleStars => package.Contains("es");
         public bool IsAcmeis => package.Contains("my");
         public bool IsFakeHeader => package.Contains("fake");
+        public bool IsXorHeader => package.Contains("xor");
 
 
         public IBundleBinaryReader OpenRead(string fullPath)
@@ -38,8 +39,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 input = ParseFakeHeader(input);
             }
+            if (IsXorHeader)
+            {
+                input = ParseXor(input);
+            }
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
-
     }
 }

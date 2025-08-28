@@ -169,6 +169,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             foreach (var ptr in _textures)
             {
+                if (ptr.Index < 0)
+                {
+                    continue;
+                }
                 var exporter = new TextureExporter(ptr.Index, (ISerializedFile)ptr.Resource);
                 exporter.SaveAs(Path.Combine(folder, exporter.FileName), mode);
             }

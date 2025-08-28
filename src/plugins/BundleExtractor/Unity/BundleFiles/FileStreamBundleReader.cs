@@ -6,7 +6,6 @@ using System.Threading;
 using ZoDream.BundleExtractor.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.BundleFiles

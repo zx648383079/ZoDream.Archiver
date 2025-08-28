@@ -30,6 +30,23 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return BinaryPrimitives.ReadInt64BigEndian(input.ReadBytes(8));
         }
 
+        private Stream ParseXor(Stream input)
+        {
+            if (!package.TryGet<XorCommandArgument>("xor", out var args))
+            {
+                return input;
+            }
+            var beginAt = input.Position;
+            var next = new XORStream(input, args.Keys, args.MaxPosition);
+            var magic = next.ReadBytes(FileStreamBundleHeader.UnityFSMagic.Length);
+            input.Position = beginAt;
+            if (magic.Equal(FileStreamBundleHeader.UnityFSMagic))
+            {
+                return next;
+            }
+            return input;
+        }
+
         public static Stream ParseFakeHeader(Stream input)
         {
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)

@@ -13,7 +13,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new AssetBundleManifest();
             var container = reader.Get<ISerializedFile>();
             new DocumentReader(container).Read(typeMaps, reader, res);
-
             return res;
         }
 

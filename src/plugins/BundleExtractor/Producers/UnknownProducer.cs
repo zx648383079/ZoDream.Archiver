@@ -31,7 +31,7 @@ namespace ZoDream.BundleExtractor.Producers
             if (options.Engine == UnityE.EngineName)
             {
                 return new OtherBundleElementScanner(
-                    options.Package ?? string.Empty,
+                    PackageArguments.Create(options.Package),
                     options
                  );
             }

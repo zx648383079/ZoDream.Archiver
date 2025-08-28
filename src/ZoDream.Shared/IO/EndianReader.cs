@@ -10,9 +10,9 @@ namespace ZoDream.Shared.IO
 {
     public class EndianReader : BinaryReader
     {
-        private bool isBigEndian;
+        internal const int BufferSize = 4096;
 
-        protected const int BufferSize = 4096;
+        private bool isBigEndian;
 
         public EndianType EndianType {
             get {
@@ -175,15 +175,55 @@ namespace ZoDream.Shared.IO
         {
             return base.ReadString();
         }
-
+        /// <summary>
+        /// >= 0x80 则 有多个字节
+        /// </summary>
+        /// <returns></returns>
         public uint Read7BitEncodedUInt()
         {
-            return StreamExtension.Read7BitEncodedUInt(this);
+            var val = (uint)ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = ReadByte();
+                bitShift += 7;
+                val |= (uint)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
         }
-
+        /// <summary>
+        /// >= 0x80 则 有多个字节
+        /// </summary>
+        /// <returns></returns>
         public ulong Read7BitEncodedUInt64()
         {
-            return StreamExtension.Read7BitEncodedUInt64(this);
+            var val = (ulong)ReadByte();
+            if (val < 0x80)
+            {
+                return val;
+            }
+            var bitShift = 0;
+            val &= 0x7f;
+            while (true)
+            {
+                var b = ReadByte();
+                bitShift += 7;
+                val |= (ulong)(b & 0x7f) << bitShift;
+                if (b < 0x80)
+                {
+                    break;
+                }
+            }
+            return val;
         }
 
         public string ReadString(int length)
@@ -205,7 +245,7 @@ namespace ZoDream.Shared.IO
 
             byte[]? array;
             Span<byte> span;
-            if (length > 4096)
+            if (length > BufferSize)
             {
                 array = ArrayPool<byte>.Shared.Rent(length);
                 span = array.AsSpan(0, length);
@@ -254,7 +294,7 @@ namespace ZoDream.Shared.IO
         //     Read string
         public string ReadStringZeroTerm()
         {
-            if (TryReadStringZeroTerm(4096, out var result))
+            if (TryReadStringZeroTerm(BufferSize, out var result))
             {
                 return result;
             }

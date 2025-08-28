@@ -5,7 +5,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 {
     internal class XORStream(
         Stream input,
-        byte[] xorPad, int maxPosition = 0) : DeflateStream(input)
+        byte[] xorPad, long maxPosition = 0) : DeflateStream(input)
     {
         public override int Read(byte[] buffer, int offset, int count)
         {
