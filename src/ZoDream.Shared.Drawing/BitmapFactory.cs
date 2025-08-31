@@ -10,14 +10,43 @@ namespace ZoDream.Shared.Drawing
         {
             return new SKBitmapDecoder().Decode(fileName);
         }
+        /// <summary>
+        /// 解码，对一些为标记的数据处理
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="format"></param>
+        /// <param name="colorType"></param>
+        /// <returns></returns>
+        public static IImageData Decode(byte[] data, int width, int height, 
+            BitmapFormat format, SKColorType colorType)
+        {
+            if (format is BitmapFormat.DXT1 or BitmapFormat.DXT2 
+                or BitmapFormat.DXT3 
+                or BitmapFormat.DXT4 or BitmapFormat.DXT5 or BitmapFormat.Dxn
+                or BitmapFormat.CTX1)
+            {
+                SKBitmapDecoder.Decode(
+                    CreateDecoder(format).Decode(data, width, height), 
+                    width, height, colorType);
+            }
+            return Decode(data, width, height, format);
+        }
 
-        public static IImageData Decode(byte[] data, int width, int height, BitmapFormat format)
+        public static IImageData Decode(byte[] data, int width, int height, 
+            BitmapFormat format)
         {
             if (SKBitmapDecoder.IsSupport(format))
             {
                 return SKBitmapDecoder.Decode(data, width, height, format);
             }
-            IBufferDecoder decoder = format switch
+            return SKBitmapDecoder.Decode(CreateDecoder(format).Decode(data, width, height), width, height, SKColorType.Rgba8888);
+        }
+
+        public static IBufferDecoder CreateDecoder(BitmapFormat format)
+        {
+            return format switch
             {
                 BitmapFormat.A8 => new A8(),
                 BitmapFormat.A16 => new A16(),
@@ -77,7 +106,6 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.YUY2 => new YUY2(),
                 _ => throw new NotImplementedException(),
             };
-            return SKBitmapDecoder.Decode(decoder.Decode(data, width, height), width, height, SKColorType.Rgba8888);
         }
     }
 }

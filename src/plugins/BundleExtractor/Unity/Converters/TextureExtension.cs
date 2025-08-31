@@ -206,7 +206,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             };
             if (painter is null)
             {
-                return BitmapFactory.Decode(data, width, height, Convert(format));
+                return BitmapFactory.Decode(data, width, height, Convert(format), SKColorType.Bgra8888);
             }
             try
             {
