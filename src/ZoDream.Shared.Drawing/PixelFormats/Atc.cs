@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class Atc(BitmapFormat format) : IBufferDecoder
+    public class ATC(BitmapFormat format) : IBufferDecoder
     {
         public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {

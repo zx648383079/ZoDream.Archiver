@@ -24,18 +24,10 @@ namespace ZoDream.Shared.Drawing
                     var u0 = data[p++];
                     var y1 = data[p++];
                     var v0 = data[p++];
-                    var c = y0 - 16;
-                    var d = u0 - 128;
-                    var e = v0 - 128;
-                    output[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
-                    output[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
-                    output[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
-                    output[o++] = byte.MaxValue;
-                    c = y1 - 16;
-                    output[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
-                    output[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
-                    output[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
-                    output[o++] = byte.MaxValue;
+                    YV12.ToRGBA(y0, u0, v0, output[o..]);
+                    o += 4;
+                    YV12.ToRGBA(y1, u0, v0, output[o..]);
+                    o += 4;
                 }
             }
             return width * height * 4;
@@ -51,20 +43,15 @@ namespace ZoDream.Shared.Drawing
                 for (var j = 0; j < width; j++)
                 {
                     var offset = (begin + j) * 4;
-                    var r = data[offset];
-                    var g = data[offset + 1];
-                    var b = data[offset + 2];
-                    var y = ((66 * r + 129 * g + 25 * b) >> 8) + 16;
-                    var u = ((-38 * r - 74 * g + 112 * b) >> 8) + 128;
-                    var v = ((112 * r - 94 * g - 18 * b) >> 8) + 128;
+                    var (y, u, v) = YV12.ToYUV(data[offset..]);
                     if (j % 2 == 0)
                     {
-                        buffer[ptrY++] = (byte)y;
-                        buffer[ptrY++] = (byte)u;
+                        buffer[ptrY++] = y;
+                        buffer[ptrY++] = u;
                     } else
                     {
-                        buffer[ptrY++] = (byte)y;
-                        buffer[ptrY++] = (byte)v;
+                        buffer[ptrY++] = y;
+                        buffer[ptrY++] = v;
                     }
                 }
             }

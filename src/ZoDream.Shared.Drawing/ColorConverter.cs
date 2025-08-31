@@ -8,7 +8,7 @@ namespace ZoDream.Shared.Drawing
     public static class ColorConverter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte From16BitTo8Bit(ushort code) => (byte)(((code * 255) + 32895) >> 16);
+        public static byte From16BitTo8Bit(ushort code) => (byte)(((code * byte.MaxValue) + 32895) >> 16);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort From8BitTo16Bit(byte code) => (ushort)(code * 257);
 
@@ -37,6 +37,31 @@ namespace ZoDream.Shared.Drawing
         public static int Sum(Vector4 a)
         {
             return (int)(a.X + a.Y + a.Z + a.W);
+        }
+        /// <summary>
+        /// int 转 byte 并限制在 0 - 255
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static byte Clamp(int val)
+        {
+            return (byte)Math.Clamp(val, 0, byte.MaxValue);
+        }
+        /// <summary>
+        /// 大端 6 个字节转 ulong
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static ulong ReadUInt64From6Bit(ReadOnlySpan<byte> data)
+        {
+            return ((ulong)data[0] << 40) |
+           ((ulong)data[1] << 32) |
+           ((ulong)data[2] << 24) |
+           ((ulong)data[3] << 16) |
+           ((ulong)data[4] << 8) |
+           data[5];
         }
 
         public static byte[] SplitByte(ReadOnlySpan<byte> input, int start, out int length, 

@@ -61,7 +61,7 @@ namespace ZoDream.Shared.Drawing
                     }
                 }
             }
-            return width * height * 4
+            return width * height * 4;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
