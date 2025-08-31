@@ -4,10 +4,16 @@ namespace ZoDream.Shared.Drawing
 {
     internal class DXN : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        {
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
             var size = width * height;
-            var buffer = new byte[size * 4];
             var chunks = width / 4;
 
             if (chunks == 0)
@@ -113,19 +119,15 @@ namespace ZoDream.Shared.Drawing
                         color.B = (byte)(((z + 1f) / 2f) * 255f);
                         color.A = 0xFF;
                         temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
-                        buffer[temp] = (byte)color.B;
-                        buffer[temp + 1] = (byte)color.G;
-                        buffer[temp + 2] = (byte)color.R;
-                        buffer[temp + 3] = (byte)color.A;
+                        output[temp] = (byte)color.B;
+                        output[temp + 1] = (byte)color.G;
+                        output[temp + 2] = (byte)color.R;
+                        output[temp + 3] = (byte)color.A;
                     }
                 }
             }
-            return buffer;
+            return size * 4;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

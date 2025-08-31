@@ -1,35 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
     public class Y16 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        {
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
             var size = width * height;
-            var buffer = new byte[size * 4];
             for (var i = 0; i < size; i++)
             {
                 // 16 bit color, but stored in 8 bits, precision loss, we can use the most important byte and truncate the rest for now.
                 // ushort color = (ushort)((data[i * 2]) | (data[i * 2 + 1] << 8));
-
                 var index = i * 4;
-                buffer[index] = data[i * 2 + 1];
-                buffer[index + 1] = data[i * 2 + 1];
-                buffer[index + 2] = data[i * 2 + 1];
-                buffer[index + 3] = byte.MaxValue;
+                output[index] = data[i * 2 + 1];
+                output[index + 1] = data[i * 2 + 1];
+                output[index + 2] = data[i * 2 + 1];
+                output[index + 3] = byte.MaxValue;
             }
-
-            return buffer;
+            return size * 4;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

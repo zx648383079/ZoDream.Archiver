@@ -1,31 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Buffers.Binary;
 
 namespace ZoDream.Shared.Drawing
 {
     internal class BGRA5551 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var size = width * height;
-            var buffer = new byte[size * 4];
-            for (int i = 0; i < (size * 2); i += 2)
-            {
-                var temp = ColorConverter.From16BitToShort(data[i], data[i + 1]);
-                buffer[i * 2] = (byte)(((temp >> 10) & 0x1F) / 31F);
-                buffer[i * 2 + 1] = (byte)(((temp >> 5) & 0x1F) / 31F);
-                buffer[i * 2 + 2] = (byte)(((temp >> 0) & 0x1F) / 31F);
-                buffer[i * 2 + 3] = (byte)((temp >> 15) & 0x01);
-            }
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
             return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
-            throw new NotImplementedException();
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                var offset = i * 2;
+                var outputOffset = i * 4;
+                var temp = BinaryPrimitives.ReadUInt16BigEndian(data[offset..]);
+                output[outputOffset] = (byte)(((temp >> 10) & 0x1F) / 31F);
+                output[outputOffset + 1] = (byte)(((temp >> 5) & 0x1F) / 31F);
+                output[outputOffset + 2] = (byte)(((temp >> 0) & 0x1F) / 31F);
+                output[outputOffset + 3] = (byte)((temp >> 15) & 0x01);
+            }
+            return size * 4;
         }
+
     }
 }

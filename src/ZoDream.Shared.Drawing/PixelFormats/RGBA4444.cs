@@ -4,23 +4,26 @@ namespace ZoDream.Shared.Drawing
 {
     public class RGBA4444 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var size = width * height;
-            var buffer = new byte[size * 4];
-            for (int i = 0; i < (size * 2); i += 2)
-            {
-                buffer[i * 2 + 2] = (byte)((data[i + 1] & 0x0F) << 4);
-                buffer[i * 2 + 3] = (byte)(data[i + 1] & 0xF0);
-                buffer[i * 2 + 0] = (byte)((data[i] & 0x0F) << 4);
-                buffer[i * 2 + 1] = (byte)(data[i] & 0xF0);
-            }
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
             return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
-            throw new NotImplementedException();
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                var offset = i * 2;
+                var outputOffset = i * 4;
+                output[outputOffset + 2] = (byte)((data[offset + 1] & 0x0F) << 4);
+                output[outputOffset + 3] = (byte)(data[offset + 1] & 0xF0);
+                output[outputOffset + 0] = (byte)((data[offset] & 0x0F) << 4);
+                output[outputOffset + 1] = (byte)(data[offset] & 0xF0);
+            }
+            return size * 4;
         }
     }
 }

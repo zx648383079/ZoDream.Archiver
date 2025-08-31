@@ -12,32 +12,34 @@ namespace ZoDream.Shared.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort From8BitTo16Bit(byte code) => (ushort)(code * 257);
 
-        public static ushort From16BitToShort(byte a, byte b) => (ushort)((a << 8) | b);
-
-        public static byte FromHalfToByte(byte[] buffer, int startIndex)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte FromHalfToByte(ReadOnlySpan<byte> buffer)
         {
-            return (byte)Math.Round((float)BitConverter.ToHalf(buffer, startIndex) * 255f);
+            return (byte)Math.Round((float)BitConverter.ToHalf(buffer) * 255f);
         }
-        public static byte FromFloatToByte(byte[] buffer, int startIndex)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte FromFloatToByte(ReadOnlySpan<byte> buffer)
         {
-            return (byte)Math.Round(BitConverter.ToSingle(buffer, startIndex) * 255f);
+            return (byte)Math.Round(BitConverter.ToSingle(buffer) * 255f);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint RotateRight(uint value, int count)
         {
             return value >> count | value << 32 - count;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Sum(Vector3 a)
         {
             return (int)(a.X + a.Y + a.Z);
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Sum(Vector4 a)
         {
             return (int)(a.X + a.Y + a.Z + a.W);
         }
 
-        public static byte[] SplitByte(byte[] input, int start, out int length, 
+        public static byte[] SplitByte(ReadOnlySpan<byte> input, int start, out int length, 
             params int[] chunks)
         {
             var sum = chunks.Sum();

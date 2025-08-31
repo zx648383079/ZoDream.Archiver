@@ -17,11 +17,11 @@ namespace ZoDream.Shared.RustWrapper
         private LoggerRef _logger = new()
         {
             log = (byte* msgPtr) => {
-                var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
+                var msg = Marshal.PtrToStringUTF8((nint)msgPtr);
                 Debug.WriteLine($"logger call: {msg} ");
             },
             progress = (uint progress, uint total, byte* msgPtr) => {
-                var msg = Marshal.PtrToStringUTF8((IntPtr)msgPtr);
+                var msg = Marshal.PtrToStringUTF8((nint)msgPtr);
                 Debug.WriteLine($"logger call: {progress}/{total}; {msg} ");
             }
         };

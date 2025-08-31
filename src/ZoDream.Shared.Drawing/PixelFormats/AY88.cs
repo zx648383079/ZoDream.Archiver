@@ -1,28 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class AY88 : IBufferDecoder
+    public class AY88 : IBufferDecoder, IBufferEncoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var size = width * height;
-            var buffer = new byte[size * 4];
-            for (var i = 0; i < (size * 2); i += 2)
-            {
-                buffer[i * 2] = data[i];
-                buffer[i * 2 + 1] = data[i + 1];
-                buffer[i * 2 + 2] = data[i + 1];
-                buffer[i * 2 + 3] = data[i + 1];
-            }
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
             return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                var offset = i * 2;
+                var outputOffset = i * 4;
+                output[outputOffset] = data[offset];
+                output[outputOffset + 1] = data[offset + 1];
+                output[outputOffset + 2] = data[offset + 1];
+                output[outputOffset + 3] = data[offset + 1];
+            }
+            return size * 4;
+        }
+
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var buffer = new byte[height * width * 2];
             for (int i = 0; i < height * width * 2; i += 2)

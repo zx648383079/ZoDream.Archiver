@@ -27,7 +27,7 @@ namespace ZoDream.Shared.Drawing
                 or BitmapFormat.DXT4 or BitmapFormat.DXT5 or BitmapFormat.Dxn
                 or BitmapFormat.CTX1)
             {
-                SKBitmapDecoder.Decode(
+                return SKBitmapDecoder.Decode(
                     CreateDecoder(format).Decode(data, width, height), 
                     width, height, colorType);
             }

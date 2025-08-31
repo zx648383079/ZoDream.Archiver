@@ -4,9 +4,16 @@ using ZoDream.Shared.Drawing.PVRTC;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class PVRTC_RGB4 : IBufferDecoder
+    public class PVRTC_RGB4 : IBufferDecoder, IBufferEncoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        {
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
             var size = Math.Max(width, height);
             var xBlocks = size / 4;
@@ -17,12 +24,10 @@ namespace ZoDream.Shared.Drawing
             var buffer = new byte[size * size * 4];
 
             var packets = new Packet[xBlocks * yBlocks];
-            var eightBytes = new byte[8];
             for (var i = 0; i < packets.Length; i++)
             {
                 packets[i] = new Packet();
-                Buffer.BlockCopy(data, i * 8, eightBytes, 0, 8);
-                packets[i].InitFromBytes(eightBytes);
+                packets[i].InitFromBytes(data.Slice(i * 8, 8));
             }
 
             var currentFactorIndex = 0;
@@ -76,10 +81,10 @@ namespace ZoDream.Shared.Drawing
                             var pX = px + x * 4;
                             var pY = py + y * 4;
                             var offset = pX + pY * size;
-                            buffer[offset] = red;
-                            buffer[offset + 1] = green;
-                            buffer[offset + 2] = green;
-                            buffer[offset + 3] = byte.MaxValue;
+                            output[offset] = red;
+                            output[offset + 1] = green;
+                            output[offset + 2] = green;
+                            output[offset + 3] = byte.MaxValue;
                             mod >>= 2;
                             currentFactorIndex++;
                         }
@@ -87,10 +92,10 @@ namespace ZoDream.Shared.Drawing
                 }
             }
 
-            return buffer;
+            return width * height * 4;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var size = Math.Max(width, height);
 
@@ -121,7 +126,6 @@ namespace ZoDream.Shared.Drawing
             }
 
             var currentFactorIndex = 0;
-            var color = new byte[4];
 
             for (int y = 0; y < blocks; ++y)
             {
@@ -160,7 +164,7 @@ namespace ZoDream.Shared.Drawing
                                                 p2.GetColorRgbB() * currentFactors[2] +
                                                 p3.GetColorRgbB() * currentFactors[3];
 
-                            Buffer.BlockCopy(data, (4 * x + px) * (4 * y + py), color, 0, 4);
+                            var color = data.Slice((4 * x + px) * (4 * y + py), 4);
 
                             var d = cb - ca;
                             var p = new Vector3(color[0] * 16, color[1] * 16, color[2] * 16);
@@ -198,17 +202,16 @@ namespace ZoDream.Shared.Drawing
         }
 
         private static (byte[] minColor, byte[] maxColor) GetMinMaxColors(
-            byte[] data, int startX, int startY)
+            ReadOnlySpan<byte> data, int startX, int startY)
         {
             byte[] minColor = [255, 255, 255];
             byte[] maxColor = [0, 0, 0];
-            var color = new byte[4];
 
             for (int x = startX; x < startX + 4; x++)
             {
                 for (int y = startY; y < startY + 4; y++)
                 {
-                    Buffer.BlockCopy(data, x * y, color, 0, 4);
+                    var color = data.Slice(x * y, 4);
                     if (color[0] < minColor[0]) { minColor[0] = color[0]; }
                     if (color[1] < minColor[1]) { minColor[1] = color[1]; }
                     if (color[2] < minColor[2]) { minColor[2] = color[2]; }

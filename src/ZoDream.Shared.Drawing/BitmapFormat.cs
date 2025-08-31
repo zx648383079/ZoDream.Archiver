@@ -88,6 +88,7 @@
         L16,
         LA1616,
 
-
+        ATC_RGB4,
+        ATC_RGB8,
     }
 }

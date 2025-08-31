@@ -318,15 +318,10 @@ namespace ZoDream.Shared.Drawing.PVRTC
             return returnValue;
         }
 
-        public void InitFromBytes(byte[] data)
+        public void InitFromBytes(ReadOnlySpan<byte> data)
         {
-            byte[] modulationDataByteArray = new byte[4];
-            byte[] otherDataByteArray = new byte[4];
-            Buffer.BlockCopy(data, 0, modulationDataByteArray, 0, 4);
-            Buffer.BlockCopy(data, 4, otherDataByteArray, 0, 4);
-
-            _modulationData = BitConverter.ToUInt32(modulationDataByteArray, 0);
-            var tempBitVector = new BitVector32(BitConverter.ToInt32(otherDataByteArray, 0));
+            _modulationData = BitConverter.ToUInt32(data);
+            var tempBitVector = new BitVector32(BitConverter.ToInt32(data[4..]));
 
             var punchThroughAlphaSection = BitVector32.CreateSection(1);
             var colorASection = BitVector32.CreateSection(16383 /*(1 << 14) - 1*/, punchThroughAlphaSection);

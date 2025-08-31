@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
     public class RGB9e5F : SwapBufferDecoder
     {
-        protected override void Decode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+
+        protected override void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            var n = BitConverter.ToInt32(input, inputOffset);
+            var n = BitConverter.ToInt32(input[inputOffset..]);
             var scale = n >> 27 & 0x1f;
             var scalef = Math.Pow(2, scale - 24);
             var b = n >> 18 & 0x1ff;
@@ -22,7 +19,7 @@ namespace ZoDream.Shared.Drawing
             output[outputOffset + 3] = byte.MaxValue;
         }
 
-        protected override void Encode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             throw new NotImplementedException();
         }

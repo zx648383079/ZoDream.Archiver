@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Linq;
 
 namespace ZoDream.Shared.Drawing
 {
-    public abstract class SwapBufferDecoder : IBufferDecoder
+    public abstract class SwapBufferDecoder : IBufferDecoder, IBufferEncoder
     {
         /// <summary>
         /// 一个颜色值占的字节数
@@ -21,6 +22,24 @@ namespace ZoDream.Shared.Drawing
             }
             return buffer;
         }
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        {
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
+            var size = width * height;
+            var colorSize = ColorSize;
+            for (var i = 0; i < size; i++)
+            {
+                Decode(data, i * colorSize, output, i * 4);
+            }
+            return size * 4;
+        }
+
         /// <summary>
         /// 解码一个颜色
         /// </summary>
@@ -28,9 +47,9 @@ namespace ZoDream.Shared.Drawing
         /// <param name="inputOffset"></param>
         /// <param name="output"></param>
         /// <param name="outputOffset"></param>
-        protected abstract void Decode(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        protected abstract void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset);
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var colorSize = ColorSize;
             var size = width * height;
@@ -48,7 +67,9 @@ namespace ZoDream.Shared.Drawing
         /// <param name="inputOffset"></param>
         /// <param name="output"></param>
         /// <param name="outputOffset"></param>
-        protected abstract void Encode(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        protected abstract void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset);
+
+        
     }
     public class RGBASwapDecoder(byte[] maps) : SwapBufferDecoder
     {
@@ -93,7 +114,7 @@ namespace ZoDream.Shared.Drawing
             }).Where(i => i < 0).Take(4).ToArray();
         }
 
-        protected override void Decode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             for (var i = 0; i < maps.Length; i++)
             {
@@ -116,12 +137,12 @@ namespace ZoDream.Shared.Drawing
         /// <param name="inputOffset"></param>
         /// <param name="output"></param>
         /// <param name="outputOffset"></param>
-        protected virtual void Decode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected virtual void Decode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             output[outputOffset] = input[inputOffset];
         }
 
-        protected override void Encode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             for (var i = 0; i < maps.Length; i++)
             {
@@ -140,7 +161,7 @@ namespace ZoDream.Shared.Drawing
         /// <param name="inputOffset"></param>
         /// <param name="output"></param>
         /// <param name="outputOffset"></param>
-        protected virtual void Encode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected virtual void Encode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             output[outputOffset] = input[inputOffset];
         }
@@ -158,7 +179,7 @@ namespace ZoDream.Shared.Drawing
         }
         public override int ColorSize => maps.Length / 2;
 
-        protected override void Decode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             for (var i = 0; i < maps.Length; i += 2)
             {
@@ -168,7 +189,7 @@ namespace ZoDream.Shared.Drawing
             }
         }
 
-        protected override void Encode(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             for (var i = 0; i < maps.Length; i += 2)
             {
@@ -181,15 +202,15 @@ namespace ZoDream.Shared.Drawing
     {
         public override int ColorSpaceSize => 4;
 
-        protected override void Decode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Decode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            output[outputOffset] = ColorConverter.FromFloatToByte(input, inputOffset);
+            output[outputOffset] = ColorConverter.FromFloatToByte(input[inputOffset..]);
         }
 
-        protected override void Encode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             var buffer = BitConverter.GetBytes(input[inputOffset] / 255f);
-            Array.Copy(buffer, 0, output, outputOffset, 4);
+            buffer.CopyTo(output.Slice(outputOffset, 4));
         }
     }
 
@@ -197,16 +218,16 @@ namespace ZoDream.Shared.Drawing
     {
         public override int ColorSpaceSize => 2;
 
-        protected override void Decode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Decode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             output[outputOffset] = ColorConverter.From16BitTo8Bit(
-                    ColorConverter.From16BitToShort(input[inputOffset], input[inputOffset + 1]));
+                    BinaryPrimitives.ReadUInt16BigEndian(input[inputOffset..]));
         }
 
-        protected override void Encode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             var buffer = BitConverter.GetBytes(ColorConverter.From8BitTo16Bit(input[inputOffset]));
-            Array.Copy(buffer, 0, output, outputOffset, 2);
+            buffer.CopyTo(output.Slice(outputOffset, 2));
         }
     }
 
@@ -214,15 +235,15 @@ namespace ZoDream.Shared.Drawing
     {
         public override int ColorSpaceSize => 2;
 
-        protected override void Decode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Decode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            output[outputOffset] = ColorConverter.FromHalfToByte(input, inputOffset);
+            output[outputOffset] = ColorConverter.FromHalfToByte(input[inputOffset..]);
         }
 
-        protected override void Encode(int index, byte[] input, int inputOffset, byte[] output, int outputOffset)
+        protected override void Encode(int index, ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
             var buffer = BitConverter.GetBytes((Half)input[inputOffset]);
-            Array.Copy(buffer, 0, output, outputOffset, 2);
+            buffer.CopyTo(output.Slice(outputOffset, 2));
         }
     }
 }

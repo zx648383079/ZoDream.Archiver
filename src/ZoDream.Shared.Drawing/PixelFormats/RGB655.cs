@@ -4,25 +4,27 @@ namespace ZoDream.Shared.Drawing
 {
     internal class RGB655 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var size = width * height;
-            var buffer = new byte[size * 4];
-            for (var i = 0; i < (size * 2); i += 2)
-            {
-                var j = i * 2;
-                var res = ColorConverter.SplitByte(data, i, out _, 6, 5, 5);
-                buffer[j] = res[0];
-                buffer[j + 1] = res[1];
-                buffer[j + 2] = res[2];
-                buffer[j + 3] = byte.MaxValue;
-            }
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
             return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
-            throw new NotImplementedException();
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                var index = i * 4;
+                var res = ColorConverter.SplitByte(data, i * 2, out _, 6, 5, 5);
+                output[index] = res[0];
+                output[index + 1] = res[1];
+                output[index + 2] = res[2];
+                output[index + 3] = byte.MaxValue;
+            }
+            return size * 4;
         }
+
     }
 }

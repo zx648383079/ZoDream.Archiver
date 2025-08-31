@@ -2,14 +2,27 @@
 
 namespace ZoDream.Shared.Drawing
 {
-    public class YV12 : IBufferDecoder
+    public class YV12 : IBufferDecoder, IBufferEncoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            throw new NotImplementedException();
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                var index = i * 4;
+                // TODO
+            }
+            return size * 4;
+        }
+
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var buffer = new byte[width * height * 3 / 2];
             var ptrY = 0;

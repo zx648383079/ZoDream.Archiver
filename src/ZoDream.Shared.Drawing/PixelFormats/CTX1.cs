@@ -1,17 +1,19 @@
-﻿using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace ZoDream.Shared.Drawing
 {
     public class CTX1(bool swapXY = false, bool computeZ = true) : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
             var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
             int xBlocks = width / 4;
             int yBlocks = height / 4;
 
@@ -49,24 +51,20 @@ namespace ZoDream.Shared.Drawing
                                 (color.R, color.G) = (color.G, color.R);
                             }
 
-                            buffer[destIndex + 0] = color.B;
-                            buffer[destIndex + 1] = color.G;
-                            buffer[destIndex + 2] = color.R;
-                            buffer[destIndex + 3] = color.A;
+                            output[destIndex + 0] = color.B;
+                            output[destIndex + 1] = color.G;
+                            output[destIndex + 2] = color.R;
+                            output[destIndex + 3] = color.A;
 
                             code >>= 2;
                         }
                     }
                 }
             }
-            return buffer;
+            return width * height * 4
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
-        {
-            throw new NotImplementedException();
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         static byte CalculateNormalZ(byte r, float g)
         {
             float x = (r / 255f * 2f) - 1f;

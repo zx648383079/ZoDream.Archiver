@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
     internal class DXT1 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            byte[] buffer = new byte[(width * height) * 4];
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
             int xBlocks = width / 4;
             int yBlocks = height / 4;
             for (int i = 0; i < yBlocks; i++)
@@ -40,44 +42,44 @@ namespace ZoDream.Shared.Drawing
                             switch (code & 3)
                             {
                                 case 0:
-                                    buffer[dataStart] = (byte)r0;
-                                    buffer[dataStart + 1] = (byte)g0;
-                                    buffer[dataStart + 2] = (byte)b0;
-                                    buffer[dataStart + 3] = 0xFF;
+                                    output[dataStart] = (byte)r0;
+                                    output[dataStart + 1] = (byte)g0;
+                                    output[dataStart + 2] = (byte)b0;
+                                    output[dataStart + 3] = 0xFF;
                                     break;
 
                                 case 1:
-                                    buffer[dataStart] = (byte)r1;
-                                    buffer[dataStart + 1] = (byte)g1;
-                                    buffer[dataStart + 2] = (byte)b1;
-                                    buffer[dataStart + 3] = 0xFF;
+                                    output[dataStart] = (byte)r1;
+                                    output[dataStart + 1] = (byte)g1;
+                                    output[dataStart + 2] = (byte)b1;
+                                    output[dataStart + 3] = 0xFF;
                                     break;
 
                                 case 2:
-                                    buffer[dataStart + 3] = 0xFF;
+                                    output[dataStart + 3] = 0xFF;
                                     if (colour0 <= colour1)
                                     {
-                                        buffer[dataStart] = (byte)((r0 + r1) / 2);
-                                        buffer[dataStart + 1] = (byte)((g0 + g1) / 2);
-                                        buffer[dataStart + 2] = (byte)((b0 + b1) / 2);
+                                        output[dataStart] = (byte)((r0 + r1) / 2);
+                                        output[dataStart + 1] = (byte)((g0 + g1) / 2);
+                                        output[dataStart + 2] = (byte)((b0 + b1) / 2);
                                     }
-                                    buffer[dataStart] = (byte)(((2 * r0) + r1) / 3);
-                                    buffer[dataStart + 1] = (byte)(((2 * g0) + g1) / 3);
-                                    buffer[dataStart + 2] = (byte)(((2 * b0) + b1) / 3);
+                                    output[dataStart] = (byte)(((2 * r0) + r1) / 3);
+                                    output[dataStart + 1] = (byte)(((2 * g0) + g1) / 3);
+                                    output[dataStart + 2] = (byte)(((2 * b0) + b1) / 3);
                                     break;
 
                                 case 3:
                                     if (colour0 <= colour1)
                                     {
-                                        buffer[dataStart] = 0;
-                                        buffer[dataStart + 1] = 0;
-                                        buffer[dataStart + 2] = 0;
-                                        buffer[dataStart + 3] = 0;
+                                        output[dataStart] = 0;
+                                        output[dataStart + 1] = 0;
+                                        output[dataStart + 2] = 0;
+                                        output[dataStart + 3] = 0;
                                     }
-                                    buffer[dataStart] = (byte)((r0 + (2 * r1)) / 3);
-                                    buffer[dataStart + 1] = (byte)((g0 + (2 * g1)) / 3);
-                                    buffer[dataStart + 2] = (byte)((b0 + (2 * b1)) / 3);
-                                    buffer[dataStart + 3] = 0xFF;
+                                    output[dataStart] = (byte)((r0 + (2 * r1)) / 3);
+                                    output[dataStart + 1] = (byte)((g0 + (2 * g1)) / 3);
+                                    output[dataStart + 2] = (byte)((b0 + (2 * b1)) / 3);
+                                    output[dataStart + 3] = 0xFF;
                                     break;
 
                                 default:
@@ -88,12 +90,8 @@ namespace ZoDream.Shared.Drawing
                     }
                 }
             }
-            return buffer;
+            return width * height * 4;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

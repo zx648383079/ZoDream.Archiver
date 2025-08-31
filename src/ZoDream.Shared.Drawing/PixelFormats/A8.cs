@@ -1,30 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class A8 : IBufferDecoder
+    public class A8 : IBufferDecoder, IBufferEncoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var size = width * height;
-            var buffer = new byte[size * 4];
-            for (var i = 0; i < size; i++)
-            {
-                int index = i * 4;
-                buffer[index] = 0xFF;
-                buffer[index + 1] = 0xFF;
-                buffer[index + 2] = 0xFF;
-                buffer[index + 3] = data[i];
-            }
-
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
             return buffer;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
+            var size = width * height;
+            for (var i = 0; i < size; i++)
+            {
+                int index = i * 4;
+                output[index] = 0xFF;
+                output[index + 1] = 0xFF;
+                output[index + 2] = 0xFF;
+                output[index + 3] = data[i];
+            }
+            return size * 4;
+        }
+
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var buffer = new byte[height * width];
             for (var i = 0; i < (buffer.Length); i++)

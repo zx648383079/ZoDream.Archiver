@@ -2,14 +2,20 @@
 
 namespace ZoDream.Shared.Drawing
 {
-    public class YUY2 : IBufferDecoder
+    public class YUY2 : IBufferDecoder, IBufferEncoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        {
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
         {
             var p = 0;
             var o = 0;
             var halfWidth = width / 2;
-            var buffer = new byte[width * height * 4];
             for (var j = 0; j < height; j++)
             {
                 for (var i = 0; i < halfWidth; ++i)
@@ -21,21 +27,21 @@ namespace ZoDream.Shared.Drawing
                     var c = y0 - 16;
                     var d = u0 - 128;
                     var e = v0 - 128;
-                    buffer[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
-                    buffer[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
-                    buffer[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
-                    buffer[o++] = byte.MaxValue;
+                    output[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
+                    output[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
+                    output[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
+                    output[o++] = byte.MaxValue;
                     c = y1 - 16;
-                    buffer[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
-                    buffer[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
-                    buffer[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
-                    buffer[o++] = byte.MaxValue;
+                    output[o++] = (byte)Math.Clamp((298 * c + 516 * d + 128) >> 8, byte.MinValue, byte.MaxValue);            // b
+                    output[o++] = (byte)Math.Clamp((298 * c - 100 * d - 208 * e + 128) >> 8, byte.MinValue, byte.MaxValue);  // g
+                    output[o++] = (byte)Math.Clamp((298 * c + 409 * e + 128) >> 8, byte.MinValue, byte.MaxValue);            // r
+                    output[o++] = byte.MaxValue;
                 }
             }
-            return buffer;
+            return width * height * 4;
         }
 
-        public byte[] Encode(byte[] data, int width, int height)
+        public byte[] Encode(ReadOnlySpan<byte> data, int width, int height)
         {
             var buffer = new byte[width * height * 2];
             var ptrY = 0;

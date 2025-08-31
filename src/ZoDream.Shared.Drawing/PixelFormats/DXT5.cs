@@ -4,9 +4,15 @@ namespace ZoDream.Shared.Drawing
 {
     internal class DXT5 : IBufferDecoder
     {
-        public byte[] Decode(byte[] data, int width, int height)
+        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            byte[] buffer = new byte[width * height * 4];
+            var buffer = new byte[width * height * 4];
+            Decode(data, width, height, buffer);
+            return buffer;
+        }
+
+        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        {
             int xBlocks = width / 4;
             int yBlocks = height / 4;
             for (int y = 0; y < yBlocks; y++)
@@ -82,47 +88,46 @@ namespace ZoDream.Shared.Drawing
                         {
                             int pixDataStart = (width * (y * 4 + j) * 4) + ((x * 4 + i) * 4);
                             uint codeDec = code & 0x3;
-
-                            buffer[pixDataStart + 3] = alpha[i, j];
+                            output[pixDataStart + 3] = alpha[i, j];
 
                             switch (codeDec)
                             {
                                 case 0:
-                                    buffer[pixDataStart + 0] = (byte)r0;
-                                    buffer[pixDataStart + 1] = (byte)g0;
-                                    buffer[pixDataStart + 2] = (byte)b0;
+                                    output[pixDataStart + 0] = (byte)r0;
+                                    output[pixDataStart + 1] = (byte)g0;
+                                    output[pixDataStart + 2] = (byte)b0;
                                     break;
                                 case 1:
-                                    buffer[pixDataStart + 0] = (byte)r1;
-                                    buffer[pixDataStart + 1] = (byte)g1;
-                                    buffer[pixDataStart + 2] = (byte)b1;
+                                    output[pixDataStart + 0] = (byte)r1;
+                                    output[pixDataStart + 1] = (byte)g1;
+                                    output[pixDataStart + 2] = (byte)b1;
                                     break;
                                 case 2:
                                     if (color0 > color1)
                                     {
-                                        buffer[pixDataStart + 0] = (byte)((2 * r0 + r1) / 3);
-                                        buffer[pixDataStart + 1] = (byte)((2 * g0 + g1) / 3);
-                                        buffer[pixDataStart + 2] = (byte)((2 * b0 + b1) / 3);
+                                        output[pixDataStart + 0] = (byte)((2 * r0 + r1) / 3);
+                                        output[pixDataStart + 1] = (byte)((2 * g0 + g1) / 3);
+                                        output[pixDataStart + 2] = (byte)((2 * b0 + b1) / 3);
                                     }
                                     else
                                     {
-                                        buffer[pixDataStart + 0] = (byte)((r0 + r1) / 2);
-                                        buffer[pixDataStart + 1] = (byte)((g0 + g1) / 2);
-                                        buffer[pixDataStart + 2] = (byte)((b0 + b1) / 2);
+                                        output[pixDataStart + 0] = (byte)((r0 + r1) / 2);
+                                        output[pixDataStart + 1] = (byte)((g0 + g1) / 2);
+                                        output[pixDataStart + 2] = (byte)((b0 + b1) / 2);
                                     }
                                     break;
                                 case 3:
                                     if (color0 > color1)
                                     {
-                                        buffer[pixDataStart + 0] = (byte)((r0 + 2 * r1) / 3);
-                                        buffer[pixDataStart + 1] = (byte)((g0 + 2 * g1) / 3);
-                                        buffer[pixDataStart + 2] = (byte)((b0 + 2 * b1) / 3);
+                                        output[pixDataStart + 0] = (byte)((r0 + 2 * r1) / 3);
+                                        output[pixDataStart + 1] = (byte)((g0 + 2 * g1) / 3);
+                                        output[pixDataStart + 2] = (byte)((b0 + 2 * b1) / 3);
                                     }
                                     else
                                     {
-                                        buffer[pixDataStart + 0] = 0;
-                                        buffer[pixDataStart + 1] = 0;
-                                        buffer[pixDataStart + 2] = 0;
+                                        output[pixDataStart + 0] = 0;
+                                        output[pixDataStart + 1] = 0;
+                                        output[pixDataStart + 2] = 0;
                                     }
                                     break;
                             }
@@ -132,12 +137,7 @@ namespace ZoDream.Shared.Drawing
                     }
                 }
             }
-            return buffer;
-        }
-
-        public byte[] Encode(byte[] data, int width, int height)
-        {
-            throw new NotImplementedException();
+            return width * height * 4;
         }
     }
 }
