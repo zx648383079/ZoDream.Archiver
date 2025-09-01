@@ -1,73 +1,37 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class ETC2 : IBufferDecoder
+    public class ETC2 : BlockBufferDecoder
     {
-        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)
         {
-            var buffer = new byte[width * height * 4];
-            Decode(data, width, height, buffer);
-            return buffer;
+            DecodeEtc2Block(data, output);
         }
 
-        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
+        internal static void DecodeEtc2Block(ReadOnlySpan<byte> data, Span<byte> output)
         {
-            int requiredLength = ((width + 3) / 4) * ((height + 3) / 4) * 8;
-            if (data.Length < requiredLength)
-            {
-                throw new ArgumentException(nameof(data));
-            }
-
-            int bcw = (width + 3) / 4;
-            int bch = (height + 3) / 4;
-            int clen_last = (width + 3) % 4 + 1;
-            Span<byte> buf = stackalloc byte[16 * 4];
-            int inputOffset = 0;
-            for (int t = 0; t < bch; t++)
-            {
-                for (int s = 0; s < bcw; s++, inputOffset += 8)
-                {
-                    DecodeEtc2Block(data.Slice(inputOffset, 8), buf);
-                    int clen = s < bcw - 1 ? 4 : clen_last;
-                    int outputOffset = t * 16 * width + s * 16;
-
-                    for (int i = 0, y = t * 4; i < 4 && y < height; i++, y++)
-                    {
-                        for (int j = 0; j < clen; j++)
-                        {
-                            buf.Slice((j + 4 * i) * 4, 4).CopyTo(output[(outputOffset + (j + i * width) * 4)..]);
-                        }
-                    }
-                }
-            }
-            return inputOffset;
-        }
-
-        internal static void DecodeEtc2Block(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            int j = input[6] << 8 | input[7];
-            int k = input[4] << 8 | input[5];
+            int j = data[6] << 8 | data[7];
+            int k = data[4] << 8 | data[5];
             Span<byte> c = stackalloc byte[3 * 3];
             Span<byte> color_set = stackalloc byte[4 * 4];
-            if ((input[3] & 2) != 0)
+            if ((data[3] & 2) != 0)
             {
-                int r = input[0] & 0xf8;
-                int dr = (input[0] << 3 & 0x18) - (input[0] << 3 & 0x20);
+                int r = data[0] & 0xf8;
+                int dr = (data[0] << 3 & 0x18) - (data[0] << 3 & 0x20);
                 if (r + dr < 0 || r + dr > 255)
                 {
                     // T
                     unchecked
                     {
-                        c[0] = (byte)(input[0] << 3 & 0xc0 | input[0] << 4 & 0x30 | input[0] >> 1 & 0xc | input[0] & 3);
-                        c[1] = (byte)(input[1] & 0xf0 | input[1] >> 4);
-                        c[2] = (byte)(input[1] & 0x0f | input[1] << 4);
-                        c[3] = (byte)(input[2] & 0xf0 | input[2] >> 4);
-                        c[4] = (byte)(input[2] & 0x0f | input[2] << 4);
-                        c[5] = (byte)(input[3] & 0xf0 | input[3] >> 4);
+                        c[0] = (byte)(data[0] << 3 & 0xc0 | data[0] << 4 & 0x30 | data[0] >> 1 & 0xc | data[0] & 3);
+                        c[1] = (byte)(data[1] & 0xf0 | data[1] >> 4);
+                        c[2] = (byte)(data[1] & 0x0f | data[1] << 4);
+                        c[3] = (byte)(data[2] & 0xf0 | data[2] >> 4);
+                        c[4] = (byte)(data[2] & 0x0f | data[2] << 4);
+                        c[5] = (byte)(data[3] & 0xf0 | data[3] >> 4);
                     }
-                    int ti = input[3] >> 1 & 6 | input[3] & 1;
+                    int ti = data[3] >> 1 & 6 | data[3] & 1;
                     byte d = ETC.Etc2DistanceTable[ti];
                     
                     ETC.ApplicateColorRaw(c, 0, color_set);
@@ -83,24 +47,24 @@ namespace ZoDream.Shared.Drawing
                 }
                 else
                 {
-                    int g = input[1] & 0xf8;
-                    int dg = (input[1] << 3 & 0x18) - (input[1] << 3 & 0x20);
+                    int g = data[1] & 0xf8;
+                    int dg = (data[1] << 3 & 0x18) - (data[1] << 3 & 0x20);
                     if (g + dg < 0 || g + dg > 255)
                     {
                         // H
                         unchecked
                         {
-                            c[0] = (byte)(input[0] << 1 & 0xf0 | input[0] >> 3 & 0xf);
-                            c[1] = (byte)(input[0] << 5 & 0xe0 | input[1] & 0x10);
+                            c[0] = (byte)(data[0] << 1 & 0xf0 | data[0] >> 3 & 0xf);
+                            c[1] = (byte)(data[0] << 5 & 0xe0 | data[1] & 0x10);
                             c[1] |= (byte)(c[0 * 3 + 1] >> 4);
-                            c[2] = (byte)(input[1] & 8 | input[1] << 1 & 6 | input[2] >> 7);
+                            c[2] = (byte)(data[1] & 8 | data[1] << 1 & 6 | data[2] >> 7);
                             c[2] |= (byte)(c[0 * 3 + 2] << 4);
-                            c[3] = (byte)(input[2] << 1 & 0xf0 | input[2] >> 3 & 0xf);
-                            c[4] = (byte)(input[2] << 5 & 0xe0 | input[3] >> 3 & 0x10);
+                            c[3] = (byte)(data[2] << 1 & 0xf0 | data[2] >> 3 & 0xf);
+                            c[4] = (byte)(data[2] << 5 & 0xe0 | data[3] >> 3 & 0x10);
                             c[4] |= (byte)(c[1 * 3 + 1] >> 4);
-                            c[5] = (byte)(input[3] << 1 & 0xf0 | input[3] >> 3 & 0xf);
+                            c[5] = (byte)(data[3] << 1 & 0xf0 | data[3] >> 3 & 0xf);
                         }
-                        int di = input[3] & 4 | input[3] << 1 & 2;
+                        int di = data[3] & 4 | data[3] << 1 & 2;
                         if (c[0] > c[3] || (c[0] == c[3] && (c[1] > c[4] || (c[1] == c[4] && c[2] >= c[5]))))
                         {
                             ++di;
@@ -118,24 +82,24 @@ namespace ZoDream.Shared.Drawing
                     }
                     else
                     {
-                        int b = input[2] & 0xf8;
-                        int db = (input[2] << 3 & 0x18) - (input[2] << 3 & 0x20);
+                        int b = data[2] & 0xf8;
+                        int db = (data[2] << 3 & 0x18) - (data[2] << 3 & 0x20);
                         if (b + db < 0 || b + db > 255)
                         {
                             // planar
                             unchecked
                             {
-                                c[0] = (byte)(input[0] << 1 & 0xfc | input[0] >> 5 & 3);
-                                c[1] = (byte)(input[0] << 7 & 0x80 | input[1] & 0x7e | input[0] & 1);
-                                c[2] = (byte)(input[1] << 7 & 0x80 | input[2] << 2 & 0x60 | input[2] << 3 & 0x18 | input[3] >> 5 & 4);
+                                c[0] = (byte)(data[0] << 1 & 0xfc | data[0] >> 5 & 3);
+                                c[1] = (byte)(data[0] << 7 & 0x80 | data[1] & 0x7e | data[0] & 1);
+                                c[2] = (byte)(data[1] << 7 & 0x80 | data[2] << 2 & 0x60 | data[2] << 3 & 0x18 | data[3] >> 5 & 4);
                                 c[2] |= (byte)(c[0 * 3 + 2] >> 6);
-                                c[3] = (byte)(input[3] << 1 & 0xf8 | input[3] << 2 & 4 | input[3] >> 5 & 3);
-                                c[4] = (byte)(input[4] & 0xfe | input[4] >> 7);
-                                c[5] = (byte)(input[4] << 7 & 0x80 | input[5] >> 1 & 0x7c);
+                                c[3] = (byte)(data[3] << 1 & 0xf8 | data[3] << 2 & 4 | data[3] >> 5 & 3);
+                                c[4] = (byte)(data[4] & 0xfe | data[4] >> 7);
+                                c[5] = (byte)(data[4] << 7 & 0x80 | data[5] >> 1 & 0x7c);
                                 c[5] |= (byte)(c[1 * 3 + 2] >> 6);
-                                c[6] = (byte)(input[5] << 5 & 0xe0 | input[6] >> 3 & 0x1c | input[5] >> 1 & 3);
-                                c[7] = (byte)(input[6] << 3 & 0xf8 | input[7] >> 5 & 0x6 | input[6] >> 4 & 1);
-                                c[8] = (byte)(input[7] << 2 | input[7] >> 4 & 3);
+                                c[6] = (byte)(data[5] << 5 & 0xe0 | data[6] >> 3 & 0x1c | data[5] >> 1 & 3);
+                                c[7] = (byte)(data[6] << 3 & 0xf8 | data[7] >> 5 & 0x6 | data[6] >> 4 & 1);
+                                c[8] = (byte)(data[7] << 2 | data[7] >> 4 & 3);
                             }
                             for (int y = 0, i = 0; y < 4; y++)
                             {
@@ -153,10 +117,10 @@ namespace ZoDream.Shared.Drawing
                             // differential
                             ReadOnlySpan<int> code =
                             [
-                                (input[3] >> 5) * 4,
-                                (input[3] >> 2 & 7) * 4
+                                (data[3] >> 5) * 4,
+                                (data[3] >> 2 & 7) * 4
                             ];
-                            int ti = (input[3] & 1) * 16;
+                            int ti = (data[3] & 1) * 16;
                             unchecked
                             {
                                 c[0] = (byte)(r | r >> 5);
@@ -186,18 +150,18 @@ namespace ZoDream.Shared.Drawing
                 // individual
                 ReadOnlySpan<int> code =
                 [
-                    (input[3] >> 5) * 4,
-                    (input[3] >> 2 & 7) * 4
+                    (data[3] >> 5) * 4,
+                    (data[3] >> 2 & 7) * 4
                 ];
-                int ti = (input[3] & 1) * 16;
+                int ti = (data[3] & 1) * 16;
                 unchecked
                 {
-                    c[0] = (byte)(input[0] & 0xf0 | input[0] >> 4);
-                    c[3] = (byte)(input[0] & 0x0f | input[0] << 4);
-                    c[1] = (byte)(input[1] & 0xf0 | input[1] >> 4);
-                    c[4] = (byte)(input[1] & 0x0f | input[1] << 4);
-                    c[2] = (byte)(input[2] & 0xf0 | input[2] >> 4);
-                    c[5] = (byte)(input[2] & 0x0f | input[2] << 4);
+                    c[0] = (byte)(data[0] & 0xf0 | data[0] >> 4);
+                    c[3] = (byte)(data[0] & 0x0f | data[0] << 4);
+                    c[1] = (byte)(data[1] & 0xf0 | data[1] >> 4);
+                    c[4] = (byte)(data[1] & 0x0f | data[1] << 4);
+                    c[2] = (byte)(data[2] & 0xf0 | data[2] >> 4);
+                    c[5] = (byte)(data[2] & 0x0f | data[2] << 4);
                 }
                 for (int i = 0; i < 16; i++, j >>= 1, k >>= 1)
                 {
@@ -209,5 +173,7 @@ namespace ZoDream.Shared.Drawing
                 }
             }
         }
+
+       
     }
 }

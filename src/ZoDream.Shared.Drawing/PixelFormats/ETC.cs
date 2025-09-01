@@ -3,50 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class ETC : IBufferDecoder
+    public class ETC : BlockBufferDecoder
     {
-        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)
         {
-            var buffer = new byte[width * height * 4];
-            Decode(data, width, height, buffer);
-            return buffer;
-        }
-
-        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
-        {
-            var requiredLength = (width + 3) / 4 * ((height + 3) / 4) * 8;
-            if (requiredLength > data.Length)
-            {
-                throw new ArgumentException(null, nameof(data));
-            }
-            int bcw = (width + 3) / 4;
-            int bch = (height + 3) / 4;
-            int clen_last = (width + 3) % 4 + 1;
-            Span<byte> buf = stackalloc byte[16 * 4];
-            int inputOffset = 0;
-            for (int t = 0; t < bch; t++)
-            {
-                for (int s = 0; s < bcw; s++, inputOffset += 8)
-                {
-                    DecodeEtc1Block(data.Slice(inputOffset, 8), buf);
-                    int clen = s < bcw - 1 ? 4 : clen_last;
-                    int outputOffset = t * 16 * width + s * 16;
-
-                    for (int i = 0, y = t * 4; i < 4 && y < height; i++, y++)
-                    {
-                        for (int j = 0; j < clen; j++)
-                        {
-                            buf.Slice((j + 4 * i) * 4, 4).CopyTo(output[(outputOffset + (j + i * width) * 4)..]);
-                        }
-                    }
-                }
-            }
-            return inputOffset;
-        }
-
-        internal static void DecodeEtc1Block(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            byte i3 = input[3];
+            byte i3 = data[3];
             ReadOnlySpan<int> code =
             [
                 (i3 >> 5) * 4,
@@ -58,12 +19,12 @@ namespace ZoDream.Shared.Drawing
             {
                 unchecked
                 {
-                    c[0] = (byte)(input[0] & 0xf8);
-                    c[1] = (byte)(input[1] & 0xf8);
-                    c[2] = (byte)(input[2] & 0xf8);
-                    c[3] = (byte)(c[0] + (input[0] << 3 & 0x18) - (input[0] << 3 & 0x20));
-                    c[4] = (byte)(c[1] + (input[1] << 3 & 0x18) - (input[1] << 3 & 0x20));
-                    c[5] = (byte)(c[2] + (input[2] << 3 & 0x18) - (input[2] << 3 & 0x20));
+                    c[0] = (byte)(data[0] & 0xf8);
+                    c[1] = (byte)(data[1] & 0xf8);
+                    c[2] = (byte)(data[2] & 0xf8);
+                    c[3] = (byte)(c[0] + (data[0] << 3 & 0x18) - (data[0] << 3 & 0x20));
+                    c[4] = (byte)(c[1] + (data[1] << 3 & 0x18) - (data[1] << 3 & 0x20));
+                    c[5] = (byte)(c[2] + (data[2] << 3 & 0x18) - (data[2] << 3 & 0x20));
                     c[0] |= (byte)(c[0] >> 5);
                     c[1] |= (byte)(c[1] >> 5);
                     c[2] |= (byte)(c[2] >> 5);
@@ -76,17 +37,17 @@ namespace ZoDream.Shared.Drawing
             {
                 unchecked
                 {
-                    c[0] = (byte)(input[0] & 0xf0 | input[0] >> 4);
-                    c[3] = (byte)(input[0] & 0x0f | input[0] << 4);
-                    c[1] = (byte)(input[1] & 0xf0 | input[1] >> 4);
-                    c[4] = (byte)(input[1] & 0x0f | input[1] << 4);
-                    c[2] = (byte)(input[2] & 0xf0 | input[2] >> 4);
-                    c[5] = (byte)(input[2] & 0x0f | input[2] << 4);
+                    c[0] = (byte)(data[0] & 0xf0 | data[0] >> 4);
+                    c[3] = (byte)(data[0] & 0x0f | data[0] << 4);
+                    c[1] = (byte)(data[1] & 0xf0 | data[1] >> 4);
+                    c[4] = (byte)(data[1] & 0x0f | data[1] << 4);
+                    c[2] = (byte)(data[2] & 0xf0 | data[2] >> 4);
+                    c[5] = (byte)(data[2] & 0x0f | data[2] << 4);
                 }
             }
 
-            int j = input[6] << 8 | input[7];
-            int k = input[4] << 8 | input[5];
+            int j = data[6] << 8 | data[7];
+            int k = data[4] << 8 | data[5];
             for (int i = 0; i < 16; i++, j >>= 1, k >>= 1)
             {
                 int s = Etc1SubblockTable[ti + i];
@@ -112,6 +73,7 @@ namespace ZoDream.Shared.Drawing
             c.Slice(o * 3, 3).CopyTo(output);
             output[3] = byte.MaxValue;
         }
+
 
 
         internal static ReadOnlySpan<byte> WriteOrderTable => [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15];
