@@ -31,7 +31,6 @@ namespace ZoDream.Shared.Drawing
                     DecodeEtc1Block(data.Slice(inputOffset, 8), buf);
                     int clen = s < bcw - 1 ? 4 : clen_last;
                     int outputOffset = t * 16 * width + s * 16;
-                    var outputPtr = output.Slice(outputOffset);
 
                     for (int i = 0, y = t * 4; i < 4 && y < height; i++, y++)
                     {
