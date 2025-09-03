@@ -5,6 +5,7 @@ namespace ZoDream.Shared.Drawing
 {
     /// <summary>
     /// @see https://github.com/AssetRipper/TextureDecoder
+    /// DXT3
     /// </summary>
     public class BC2 : BlockBufferDecoder
     {

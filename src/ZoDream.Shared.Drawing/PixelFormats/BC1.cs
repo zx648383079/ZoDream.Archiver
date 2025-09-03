@@ -4,7 +4,9 @@ using System.Buffers.Binary;
 namespace ZoDream.Shared.Drawing
 {
     /// <summary>
+    /// Block Compression
     /// @see https://github.com/AssetRipper/TextureDecoder
+    /// DXT1
     /// </summary>
     public class BC1 : BlockBufferDecoder
     {

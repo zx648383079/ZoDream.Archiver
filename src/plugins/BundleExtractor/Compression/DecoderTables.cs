@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ZoDream.BundleExtractor.Compression
 {
-    internal class DecoderTables
+    public class DecoderTables
     {
         internal const int MAX_EXPECTED_CODE_SIZE = 16;
         internal const int MAX_TABLE_BITS = 11;

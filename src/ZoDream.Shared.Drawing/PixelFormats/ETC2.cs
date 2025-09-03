@@ -3,6 +3,7 @@
 namespace ZoDream.Shared.Drawing
 {
     /// <summary>
+    /// ETC_RGB
     /// @see https://github.com/AssetRipper/TextureDecoder
     /// </summary>
     public class ETC2 : BlockBufferDecoder

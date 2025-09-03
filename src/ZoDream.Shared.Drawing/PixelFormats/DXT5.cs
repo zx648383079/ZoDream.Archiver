@@ -2,6 +2,9 @@
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// BC3
+    /// </summary>
     public class DXT5 : BlockBufferDecoder
     {
         protected override int BlockSize => 16;

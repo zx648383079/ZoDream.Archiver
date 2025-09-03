@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ZoDream.BundleExtractor.Compression
 {
-    internal class SymbolCodec
+    public class SymbolCodec
     {
         private static readonly byte[] MOST_PROBABLE_CODELENGTH_CODES = [
                 SMALL_ZERO_RUN_CODE,

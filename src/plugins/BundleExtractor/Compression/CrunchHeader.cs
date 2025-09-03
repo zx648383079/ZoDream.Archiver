@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.BundleExtractor.Compression
 {
-    internal class CrunchHeader
+    public class CrunchHeader
     {
         internal const int MIN_SIZE = 74;
         internal static byte[] Signature = "Hx"u8.ToArray();

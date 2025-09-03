@@ -33,13 +33,13 @@ namespace ZoDream.Shared.Drawing
             {
                 var blockData = new BlockData
                 {
-                    bw = blockWidth,
-                    bh = blockHeight
+                    BlockWidth = blockWidth,
+                    BlockHeight = blockHeight
                 };
                 DecodeBlockParameters(data, ref blockData);
                 DecodeEndpoints(data, ref blockData);
                 DecodeWeights(data, ref blockData);
-                if (blockData.part_num > 1)
+                if (blockData.PartCount > 1)
                 {
                     SelectPartition(data, ref blockData);
                 }
@@ -49,84 +49,84 @@ namespace ZoDream.Shared.Drawing
 
         private static void DecodeBlockParameters(ReadOnlySpan<byte> input, ref BlockData pBlock)
         {
-            pBlock.dual_plane = (input[1] & 4) >> 2;
-            pBlock.weight_range = (input[0] >> 4 & 1) | (input[1] << 2 & 8);
+            pBlock.DualPlane = (input[1] & 4) >> 2;
+            pBlock.WeightRange = (input[0] >> 4 & 1) | (input[1] << 2 & 8);
 
             if ((input[0] & 3) != 0)
             {
-                pBlock.weight_range |= input[0] << 1 & 6;
+                pBlock.WeightRange |= input[0] << 1 & 6;
                 switch (input[0] & 0xc)
                 {
                     case 0:
-                        pBlock.width = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 4;
-                        pBlock.height = (input[0] >> 5 & 3) + 2;
+                        pBlock.Width = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 4;
+                        pBlock.Height = (input[0] >> 5 & 3) + 2;
                         break;
                     case 4:
-                        pBlock.width = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 8;
-                        pBlock.height = (input[0] >> 5 & 3) + 2;
+                        pBlock.Width = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 8;
+                        pBlock.Height = (input[0] >> 5 & 3) + 2;
                         break;
                     case 8:
-                        pBlock.width = (input[0] >> 5 & 3) + 2;
-                        pBlock.height = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 8;
+                        pBlock.Width = (input[0] >> 5 & 3) + 2;
+                        pBlock.Height = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 7 & 3) + 8;
                         break;
                     case 12:
                         if ((input[1] & 1) != 0)
                         {
-                            pBlock.width = (input[0] >> 7 & 1) + 2;
-                            pBlock.height = (input[0] >> 5 & 3) + 2;
+                            pBlock.Width = (input[0] >> 7 & 1) + 2;
+                            pBlock.Height = (input[0] >> 5 & 3) + 2;
                         }
                         else
                         {
-                            pBlock.width = (input[0] >> 5 & 3) + 2;
-                            pBlock.height = (input[0] >> 7 & 1) + 6;
+                            pBlock.Width = (input[0] >> 5 & 3) + 2;
+                            pBlock.Height = (input[0] >> 7 & 1) + 6;
                         }
                         break;
                 }
             }
             else
             {
-                pBlock.weight_range |= input[0] >> 1 & 6;
+                pBlock.WeightRange |= input[0] >> 1 & 6;
                 switch (BinaryPrimitives.ReadInt32LittleEndian(input) & 0x180)
                 {
                     case 0:
-                        pBlock.width = 12;
-                        pBlock.height = (input[0] >> 5 & 3) + 2;
+                        pBlock.Width = 12;
+                        pBlock.Height = (input[0] >> 5 & 3) + 2;
                         break;
                     case 0x80:
-                        pBlock.width = (input[0] >> 5 & 3) + 2;
-                        pBlock.height = 12;
+                        pBlock.Width = (input[0] >> 5 & 3) + 2;
+                        pBlock.Height = 12;
                         break;
                     case 0x100:
-                        pBlock.width = (input[0] >> 5 & 3) + 6;
-                        pBlock.height = (input[1] >> 1 & 3) + 6;
-                        pBlock.dual_plane = 0;
-                        pBlock.weight_range &= 7;
+                        pBlock.Width = (input[0] >> 5 & 3) + 6;
+                        pBlock.Height = (input[1] >> 1 & 3) + 6;
+                        pBlock.DualPlane = 0;
+                        pBlock.WeightRange &= 7;
                         break;
                     case 0x180:
-                        pBlock.width = (input[0] & 0x20) != 0 ? 10 : 6;
-                        pBlock.height = (input[0] & 0x20) != 0 ? 6 : 10;
+                        pBlock.Width = (input[0] & 0x20) != 0 ? 10 : 6;
+                        pBlock.Height = (input[0] & 0x20) != 0 ? 6 : 10;
                         break;
                 }
             }
 
-            pBlock.part_num = (input[1] >> 3 & 3) + 1;
+            pBlock.PartCount = (input[1] >> 3 & 3) + 1;
 
-            pBlock.weight_num = pBlock.width * pBlock.height;
-            if (pBlock.dual_plane != 0)
+            pBlock.WeightCount = pBlock.Width * pBlock.Height;
+            if (pBlock.DualPlane != 0)
             {
-                pBlock.weight_num *= 2;
+                pBlock.WeightCount *= 2;
             }
 
             int config_bits, cem_base = 0;
-            int weight_bits = WeightPrecTableA[pBlock.weight_range] switch
+            int weight_bits = WeightPrecTableA[pBlock.WeightRange] switch
             {
-                3 => pBlock.weight_num * WeightPrecTableB[pBlock.weight_range] + (pBlock.weight_num * 8 + 4) / 5,
-                5 => pBlock.weight_num * WeightPrecTableB[pBlock.weight_range] + (pBlock.weight_num * 7 + 2) / 3,
-                _ => pBlock.weight_num * WeightPrecTableB[pBlock.weight_range],
+                3 => pBlock.WeightCount * WeightPrecTableB[pBlock.WeightRange] + (pBlock.WeightCount * 8 + 4) / 5,
+                5 => pBlock.WeightCount * WeightPrecTableB[pBlock.WeightRange] + (pBlock.WeightCount * 7 + 2) / 3,
+                _ => pBlock.WeightCount * WeightPrecTableB[pBlock.WeightRange],
             };
-            if (pBlock.part_num == 1)
+            if (pBlock.PartCount == 1)
             {
-                pBlock.cem[0] = BinaryPrimitives.ReadInt32LittleEndian(input[1..]) >> 5 & 0xf;
+                pBlock.Cem[0] = BinaryPrimitives.ReadInt32LittleEndian(input[1..]) >> 5 & 0xf;
                 config_bits = 17;
             }
             else
@@ -135,66 +135,66 @@ namespace ZoDream.Shared.Drawing
                 if (cem_base == 0)
                 {
                     int cem = input[3] >> 1 & 0xf;
-                    for (int i = 0; i < pBlock.part_num; i++)
+                    for (int i = 0; i < pBlock.PartCount; i++)
                     {
-                        pBlock.cem[i] = cem;
+                        pBlock.Cem[i] = cem;
                     }
                     config_bits = 29;
                 }
                 else
                 {
-                    for (int i = 0; i < pBlock.part_num; i++)
+                    for (int i = 0; i < pBlock.PartCount; i++)
                     {
-                        pBlock.cem[i] = ((input[3] >> (i + 1) & 1) + cem_base - 1) << 2;
+                        pBlock.Cem[i] = ((input[3] >> (i + 1) & 1) + cem_base - 1) << 2;
                     }
-                    switch (pBlock.part_num)
+                    switch (pBlock.PartCount)
                     {
                         case 2:
-                            pBlock.cem[0] |= input[3] >> 3 & 3;
-                            pBlock.cem[1] |= GetBits(input, 126 - weight_bits, 2);
+                            pBlock.Cem[0] |= input[3] >> 3 & 3;
+                            pBlock.Cem[1] |= GetBits(input, 126 - weight_bits, 2);
                             break;
                         case 3:
-                            pBlock.cem[0] |= input[3] >> 4 & 1;
-                            pBlock.cem[0] |= GetBits(input, 122 - weight_bits, 2) & 2;
-                            pBlock.cem[1] |= GetBits(input, 124 - weight_bits, 2);
-                            pBlock.cem[2] |= GetBits(input, 126 - weight_bits, 2);
+                            pBlock.Cem[0] |= input[3] >> 4 & 1;
+                            pBlock.Cem[0] |= GetBits(input, 122 - weight_bits, 2) & 2;
+                            pBlock.Cem[1] |= GetBits(input, 124 - weight_bits, 2);
+                            pBlock.Cem[2] |= GetBits(input, 126 - weight_bits, 2);
                             break;
                         case 4:
                             for (int i = 0; i < 4; i++)
                             {
-                                pBlock.cem[i] |= GetBits(input, 120 + i * 2 - weight_bits, 2);
+                                pBlock.Cem[i] |= GetBits(input, 120 + i * 2 - weight_bits, 2);
                             }
                             break;
                     }
-                    config_bits = 25 + pBlock.part_num * 3;
+                    config_bits = 25 + pBlock.PartCount * 3;
                 }
             }
 
-            if (pBlock.dual_plane != 0)
+            if (pBlock.DualPlane != 0)
             {
                 config_bits += 2;
-                pBlock.plane_selector = GetBits(input, cem_base != 0 ? 130 - weight_bits - pBlock.part_num * 3 : 126 - weight_bits, 2);
+                pBlock.PlaneSelector = GetBits(input, cem_base != 0 ? 130 - weight_bits - pBlock.PartCount * 3 : 126 - weight_bits, 2);
             }
 
             int remain_bits = 128 - config_bits - weight_bits;
 
-            pBlock.endpoint_value_num = 0;
-            for (int i = 0; i < pBlock.part_num; i++)
+            pBlock.EndpointValueCount = 0;
+            for (int i = 0; i < pBlock.PartCount; i++)
             {
-                pBlock.endpoint_value_num += (pBlock.cem[i] >> 1 & 6) + 2;
+                pBlock.EndpointValueCount += (pBlock.Cem[i] >> 1 & 6) + 2;
             }
 
             for (int i = 0, endpoint_bits; i < CemTableA.Length; i++)
             {
                 endpoint_bits = CemTableA[i] switch
                 {
-                    3 => pBlock.endpoint_value_num * CemTableB[i] + (pBlock.endpoint_value_num * 8 + 4) / 5,
-                    5 => pBlock.endpoint_value_num * CemTableB[i] + (pBlock.endpoint_value_num * 7 + 2) / 3,
-                    _ => pBlock.endpoint_value_num * CemTableB[i],
+                    3 => pBlock.EndpointValueCount * CemTableB[i] + (pBlock.EndpointValueCount * 8 + 4) / 5,
+                    5 => pBlock.EndpointValueCount * CemTableB[i] + (pBlock.EndpointValueCount * 7 + 2) / 3,
+                    _ => pBlock.EndpointValueCount * CemTableB[i],
                 };
                 if (endpoint_bits <= remain_bits)
                 {
-                    pBlock.cem_range = i;
+                    pBlock.CemRange = i;
                     break;
                 }
             }
@@ -203,17 +203,17 @@ namespace ZoDream.Shared.Drawing
         private static void DecodeEndpoints(ReadOnlySpan<byte> input, ref BlockData pBlock)
         {
             Span<IntSeqData> epSeq = stackalloc IntSeqData[32];
-            DecodeIntseq(input, pBlock.part_num == 1 ? 17 : 29, CemTableA[pBlock.cem_range], CemTableB[pBlock.cem_range], pBlock.endpoint_value_num, false, epSeq);
+            DecodeIntseq(input, pBlock.PartCount == 1 ? 17 : 29, CemTableA[pBlock.CemRange], CemTableB[pBlock.CemRange], pBlock.EndpointValueCount, false, epSeq);
 
             Span<int> ev = stackalloc int[32];
-            switch (CemTableA[pBlock.cem_range])
+            switch (CemTableA[pBlock.CemRange])
             {
                 case 3:
-                    for (int i = 0, b = 0, c = DETritsTable[CemTableB[pBlock.cem_range]]; i < pBlock.endpoint_value_num; i++)
+                    for (int i = 0, b = 0, c = DETritsTable[CemTableB[pBlock.CemRange]]; i < pBlock.EndpointValueCount; i++)
                     {
-                        int a = (epSeq[i].bits & 1) * 0x1ff;
-                        int x = epSeq[i].bits >> 1;
-                        switch (CemTableB[pBlock.cem_range])
+                        int a = (epSeq[i].Bits & 1) * 0x1ff;
+                        int x = epSeq[i].Bits >> 1;
+                        switch (CemTableB[pBlock.CemRange])
                         {
                             case 1:
                                 b = 0;
@@ -234,16 +234,16 @@ namespace ZoDream.Shared.Drawing
                                 b = x << 4 | x >> 4;
                                 break;
                         }
-                        ev[i] = (a & 0x80) | ((epSeq[i].nonbits * c + b) ^ a) >> 2;
+                        ev[i] = (a & 0x80) | ((epSeq[i].NonBits * c + b) ^ a) >> 2;
                     }
                     break;
 
                 case 5:
-                    for (int i = 0, b = 0, c = DEQuintsTable[CemTableB[pBlock.cem_range]]; i < pBlock.endpoint_value_num; i++)
+                    for (int i = 0, b = 0, c = DEQuintsTable[CemTableB[pBlock.CemRange]]; i < pBlock.EndpointValueCount; i++)
                     {
-                        int a = (epSeq[i].bits & 1) * 0x1ff;
-                        int x = epSeq[i].bits >> 1;
-                        switch (CemTableB[pBlock.cem_range])
+                        int a = (epSeq[i].Bits & 1) * 0x1ff;
+                        int x = epSeq[i].Bits >> 1;
+                        switch (CemTableB[pBlock.CemRange])
                         {
                             case 1:
                                 b = 0;
@@ -261,59 +261,59 @@ namespace ZoDream.Shared.Drawing
                                 b = x << 5 | x >> 3;
                                 break;
                         }
-                        ev[i] = (a & 0x80) | ((epSeq[i].nonbits * c + b) ^ a) >> 2;
+                        ev[i] = (a & 0x80) | ((epSeq[i].NonBits * c + b) ^ a) >> 2;
                     }
                     break;
 
                 default:
-                    switch (CemTableB[pBlock.cem_range])
+                    switch (CemTableB[pBlock.CemRange])
                     {
                         case 1:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits * 0xff;
+                                ev[i] = epSeq[i].Bits * 0xff;
                             }
                             break;
                         case 2:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits * 0x55;
+                                ev[i] = epSeq[i].Bits * 0x55;
                             }
                             break;
                         case 3:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits << 5 | epSeq[i].bits << 2 | epSeq[i].bits >> 1;
+                                ev[i] = epSeq[i].Bits << 5 | epSeq[i].Bits << 2 | epSeq[i].Bits >> 1;
                             }
                             break;
                         case 4:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits << 4 | epSeq[i].bits;
+                                ev[i] = epSeq[i].Bits << 4 | epSeq[i].Bits;
                             }
                             break;
                         case 5:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits << 3 | epSeq[i].bits >> 2;
+                                ev[i] = epSeq[i].Bits << 3 | epSeq[i].Bits >> 2;
                             }
                             break;
                         case 6:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits << 2 | epSeq[i].bits >> 4;
+                                ev[i] = epSeq[i].Bits << 2 | epSeq[i].Bits >> 4;
                             }
                             break;
                         case 7:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits << 1 | epSeq[i].bits >> 6;
+                                ev[i] = epSeq[i].Bits << 1 | epSeq[i].Bits >> 6;
                             }
                             break;
                         case 8:
-                            for (int i = 0; i < pBlock.endpoint_value_num; i++)
+                            for (int i = 0; i < pBlock.EndpointValueCount; i++)
                             {
-                                ev[i] = epSeq[i].bits;
+                                ev[i] = epSeq[i].Bits;
                             }
                             break;
                     }
@@ -321,40 +321,40 @@ namespace ZoDream.Shared.Drawing
             }
 
             Span<int> v = ev;
-            for (int cem = 0; cem < pBlock.part_num; v = v.Slice((pBlock.cem[cem] / 4 + 1) * 2), cem++)
+            for (int cem = 0; cem < pBlock.PartCount; v = v.Slice((pBlock.Cem[cem] / 4 + 1) * 2), cem++)
             {
-                switch (pBlock.cem[cem])
+                switch (pBlock.Cem[cem])
                 {
                     case 0:
-                        SetEndpoint(pBlock.endpoints[cem], v[0], v[0], v[0], 255, v[1], v[1], v[1], 255);
+                        SetEndpoint(pBlock.Endpoints[cem], v[0], v[0], v[0], 255, v[1], v[1], v[1], 255);
                         break;
                     case 1:
                         {
                             int l0 = (v[0] >> 2) | (v[1] & 0xc0);
                             int l1 = ColorConverter.Clamp(l0 + (v[1] & 0x3f));
-                            SetEndpoint(pBlock.endpoints[cem], l0, l0, l0, 255, l1, l1, l1, 255);
+                            SetEndpoint(pBlock.Endpoints[cem], l0, l0, l0, 255, l1, l1, l1, 255);
                         }
                         break;
                     case 4:
-                        SetEndpoint(pBlock.endpoints[cem], v[0], v[0], v[0], v[2], v[1], v[1], v[1], v[3]);
+                        SetEndpoint(pBlock.Endpoints[cem], v[0], v[0], v[0], v[2], v[1], v[1], v[1], v[3]);
                         break;
                     case 5:
                         BitTransferSigned(ref v[1], ref v[0]);
                         BitTransferSigned(ref v[3], ref v[2]);
                         v[1] += v[0];
-                        SetEndpointClamp(pBlock.endpoints[cem], v[0], v[0], v[0], v[2], v[1], v[1], v[1], v[2] + v[3]);
+                        SetEndpointClamp(pBlock.Endpoints[cem], v[0], v[0], v[0], v[2], v[1], v[1], v[1], v[2] + v[3]);
                         break;
                     case 6:
-                        SetEndpoint(pBlock.endpoints[cem], v[0] * v[3] >> 8, v[1] * v[3] >> 8, v[2] * v[3] >> 8, 255, v[0], v[1], v[2], 255);
+                        SetEndpoint(pBlock.Endpoints[cem], v[0] * v[3] >> 8, v[1] * v[3] >> 8, v[2] * v[3] >> 8, 255, v[0], v[1], v[2], 255);
                         break;
                     case 8:
                         if (v[0] + v[2] + v[4] <= v[1] + v[3] + v[5])
                         {
-                            SetEndpoint(pBlock.endpoints[cem], v[0], v[2], v[4], 255, v[1], v[3], v[5], 255);
+                            SetEndpoint(pBlock.Endpoints[cem], v[0], v[2], v[4], 255, v[1], v[3], v[5], 255);
                         }
                         else
                         {
-                            SetEndpointBlue(pBlock.endpoints[cem], v[1], v[3], v[5], 255, v[0], v[2], v[4], 255);
+                            SetEndpointBlue(pBlock.Endpoints[cem], v[1], v[3], v[5], 255, v[0], v[2], v[4], 255);
                         }
 
                         break;
@@ -364,25 +364,25 @@ namespace ZoDream.Shared.Drawing
                         BitTransferSigned(ref v[5], ref v[4]);
                         if (v[1] + v[3] + v[5] >= 0)
                         {
-                            SetEndpointClamp(pBlock.endpoints[cem], v[0], v[2], v[4], 255, v[0] + v[1], v[2] + v[3], v[4] + v[5], 255);
+                            SetEndpointClamp(pBlock.Endpoints[cem], v[0], v[2], v[4], 255, v[0] + v[1], v[2] + v[3], v[4] + v[5], 255);
                         }
                         else
                         {
-                            SetEndpointBlueClamp(pBlock.endpoints[cem], v[0] + v[1], v[2] + v[3], v[4] + v[5], 255, v[0], v[2], v[4], 255);
+                            SetEndpointBlueClamp(pBlock.Endpoints[cem], v[0] + v[1], v[2] + v[3], v[4] + v[5], 255, v[0], v[2], v[4], 255);
                         }
 
                         break;
                     case 10:
-                        SetEndpoint(pBlock.endpoints[cem], v[0] * v[3] >> 8, v[1] * v[3] >> 8, v[2] * v[3] >> 8, v[4], v[0], v[1], v[2], v[5]);
+                        SetEndpoint(pBlock.Endpoints[cem], v[0] * v[3] >> 8, v[1] * v[3] >> 8, v[2] * v[3] >> 8, v[4], v[0], v[1], v[2], v[5]);
                         break;
                     case 12:
                         if (v[0] + v[2] + v[4] <= v[1] + v[3] + v[5])
                         {
-                            SetEndpoint(pBlock.endpoints[cem], v[0], v[2], v[4], v[6], v[1], v[3], v[5], v[7]);
+                            SetEndpoint(pBlock.Endpoints[cem], v[0], v[2], v[4], v[6], v[1], v[3], v[5], v[7]);
                         }
                         else
                         {
-                            SetEndpointBlue(pBlock.endpoints[cem], v[1], v[3], v[5], v[7], v[0], v[2], v[4], v[6]);
+                            SetEndpointBlue(pBlock.Endpoints[cem], v[1], v[3], v[5], v[7], v[0], v[2], v[4], v[6]);
                         }
 
                         break;
@@ -393,11 +393,11 @@ namespace ZoDream.Shared.Drawing
                         BitTransferSigned(ref v[7], ref v[6]);
                         if (v[1] + v[3] + v[5] >= 0)
                         {
-                            SetEndpointClamp(pBlock.endpoints[cem], v[0], v[2], v[4], v[6], v[0] + v[1], v[2] + v[3], v[4] + v[5], v[6] + v[7]);
+                            SetEndpointClamp(pBlock.Endpoints[cem], v[0], v[2], v[4], v[6], v[0] + v[1], v[2] + v[3], v[4] + v[5], v[6] + v[7]);
                         }
                         else
                         {
-                            SetEndpointBlueClamp(pBlock.endpoints[cem], v[0] + v[1], v[2] + v[3], v[4] + v[5], v[6] + v[7], v[0], v[2], v[4], v[6]);
+                            SetEndpointBlueClamp(pBlock.Endpoints[cem], v[0] + v[1], v[2] + v[3], v[4] + v[5], v[6] + v[7], v[0], v[2], v[4], v[6]);
                         }
 
                         break;
@@ -408,50 +408,50 @@ namespace ZoDream.Shared.Drawing
         private static void DecodeWeights(ReadOnlySpan<byte> input, ref BlockData block)
         {
             Span<IntSeqData> wSeq = stackalloc IntSeqData[128];
-            DecodeIntseq(input, 128, WeightPrecTableA[block.weight_range], WeightPrecTableB[block.weight_range], block.weight_num, true, wSeq);
+            DecodeIntseq(input, 128, WeightPrecTableA[block.WeightRange], WeightPrecTableB[block.WeightRange], block.WeightCount, true, wSeq);
 
             Span<int> wv = stackalloc int[128];
-            if (WeightPrecTableA[block.weight_range] == 0)
+            if (WeightPrecTableA[block.WeightRange] == 0)
             {
-                switch (WeightPrecTableB[block.weight_range])
+                switch (WeightPrecTableB[block.WeightRange])
                 {
                     case 1:
-                        for (int i = 0; i < block.weight_num; i++)
+                        for (int i = 0; i < block.WeightCount; i++)
                         {
-                            wv[i] = wSeq[i].bits != 0 ? 63 : 0;
+                            wv[i] = wSeq[i].Bits != 0 ? 63 : 0;
                         }
 
                         break;
                     case 2:
-                        for (int i = 0; i < block.weight_num; i++)
+                        for (int i = 0; i < block.WeightCount; i++)
                         {
-                            wv[i] = wSeq[i].bits << 4 | wSeq[i].bits << 2 | wSeq[i].bits;
+                            wv[i] = wSeq[i].Bits << 4 | wSeq[i].Bits << 2 | wSeq[i].Bits;
                         }
 
                         break;
                     case 3:
-                        for (int i = 0; i < block.weight_num; i++)
+                        for (int i = 0; i < block.WeightCount; i++)
                         {
-                            wv[i] = wSeq[i].bits << 3 | wSeq[i].bits;
+                            wv[i] = wSeq[i].Bits << 3 | wSeq[i].Bits;
                         }
 
                         break;
                     case 4:
-                        for (int i = 0; i < block.weight_num; i++)
+                        for (int i = 0; i < block.WeightCount; i++)
                         {
-                            wv[i] = wSeq[i].bits << 2 | wSeq[i].bits >> 2;
+                            wv[i] = wSeq[i].Bits << 2 | wSeq[i].Bits >> 2;
                         }
 
                         break;
                     case 5:
-                        for (int i = 0; i < block.weight_num; i++)
+                        for (int i = 0; i < block.WeightCount; i++)
                         {
-                            wv[i] = wSeq[i].bits << 1 | wSeq[i].bits >> 4;
+                            wv[i] = wSeq[i].Bits << 1 | wSeq[i].Bits >> 4;
                         }
 
                         break;
                 }
-                for (int i = 0; i < block.weight_num; i++)
+                for (int i = 0; i < block.WeightCount; i++)
                 {
                     if (wv[i] > 32)
                     {
@@ -459,60 +459,60 @@ namespace ZoDream.Shared.Drawing
                     }
                 }
             }
-            else if (WeightPrecTableB[block.weight_range] == 0)
+            else if (WeightPrecTableB[block.WeightRange] == 0)
             {
-                int s = WeightPrecTableA[block.weight_range] == 3 ? 32 : 16;
-                for (int i = 0; i < block.weight_num; i++)
+                int s = WeightPrecTableA[block.WeightRange] == 3 ? 32 : 16;
+                for (int i = 0; i < block.WeightCount; i++)
                 {
-                    wv[i] = wSeq[i].nonbits * s;
+                    wv[i] = wSeq[i].NonBits * s;
                 }
             }
             else
             {
-                if (WeightPrecTableA[block.weight_range] == 3)
+                if (WeightPrecTableA[block.WeightRange] == 3)
                 {
-                    switch (WeightPrecTableB[block.weight_range])
+                    switch (WeightPrecTableB[block.WeightRange])
                     {
                         case 1:
-                            for (int i = 0; i < block.weight_num; i++)
+                            for (int i = 0; i < block.WeightCount; i++)
                             {
-                                wv[i] = wSeq[i].nonbits * 50;
+                                wv[i] = wSeq[i].NonBits * 50;
                             }
                             break;
                         case 2:
-                            for (int i = 0; i < block.weight_num; i++)
+                            for (int i = 0; i < block.WeightCount; i++)
                             {
-                                wv[i] = wSeq[i].nonbits * 23;
-                                if ((wSeq[i].bits & 2) != 0)
+                                wv[i] = wSeq[i].NonBits * 23;
+                                if ((wSeq[i].Bits & 2) != 0)
                                 {
                                     wv[i] += 0b1000101;
                                 }
                             }
                             break;
                         case 3:
-                            for (int i = 0; i < block.weight_num; i++)
+                            for (int i = 0; i < block.WeightCount; i++)
                             {
-                                wv[i] = wSeq[i].nonbits * 11 + ((wSeq[i].bits << 4 | wSeq[i].bits >> 1) & 0b1100011);
+                                wv[i] = wSeq[i].NonBits * 11 + ((wSeq[i].Bits << 4 | wSeq[i].Bits >> 1) & 0b1100011);
                             }
                             break;
                     }
                 }
-                else if (WeightPrecTableA[block.weight_range] == 5)
+                else if (WeightPrecTableA[block.WeightRange] == 5)
                 {
-                    switch (WeightPrecTableB[block.weight_range])
+                    switch (WeightPrecTableB[block.WeightRange])
                     {
                         case 1:
-                            for (int i = 0; i < block.weight_num; i++)
+                            for (int i = 0; i < block.WeightCount; i++)
                             {
-                                wv[i] = wSeq[i].nonbits * 28;
+                                wv[i] = wSeq[i].NonBits * 28;
                             }
 
                             break;
                         case 2:
-                            for (int i = 0; i < block.weight_num; i++)
+                            for (int i = 0; i < block.WeightCount; i++)
                             {
-                                wv[i] = wSeq[i].nonbits * 13;
-                                if ((wSeq[i].bits & 2) != 0)
+                                wv[i] = wSeq[i].NonBits * 13;
+                                if ((wSeq[i].Bits & 2) != 0)
                                 {
                                     wv[i] += 0b1000010;
                                 }
@@ -520,9 +520,9 @@ namespace ZoDream.Shared.Drawing
                             break;
                     }
                 }
-                for (int i = 0; i < block.weight_num; i++)
+                for (int i = 0; i < block.WeightCount; i++)
                 {
-                    int a = (wSeq[i].bits & 1) * 0x7f;
+                    int a = (wSeq[i].Bits & 1) * 0x7f;
                     wv[i] = (a & 0x20) | ((wv[i] ^ a) >> 2);
                     if (wv[i] > 32)
                     {
@@ -531,19 +531,19 @@ namespace ZoDream.Shared.Drawing
                 }
             }
 
-            int ds = (1024 + block.bw / 2) / (block.bw - 1);
-            int dt = (1024 + block.bh / 2) / (block.bh - 1);
-            int pn = block.dual_plane != 0 ? 2 : 1;
+            int ds = (1024 + block.BlockWidth / 2) / (block.BlockWidth - 1);
+            int dt = (1024 + block.BlockHeight / 2) / (block.BlockHeight - 1);
+            int pn = block.DualPlane != 0 ? 2 : 1;
 
-            for (int t = 0, i = 0; t < block.bh; t++)
+            for (int t = 0, i = 0; t < block.BlockHeight; t++)
             {
-                for (int s = 0; s < block.bw; s++, i++)
+                for (int s = 0; s < block.BlockWidth; s++, i++)
                 {
-                    int gs = (ds * s * (block.width - 1) + 32) >> 6;
-                    int gt = (dt * t * (block.height - 1) + 32) >> 6;
+                    int gs = (ds * s * (block.Width - 1) + 32) >> 6;
+                    int gt = (dt * t * (block.Height - 1) + 32) >> 6;
                     int fs = gs & 0xf;
                     int ft = gt & 0xf;
-                    int v = (gs >> 4) + (gt >> 4) * block.width;
+                    int v = (gs >> 4) + (gt >> 4) * block.Width;
                     int w11 = (fs * ft + 8) >> 4;
                     int w10 = ft - w11;
                     int w01 = fs - w11;
@@ -553,9 +553,9 @@ namespace ZoDream.Shared.Drawing
                     {
                         int p00 = wv[v * pn + p];
                         int p01 = wv[(v + 1) * pn + p];
-                        int p10 = wv[(v + block.width) * pn + p];
-                        int p11 = wv[(v + block.width + 1) * pn + p];
-                        block.weights[i * 2 + p] = (p00 * w00 + p01 * w01 + p10 * w10 + p11 * w11 + 8) >> 4;
+                        int p10 = wv[(v + block.Width) * pn + p];
+                        int p11 = wv[(v + block.Width + 1) * pn + p];
+                        block.Weights[i * 2 + p] = (p00 * w00 + p01 * w01 + p10 * w10 + p11 * w11 + 8) >> 4;
                     }
                 }
             }
@@ -563,8 +563,8 @@ namespace ZoDream.Shared.Drawing
 
         private static void SelectPartition(ReadOnlySpan<byte> input, ref BlockData block)
         {
-            bool small_block = block.bw * block.bh < 31;
-            int seed = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 13 & 0x3ff) | (block.part_num - 1) << 10;
+            bool small_block = block.BlockWidth * block.BlockHeight < 31;
+            int seed = (BinaryPrimitives.ReadInt32LittleEndian(input) >> 13 & 0x3ff) | (block.PartCount - 1) << 10;
 
             uint rnum;
             unchecked
@@ -593,7 +593,7 @@ namespace ZoDream.Shared.Drawing
             ReadOnlySpan<int> sh =
             [
                 (seed & 2) != 0 ? 4 : 5,
-                block.part_num == 3 ? 6 : 5
+                block.PartCount == 3 ? 6 : 5
             ];
 
             if ((seed & 1) != 0)
@@ -613,31 +613,31 @@ namespace ZoDream.Shared.Drawing
 
             if (small_block)
             {
-                for (int t = 0, i = 0; t < block.bh; t++)
+                for (int t = 0, i = 0; t < block.BlockHeight; t++)
                 {
-                    for (int s = 0; s < block.bw; s++, i++)
+                    for (int s = 0; s < block.BlockWidth; s++, i++)
                     {
                         int x = s << 1;
                         int y = t << 1;
                         int a = (int)((seeds[0] * x + seeds[1] * y + (rnum >> 14)) & 0x3f);
                         int b = (int)((seeds[2] * x + seeds[3] * y + (rnum >> 10)) & 0x3f);
-                        int c = (int)(block.part_num < 3 ? 0 : (seeds[4] * x + seeds[5] * y + (rnum >> 6)) & 0x3f);
-                        int d = (int)(block.part_num < 4 ? 0 : (seeds[6] * x + seeds[7] * y + (rnum >> 2)) & 0x3f);
-                        block.partition[i] = (a >= b && a >= c && a >= d) ? 0 : (b >= c && b >= d) ? 1 : (c >= d) ? 2 : 3;
+                        int c = (int)(block.PartCount < 3 ? 0 : (seeds[4] * x + seeds[5] * y + (rnum >> 6)) & 0x3f);
+                        int d = (int)(block.PartCount < 4 ? 0 : (seeds[6] * x + seeds[7] * y + (rnum >> 2)) & 0x3f);
+                        block.Partition[i] = (a >= b && a >= c && a >= d) ? 0 : (b >= c && b >= d) ? 1 : (c >= d) ? 2 : 3;
                     }
                 }
             }
             else
             {
-                for (int y = 0, i = 0; y < block.bh; y++)
+                for (int y = 0, i = 0; y < block.BlockHeight; y++)
                 {
-                    for (int x = 0; x < block.bw; x++, i++)
+                    for (int x = 0; x < block.BlockWidth; x++, i++)
                     {
                         int a = (int)((seeds[0] * x + seeds[1] * y + (rnum >> 14)) & 0x3f);
                         int b = (int)((seeds[2] * x + seeds[3] * y + (rnum >> 10)) & 0x3f);
-                        int c = (int)(block.part_num < 3 ? 0 : (seeds[4] * x + seeds[5] * y + (rnum >> 6)) & 0x3f);
-                        int d = (int)(block.part_num < 4 ? 0 : (seeds[6] * x + seeds[7] * y + (rnum >> 2)) & 0x3f);
-                        block.partition[i] = (a >= b && a >= c && a >= d) ? 0 : (b >= c && b >= d) ? 1 : (c >= d) ? 2 : 3;
+                        int c = (int)(block.PartCount < 3 ? 0 : (seeds[4] * x + seeds[5] * y + (rnum >> 6)) & 0x3f);
+                        int d = (int)(block.PartCount < 4 ? 0 : (seeds[6] * x + seeds[7] * y + (rnum >> 2)) & 0x3f);
+                        block.Partition[i] = (a >= b && a >= c && a >= d) ? 0 : (b >= c && b >= d) ? 1 : (c >= d) ? 2 : 3;
                     }
                 }
             }
@@ -645,53 +645,53 @@ namespace ZoDream.Shared.Drawing
 
         private static void ApplicateColor(BlockData block, Span<byte> output)
         {
-            if (block.dual_plane != 0)
+            if (block.DualPlane != 0)
             {
                 Span<int> ps = [0, 0, 0, 0];
-                ps[block.plane_selector] = 1;
-                if (block.part_num > 1)
+                ps[block.PlaneSelector] = 1;
+                if (block.PartCount > 1)
                 {
-                    for (int i = 0; i < block.bw * block.bh; i++)
+                    for (int i = 0; i < block.BlockWidth * block.BlockHeight; i++)
                     {
-                        int p = block.partition[i];
-                        output[i * 4] = SelectColor(block.endpoints[p][0], block.endpoints[p][4], block.weights[i * 2 + ps[0]]);
-                        output[i * 4 + 1] = SelectColor(block.endpoints[p][1], block.endpoints[p][5], block.weights[i * 2 + ps[1]]);
-                        output[i * 4 + 2] = SelectColor(block.endpoints[p][2], block.endpoints[p][6], block.weights[i * 2 + ps[2]]);
-                        output[i * 4 + 3] = SelectColor(block.endpoints[p][3], block.endpoints[p][7], block.weights[i * 2 + ps[3]]);
+                        int p = block.Partition[i];
+                        output[i * 4] = SelectColor(block.Endpoints[p][0], block.Endpoints[p][4], block.Weights[i * 2 + ps[0]]);
+                        output[i * 4 + 1] = SelectColor(block.Endpoints[p][1], block.Endpoints[p][5], block.Weights[i * 2 + ps[1]]);
+                        output[i * 4 + 2] = SelectColor(block.Endpoints[p][2], block.Endpoints[p][6], block.Weights[i * 2 + ps[2]]);
+                        output[i * 4 + 3] = SelectColor(block.Endpoints[p][3], block.Endpoints[p][7], block.Weights[i * 2 + ps[3]]);
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < block.bw * block.bh; i++)
+                    for (int i = 0; i < block.BlockWidth * block.BlockHeight; i++)
                     {
-                        output[i * 4] = SelectColor(block.endpoints[0][0], block.endpoints[0][4], block.weights[i * 2 + ps[0]]);
-                        output[i * 4 + 1] = SelectColor(block.endpoints[0][1], block.endpoints[0][5], block.weights[i * 2 + ps[1]]);
-                        output[i * 4 + 2] = SelectColor(block.endpoints[0][2], block.endpoints[0][6], block.weights[i * 2 + ps[2]]);
-                        output[i * 4 + 3] = SelectColor(block.endpoints[0][3], block.endpoints[0][7], block.weights[i * 2 + ps[3]]);
+                        output[i * 4] = SelectColor(block.Endpoints[0][0], block.Endpoints[0][4], block.Weights[i * 2 + ps[0]]);
+                        output[i * 4 + 1] = SelectColor(block.Endpoints[0][1], block.Endpoints[0][5], block.Weights[i * 2 + ps[1]]);
+                        output[i * 4 + 2] = SelectColor(block.Endpoints[0][2], block.Endpoints[0][6], block.Weights[i * 2 + ps[2]]);
+                        output[i * 4 + 3] = SelectColor(block.Endpoints[0][3], block.Endpoints[0][7], block.Weights[i * 2 + ps[3]]);
                        
                     }
                 }
             }
-            else if (block.part_num > 1)
+            else if (block.PartCount > 1)
             {
-                for (int i = 0; i < block.bw * block.bh; i++)
+                for (int i = 0; i < block.BlockWidth * block.BlockHeight; i++)
                 {
-                    int p = block.partition[i];
-                    output[i * 4] = SelectColor(block.endpoints[p][0], block.endpoints[p][4], block.weights[i * 2]);
-                    output[i * 4 + 1] = SelectColor(block.endpoints[p][1], block.endpoints[p][5], block.weights[i * 2]);
-                    output[i * 4 + 2] = SelectColor(block.endpoints[p][2], block.endpoints[p][6], block.weights[i * 2]);
-                    output[i * 4 + 3] = SelectColor(block.endpoints[p][3], block.endpoints[p][7], block.weights[i * 2]);
+                    int p = block.Partition[i];
+                    output[i * 4] = SelectColor(block.Endpoints[p][0], block.Endpoints[p][4], block.Weights[i * 2]);
+                    output[i * 4 + 1] = SelectColor(block.Endpoints[p][1], block.Endpoints[p][5], block.Weights[i * 2]);
+                    output[i * 4 + 2] = SelectColor(block.Endpoints[p][2], block.Endpoints[p][6], block.Weights[i * 2]);
+                    output[i * 4 + 3] = SelectColor(block.Endpoints[p][3], block.Endpoints[p][7], block.Weights[i * 2]);
             
                 }
             }
             else
             {
-                for (int i = 0; i < block.bw * block.bh; i++)
+                for (int i = 0; i < block.BlockWidth * block.BlockHeight; i++)
                 {
-                    output[i * 4] = SelectColor(block.endpoints[0][0], block.endpoints[0][4], block.weights[i * 2]);
-                    output[i * 4 + 1] = SelectColor(block.endpoints[0][1], block.endpoints[0][5], block.weights[i * 2]);
-                    output[i * 4 + 2] = SelectColor(block.endpoints[0][2], block.endpoints[0][6], block.weights[i * 2]);
-                    output[i * 4 + 3] = SelectColor(block.endpoints[0][3], block.endpoints[0][7], block.weights[i * 2]);
+                    output[i * 4] = SelectColor(block.Endpoints[0][0], block.Endpoints[0][4], block.Weights[i * 2]);
+                    output[i * 4 + 1] = SelectColor(block.Endpoints[0][1], block.Endpoints[0][5], block.Weights[i * 2]);
+                    output[i * 4 + 2] = SelectColor(block.Endpoints[0][2], block.Endpoints[0][6], block.Weights[i * 2]);
+                    output[i * 4 + 3] = SelectColor(block.Endpoints[0][3], block.Endpoints[0][7], block.Weights[i * 2]);
                    
                 }
             }
@@ -725,8 +725,8 @@ namespace ZoDream.Shared.Drawing
                         {
                             _out[n] = new IntSeqData()
                             {
-                                bits = (int)(d >> (DImt[j] + b * j)) & mask,
-                                nonbits = DITritsTable[j * 256 + x],
+                                Bits = (int)(d >> (DImt[j] + b * j)) & mask,
+                                NonBits = DITritsTable[j * 256 + x],
                             };
                         }
                     }
@@ -741,8 +741,8 @@ namespace ZoDream.Shared.Drawing
                         {
                             _out[n] = new IntSeqData()
                             {
-                                bits = unchecked((int)(d >> (DImt[j] + b * j))) & mask,
-                                nonbits = DITritsTable[j * 256 + x],
+                                Bits = unchecked((int)(d >> (DImt[j] + b * j))) & mask,
+                                NonBits = DITritsTable[j * 256 + x],
                             };
                         }
                     }
@@ -767,8 +767,8 @@ namespace ZoDream.Shared.Drawing
                         {
                             _out[n] = new IntSeqData()
                             {
-                                bits = (int)d >> (DImq[j] + b * j) & mask,
-                                nonbits = DIQuintsTable[j * 128 + x],
+                                Bits = (int)d >> (DImq[j] + b * j) & mask,
+                                NonBits = DIQuintsTable[j * 128 + x],
                             };
                         }
                     }
@@ -783,8 +783,8 @@ namespace ZoDream.Shared.Drawing
                         {
                             _out[n] = new IntSeqData()
                             {
-                                bits = (int)d >> (DImq[j] + b * j) & mask,
-                                nonbits = DIQuintsTable[j * 128 + x],
+                                Bits = (int)d >> (DImq[j] + b * j) & mask,
+                                NonBits = DIQuintsTable[j * 128 + x],
                             };
                         }
                     }
@@ -798,8 +798,8 @@ namespace ZoDream.Shared.Drawing
                     {
                         _out[n] = new IntSeqData()
                         {
-                            bits = BitReverseU8((byte)GetBits(input, p, b), b),
-                            nonbits = 0,
+                            Bits = BitReverseU8((byte)GetBits(input, p, b), b),
+                            NonBits = 0,
                         };
                     }
                 }
@@ -809,8 +809,8 @@ namespace ZoDream.Shared.Drawing
                     {
                         _out[n] = new IntSeqData()
                         {
-                            bits = GetBits(input, p, b),
-                            nonbits = 0,
+                            Bits = GetBits(input, p, b),
+                            NonBits = 0,
                         };
                     }
                 }

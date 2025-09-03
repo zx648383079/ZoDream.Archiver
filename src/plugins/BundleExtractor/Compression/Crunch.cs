@@ -12,12 +12,12 @@ using NotSupportedException = ZoDream.Shared.NotSupportedException;
 
 namespace ZoDream.BundleExtractor.Compression
 {
-    public class Crunch(EndianReader reader)
+    public class Crunch(Stream input) : IDisposable
     {
         const int CRNMAX_LEVELS = 16;
         const bool CRND_LITTLE_ENDIAN_PLATFORM = true;
         private static readonly byte[] DXT1_FROM_LINEAR = [0, 2, 3, 1];
-        private static readonly byte[] DXT5_FROM_LINEAR = [0, 2, 3, 4, 5, 6, 7, 1];
+        protected static readonly byte[] DXT5_FROM_LINEAR = [0, 2, 3, 4, 5, 6, 7, 1];
         private static readonly byte[] CRND_CHUNK_ENCODING_NUM_TILES = [1, 2, 2, 3, 3, 3, 3, 4];
         private static readonly byte[][] CRND_CHUNK_ENCODING_TILES = [
             [0, 0, 0, 0],
@@ -29,27 +29,22 @@ namespace ZoDream.BundleExtractor.Compression
              [1, 0, 2, 0],
             [0, 1, 2, 3],
             ];
-        public Crunch(Stream input)
-            : this(new EndianReader(input, EndianType.BigEndian))
-        {
-            
-        }
 
 
-        private CrunchHeader _header;
-        private SymbolCodec _codec;
-        private StaticHuffmanDataModel _chunkEncodingDm;
-        private StaticHuffmanDataModel[] _endpointDeltaDm = new StaticHuffmanDataModel[2];
-        private StaticHuffmanDataModel[] _selectorDeltaDm = new StaticHuffmanDataModel[2];
-        private uint[] _colorEndpoints = [];
-        private uint[] _colorSelectors = [];
-        private ushort[] _alphaEndpoints = [];
-        private ushort[] _alphaSelectors = [];
+        protected CrunchHeader _header = new();
+        protected SymbolCodec _codec = new();
+        protected StaticHuffmanDataModel _chunkEncodingDm = new();
+        protected StaticHuffmanDataModel[] _endpointDeltaDm = new StaticHuffmanDataModel[2];
+        protected StaticHuffmanDataModel[] _selectorDeltaDm = new StaticHuffmanDataModel[2];
+        protected uint[] _colorEndpoints = [];
+        protected uint[] _colorSelectors = [];
+        protected ushort[] _alphaEndpoints = [];
+        protected ushort[] _alphaSelectors = [];
 
 
         public byte[] Read(int level_index = 0)
         {
-            reader.Position = 0;
+            input.Position = 0;
             _header = ReadHeader();
             if (!InitTables() || !DecodePalettes())
             {
@@ -59,13 +54,13 @@ namespace ZoDream.BundleExtractor.Compression
             var height = Math.Max(1, _header.Height >> level_index);
             var blocks_x = Math.Max(1, (width + 3) >> 2);
             var blocks_y = Math.Max(1, (height + 3) >> 2);
-            var row_pitch = blocks_x * (int)GetBytesPerDxtBlock(_header.Format);
+            var row_pitch = blocks_x * GetBytesPerDxtBlock(_header.Format);
             var total_face_size = row_pitch * blocks_y;
             if (total_face_size < 8 || level_index >= CRNMAX_LEVELS)
             {
                 return [];
             }
-            var outputLength = (int)(total_face_size * _header.Faces);
+            var outputLength = total_face_size * _header.Faces;
             var buffer = ArrayPool<byte>.Shared.Rent(outputLength);
             try
             {
@@ -74,23 +69,37 @@ namespace ZoDream.BundleExtractor.Compression
                 {
                     return [];
                 }
-                return _header.Format switch
-                {
-                    CrunchFormat.Dxt1 => new BC1().Decode(output, width, height),
-                    CrunchFormat.CCrnfmtDxt5
-                        or CrunchFormat.Dxt5CcxY
-                        or CrunchFormat.Dxt5XGbr
-                        or CrunchFormat.Dxt5Agbr
-                        or CrunchFormat.Dxt5XGxR => new BC3().Decode(output, width, height),
-                    CrunchFormat.DxnXy or CrunchFormat.DxnYx => new BC5().Decode(output, width, height),
-                    CrunchFormat.Dxt5a => new BC4().Decode(output, width, height),
-                    _ => throw new NotImplementedException(),
-                };
+                return Decode(output, width, height);
             }
             finally
             {
                 ArrayPool<byte>.Shared.Return(buffer);
             }
+        }
+        /// <summary>
+        /// 截取部分数据
+        /// </summary>
+        /// <param name="palette"></param>
+        /// <returns></returns>
+        protected Stream Slice(CrunchPalette palette)
+        {
+            return new PartialStream(input, palette.Offset, palette.Size);
+        }
+
+        protected virtual byte[] Decode(ReadOnlySpan<byte> output, int width, int height)
+        {
+            return _header.Format switch
+            {
+                CrunchFormat.Dxt1 => new BC1().Decode(output, width, height),
+                CrunchFormat.CCrnfmtDxt5
+                    or CrunchFormat.Dxt5CcxY
+                    or CrunchFormat.Dxt5XGbr
+                    or CrunchFormat.Dxt5Agbr
+                    or CrunchFormat.Dxt5XGxR => new BC3().Decode(output, width, height),
+                CrunchFormat.DxnXy or CrunchFormat.DxnYx => new BC5().Decode(output, width, height),
+                CrunchFormat.Dxt5a => new BC4().Decode(output, width, height),
+                _ => throw new NotImplementedException(),
+            };
         }
 
 
@@ -100,7 +109,7 @@ namespace ZoDream.BundleExtractor.Compression
         {
             
             var cur_level_ofs = _header.LevelOffsets[level_index];
-            var next_level_ofs = reader.Length;
+            var next_level_ofs = input.Length;
             if (level_index + 1 < _header.LevelOffsets.Length) 
             {
                 next_level_ofs = _header.LevelOffsets[level_index + 1];
@@ -109,16 +118,16 @@ namespace ZoDream.BundleExtractor.Compression
             {
                 return false;
             }
-            return UnpackLevel2(new PartialStream(reader.BaseStream, cur_level_ofs, next_level_ofs - cur_level_ofs),
+            return UnpackLevel(new PartialStream(input, cur_level_ofs, next_level_ofs - cur_level_ofs),
                 output,
                 row_pitch_in_bytes,
                 level_index);
         }
-        public bool InitTables()
+        private bool InitTables()
         {
             bool res;
             res = _codec.StartDecoding(
-                new PartialStream(reader.BaseStream, _header.TablesOffset, _header.TablesSize)
+                new PartialStream(input, _header.TablesOffset, _header.TablesSize)
             );
             if (!res)
             {
@@ -159,7 +168,7 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool DecodePalettes()
+        private bool DecodePalettes()
         {
             if (_header.ColorEndpoints.Count != 0)
             {
@@ -188,14 +197,14 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool DecodeColorEndpoints()
+        protected virtual bool DecodeColorEndpoints()
         {
             uint num_color_endpoints = _header.ColorEndpoints.Count;
             _colorEndpoints = new uint[num_color_endpoints];
             bool res;
 
             res = _codec.StartDecoding(
-                new PartialStream(reader.BaseStream, _header.ColorEndpoints.Offset, _header.ColorEndpoints.Size)
+                Slice(_header.ColorEndpoints)
             );
             if (!res)
             {
@@ -214,7 +223,6 @@ namespace ZoDream.BundleExtractor.Compression
             }
 
             uint a = 0, b = 0, c = 0, d = 0, e = 0, f = 0;
-            uint[] p_dst = _colorEndpoints;
             for (int i = 0; i < num_color_endpoints; i++)
             {
                 uint da, db, dc, dd, de, df;
@@ -230,7 +238,7 @@ namespace ZoDream.BundleExtractor.Compression
                 e = (e + de) & 63;
                 df = _codec.Decode(dm[0]);
                 f = (f + df) & 31;
-                p_dst[i] = (CRND_LITTLE_ENDIAN_PLATFORM) ?
+                _colorEndpoints[i] = CRND_LITTLE_ENDIAN_PLATFORM ?
                     (c | (b << 5) | (a << 11) | (f << 16) | (e << 21) | (d << 27)) :
                     (f | (e << 5) | (d << 11) | (c << 16) | (b << 21) | (a << 27));
             }
@@ -238,14 +246,14 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool DecodeColorSelectors()
+        protected virtual bool DecodeColorSelectors()
         {
             const uint MAX_SELECTOR_VALUE = 3;
             const int MAX_UNIQUE_SELECTOR_DELTAS = (int)(MAX_SELECTOR_VALUE * 2) + 1;
             int numColorSelectors = (int)_header.ColorSelectors.Count; // Assuming cast_to_uint is a simple cast
             bool res;
             res = _codec.StartDecoding(
-                new PartialStream(reader.BaseStream, _header.ColorSelectors.Offset, _header.ColorSelectors.Size)
+                Slice(_header.ColorSelectors)
             );
             if (!res)
             {
@@ -326,12 +334,12 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool DecodeAlphaEndpoints()
+        private bool DecodeAlphaEndpoints()
         {
             int numAlphaEndpoints = (int)_header.AlphaEndpoints.Count; // Assuming cast_to_uint is a simple cast
             bool res;
             res = _codec.StartDecoding(
-                new PartialStream(reader.BaseStream, _header.AlphaEndpoints.Offset, _header.AlphaEndpoints.Size)
+                Slice(_header.AlphaEndpoints)
             );
             if (!res)
             {
@@ -358,14 +366,14 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool DecodeAlphaSelectors()
+        protected virtual bool DecodeAlphaSelectors()
         {
             const uint MAX_SELECTOR_VALUE = 7;
             const int MAX_UNIQUE_SELECTOR_DELTAS = (int)(MAX_SELECTOR_VALUE * 2 + 1);
             int numAlphaSelectors = (int)_header.AlphaSelectors.Count;
             bool res;
             res = _codec.StartDecoding(
-                new PartialStream(reader.BaseStream, _header.AlphaSelectors.Offset, _header.AlphaSelectors.Size)
+                Slice(_header.AlphaSelectors)
             );
             if (!res)
             {
@@ -428,8 +436,8 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool UnpackLevel2(
-            Stream input,
+        private bool UnpackLevel(
+            Stream source,
             Span<byte> output,
             int rowPitchInBytes,
             int levelIndex)
@@ -438,7 +446,7 @@ namespace ZoDream.BundleExtractor.Compression
             int height = Math.Max(_header.Height >> levelIndex, 1);
             int blocksX = (width + 3) >> 2;
             int blocksY = (height + 3) >> 2;
-            int blockSize = _header.Format is CrunchFormat.Dxt1 or CrunchFormat.Dxt5a ? 8 : 16;
+            int blockSize = GetBlockSize(_header.Format);
             var minimalRowPitch = blockSize * blocksX;
 
             if (rowPitchInBytes == 0)
@@ -455,17 +463,25 @@ namespace ZoDream.BundleExtractor.Compression
                 return false;
             }
 
-            var chunksX = (blocksX + 1) >> 1;
-            var chunksY = (blocksY + 1) >> 1;
-            if (!_codec.StartDecoding(input))
+            if (!_codec.StartDecoding(source))
             {
                 return false;
             }
 
+            Unpack(output, rowPitchInBytes, blocksX, blocksY);
+
+            _codec.StopDecoding();
+            return true;
+        }
+
+        protected virtual void Unpack(Span<byte> output, int rowPitchInBytes, int blocksWidth, int blocksHeight)
+        {
+            var chunksX = (blocksWidth + 1) >> 1;
+            var chunksY = (blocksHeight + 1) >> 1;
             switch (_header.Format)
             {
                 case CrunchFormat.Dxt1:
-                    UnpackDxt1(output, rowPitchInBytes, blocksX, blocksY, chunksX, chunksY);
+                    UnpackDxt1(output, rowPitchInBytes, blocksWidth, blocksHeight, chunksX, chunksY);
                     break;
 
                 case CrunchFormat.CCrnfmtDxt5:
@@ -473,29 +489,26 @@ namespace ZoDream.BundleExtractor.Compression
                 case CrunchFormat.Dxt5XGbr:
                 case CrunchFormat.Dxt5Agbr:
                 case CrunchFormat.Dxt5XGxR:
-                    UnpackDxt5(output, rowPitchInBytes, blocksX, blocksY, chunksX, chunksY);
+                    UnpackDxt5(output, rowPitchInBytes, blocksWidth, blocksHeight, chunksX, chunksY);
                     break;
 
                 case CrunchFormat.Dxt5a:
-                    UnpackDxt5a(output, rowPitchInBytes, blocksX, blocksY, chunksX, chunksY);
+                    UnpackDxt5a(output, rowPitchInBytes, blocksWidth, blocksHeight, chunksX, chunksY);
                     break;
 
                 case CrunchFormat.DxnXy:
                 case CrunchFormat.DxnYx:
-                    UnpackDxn(output, rowPitchInBytes, blocksX, blocksY, chunksX, chunksY);
+                    UnpackDxn(output, rowPitchInBytes, blocksWidth, blocksHeight, chunksX, chunksY);
                     break;
 
                 default:
-                    return false;
+                    throw new NotImplementedException();
             }
-
-            _codec.StopDecoding();
-            return true;
         }
         #endregion
 
         #region Dxt
-        public bool UnpackDxt1(
+        private bool UnpackDxt1(
             Span<byte> output,
             int rowPitchInBytes,
             int blocksX,
@@ -607,7 +620,7 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool UnpackDxt5(
+        private bool UnpackDxt5(
             Span<byte> output,
             int rowPitchInBytes,
             int blocksX,
@@ -715,7 +728,7 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool UnpackDxt5a(
+        private bool UnpackDxt5a(
             Span<byte> output,
             int rowPitchInBytes,
             int blocksX,
@@ -806,7 +819,7 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        public bool UnpackDxn(
+        private bool UnpackDxn(
             Span<byte> output,
             int rowPitchInBytes,
             int blocksX,
@@ -913,7 +926,7 @@ namespace ZoDream.BundleExtractor.Compression
             return true;
         }
 
-        private static void WriteUInt(Span<byte> output, int index, uint val)
+        protected static void WriteUInt(Span<byte> output, int index, uint val)
         {
             BinaryPrimitives.WriteUInt32LittleEndian(output[(index * 4)..], val);
         }
@@ -921,6 +934,7 @@ namespace ZoDream.BundleExtractor.Compression
 
         private CrunchHeader ReadHeader()
         {
+            var reader = new EndianReader(input, EndianType.BigEndian);
             var res = new CrunchHeader();
             Expectation.ThrowIfNotSignature(reader.ReadBytes(2).SequenceEqual(CrunchHeader.Signature));
             res.HeaderSize = reader.ReadUInt16();
@@ -936,33 +950,38 @@ namespace ZoDream.BundleExtractor.Compression
             res.Reserved = reader.ReadUInt32();
             res.Userdata0 = reader.ReadUInt32();
             res.Userdata1 = reader.ReadUInt32();
-            res.ColorEndpoints = ReadPalette();
-            res.ColorSelectors = ReadPalette();
-            res.AlphaEndpoints = ReadPalette();
-            res.AlphaSelectors = ReadPalette();
+            res.ColorEndpoints = ReadPalette(reader);
+            res.ColorSelectors = ReadPalette(reader);
+            res.AlphaEndpoints = ReadPalette(reader);
+            res.AlphaSelectors = ReadPalette(reader);
             res.TablesSize = reader.ReadUInt16();
-            res.TablesOffset = ReadUInt3();
+            res.TablesOffset = ReadUInt3(reader);
             res.LevelOffsets = reader.ReadArray(levelCount, reader.ReadUInt32);
             Expectation.ThrowIf(res.HeaderSize < CrunchHeader.MIN_SIZE);
             return res;
         }
 
-        private CrunchPalette ReadPalette()
+        private CrunchPalette ReadPalette(BinaryReader reader)
         {
-            return new CrunchPalette(ReadUInt3(), ReadUInt3(), reader.ReadUInt16());
+            return new CrunchPalette(ReadUInt3(reader), ReadUInt3(reader), reader.ReadUInt16());
         }
 
-        private uint ReadUInt3()
+        private static uint ReadUInt3(BinaryReader reader)
         {
             return (uint)reader.ReadByte() << 16 | reader.ReadUInt16();
         }
 
-        private static uint GetBytesPerDxtBlock(CrunchFormat format)
+        private int GetBytesPerDxtBlock(CrunchFormat format)
         {
             return (GetBitsPerTexel(format) << 4) >> 3;
         }
 
-        private static uint GetBitsPerTexel(CrunchFormat format)
+        protected virtual int GetBlockSize(CrunchFormat format)
+        {
+            return format is CrunchFormat.Dxt1 or CrunchFormat.Dxt5a ? 8 : 16;
+        }
+
+        protected virtual int GetBitsPerTexel(CrunchFormat format)
         {
             return format switch
             {
@@ -978,6 +997,11 @@ namespace ZoDream.BundleExtractor.Compression
                 or CrunchFormat.Dxt5Agbr => 8,
                 _ => throw new NotSupportedException(format.ToString()),
             };
+        }
+
+        public void Dispose()
+        {
+            input.Dispose();
         }
     }
 }

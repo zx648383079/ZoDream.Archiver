@@ -2,7 +2,11 @@
 
 namespace ZoDream.Shared.Drawing
 {
-    internal class DXT1 : BlockBufferDecoder
+    /// <summary>
+    /// S3 Texture Compression
+    /// BC1
+    /// </summary>
+    public class DXT1 : BlockBufferDecoder
     {
         protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)
         {

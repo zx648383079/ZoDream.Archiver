@@ -6,33 +6,33 @@ namespace ZoDream.Shared.Drawing
     {
         private struct BlockData
         {
-            public int bw;
-            public int bh;
-            public int width;
-            public int height;
-            public int part_num;
-            public int dual_plane;
-            public int plane_selector;
-            public int weight_range;
+            public int BlockWidth;
+            public int BlockHeight;
+            public int Width;
+            public int Height;
+            public int PartCount;
+            public int DualPlane;
+            public int PlaneSelector;
+            public int WeightRange;
             /// <summary>
             /// max: 120
             /// </summary>
-            public int weight_num;
-            public IntBuffer4 cem;
-            public int cem_range;
+            public int WeightCount;
+            public IntBuffer4 Cem;
+            public int CemRange;
             /// <summary>
             /// max: 32
             /// </summary>
-            public int endpoint_value_num;
+            public int EndpointValueCount;
             /// <summary>
             /// 4 * 8
             /// </summary>
-            public EndpointBuffer endpoints;
+            public EndpointBuffer Endpoints;
             /// <summary>
             /// 144 * 2
             /// </summary>
-            public IntBuffer288 weights;
-            public IntBuffer144 partition;
+            public IntBuffer288 Weights;
+            public IntBuffer144 Partition;
         }
 
         [InlineArray(4)]
@@ -67,8 +67,8 @@ namespace ZoDream.Shared.Drawing
 
         private struct IntSeqData
         {
-            public int bits;
-            public int nonbits;
+            public int Bits;
+            public int NonBits;
         }
     }
 }

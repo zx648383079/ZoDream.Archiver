@@ -88,6 +88,14 @@
         L16,
         LA1616,
 
+        BC1,
+        BC2,
+        BC3,
+        BC4,
+        BC5,
+        BC6H,
+        BC7,
+
         ATC_RGB4,
         ATC_RGB8,
     }

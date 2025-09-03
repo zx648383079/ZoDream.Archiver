@@ -2,7 +2,7 @@
 
 namespace ZoDream.BundleExtractor.Compression
 {
-    internal class StaticHuffmanDataModel
+    public class StaticHuffmanDataModel
     {
         public uint TotalSyms;
         public byte[] CodeSizes = [];

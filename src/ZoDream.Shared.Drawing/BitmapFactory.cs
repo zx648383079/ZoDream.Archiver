@@ -57,9 +57,18 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.RGB655 => new RGB655(),
                 BitmapFormat.RGBA5551 => new ARGB1555(),
                 BitmapFormat.RGBX8888 => new RGBX8888(),
-                BitmapFormat.DXT1 => new DXT1(),
-                BitmapFormat.DXT3 => new DXT3(),
-                BitmapFormat.DXT5 => new DXT5(),
+                BitmapFormat.DXT1 or BitmapFormat.BC1 => new DXT1(),
+                BitmapFormat.DXT3 or BitmapFormat.DXT2 or BitmapFormat.BC2 => new DXT3(),
+                BitmapFormat.DXT5 or BitmapFormat.DXT4 or BitmapFormat.BC3 => new DXT5(),
+
+                BitmapFormat.BC4 => new BC4(),
+                BitmapFormat.BC5 => new BC5(),
+                BitmapFormat.BC7 => new BC7(),
+                BitmapFormat.BC6H => new BC6h(false),
+
+                BitmapFormat.ATC_RGB4 => new ATC_RGB4(),
+                BitmapFormat.ATC_RGB8 => new ATC_RGB8(),
+
                 BitmapFormat.P8 => new P8(),
                 BitmapFormat.ARGBFP32 => throw new NotImplementedException(),
                 BitmapFormat.RGBFP32 => throw new NotImplementedException(),
