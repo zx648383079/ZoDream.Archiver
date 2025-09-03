@@ -25,38 +25,38 @@ namespace ZoDream.Shared.Drawing
             {
                 byte rMin = data[i + 0];
                 byte rMax = data[i + 1];
-                byte[] rIndices = new byte[16];
-                int temp = ((data[i + 4] << 16) | (data[i + 3] << 8)) | data[i + 2];
+                var rIndices = new byte[16];
+                int temp = (data[i + 4] << 16) | (data[i + 3] << 8) | data[i + 2];
                 int indices = 0;
                 while (indices < 8)
                 {
                     rIndices[indices] = (byte)(temp & 7);
-                    temp = temp >> 3;
+                    temp >>= 3;
                     indices++;
                 }
                 temp = ((data[i + 7] << 16) | (data[i + 6] << 8)) | data[i + 5];
                 while (indices < 16)
                 {
                     rIndices[indices] = (byte)(temp & 7);
-                    temp = temp >> 3;
+                    temp >>= 3;
                     indices++;
                 }
                 byte gMin = data[i + 8];
                 byte gMax = data[i + 9];
                 byte[] gIndices = new byte[16];
-                temp = ((data[i + 12] << 16) | (data[i + 11] << 8)) | data[i + 10];
+                temp = (data[i + 12] << 16) | (data[i + 11] << 8) | data[i + 10];
                 indices = 0;
                 while (indices < 8)
                 {
                     gIndices[indices] = (byte)(temp & 7);
-                    temp = temp >> 3;
+                    temp >>= 3;
                     indices++;
                 }
                 temp = ((data[i + 15] << 16) | (data[i + 14] << 8)) | data[i + 13];
                 while (indices < 16)
                 {
                     gIndices[indices] = (byte)(temp & 7);
-                    temp = temp >> 3;
+                    temp >>= 3;
                     indices++;
                 }
                 byte[] redTable = new byte[8];
@@ -77,10 +77,10 @@ namespace ZoDream.Shared.Drawing
                     redTable[3] = (byte)((3 * redTable[0] + 2 * redTable[1]) / 5.0f);
                     redTable[4] = (byte)((2 * redTable[0] + 3 * redTable[1]) / 5.0f);
                     redTable[5] = (byte)((1 * redTable[0] + 4 * redTable[1]) / 5.0f);
-                    redTable[6] = (byte)0;
-                    redTable[7] = (byte)255;
+                    redTable[6] = byte.MinValue;
+                    redTable[7] = byte.MaxValue;
                 }
-                byte[] grnTable = new byte[8];
+                var grnTable = new byte[8];
                 grnTable[0] = gMin;
                 grnTable[1] = gMax;
                 if (grnTable[0] > grnTable[1])
@@ -98,31 +98,30 @@ namespace ZoDream.Shared.Drawing
                     grnTable[3] = (byte)((3 * grnTable[0] + 2 * grnTable[1]) / 5.0f);
                     grnTable[4] = (byte)((2 * grnTable[0] + 3 * grnTable[1]) / 5.0f);
                     grnTable[5] = (byte)((1 * grnTable[0] + 4 * grnTable[1]) / 5.0f);
-                    grnTable[6] = (byte)0;
-                    grnTable[7] = (byte)255;
+                    grnTable[6] = byte.MinValue;
+                    grnTable[7] = byte.MaxValue;
                 }
                 int chunkNum = i / 16;
                 int xPos = chunkNum % chunks;
                 int yPos = (chunkNum - xPos) / chunks;
-                int sizeh = (height < 4) ? height : 4;
-                int sizew = (width < 4) ? width : 4;
-                for (int j = 0; j < sizeh; j++)
+                int sizeH = (height < 4) ? height : 4;
+                int sizeW = (width < 4) ? width : 4;
+                for (int j = 0; j < sizeH; j++)
                 {
-                    for (int k = 0; k < sizew; k++)
+                    for (int k = 0; k < sizeW; k++)
                     {
-                        RGBAColor color;
-                        color.G = redTable[rIndices[(j * sizeh) + k]];
-                        color.R = grnTable[gIndices[(j * sizeh) + k]];
-                        float x = ((((float)color.R) / 255f) * 2f) - 1f;
-                        float y = ((((float)color.G) / 255f) * 2f) - 1f;
-                        float z = (float)Math.Sqrt((double)Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
-                        color.B = (byte)(((z + 1f) / 2f) * 255f);
-                        color.A = 0xFF;
-                        temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
-                        output[temp] = (byte)color.B;
-                        output[temp + 1] = (byte)color.G;
-                        output[temp + 2] = (byte)color.R;
-                        output[temp + 3] = (byte)color.A;
+                        var g = redTable[rIndices[(j * sizeH) + k]];
+                        var r = grnTable[gIndices[(j * sizeH) + k]];
+                        float x = (r / 255f * 2f) - 1f;
+                        float y = (g / 255f * 2f) - 1f;
+                        float z = (float)Math.Sqrt(Math.Max(0f, Math.Min(1f, 1f - (x * x)) - (y * y)));
+                        var b = (byte)((z + 1f) / 2f * 255f);
+                        var a = byte.MaxValue;
+                        temp = ((((yPos * 4) + j) * width) + (xPos * 4) + k) * 4;
+                        output[temp] = r;
+                        output[temp + 1] = g;
+                        output[temp + 2] = b;
+                        output[temp + 3] = a;
                     }
                 }
             }

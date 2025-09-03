@@ -46,7 +46,7 @@ namespace ZoDream.Shared.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static byte Clamp(int val)
         {
-            return (byte)Math.Clamp(val, 0, byte.MaxValue);
+            return (byte)Math.Clamp(val, byte.MinValue, byte.MaxValue);
         }
         /// <summary>
         /// 大端 6 个字节转 ulong

@@ -3,6 +3,10 @@ using System.Buffers.Binary;
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
+    /// <param name="isSigned"></param>
     public class BC6h(bool isSigned) : BlockBufferDecoder
     {
 

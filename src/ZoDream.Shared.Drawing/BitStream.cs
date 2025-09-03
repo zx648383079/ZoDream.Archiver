@@ -67,7 +67,7 @@ namespace ZoDream.Shared.Drawing
         {
             uint bits = ReadBits(numBits);
             // Reverse the bits.
-            return ColorConverter.ReverseBits(bits) >> (32 - numBits);
+            return ColorConverter.ReverseBits(bits) >> 32 - numBits;
         }
     }
 }

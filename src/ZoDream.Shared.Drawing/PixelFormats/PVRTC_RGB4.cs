@@ -6,9 +6,11 @@ namespace ZoDream.Shared.Drawing
 {
     public class PVRTC_RGB4 : IBufferDecoder, IBufferEncoder
     {
+
         public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
         {
-            var buffer = new byte[width * height * 4];
+            var size = Math.Max(width, height);
+            var buffer = new byte[size * size * 4];
             Decode(data, width, height, buffer);
             return buffer;
         }
@@ -20,8 +22,6 @@ namespace ZoDream.Shared.Drawing
             var yBlocks = size / 4;
             var xBlockMask = xBlocks - 1;
             var yBlockMask = yBlocks - 1;
-
-            var buffer = new byte[size * size * 4];
 
             var packets = new Packet[xBlocks * yBlocks];
             for (var i = 0; i < packets.Length; i++)
@@ -204,8 +204,8 @@ namespace ZoDream.Shared.Drawing
         private static (byte[] minColor, byte[] maxColor) GetMinMaxColors(
             ReadOnlySpan<byte> data, int startX, int startY)
         {
-            byte[] minColor = [255, 255, 255];
-            byte[] maxColor = [0, 0, 0];
+            byte[] minColor = [byte.MaxValue, byte.MaxValue, byte.MaxValue];
+            byte[] maxColor = [byte.MinValue, byte.MinValue, byte.MinValue];
 
             for (int x = startX; x < startX + 4; x++)
             {

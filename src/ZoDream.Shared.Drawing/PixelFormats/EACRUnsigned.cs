@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
     public class EACRUnsigned : BlockBufferDecoder
     {
         protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)

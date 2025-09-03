@@ -2,6 +2,9 @@
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
     public class ETC2A1 : BlockBufferDecoder
     {
         protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)

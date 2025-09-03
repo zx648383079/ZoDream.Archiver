@@ -341,5 +341,19 @@ namespace ZoDream.Shared.IO
             result = null;
             return false;
         }
+
+        public T[] ReadArray<T>(int count, Func<T> cb)
+        {
+            if (count <= 0)
+            {
+                return [];
+            }
+            var items = new T[count];
+            for (int i = 0; i < count; i++)
+            {
+                items[i] = cb.Invoke();
+            }
+            return items;
+        }
     }
 }

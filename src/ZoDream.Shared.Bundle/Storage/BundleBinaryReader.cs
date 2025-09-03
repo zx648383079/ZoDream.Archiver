@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
-using System.Reflection.PortableExecutable;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 

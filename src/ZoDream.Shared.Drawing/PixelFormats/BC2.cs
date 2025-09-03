@@ -3,6 +3,9 @@ using System.Buffers.Binary;
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
     public class BC2 : BlockBufferDecoder
     {
         protected override int BlockSize => 16;

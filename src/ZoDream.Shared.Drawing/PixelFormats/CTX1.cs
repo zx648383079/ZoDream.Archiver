@@ -3,74 +3,61 @@ using System.Runtime.CompilerServices;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class CTX1(bool swapXY = false, bool computeZ = true) : IBufferDecoder
+    public class CTX1(bool swapXY = false, bool computeZ = true) : BlockBufferDecoder
     {
-        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)
         {
-            var buffer = new byte[width * height * 4];
-            Decode(data, width, height, buffer);
-            return buffer;
-        }
+            Span<byte> vectors = stackalloc byte[4 * 2]; // RG
+            vectors[0] = data[1];
+            vectors[1] = data[0];
 
-        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
-        {
-            int xBlocks = width / 4;
-            int yBlocks = height / 4;
+            vectors[2] = data[3];
+            vectors[3] = data[2];
 
-            var vectors = new RGBAColor[4];
-            for (int i = 0; i < yBlocks; i++)
+            vectors[4] = (byte)((2 * vectors[0] + vectors[2] + 1) / 3);
+            vectors[5] = (byte)((2 * vectors[1] + vectors[3] + 1) / 3);
+
+            vectors[6] = (byte)((vectors[0] + 2 * vectors[2] + 1) / 3);
+            vectors[7] = (byte)((vectors[1] + 2 * vectors[3] + 1) / 3);
+
+            var code = BitConverter.ToUInt32(data[4..]);
+
+            for (int y = 0; y < 4; y++)
             {
-                for (int j = 0; j < xBlocks; j++)
+                for (int x = 0; x < 4; x++)
                 {
-                    int srcIndex = (i * xBlocks + j) * 8;
-                    vectors[0] = new RGBAColor(data[srcIndex + 1], data[srcIndex + 0], 0, 0);
-                    vectors[1] = new RGBAColor(data[srcIndex + 3], data[srcIndex + 2], 0, 0);
-                    vectors[2].R = (byte)((2 * vectors[0].R + vectors[1].R + 1) / 3);
-                    vectors[2].G = (byte)((2 * vectors[0].G + vectors[1].G + 1) / 3);
-                    vectors[3].R = (byte)((vectors[0].R + 2 * vectors[1].R + 1) / 3);
-                    vectors[3].G = (byte)((vectors[0].G + 2 * vectors[1].G + 1) / 3);
+                    var destIndex = GetBlockIndex(x, y) * PixelSize;
+                    var mapIndex = (int)(code & 3) * 2;
 
-                    var code = (uint)((data[srcIndex + 7] << 24) | (data[srcIndex + 6] << 16) | (data[srcIndex + 5] << 8) | (data[srcIndex + 4]));
+                    var r = vectors[mapIndex];
+                    var g = vectors[mapIndex + 1];
 
-                    for (int k = 0; k < 4; k++)
+                    var b = computeZ ? CalculateNormalZ(r, g) : byte.MinValue;
+
+                    if (swapXY)
                     {
-                        for (int m = 0; m < 4; m++)
-                        {
-                            int destIndex = ((width * ((i * 4) + k)) * 4) + (((j * 4) + m) * 4);
-
-                            RGBAColor vector = vectors[(int)(code & 3)];
-
-                            RGBAColor color;
-                            color.R = vector.R;
-                            color.G = vector.G;
-                            color.B = computeZ ? CalculateNormalZ(vector.R, vector.G) : (byte)0;
-                            color.A = 0xFF;
-
-                            if (swapXY)
-                            {
-                                (color.R, color.G) = (color.G, color.R);
-                            }
-
-                            output[destIndex + 0] = color.B;
-                            output[destIndex + 1] = color.G;
-                            output[destIndex + 2] = color.R;
-                            output[destIndex + 3] = color.A;
-
-                            code >>= 2;
-                        }
+                        (r, g) = (g, r);
                     }
+
+                    output[destIndex] = r;
+                    output[destIndex + 1] = g;
+                    output[destIndex + 2] = b;
+                    output[destIndex + 3] = byte.MaxValue;
+
+                    code >>= 2;
                 }
             }
-            return width * height * 4;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static byte CalculateNormalZ(byte r, float g)
+        private static byte CalculateNormalZ(byte r, float g)
         {
             float x = (r / 255f * 2f) - 1f;
             float y = (g / 255f * 2f) - 1f;
             float z = (float)Math.Sqrt(Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
-            return (byte)(((z + 1f) / 2f) * 255f);
+            return (byte)((z + 1f) / 2f * 255f);
         }
+
+   
     }
 }

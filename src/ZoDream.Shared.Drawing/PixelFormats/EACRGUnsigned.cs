@@ -2,6 +2,9 @@
 
 namespace ZoDream.Shared.Drawing
 {
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
     public class EACRGUnsigned : BlockBufferDecoder
     {
         protected override int BlockSize => 16;

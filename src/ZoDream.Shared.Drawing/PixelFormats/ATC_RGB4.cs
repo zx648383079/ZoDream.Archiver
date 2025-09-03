@@ -3,40 +3,16 @@ using System.Runtime.CompilerServices;
 
 namespace ZoDream.Shared.Drawing
 {
-    public class ATC_RGB4 : IBufferDecoder
+    /// <summary>
+    /// @see https://github.com/AssetRipper/TextureDecoder
+    /// </summary>
+    public class ATC_RGB4 : BlockBufferDecoder
     {
-        public byte[] Decode(ReadOnlySpan<byte> data, int width, int height)
+        protected override void DecodeBlock(ReadOnlySpan<byte> data, Span<byte> output)
         {
-            var buffer = new byte[width * height * 4];
-            Decode(data, width, height, buffer);
-            return buffer;
+            DecodeAtcRgb4Block(data, output);
         }
 
-        public int Decode(ReadOnlySpan<byte> data, int width, int height, Span<byte> output)
-        {
-            int bcw = (width + 3) / 4;
-            int bch = (height + 3) / 4;
-            int clen_last = (width + 3) % 4 + 1;
-            Span<byte> buf = stackalloc byte[16 * 4];
-            int inputOffset = 0;
-            for (int t = 0; t < bch; t++)
-            {
-                for (int s = 0; s < bcw; s++, inputOffset += 8)
-                {
-                    DecodeAtcRgb4Block(data.Slice(inputOffset, 8), buf);
-                    int clen = s < bcw - 1 ? 4 : clen_last;
-                    for (int i = 0, y = t * 4; i < 4 && y < height; i++, y++)
-                    {
-                        int outputOffset = t * 16 * width + s * 16 + i * width * 4;
-                        for (int j = 0; j < clen; j++)
-                        {
-                            buf.Slice(j + 4 * i, 4).CopyTo(output[(outputOffset + j * 4)..]);
-                        }
-                    }
-                }
-            }
-            return inputOffset;
-        }
 
 
         private static void DecodeAtcRgb4Block(ReadOnlySpan<byte> input, Span<byte> output)
@@ -107,5 +83,7 @@ namespace ZoDream.Shared.Drawing
             // bit-pattern replicating scaling (can at most double the bits)
             return (value << (to - from)) | (value >> (from * 2 - to));
         }
+
+
     }
 }
