@@ -60,9 +60,9 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.ATC_RGBA8 => new ATC_RGBA8(),
 
                 BitmapFormat.P8 => new P8(),
-                BitmapFormat.ARGBFP32 => throw new NotImplementedException(),
-                BitmapFormat.RGBFP32 => throw new NotImplementedException(),
-                BitmapFormat.RGBFP16 => throw new NotImplementedException(),
+                BitmapFormat.ARGBFP32 => new FloatSwapDecoder("ARGB"),
+                BitmapFormat.RGBFP32 => new FloatSwapDecoder("RGB"),
+                BitmapFormat.RGBFP16 => new HalfSwapDecoder("RGB"),
                 BitmapFormat.VU88 => new VU88(),
                 BitmapFormat.G8 => new G8(),
                 BitmapFormat.GB88 => new GB88(),

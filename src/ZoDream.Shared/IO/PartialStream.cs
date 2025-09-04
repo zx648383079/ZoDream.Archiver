@@ -26,16 +26,21 @@ namespace ZoDream.Shared.IO
 
         public PartialStream(Stream stream, long beginPosition, long byteLength)
         {
-            _byteLength = byteLength;
-            if (stream is not PartialStream ps)
+            var source = stream;
+            if (stream is PartialStream ps)
             {
-                _baseStream = stream;
-                _current = _beginPosition = beginPosition;
-                return;
+                beginPosition += ps._beginPosition;
+                _syncStream = ps;
+                source = ps.BaseStream;
             }
-            _syncStream = ps;
-            _baseStream = ps.BaseStream;
-            _current = _beginPosition = beginPosition + ps._beginPosition;
+            if (source is EmptyStream)
+            {
+                beginPosition = 0;
+                byteLength = 0;
+            }
+            _baseStream = source;
+            _current = _beginPosition = beginPosition;
+            _byteLength = byteLength;
         }
         private readonly Stream _baseStream;
         private readonly PartialStream? _syncStream;

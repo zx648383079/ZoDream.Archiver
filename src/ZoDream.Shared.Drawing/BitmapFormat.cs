@@ -105,5 +105,7 @@
 
         ATC_RGB4,
         ATC_RGBA8,
+
+        ASTC,
     }
 }

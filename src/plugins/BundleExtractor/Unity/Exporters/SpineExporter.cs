@@ -110,6 +110,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         }
         private void AddMaterial(SpineReplacementMaterial[] data)
         {
+            if (data is null)
+            {
+                return;
+            }
             foreach (var item in data)
             {
                 AddMaterial(item.Material);

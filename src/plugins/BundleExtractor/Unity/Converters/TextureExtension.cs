@@ -52,8 +52,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 TextureFormat.BC7 => BitmapFormat.BC7,
                 TextureFormat.BC4 => BitmapFormat.BC4,
                 TextureFormat.BC5 => BitmapFormat.BC5,
-                TextureFormat.DXT1Crunched => throw new NotImplementedException(),
-                TextureFormat.DXT5Crunched => throw new NotImplementedException(),
+             
                 TextureFormat.PVRTC_RGB2 => BitmapFormat.PVRTC_RGB2,
                 TextureFormat.PVRTC_RGBA2 => BitmapFormat.PVRTC_RGBA2,
                 TextureFormat.PVRTC_RGB4 => BitmapFormat.PVRTC_RGB4,
@@ -68,33 +67,39 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 TextureFormat.ETC2_RGB => BitmapFormat.ETC2,
                 TextureFormat.ETC2_RGBA1 => BitmapFormat.ETC2_A1,
                 TextureFormat.ETC2_RGBA8 => BitmapFormat.ETC2_A8,
-                TextureFormat.ASTC_RGB_4x4 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGB_5x5 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGB_6x6 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGB_8x8 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGB_10x10 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGB_12x12 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_4x4 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_5x5 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_6x6 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_8x8 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_10x10 => throw new NotImplementedException(),
-                TextureFormat.ASTC_RGBA_12x12 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_4x4 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_5x5 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_6x6 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_8x8 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_10x10 => throw new NotImplementedException(),
-                TextureFormat.ASTC_HDR_12x12 => throw new NotImplementedException(),
+
                 TextureFormat.RG16 => BitmapFormat.RG88,
                 TextureFormat.R8 => BitmapFormat.R8,
-                TextureFormat.ETC_RGB4Crunched => throw new NotImplementedException(),
-                TextureFormat.ETC2_RGBA8Crunched => throw new NotImplementedException(),
-                TextureFormat.R16_Alt => throw new NotImplementedException(),
+       
              
                 TextureFormat.RG32 => BitmapFormat.RG1616,
                 TextureFormat.RGB48 => BitmapFormat.RGB161616,
                 TextureFormat.RGBA64 => BitmapFormat.RGBA16161616,
+
+                // 一下需要特殊处理
+                TextureFormat.ETC_RGB4Crunched => BitmapFormat.ETC,
+                TextureFormat.ETC2_RGBA8Crunched => BitmapFormat.ETC2,
+                TextureFormat.R16_Alt => BitmapFormat.R16,
+                TextureFormat.DXT1Crunched => BitmapFormat.DXT1,
+                TextureFormat.DXT5Crunched => BitmapFormat.DXT5,
+                TextureFormat.ASTC_RGB_4x4
+                or TextureFormat.ASTC_RGB_5x5
+                or TextureFormat.ASTC_RGB_6x6
+                or TextureFormat.ASTC_RGB_8x8
+                or TextureFormat.ASTC_RGB_10x10
+                or TextureFormat.ASTC_RGB_12x12
+                or TextureFormat.ASTC_RGBA_4x4
+                or TextureFormat.ASTC_RGBA_5x5
+                or TextureFormat.ASTC_RGBA_6x6
+                or TextureFormat.ASTC_RGBA_8x8
+                or TextureFormat.ASTC_RGBA_10x10
+                or TextureFormat.ASTC_RGBA_12x12
+                or TextureFormat.ASTC_HDR_4x4
+                or TextureFormat.ASTC_HDR_5x5
+                or TextureFormat.ASTC_HDR_6x6
+                or TextureFormat.ASTC_HDR_8x8
+                or TextureFormat.ASTC_HDR_10x10
+                or TextureFormat.ASTC_HDR_12x12 => BitmapFormat.ASTC,
                 _ => BitmapFormat.BGRA8888,
             };
         }
@@ -153,6 +158,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             int width, int height, 
             TextureFormat format, Version version)
         {
+            if (data is null || data.Length == 0)
+            {
+                return null;
+            }
             if (format.ToString().EndsWith("Crunched"))
             {
                 if (version.GreaterThanOrEquals(2017, 3) || format is TextureFormat.ETC_RGB4Crunched or TextureFormat.ETC2_RGBA8Crunched)
@@ -204,7 +213,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 data.ReadExactly(buffer, 0, length);
                 return BitmapFactory.Decode(painter.Decode(buffer.AsSpan(0, length), width, height), width, height, SKColorType.Rgba8888);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return null;
             }

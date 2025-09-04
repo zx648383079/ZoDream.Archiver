@@ -949,6 +949,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                          pbr.DiffuseFactor = col.Value;
                         break;
                     case "_SColor":
+                        res.PbrMetallicRoughness ??= new();
                         res.PbrMetallicRoughness.BaseColorFactor = col.Value;
                         //res.AlphaMode = AlphaMode.MASK;
                         break;
