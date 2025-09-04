@@ -74,14 +74,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 isCached = true;
                 image = s.Container?.Shared?.GetOrAdd(res.GetHashCode(), () => {
                     res.ImageData.Position = 0;
-                    var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
+                    var data = TextureExtension.Decode(res.ImageData, res.Width,
                         res.Height, res.TextureFormat, resource.Version);
                     return data?.ToImage();
                 });
             } else
             {
                 res.ImageData.Position = 0;
-                var data = TextureExtension.Decode(res.ImageData.ToArray(), res.Width,
+                var data = TextureExtension.Decode(res.ImageData, res.Width,
                     res.Height, res.TextureFormat, resource.Version);
                 image = data?.ToImage();
             }

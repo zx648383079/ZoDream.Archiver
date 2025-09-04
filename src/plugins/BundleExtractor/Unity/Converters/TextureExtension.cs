@@ -1,8 +1,11 @@
 ﻿using SkiaSharp;
 using System;
+using System.Buffers;
+using System.IO;
 using UnityEngine;
+using ZoDream.BundleExtractor.Compression;
 using ZoDream.Shared.Drawing;
-using ZoDream.Shared.RustWrapper;
+using ZoDream.Shared.IO;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
@@ -45,26 +48,26 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 TextureFormat.YUY2 => BitmapFormat.YUY2,
                 TextureFormat.RGB9e5Float => BitmapFormat.RGB9e5F,
                 TextureFormat.RGBFloat => BitmapFormat.RGBF,
-                TextureFormat.BC6H => throw new NotImplementedException(),
-                TextureFormat.BC7 => throw new NotImplementedException(),
-                TextureFormat.BC4 => throw new NotImplementedException(),
-                TextureFormat.BC5 => throw new NotImplementedException(),
+                TextureFormat.BC6H => BitmapFormat.BC6H,
+                TextureFormat.BC7 => BitmapFormat.BC7,
+                TextureFormat.BC4 => BitmapFormat.BC4,
+                TextureFormat.BC5 => BitmapFormat.BC5,
                 TextureFormat.DXT1Crunched => throw new NotImplementedException(),
                 TextureFormat.DXT5Crunched => throw new NotImplementedException(),
                 TextureFormat.PVRTC_RGB2 => BitmapFormat.PVRTC_RGB2,
                 TextureFormat.PVRTC_RGBA2 => BitmapFormat.PVRTC_RGBA2,
                 TextureFormat.PVRTC_RGB4 => BitmapFormat.PVRTC_RGB4,
                 TextureFormat.PVRTC_RGBA4 => BitmapFormat.PVRTC_RGBA4,
-                TextureFormat.ETC_RGB4 => throw new NotImplementedException(),
-                TextureFormat.ATC_RGB4 => throw new NotImplementedException(),
-                TextureFormat.ATC_RGBA8 => throw new NotImplementedException(),
-                TextureFormat.EAC_R => throw new NotImplementedException(),
-                TextureFormat.EAC_R_SIGNED => throw new NotImplementedException(),
-                TextureFormat.EAC_RG => throw new NotImplementedException(),
-                TextureFormat.EAC_RG_SIGNED => throw new NotImplementedException(),
-                TextureFormat.ETC2_RGB => throw new NotImplementedException(),
-                TextureFormat.ETC2_RGBA1 => throw new NotImplementedException(),
-                TextureFormat.ETC2_RGBA8 => throw new NotImplementedException(),
+                TextureFormat.ETC_RGB4 or TextureFormat.ETC_RGB4_3DS or TextureFormat.ETC_RGBA8_3DS => BitmapFormat.ETC,
+                TextureFormat.ATC_RGB4 => BitmapFormat.ATC_RGB4,
+                TextureFormat.ATC_RGBA8 => BitmapFormat.ATC_RGBA8,
+                TextureFormat.EAC_R => BitmapFormat.EAC_R,
+                TextureFormat.EAC_R_SIGNED => BitmapFormat.EAC_R_SIGNED,
+                TextureFormat.EAC_RG => BitmapFormat.EAC_RG,
+                TextureFormat.EAC_RG_SIGNED => BitmapFormat.EAC_RG_SIGNED,
+                TextureFormat.ETC2_RGB => BitmapFormat.ETC2,
+                TextureFormat.ETC2_RGBA1 => BitmapFormat.ETC2_A1,
+                TextureFormat.ETC2_RGBA8 => BitmapFormat.ETC2_A8,
                 TextureFormat.ASTC_RGB_4x4 => throw new NotImplementedException(),
                 TextureFormat.ASTC_RGB_5x5 => throw new NotImplementedException(),
                 TextureFormat.ASTC_RGB_6x6 => throw new NotImplementedException(),
@@ -77,19 +80,18 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 TextureFormat.ASTC_RGBA_8x8 => throw new NotImplementedException(),
                 TextureFormat.ASTC_RGBA_10x10 => throw new NotImplementedException(),
                 TextureFormat.ASTC_RGBA_12x12 => throw new NotImplementedException(),
-                TextureFormat.ETC_RGB4_3DS => throw new NotImplementedException(),
-                TextureFormat.ETC_RGBA8_3DS => throw new NotImplementedException(),
-                TextureFormat.RG16 => BitmapFormat.RG88,
-                TextureFormat.R8 => BitmapFormat.R8,
-                TextureFormat.ETC_RGB4Crunched => throw new NotImplementedException(),
-                TextureFormat.ETC2_RGBA8Crunched => throw new NotImplementedException(),
-                TextureFormat.R16_Alt => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_4x4 => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_5x5 => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_6x6 => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_8x8 => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_10x10 => throw new NotImplementedException(),
                 TextureFormat.ASTC_HDR_12x12 => throw new NotImplementedException(),
+                TextureFormat.RG16 => BitmapFormat.RG88,
+                TextureFormat.R8 => BitmapFormat.R8,
+                TextureFormat.ETC_RGB4Crunched => throw new NotImplementedException(),
+                TextureFormat.ETC2_RGBA8Crunched => throw new NotImplementedException(),
+                TextureFormat.R16_Alt => throw new NotImplementedException(),
+             
                 TextureFormat.RG32 => BitmapFormat.RG1616,
                 TextureFormat.RGB48 => BitmapFormat.RGB161616,
                 TextureFormat.RGBA64 => BitmapFormat.RGBA16161616,
@@ -147,74 +149,68 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             };
         }
 
-        public static IImageData? Decode(byte[] data, 
+        public static IImageData? Decode(Stream data, 
             int width, int height, 
             TextureFormat format, Version version)
         {
             if (format.ToString().EndsWith("Crunched"))
             {
-                using var decoder = new Painter(
-                    version.GreaterThanOrEquals(2017, 3) ||
-                    format == TextureFormat.ETC_RGB4Crunched ||
-                    format == TextureFormat.ETC2_RGBA8Crunched ? PixelID.UnityCrunch : PixelID.Crunch
-                    , width, height);
-                data = decoder.Decode(data);
-                format = Enum.Parse<TextureFormat>(format.ToString()[..^8]);
+                if (version.GreaterThanOrEquals(2017, 3) || format is TextureFormat.ETC_RGB4Crunched or TextureFormat.ETC2_RGBA8Crunched)
+                {
+                    return BitmapFactory.Decode(new UnityCrunch(data).Read(), width, height, BitmapFormat.RGBA8888);
+                }
+                return BitmapFactory.Decode(new Crunch(data).Read(), width, height, BitmapFormat.RGBA8888);
             }
-            Painter? painter = format switch
+            IBufferDecoder? painter = format switch
             {
-                TextureFormat.ATC_RGB4 => new Painter(PixelID.AtcRgb, width, height, 4),
-                TextureFormat.ATC_RGBA8 => new Painter(PixelID.AtcRgba, width, height, 8),
-                TextureFormat.ASTC_HDR_4x4 => new Painter(PixelID.AsTcHdr, width, height, 4, 4),
-                TextureFormat.ASTC_HDR_5x5 => new Painter(PixelID.AsTcHdr, width, height, 5, 5),
-                TextureFormat.ASTC_HDR_6x6 => new Painter(PixelID.AsTcHdr, width, height, 6, 6),
-                TextureFormat.ASTC_HDR_8x8 => new Painter(PixelID.AsTcHdr, width, height, 8, 8),
-                TextureFormat.ASTC_HDR_10x10 => new Painter(PixelID.AsTcHdr, width, height, 10, 10),
-                TextureFormat.ASTC_HDR_12x12 => new Painter(PixelID.AsTcHdr, width, height, 12, 12),
-                TextureFormat.ASTC_RGB_4x4 => new Painter(PixelID.AsTcRgb, width, height, 4, 4),
-                TextureFormat.ASTC_RGB_5x5 => new Painter(PixelID.AsTcRgb, width, height, 5, 5),
-                TextureFormat.ASTC_RGB_6x6 => new Painter(PixelID.AsTcRgb, width, height, 6, 6),
-                TextureFormat.ASTC_RGB_8x8 => new Painter(PixelID.AsTcRgb, width, height, 8, 8),
-                TextureFormat.ASTC_RGB_10x10 => new Painter(PixelID.AsTcRgb, width, height, 10, 10),
-                TextureFormat.ASTC_RGB_12x12 => new Painter(PixelID.AsTcRgb, width, height, 12, 12),
-                TextureFormat.ASTC_RGBA_4x4 => new Painter(PixelID.AsTcRgba, width, height, 4, 4),
-                TextureFormat.ASTC_RGBA_5x5 => new Painter(PixelID.AsTcRgba, width, height, 5, 5),
-                TextureFormat.ASTC_RGBA_6x6 => new Painter(PixelID.AsTcRgba, width, height, 6, 6),
-                TextureFormat.ASTC_RGBA_8x8 => new Painter(PixelID.AsTcRgba, width, height, 8, 8),
-                TextureFormat.ASTC_RGBA_10x10 => new Painter(PixelID.AsTcRgba, width, height, 10, 10),
-                TextureFormat.ASTC_RGBA_12x12 => new Painter(PixelID.AsTcRgba, width, height, 12, 12),
-                TextureFormat.BC6H => new Painter(PixelID.Bcn, width, height, 6),
-                TextureFormat.BC7 => new Painter(PixelID.Bcn, width, height, 7),
-                TextureFormat.BC4 => new Painter(PixelID.Bcn, width, height, 4),
-                TextureFormat.BC5 => new Painter(PixelID.Bcn, width, height, 5),
-                TextureFormat.ETC2_RGB => new Painter(PixelID.EtcRgb, width, height, 2),
-                TextureFormat.ETC_RGB4 or TextureFormat.ETC_RGB4_3DS
-                    or TextureFormat.ETC_RGB4Crunched => new Painter(PixelID.EtcRgb, width, height, 1, 4),
-                TextureFormat.EAC_R => new Painter(PixelID.EacR, width, height),
-                TextureFormat.EAC_R_SIGNED => new Painter(PixelID.EacR, width, height, 1),
-                TextureFormat.EAC_RG => new Painter(PixelID.EacRg, width, height),
-                TextureFormat.EAC_RG_SIGNED => new Painter(PixelID.EacRg, width, height, 1),
-                TextureFormat.ETC2_RGBA1 => new Painter(PixelID.EtcRgba, width, height, 2, 1),
-                TextureFormat.ETC2_RGBA8 or TextureFormat.ETC2_RGBA8Crunched =>
-                new Painter(PixelID.EtcRgba, width, height, 2, 8),
-                TextureFormat.ETC_RGBA8_3DS => new Painter(PixelID.EtcRgba, width, height, 1, 8),
-                TextureFormat.PVRTC_RGB2 => new Painter(PixelID.PvrTcRgb, width, height, 2),
-                TextureFormat.PVRTC_RGBA2 => new Painter(PixelID.PvrTcRgba, width, height, 2),
-                TextureFormat.PVRTC_RGB4 => new Painter(PixelID.PvrTcRgb, width, height, 4),
-                TextureFormat.PVRTC_RGBA4 => new Painter(PixelID.PvrTcRgba, width, height, 4),
+                TextureFormat.ASTC_HDR_4x4 => new ASTC(4, 4),
+                TextureFormat.ASTC_HDR_5x5 => new ASTC(5, 5),
+                TextureFormat.ASTC_HDR_6x6 => new ASTC(6, 6),
+                TextureFormat.ASTC_HDR_8x8 => new ASTC(8, 8),
+                TextureFormat.ASTC_HDR_10x10 => new ASTC(10, 10),
+                TextureFormat.ASTC_HDR_12x12 => new ASTC(12, 12),
+                TextureFormat.ASTC_RGB_4x4 => new ASTC(4, 4),
+                TextureFormat.ASTC_RGB_5x5 => new ASTC(5, 5),
+                TextureFormat.ASTC_RGB_6x6 => new ASTC(6, 6),
+                TextureFormat.ASTC_RGB_8x8 => new ASTC(8, 8),
+                TextureFormat.ASTC_RGB_10x10 => new ASTC(10, 10),
+                TextureFormat.ASTC_RGB_12x12 => new ASTC(12, 12),
+                TextureFormat.ASTC_RGBA_4x4 => new ASTC(4, 4),
+                TextureFormat.ASTC_RGBA_5x5 => new ASTC(5, 5),
+                TextureFormat.ASTC_RGBA_6x6 => new ASTC(6, 6),
+                TextureFormat.ASTC_RGBA_8x8 => new ASTC(8, 8),
+                TextureFormat.ASTC_RGBA_10x10 => new ASTC(10, 10),
+                TextureFormat.ASTC_RGBA_12x12 => new ASTC(12, 12),
                 _ => null
             };
+            var targetFormat = Convert(format);
+            if (painter is null && BitmapFactory.ShouldExtraDecoder(targetFormat))
+            {
+                painter = BitmapFactory.CreateDecoder(targetFormat);
+                if (painter is null)
+                {
+                    return null;
+                }
+            }
             if (painter is null)
             {
-                return BitmapFactory.Decode(data, width, height, Convert(format), SKColorType.Bgra8888);
+                return BitmapFactory.Decode(data.ToArray(), width, height, targetFormat);
             }
+            var length = (int)data.Length;
+            var buffer = ArrayPool<byte>.Shared.Rent(length);
             try
             {
-                return BitmapFactory.Decode(painter.Decode(data), width, height, BitmapFormat.RGBA8888);
+                data.Position = 0;
+                data.ReadExactly(buffer, 0, length);
+                return BitmapFactory.Decode(painter.Decode(buffer.AsSpan(0, length), width, height), width, height, SKColorType.Rgba8888);
+            }
+            catch (Exception)
+            {
+                return null;
             }
             finally
             {
-                painter?.Dispose();
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 

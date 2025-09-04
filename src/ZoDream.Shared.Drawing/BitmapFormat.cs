@@ -58,7 +58,14 @@
         PVRTC_RGB4,
         PVRTC_RGBA4,
 
-        ETC_RGB8,
+        ETC,
+        ETC2,
+        ETC2_A1,
+        ETC2_A8,
+        EAC_RG,
+        EAC_R,
+        EAC_R_SIGNED,
+        EAC_RG_SIGNED,
 
         RG88,
         RG1616,
@@ -97,6 +104,6 @@
         BC7,
 
         ATC_RGB4,
-        ATC_RGB8,
+        ATC_RGBA8,
     }
 }

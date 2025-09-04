@@ -6,7 +6,7 @@ namespace ZoDream.Shared.Drawing
     /// <summary>
     /// @see https://github.com/AssetRipper/TextureDecoder
     /// </summary>
-    public class ATC_RGB8 : BlockBufferDecoder
+    public class ATC_RGBA8 : BlockBufferDecoder
     {
         protected override int BlockSize => 16;
 

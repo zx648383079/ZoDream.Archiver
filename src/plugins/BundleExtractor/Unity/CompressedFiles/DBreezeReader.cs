@@ -62,7 +62,7 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             fs.Position = 0x160;
             var format = (TextureFormat)reader.ReadInt32();
             fs.Position = 0x1C1;
-            var data = TextureExtension.Decode(fs.ToArray(), width,
+            var data = TextureExtension.Decode(new PartialStream(fs), width,
             height, format, Version.Parse("2018.4.34f1"));
             using var img = data?.ToImage();
             using var flip = img?.Flip(false);

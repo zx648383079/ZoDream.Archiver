@@ -10,28 +10,9 @@ namespace ZoDream.Shared.Drawing
         {
             return new SKBitmapDecoder().Decode(fileName);
         }
-        /// <summary>
-        /// 解码，对一些为标记的数据处理
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="format"></param>
-        /// <param name="colorType"></param>
-        /// <returns></returns>
-        public static IImageData Decode(byte[] data, int width, int height, 
-            BitmapFormat format, SKColorType colorType)
+        public static IImageData Decode(byte[] data, int width, int height, SKColorType colorType)
         {
-            if (format is BitmapFormat.DXT1 or BitmapFormat.DXT2 
-                or BitmapFormat.DXT3 
-                or BitmapFormat.DXT4 or BitmapFormat.DXT5 or BitmapFormat.Dxn
-                or BitmapFormat.CTX1)
-            {
-                return SKBitmapDecoder.Decode(
-                    CreateDecoder(format).Decode(data, width, height), 
-                    width, height, colorType);
-            }
-            return Decode(data, width, height, format);
+            return SKBitmapDecoder.Decode(data, width, height, colorType);
         }
 
         public static IImageData Decode(byte[] data, int width, int height, 
@@ -42,6 +23,15 @@ namespace ZoDream.Shared.Drawing
                 return SKBitmapDecoder.Decode(data, width, height, format);
             }
             return SKBitmapDecoder.Decode(CreateDecoder(format).Decode(data, width, height), width, height, SKColorType.Rgba8888);
+        }
+        /// <summary>
+        /// 判断是否需要额外的解码器
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static bool ShouldExtraDecoder(BitmapFormat format)
+        {
+            return !SKBitmapDecoder.IsSupport(format);
         }
 
         public static IBufferDecoder CreateDecoder(BitmapFormat format)
@@ -67,7 +57,7 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.BC6H => new BC6h(false),
 
                 BitmapFormat.ATC_RGB4 => new ATC_RGB4(),
-                BitmapFormat.ATC_RGB8 => new ATC_RGB8(),
+                BitmapFormat.ATC_RGBA8 => new ATC_RGBA8(),
 
                 BitmapFormat.P8 => new P8(),
                 BitmapFormat.ARGBFP32 => throw new NotImplementedException(),
@@ -83,7 +73,14 @@ namespace ZoDream.Shared.Drawing
                 BitmapFormat.PVRTC_RGBA2 => throw new NotImplementedException(),
                 BitmapFormat.PVRTC_RGB4 => new PVRTC_RGB4(),
                 BitmapFormat.PVRTC_RGBA4 => new PVRTC_RGBA4(),
-                BitmapFormat.ETC_RGB8 => throw new NotImplementedException(),
+                BitmapFormat.ETC => new ETC(),
+                BitmapFormat.ETC2 => new ETC2(),
+                BitmapFormat.ETC2_A1 => new ETC2A1(),
+                BitmapFormat.ETC2_A8 => new ETC2A8(),
+                BitmapFormat.EAC_R => new EACRUnsigned(),
+                BitmapFormat.EAC_R_SIGNED => new EACRSigned(),
+                BitmapFormat.EAC_RG => new EACRGUnsigned(),
+                BitmapFormat.EAC_RG_SIGNED => new EACRGSigned(),
                 BitmapFormat.RG88 => new RG88(),
                 BitmapFormat.RG1616 => new RG1616(),
                 BitmapFormat.RGBA4444 => new RGBA4444(),
