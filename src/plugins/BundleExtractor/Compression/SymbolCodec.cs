@@ -181,9 +181,9 @@ namespace ZoDream.BundleExtractor.Compression
         public uint Decode(StaticHuffmanDataModel model)
         {
             var pTables = model.DecodeTables;
-            if (this._bitCount < 24)
+            if (_bitCount < 24)
             {
-                if (this._bitCount < 16)
+                if (_bitCount < 16)
                 {
                     uint c0 = 0;
                     uint c1 = 0;

@@ -36,11 +36,8 @@ namespace ZoDream.BundleExtractor.Compression
 
         protected override bool DecodeColorEndpoints()
         {
-            bool has_etc_color_blocks = _header.Format == CrunchFormat.Etc1 ||
-                                        _header.Format == CrunchFormat.Etc2 ||
-                                        _header.Format == CrunchFormat.Etc2a ||
-                                        _header.Format == CrunchFormat.Etc1s ||
-                                        _header.Format == CrunchFormat.Etc2as;
+            bool has_etc_color_blocks = _header.Format is CrunchFormat.Etc1 or CrunchFormat.Etc2 
+                or CrunchFormat.Etc2a or CrunchFormat.Etc1s or CrunchFormat.Etc2as;
             if (!has_etc_color_blocks)
             {
                 return base.DecodeColorEndpoints();
@@ -48,9 +45,7 @@ namespace ZoDream.BundleExtractor.Compression
             uint num_color_endpoints = _header.ColorEndpoints.Count;
             
 
-            bool has_subblocks = _header.Format == CrunchFormat.Etc1 ||
-                                 _header.Format == CrunchFormat.Etc2 ||
-                                 _header.Format == CrunchFormat.Etc2a;
+            bool has_subblocks = _header.Format is CrunchFormat.Etc1 or CrunchFormat.Etc2 or CrunchFormat.Etc2a;
             _colorEndpoints = new uint[num_color_endpoints];
             if (!_codec.StartDecoding(
                     Slice(_header.ColorEndpoints)
@@ -65,7 +60,7 @@ namespace ZoDream.BundleExtractor.Compression
                 return false;
             }
 
-            uint a = 0, b = 0, c = 0, d = 0, e = 0, f = 0;
+            uint a = 0;
             for (uint i = 0; i < num_color_endpoints; i++)
             {
                 for (int shift = 0; shift < 4; shift++)
@@ -91,15 +86,10 @@ namespace ZoDream.BundleExtractor.Compression
 
         protected override bool DecodeColorSelectors()
         {
-            bool hasEtcColorBlocks = (_header.Format == CrunchFormat.Etc1) ||
-                                     (_header.Format == CrunchFormat.Etc2) ||
-                                     (_header.Format == CrunchFormat.Etc2a) ||
-                                     (_header.Format == CrunchFormat.Etc1s) ||
-                                     (_header.Format == CrunchFormat.Etc2as);
+            bool hasEtcColorBlocks = _header.Format is CrunchFormat.Etc1 or CrunchFormat.Etc2 
+                or CrunchFormat.Etc2a or CrunchFormat.Etc1s or CrunchFormat.Etc2as;
 
-            bool hasSubblocks = (_header.Format == CrunchFormat.Etc1) ||
-                                (_header.Format == CrunchFormat.Etc2) ||
-                                (_header.Format == CrunchFormat.Etc2a);
+            bool hasSubblocks = _header.Format is CrunchFormat.Etc1 or CrunchFormat.Etc2 or CrunchFormat.Etc2a;
             bool res;
             // Return value here is ignored in the original code.
             res = _codec.StartDecoding(
@@ -306,7 +296,7 @@ namespace ZoDream.BundleExtractor.Compression
             BinaryPrimitives.WriteUInt16BigEndian(next, buffer[half]);
             if ((index & 1) != 1)
             {
-                buffer[half] = (ushort)((ushort)next[0] << 8 | next[1] | val);
+                buffer[half] = (ushort)(next[0] << 8 | next[1] | val);
             } else
             {
                 buffer[half] = (ushort)(next[0] | val << 8 | next[1]);
