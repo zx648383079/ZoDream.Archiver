@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
@@ -10,4 +12,26 @@ namespace ZoDream.Shared.Bundle
         public bool IsMatch(IFilePath filePath);
     }
 
+    public class BundleMultipleFilter : Collection<IBundleFilter>, IBundleFilter
+    {
+        public BundleMultipleFilter()
+        {
+            
+        }
+        public BundleMultipleFilter(IList<IBundleFilter> items): base(items)
+        {
+            
+        }
+        public bool IsMatch(IFilePath filePath)
+        {
+            foreach (var item in Items)
+            {
+                if (item.IsMatch(filePath))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

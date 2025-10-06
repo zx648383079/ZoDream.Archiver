@@ -14,6 +14,7 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor
 {
@@ -239,6 +240,10 @@ namespace ZoDream.BundleExtractor
             var temporary = _service.Get<ITemporaryStorage>();
             temporary.Add(stream.BaseStream);
             stream.Add(_service.Get<IBundleCodec>());
+            if (_service.TryGet<Version>(out var version))
+            {
+                stream.Add(version);
+            }
             using var reader = _scheme.Open(stream, fullName, new ArchiveOptions()
             {
                 LeaveStreamOpen = true

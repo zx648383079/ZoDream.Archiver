@@ -4,6 +4,9 @@ using System.IO;
 using System.IO.Enumeration;
 using System.Text;
 using System.Threading;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -200,6 +203,25 @@ namespace ZoDream.Shared.Bundle
                 return Path.GetRelativePath(item, fullPath);
             }
             return Path.GetFileName(fullPath);
+        }
+
+        public static string Create(IBundleSource source, IFilePath sourcePath, string fileName, string outputFolder)
+        {
+            var fullPath = FilePath.GetFilePath(sourcePath);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = sourcePath.Name;
+            }
+            var sourceFolder = Path.GetDirectoryName(fullPath);
+            if (!LocationStorage.IsFullPath(fullPath))
+            {
+                return Path.Combine(outputFolder, sourceFolder, LocationStorage.CreateSafeFileName(fileName));
+            }
+            if (sourceFolder?.StartsWith(outputFolder) == true)
+            {
+                return Path.Combine(sourceFolder, LocationStorage.CreateSafeFileName(fileName));
+            }
+            return Path.Combine(outputFolder, source.GetRelativePath(sourceFolder), LocationStorage.CreateSafeFileName(fileName));
         }
 
         public static int ToHashCode(string value)

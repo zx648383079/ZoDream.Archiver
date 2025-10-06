@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -8,12 +8,15 @@ using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using Object = UnityEngine.Object;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     internal partial class SerializedFileReader : IArchiveReader
     {
-        public SerializedFileReader(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options)
+        public SerializedFileReader(IBundleBinaryReader reader, 
+            IFilePath sourcePath, 
+            IArchiveOptions? options)
         {
             FullPath = sourcePath;
             _reader = reader;
@@ -22,6 +25,10 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             if (SerializedFileMetadata.IsMetadataAtTheEnd(_header.Version))
             {
                 reader.BaseStream.Position = Math.Max(reader.BaseStream.Position, _header.FileSize - _header.MetadataSize);
+            }
+            if (reader.TryGet<Version>(out var version))
+            {
+                _metadata.Version = version;
             }
             _metadata.Read(reader.BaseStream, _header);
             CombineFormats(_header.Version, _metadata);

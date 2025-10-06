@@ -8,6 +8,7 @@ using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Engines
 {
@@ -62,6 +63,10 @@ namespace ZoDream.BundleExtractor.Engines
         public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
             service.AddIf<UnityBundleScheme>();
+            if (!string.IsNullOrWhiteSpace(options.Version) && Version.TryParse(options.Version, out var version, out _))
+            {
+                service.Add(version);
+            }
             return new UnityBundleChunkReader(fileItems, service, options);
         }
 

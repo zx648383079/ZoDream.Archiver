@@ -60,17 +60,15 @@ namespace ZoDream.Shared.Bundle
             return File.Create(filePath.FullPath);
         }
 
-        public override int GetHashCode()
-        {
-            return _hasCode;
-        }
-
         public string GetRelativePath(string filePath)
         {
             return BundleStorage.GetRelativePath(_entryItems, filePath);
         }
 
-        
+        public override int GetHashCode()
+        {
+            return _hasCode;
+        }
     }
 
     public enum SearchTarget

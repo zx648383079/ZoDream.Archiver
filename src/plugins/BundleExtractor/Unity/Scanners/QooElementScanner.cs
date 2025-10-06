@@ -6,16 +6,27 @@ using System.Security.Cryptography;
 using System.Text;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal class QooElementScanner : IBundleParser
+    public class QooElementScanner(IBundleSource source, IBundleExtractOptions options) : IBundleParser, IBundleFilter
     {
-        public IBundleBinaryReader OpenRead(string fullPath)
+        public bool IsMatch(IFilePath filePath)
         {
-            var input = File.OpenRead(fullPath);
-            return Parse(input, new FilePath(fullPath));
+            if (!FileSystemName.MatchesSimpleExpression("dialogue*.json", filePath.Name, true))
+            {
+                return false;
+            }
+            var fileName = BundleStorage.Create(source, filePath, string.Empty, options.OutputFolder);
+            if (LocationStorage.TryCreate(fileName, ".json", options.FileMode, out fileName))
+            {
+                using var fs = Decrypt(source.OpenRead(filePath));
+                fs.SaveAs(fileName);
+            }
+            return true;
         }
 
         public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
@@ -23,10 +34,6 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             if (sourcePath.Name == "spine.bundle")
             {
                 input = new XORStream(input, [0xFF], 64);
-            }
-            if (FileSystemName.MatchesSimpleExpression("dialogue*.json", sourcePath.Name, true))
-            {
-
             }
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
@@ -53,5 +60,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                 Convert.ToHexStringLower(MD5.HashData(data[..28]))));
             return new ZLibStream(ms, CompressionMode.Decompress, false);
         }
+
+       
     }
 }

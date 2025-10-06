@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Bundle;
 using UnityEngine;
@@ -7,7 +7,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
     public class SerializedFileMetadata
     {
-        public Version Version { get; set; }
+        public Version Version { get; set; } = Version.MinVersion;
         public BuildTarget TargetPlatform { get; set; }
         public bool EnableTypeTree { get; set; }
         public SerializedType[] Types { get; set; } = [];
@@ -75,7 +75,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         {
             if (HasEndian(header.Version))
             {
-                int num = stream.ReadByte();
+                var num = stream.ReadByte();
                 //This is not and should not be aligned.
                 //Alignment only happens for the endian boolean on version 9 and greater.
                 //This coincides with endian being stored in the header on version 9 and greater.
@@ -96,8 +96,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             var generation = reader.Get<FormatVersion>();
             if (HasSignature(generation))
             {
-                string signature = reader.ReadStringZeroTerm();
-                Version = Version.Parse(signature);
+                var signature = reader.ReadStringZeroTerm();
+                if (Version == Version.MinVersion)
+                {
+                    Version = Version.Parse(signature);
+                }
             }
             reader.Add(Version);
             if (HasPlatform(generation))
