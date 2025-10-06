@@ -1,4 +1,4 @@
-﻿namespace ZoDream.Shared.Bundle
+namespace ZoDream.Shared.Bundle
 {
     public interface IBundleProducer: IBundleLoader
     {
@@ -7,13 +7,13 @@
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public IBundleStorage GetStorage(IBundleOptions options);
+        public IBundleParser CreateParser(IBundleOptions options);
 
         /// <summary>
         /// 获取文件解析器
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public IBundleSerializer GetSerializer(IBundleOptions options);
+        public IBundleSerializer CreateSerializer(IBundleOptions options);
     }
 }

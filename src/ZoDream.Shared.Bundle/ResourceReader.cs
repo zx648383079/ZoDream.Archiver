@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,9 +14,9 @@ namespace ZoDream.Shared.Bundle
     /// <param name="fileItems"></param>
     /// <param name="scheme"></param>
     public class ResourceReader(
-        IEnumerable<string> fileItems, 
+        IBundleChunk fileItems, 
         IResourceScheme scheme,
-        IEntryService service) : IBundleReader
+        IEntryService service) : IBundleHandler
     {
         
 
@@ -24,15 +24,15 @@ namespace ZoDream.Shared.Bundle
         {
             var logger = service.Get<ILogger>();
             var progress = logger?.CreateSubProgress("Extract file...", 
-                fileItems is IBundleChunk c ? c.Count : fileItems.Count());
+                fileItems is IBundleChunk c ? c.Count : fileItems.Count);
             var i = 0;
-            foreach (var item in fileItems)
+            foreach (var item in fileItems.Items)
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                using var reader = scheme.Open(item);
+                using var reader = scheme.Open(item.FullPath);
                 reader?.ExtractTo(folder, mode, token);
                 if (progress is not null)
                 {

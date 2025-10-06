@@ -1,4 +1,3 @@
-﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -10,22 +9,21 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Cocos
 {
-    public class BlowfishReader(IEnumerable<string> fileItems) : IBundleReader
+    public class BlowfishReader(IBundleChunk fileItems) : IBundleHandler
     {
         private static readonly int[] CONST_IMG = [ 'd', 'r', -1, -1, -1, 'p', 'n', 'g' ];
         private static readonly int[] CONST_LUA = [ 'd', 'r', -1, -1, -1, 'l', 'u', 'a' ];
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
-            foreach (var item in fileItems)
+            foreach (var item in fileItems.Items)
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                var fileName = fileItems is IBundleChunk c ? c.Create(item, folder) 
-                    : Path.Combine(folder, Path.GetFileName(item));
-                using var fs = File.OpenRead(item);
+                var fileName = fileItems.Create(item, folder);
+                using var fs = fileItems.OpenRead(item);
                 if (!IsSupport(fs, out var extension))
                 {
                     continue;

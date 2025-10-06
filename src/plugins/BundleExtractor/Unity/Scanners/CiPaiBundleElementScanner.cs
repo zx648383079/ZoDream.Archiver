@@ -1,11 +1,11 @@
-﻿using System.IO;
+using System.IO;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class CiPaiBundleElementScanner(string package) : IBundleStorage
+    internal partial class CiPaiBundleElementScanner(string package) : IBundleParser
     {
 
         public bool IsPerpetualNovelty => package.Contains("wh");
@@ -21,10 +21,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public IBundleBinaryReader OpenRead(string fullPath)
         {
-            return OpenRead(Open(fullPath), new FilePath(fullPath));
+            return Parse(Open(fullPath), new FilePath(fullPath));
         }
 
-        public IBundleBinaryReader OpenRead(Stream input, IFilePath sourcePath)
+        public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
         {
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }

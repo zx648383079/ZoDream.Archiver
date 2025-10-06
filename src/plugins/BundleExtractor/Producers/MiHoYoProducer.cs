@@ -1,4 +1,4 @@
-﻿using ZoDream.BundleExtractor.Unity.Converters;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 
@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Producers
 
         public string AliasName => ProducerName;
 
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             return new BundleSerializer([
                 .. UnityConverter.Converters,
@@ -18,7 +18,7 @@ namespace ZoDream.BundleExtractor.Producers
                 ]);
         }
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
             return new MiHoYoElementScanner(options.Package ?? string.Empty);
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -7,12 +6,12 @@ using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
-using ZoDream.Shared.Logging;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class UnityEngine(IEntryService service) : IBundleEngine
+    public class UnityEngine(IEntryService service) : IBundleEngine, IBundleFilter
     {
         internal const string EngineName = "Unity";
         
@@ -22,15 +21,15 @@ namespace ZoDream.BundleExtractor.Engines
         private const string AndroidAssemblyName = "libunity.so";
         private const string WindowsAssemblyName = "UnityPlayer.dll";
 
-        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
+        public IBundleSplitter CreateSplitter(IBundleOptions options)
         {
             if (options is not IBundleExtractOptions o)
             {
-                return fileItems.EnumerateChunk(100);
+                return new BundleSplitter(100);
             }
             if (o.OnlyDependencyTask || string.IsNullOrWhiteSpace(o.DependencySource))
             {
-                return fileItems.EnumerateChunk(Math.Max(o.MaxBatchCount, 1));
+                return new BundleSplitter(Math.Max(o.MaxBatchCount, 1));
             }
             if (!service.TryGet<IDependencyDictionary>(out var dict))
             {
@@ -48,18 +47,19 @@ namespace ZoDream.BundleExtractor.Engines
                 }
                 service.Add(dict);
             }
-            if (YooAssetScheme.TryGet(fileItems, out var mapper))
-            {
-                service.Add(mapper);
-                service.Get<ILogger>().Info("YooAsset Mapper");
-            }
-            return fileItems.EnumerateChunk(dict);
+            return new BundleDependencySplitter(dict);
         }
+
+        public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
+        {
+            return new YooAssetScheme(fileItems);
+        }
+
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
             return new DependencyBuilder(options is IBundleExtractOptions o && o.OnlyDependencyTask ? o.DependencySource : string.Empty);
         }
-        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
+        public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
             service.AddIf<UnityBundleScheme>();
             return new UnityBundleChunkReader(fileItems, service, options);
@@ -132,27 +132,29 @@ namespace ZoDream.BundleExtractor.Engines
             }
         }
 
-        public bool IsExclude(IBundleOptions options, string fileName)
+        public bool IsMatch(IFilePath filePath)
         {
+            var options = service.Get<IBundleOptions>();
             if (!string.IsNullOrWhiteSpace(options.Entrance) &&
-                fileName.StartsWith(options.Entrance))
+                filePath.FullPath.StartsWith(options.Entrance))
             {
                 if (options.Platform == AndroidPlatformScheme.PlatformName)
                 {
-                    return !fileName.StartsWith(Path.Combine(options.Entrance,
+                    return !filePath.FullPath.StartsWith(Path.Combine(options.Entrance,
                         "assets"));
                 }
             }
-            var i = fileName.LastIndexOf('.');
+            var i = filePath.FullPath.LastIndexOf('.');
             if (i < 0)
             {
                 return false;
             }
-            return fileName[(i + 1)..].ToLower() switch
+            return filePath.FullPath[(i + 1)..].ToLower() switch
             {
                 "xml" or "dex" or "so" or "kotlin_metadata" or "dylib" => true,
                 _ => false
             };
         }
+
     }
 }

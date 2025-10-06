@@ -1,11 +1,11 @@
-﻿using System.IO;
+using System.IO;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(ICommandArguments package, IBundleOptions options) : IBundleStorage
+    internal partial class OtherBundleElementScanner(ICommandArguments package, IBundleOptions options) : IBundleParser
     {
 
         public bool IsCounterSide => package.Contains("cs");
@@ -30,10 +30,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public IBundleBinaryReader OpenRead(string fullPath)
         {
-            return OpenRead(File.OpenRead(fullPath), new FilePath(fullPath));
+            return Parse(File.OpenRead(fullPath), new FilePath(fullPath));
         }
 
-        public IBundleBinaryReader OpenRead(Stream input, IFilePath sourcePath)
+        public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
         {
             if (IsFakeHeader && !FileNameHelper.IsCommonFile(sourcePath.Name))
             {

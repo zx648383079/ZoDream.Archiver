@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
@@ -37,7 +38,7 @@ namespace ZoDream.BundleExtractor
         /// <param name="folder"></param>
         /// <param name="mode"></param>
         /// <param name="token"></param>
-        internal void ExportResource(string folder, ArchiveExtractMode mode, CancellationToken token)
+        internal void ExportResource(HashSet<string> entryItems, string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             if (!Options.EnabledResource)
             {
@@ -47,6 +48,10 @@ namespace ZoDream.BundleExtractor
             foreach (var item in _resourceItems.Values)
             {
                 if (item.Value.Position > 0)
+                {
+                    continue;
+                }
+                if (!entryItems.Contains(item.Key.FullPath))
                 {
                     continue;
                 }
@@ -61,7 +66,7 @@ namespace ZoDream.BundleExtractor
                 }
             }
         }
-        internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
+        internal void ExportAssets(HashSet<string> entryItems, string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             var progress = Logger?.CreateSubProgress("Batch Export ...", _exporterItems.Count);
             foreach (var exporter in _exporterItems)
@@ -79,7 +84,7 @@ namespace ZoDream.BundleExtractor
             foreach (var asset in _assetItems)
             {
                 var sourcePath = FilePath.GetFilePath(asset.FullPath);
-                if (!_fileItems.IsExportable(sourcePath))
+                if (!entryItems.Contains(sourcePath))
                 {
                     continue;
                 }
@@ -125,7 +130,6 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                _fileItems.Filter?.Exclude(sourcePath, BundleExcludeFlag.Export);
                 if (progress is not null)
                 {
                     progress.Value++;
@@ -141,8 +145,7 @@ namespace ZoDream.BundleExtractor
         /// <returns></returns>
         private bool PrepareExport(int entryId, ISerializedFile resource)
         {
-            if (resource.IsExclude(entryId) || 
-                !_fileItems.IsExportable(FilePath.GetFilePath(resource.FullPath)))
+            if (resource.IsExclude(entryId))
             {
                 return false;
             }

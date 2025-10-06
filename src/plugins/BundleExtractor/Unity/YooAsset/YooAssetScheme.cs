@@ -1,23 +1,28 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.YooAsset
 {
-    public class YooAssetScheme : IBundleArchiveScheme
+    public class YooAssetScheme(IBundleSource source) : IBundleSource
     {
+        private readonly IBundleMapper _mapper = new BundleMapper();
 
-        public static bool TryGet(IBundleSource items, [NotNullWhen(true)] out IBundleMapper? mapper)
+        public uint Count => source.Count;
+
+
+        public uint Analyze(CancellationToken token = default)
         {
-            var res = new BundleMapper();
+            var res = source.Analyze(token);
             var buffer = new byte[4];
             var hotfixPath = string.Empty;
             var lastCheck = 0L;
-            foreach (var item in items.Glob("*.bytes"))
+            foreach (var item in source.GetFiles("*.bytes"))
             {
                 var fs = File.OpenRead(item);
                 if (fs.Length < 10)
@@ -34,7 +39,7 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
                 }
                 if (!item.Contains("ManifestFiles"))
                 {
-                    new YooAssetReader(fs, item, YooAssetType.Apk).Write(res);
+                    new YooAssetReader(fs, item, YooAssetType.Apk).Write(_mapper);
                     continue;
                 }
                 var size = fs.Length;
@@ -48,13 +53,17 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
             if (!string.IsNullOrEmpty(hotfixPath))
             {
                 new YooAssetReader(File.OpenRead(hotfixPath), hotfixPath,
-                    YooAssetType.Hotfix).Write(res);
+                    YooAssetType.Hotfix).Write(_mapper);
             }
-            mapper = res;
-            return res.Count > 0;
+            return res;
         }
 
-        public IEnumerable<YooAssetReader> GetFiles(string folder)
+        public IEnumerable<string> GetDirectories(params string[] searchPatternItems)
+        {
+            return source.GetDirectories(searchPatternItems);
+        }
+
+        public IEnumerable<YooAssetReader> Create(string folder)
         {
             var buffer = new byte[4];
             var hotfixPath = string.Empty;
@@ -88,11 +97,38 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
                     YooAssetType.Hotfix);
             }
         }
-        
 
-        public IArchiveReader? Open(IBundleBinaryReader reader, IFilePath sourcePath, IArchiveOptions? options = null)
+        public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
-            throw new NotImplementedException();
+            return source.GetFiles(searchPatternItems);
+        }
+
+        public string GetRelativePath(string filePath)
+        {
+            //if (_mapper.TryGet(filePath, out var res))
+            //{
+            //    return source.GetRelativePath(res);
+            //}
+            return source.GetRelativePath(filePath);
+        }
+
+        public IEnumerable<string> Glob(params string[] searchPatternItems)
+        {
+            return source.Glob(searchPatternItems);
+        }
+
+        public Stream OpenRead(IFilePath filePath)
+        {
+            if (_mapper.TryGet(filePath.FullPath, out var res))
+            {
+                return source.OpenRead(FilePath.Parse(res));
+            }
+            return source.OpenRead(filePath);
+        }
+
+        public Stream OpenWrite(IFilePath filePath)
+        {
+            return source.OpenWrite(filePath);
         }
     }
 }

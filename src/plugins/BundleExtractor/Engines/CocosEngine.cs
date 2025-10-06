@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ZoDream.BundleExtractor.Cocos;
@@ -14,9 +14,15 @@ namespace ZoDream.BundleExtractor.Engines
 
         public string AliasName => EngineName;
 
-        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
+
+        public IBundleSplitter CreateSplitter(IBundleOptions options)
         {
-            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+            return new BundleSplitter(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+        }
+
+        public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
+        {
+            return fileItems;
         }
 
         public IDependencyBuilder GetBuilder(IBundleOptions options)
@@ -24,7 +30,7 @@ namespace ZoDream.BundleExtractor.Engines
             return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
         }
 
-        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
+        public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
             if (options.Producer == PaperProducer.ProducerName)
             {
@@ -43,9 +49,6 @@ namespace ZoDream.BundleExtractor.Engines
             return false;
         }
 
-        public bool IsExclude(IBundleOptions options, string fileName)
-        {
-            return false;
-        }
+
     }
 }

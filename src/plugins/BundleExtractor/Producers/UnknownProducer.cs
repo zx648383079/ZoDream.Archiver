@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Producers
             return false;
         }
 
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             if (options.Engine == UnityE.EngineName)
             {
@@ -26,7 +26,7 @@ namespace ZoDream.BundleExtractor.Producers
             return new BundleSerializer();
         }
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
             if (options.Engine == UnityE.EngineName)
             {

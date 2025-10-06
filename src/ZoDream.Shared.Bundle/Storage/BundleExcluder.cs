@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using ZoDream.Shared.Bundle;
+using System.Collections.Generic;
 
-namespace ZoDream.BundleExtractor
+namespace ZoDream.Shared.Bundle
 {
-    public partial class BundleReader: IBundleFilter
+    public class BundleExcluder : IBundleExcluder
     {
-
-        private IBundleEngine? _engine;
         private readonly HashSet<string> _excludeItems = [];
 
         public void Exclude(string filePath, BundleExcludeFlag flag)
@@ -19,7 +16,7 @@ namespace ZoDream.BundleExtractor
 
         public bool IsExclude(string filePath)
         {
-            return _engine?.IsExclude(options, filePath) == true;
+            return _excludeItems.Contains(filePath);
         }
 
         public bool IsExclude(string filePath, BundleExcludeFlag flag)

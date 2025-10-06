@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -7,16 +7,16 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class IceConeElementScanner(string package) : IBundleStorage
+    public class IceConeElementScanner(string package) : IBundleParser
     {
         public bool IsAeonFantasy => package.Contains("aeon");
 
         public IBundleBinaryReader OpenRead(string fullPath)
         {
-            return OpenRead(File.OpenRead(fullPath), FilePath.Parse(fullPath));
+            return Parse(File.OpenRead(fullPath), FilePath.Parse(fullPath));
         }
 
-        public IBundleBinaryReader OpenRead(Stream input, IFilePath sourcePath)
+        public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
         {
             if (input is EeabStream)
             {

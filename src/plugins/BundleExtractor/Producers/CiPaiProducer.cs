@@ -1,4 +1,4 @@
-﻿using ZoDream.BundleExtractor.Unity.Converters;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
@@ -11,12 +11,12 @@ namespace ZoDream.BundleExtractor.Producers
             return false;
         }
 
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             return new BundleSerializer(UnityConverter.Converters);
         }
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
             return new BundleStorage();
         }

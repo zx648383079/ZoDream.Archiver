@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,17 +10,17 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    public class AisnoElementScanner(string package) : IBundleStorage
+    public class AisnoElementScanner(string package) : IBundleParser
     {
         public bool IsWQMT => package.Contains("wqmt");
 
 
         public IBundleBinaryReader OpenRead(string fullPath)
         {
-            return OpenRead(File.OpenRead(fullPath), new FilePath(fullPath));
+            return Parse(File.OpenRead(fullPath), new FilePath(fullPath));
         }
 
-        public IBundleBinaryReader OpenRead(Stream input, IFilePath sourcePath)
+        public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
         {
             if (input is XORStream)
             {

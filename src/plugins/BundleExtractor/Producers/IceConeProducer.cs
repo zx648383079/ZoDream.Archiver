@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,12 +13,12 @@ namespace ZoDream.BundleExtractor.Producers
     {
         public string AliasName => "IceCone Studio";
 
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             return new BundleSerializer(UnityConverter.Converters);
         }
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
             return new IceConeElementScanner(options.Package ?? string.Empty);
         }

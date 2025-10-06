@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ZoDream.Shared.Bundle;
 
@@ -9,15 +9,20 @@ namespace ZoDream.BundleExtractor.Engines
         internal const string EngineName = "Unreal";
 
         public string AliasName => EngineName;
-        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
+        public IBundleSplitter CreateSplitter(IBundleOptions options)
         {
-            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+            return new BundleSplitter(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+        }
+
+        public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
+        {
+            return fileItems;
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
             return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
         }
-        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
+        public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
             return null;
         }
@@ -27,9 +32,5 @@ namespace ZoDream.BundleExtractor.Engines
             return false;
         }
 
-        public bool IsExclude(IBundleOptions options, string fileName)
-        {
-            return false;
-        }
     }
 }

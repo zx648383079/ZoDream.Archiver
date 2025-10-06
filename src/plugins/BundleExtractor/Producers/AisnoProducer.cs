@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using ZoDream.BundleExtractor.Unity.Converters;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
@@ -10,17 +11,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
-            return AisnoElementScanner(options.Package ?? string.Empty);
+            return new AisnoElementScanner(options.Package ?? string.Empty);
         }
 
-        private IBundleStorage AisnoElementScanner(string v)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             return new BundleSerializer(UnityConverter.Converters);
         }

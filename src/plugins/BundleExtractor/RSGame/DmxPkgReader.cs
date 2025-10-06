@@ -1,4 +1,4 @@
-﻿using SharpCompress.Archives.Zip;
+using SharpCompress.Archives.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +12,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.RSGame
 {
-    public class DmxPkgReader(Stream input) : IBundleReader
+    public class DmxPkgReader(Stream input) : IBundleHandler
     {
  
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)

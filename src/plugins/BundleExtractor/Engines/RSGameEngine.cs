@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,31 +17,30 @@ namespace ZoDream.BundleExtractor.Engines
         internal const string EngineName = "RSGame";
         public string AliasName => EngineName;
 
-        public IEnumerable<IBundleChunk> EnumerateChunk(IBundleSource fileItems, IBundleOptions options)
+        public IBundleSplitter CreateSplitter(IBundleOptions options)
         {
-            return fileItems.EnumerateChunk(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
+            return new BundleSplitter(options is IBundleExtractOptions o ? Math.Max(o.MaxBatchCount, 1) : 100);
         }
 
-
+        public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
+        {
+            return fileItems;
+        }
 
         public IDependencyBuilder GetBuilder(IBundleOptions options)
         {
             return new DependencyBuilder(options is IBundleExtractOptions o ? o.DependencySource : string.Empty);
         }
 
-        public bool IsExclude(IBundleOptions options, string fileName)
-        {
-            return false;
-        }
 
-        public IBundleReader OpenRead(IBundleChunk fileItems, IBundleOptions options)
+        public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
             return new ResourceReader(fileItems, this, service);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
-            if (fileItems.Glob("*.dmxpkg").Any())
+            if (fileItems.GetFiles("*.dmxpkg").Any())
             {
                 options.Engine = EngineName;
                 return true;
@@ -108,7 +107,7 @@ namespace ZoDream.BundleExtractor.Engines
             }
         }
 
-        public IBundleReader? Open(string fileName)
+        public IBundleHandler? Open(string fileName)
         {
             if (!fileName.EndsWith(".dmxpkg"))
             {
@@ -117,7 +116,7 @@ namespace ZoDream.BundleExtractor.Engines
             return new DmxPkgReader(File.OpenRead(fileName));
         }
 
-        public IBundleReader? Open(Stream stream, string fileName)
+        public IBundleHandler? Open(Stream stream, string fileName)
         {
             if (!fileName.EndsWith(".dmxpkg"))
             {

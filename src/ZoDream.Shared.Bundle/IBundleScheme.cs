@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
@@ -14,13 +14,13 @@ namespace ZoDream.Shared.Bundle
         /// <param name="fileItems"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public IBundleReader? Load(IEnumerable<string> fileItems, IArchiveOptions? options = null);
+        public IBundleHandler? Load(IBundleSource fileItems, IArchiveOptions? options = null);
         /// <summary>
         /// 获取项目信息
         /// </summary>
         /// <param name="fileItems"></param>
         /// <returns></returns>
-        public IBundleOptions? TryLoad(IEnumerable<string> fileItems);
+        public IBundleOptions? TryLoad(IBundleSource fileItems);
 
     }
 }

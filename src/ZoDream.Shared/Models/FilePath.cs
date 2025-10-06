@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using ZoDream.Shared.Interfaces;
 using IOPath = System.IO.Path;
 
 namespace ZoDream.Shared.Models
 {
-    public struct FilePathName(string name) : IFileName
+    public readonly struct FilePathName(string name) : IFileName
     {
         public readonly string Name => name;
 
@@ -55,7 +55,7 @@ namespace ZoDream.Shared.Models
         }
     }
 
-    public struct FilePath(string path) : IFilePath
+    public readonly struct FilePath(string path) : IFilePath
     {
         public readonly string FullPath => path;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -165,7 +165,7 @@ namespace ZoDream.Shared.Models
         }
     }
 
-    public struct EntryName(string name) : IEntryName
+    public readonly struct EntryName(string name) : IEntryName
     {
         public readonly string EntryPath => name;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -247,7 +247,7 @@ namespace ZoDream.Shared.Models
         }
     }
 
-    public struct FileEntryPath(string filePath, string entryName) : IEntryPath
+    public readonly struct FileEntryPath(string filePath, string entryName) : IEntryPath
     {
         public const string Separator = "#";
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -347,7 +347,7 @@ namespace ZoDream.Shared.Models
                 string.IsNullOrWhiteSpace(EntryPath) ? name : IOPath.Combine(EntryPath, name));
         }
 
-        public IFilePath Adjacent(string name)
+        public readonly IFilePath Adjacent(string name)
         {
             var folder = IOPath.GetDirectoryName(EntryPath);
             if (string.IsNullOrEmpty(folder))

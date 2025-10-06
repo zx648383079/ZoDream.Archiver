@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Producers
@@ -9,12 +9,12 @@ namespace ZoDream.BundleExtractor.Producers
 
         public string AliasName => ProducerName;
 
-        public IBundleSerializer GetSerializer(IBundleOptions options)
+        public IBundleSerializer CreateSerializer(IBundleOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public IBundleStorage GetStorage(IBundleOptions options)
+        public IBundleParser CreateParser(IBundleOptions options)
         {
             throw new NotImplementedException();
         }

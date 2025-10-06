@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -180,7 +180,7 @@ namespace ZoDream.Archiver.ViewModels
                 await _app.ConfirmAsync("请选择文件");
                 return;
             }
-            _options.Load(_scheme.TryLoad(FileItems.Select(i => i.FullPath)));
+            _options.Load(_scheme.TryLoad(new BundleSource(FileItems.Select(i => i.FullPath))));
             var dialog = new BundlePropertyDialog();
             dialog.ViewModel.Load(_options);
             await _app.OpenDialogAsync(dialog);
@@ -281,7 +281,7 @@ namespace ZoDream.Archiver.ViewModels
             }
             var token = _app.OpenProgress("解压中...");
             await Task.Factory.StartNew(() => {
-                IBundleReader? reader;
+                IBundleHandler? reader;
                 reader = _scheme.Load(source, _options);
                 try
                 {

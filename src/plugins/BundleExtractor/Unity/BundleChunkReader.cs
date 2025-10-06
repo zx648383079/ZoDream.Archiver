@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor
 {
-    internal partial class UnityBundleChunkReader : IBundleReader, IBundleContainer
+    internal partial class UnityBundleChunkReader : IBundleHandler, IBundleContainer
     {
 
         public UnityBundleChunkReader(
@@ -134,6 +134,10 @@ namespace ZoDream.BundleExtractor
             EnqueueImportQueue(dependencyPath);
         }
 
+        private void EnqueueImportQueue(IFilePath fullPath)
+        {
+            EnqueueImportQueue(fullPath.Name, fullPath.FullPath);
+        }
         private void EnqueueImportQueue(string fullPath)
         {
             EnqueueImportQueue(Path.GetFileName(fullPath), fullPath);
@@ -149,10 +153,6 @@ namespace ZoDream.BundleExtractor
             {
                 return;
             }
-            if (!File.Exists(fullPath))
-            {
-                return;
-            }
             _importItems.Add(fullPath);
             _importFileHash.Add(Path.GetFileName(name));
         }
@@ -161,7 +161,13 @@ namespace ZoDream.BundleExtractor
         {
             _extractMode = mode;
             _extractFolder = folder;
-            foreach (var item in _fileItems)
+            var entryItems = new HashSet<string>(); 
+            foreach (var item in _fileItems.Items)
+            {
+                EnqueueImportQueue(item);
+                entryItems.Add(item.FullPath);
+            }
+            foreach (var item in _fileItems.Dependencies)
             {
                 EnqueueImportQueue(item);
             }
@@ -185,13 +191,13 @@ namespace ZoDream.BundleExtractor
             }
             ReadAssets(token);
             ProcessAssets(token);
-            ExportAssets(folder, mode, token);
-            ExportResource(folder, mode, token);
+            ExportAssets(entryItems, folder, mode, token);
+            ExportResource(entryItems, folder, mode, token);
         }
 
         private void LoadFile(string fullName, CancellationToken token)
         {
-            var reader = _service.Get<IBundleStorage>().OpenRead(fullName);
+            var reader = _fileItems.OpenRead(FilePath.Parse(fullName));
             if (reader is null || reader.Length == 0)
             {
                 reader?.Dispose();
@@ -210,7 +216,7 @@ namespace ZoDream.BundleExtractor
 
         private void LoadFile(Stream stream, IFilePath fullName, CancellationToken token)
         {
-            var reader = _service.Get<IBundleStorage>().OpenRead(stream, fullName);
+            var reader = _service.Get<IBundleParser>().Parse(stream, fullName);
             if (reader is null || reader.Length == 0)
             {
                 reader?.Dispose();

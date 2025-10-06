@@ -1,5 +1,6 @@
-﻿using LzhamWrapper;
+using LzhamWrapper;
 using LzhamWrapper.Enums;
+using LzhamWrapper.Parameters;
 using System.Buffers;
 using System.IO;
 using ZoDream.Shared.Bundle;

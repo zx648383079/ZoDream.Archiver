@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -7,7 +7,7 @@ namespace ZoDream.Shared.Bundle
     /// </summary>
     public interface IResourceScheme
     {
-        public IBundleReader? Open(string fileName);
-        public IBundleReader? Open(Stream stream, string fileName);
+        public IBundleHandler? Open(string fileName);
+        public IBundleHandler? Open(Stream stream, string fileName);
     }
 }

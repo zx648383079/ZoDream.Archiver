@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
@@ -39,55 +39,6 @@ namespace ZoDream.Shared.Bundle
         public static uint FileCount(IEnumerable<string> items, CancellationToken token = default)
         {
             return FileCount(items, string.Empty, token);
-        }
-        public static uint FileCount(IEnumerable<string> items, 
-            string pattern,
-            IBundleFilter? filter,
-            CancellationToken token = default)
-        {
-            var options = new EnumerationOptions()
-            {
-                RecurseSubdirectories = true,
-                MatchType = MatchType.Win32,
-                AttributesToSkip = FileAttributes.None,
-                IgnoreInaccessible = false
-            };
-            var count = 0u;
-            foreach (var item in items)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    break;
-                }
-                if (File.Exists(item))
-                {
-                    count++;
-                    continue;
-                }
-                var res = new FileSystemEnumerable<string>(item, delegate (ref FileSystemEntry entry)
-                {
-                    return entry.ToSpecifiedFullPath();
-                }, options)
-                {
-                    ShouldIncludePredicate = delegate (ref FileSystemEntry entry)
-                    {
-                        return !entry.IsDirectory && IsMatch(entry.FileName, pattern);
-                    }
-                };
-                foreach (var it in res)
-                {
-                    if (filter?.IsExclude(it) == true)
-                    {
-                        continue;
-                    }
-                    count++;
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-            }
-            return count;
         }
         public static uint FileCount(IEnumerable<string> items,
             string pattern,
@@ -135,17 +86,8 @@ namespace ZoDream.Shared.Bundle
         }
 
         public static IEnumerable<string> Glob(
-            IEnumerable<string> fileItems,
-            string[] searchPatternItems,
-            SearchTarget target,
-            CancellationToken token = default)
-        {
-            return Glob(fileItems, searchPatternItems, null, target, token);
-        }
-        public static IEnumerable<string> Glob(
             IEnumerable<string> fileItems, 
             string[] searchPatternItems,
-            IBundleFilter? filter,
             SearchTarget target,
             CancellationToken token = default)
         {
@@ -183,10 +125,6 @@ namespace ZoDream.Shared.Bundle
                 };
                 foreach (var it in res)
                 {
-                    if (filter?.IsExclude(it) == true)
-                    {
-                        continue;
-                    }
                     yield return it;
                 }
             }
@@ -240,6 +178,28 @@ namespace ZoDream.Shared.Bundle
                 }
             }
             return BitConverter.ToInt32(buffer);
+        }
+        /// <summary>
+        /// 根据入口获取路径
+        /// </summary>
+        /// <param name="entranceItems"></param>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public static string GetRelativePath(IEnumerable<string> entranceItems, string fullPath)
+        {
+            foreach (var item in entranceItems)
+            {
+                if (!fullPath.StartsWith(item))
+                {
+                    continue;
+                }
+                if (fullPath.Length == item.Length)
+                {
+                    break;
+                }
+                return Path.GetRelativePath(item, fullPath);
+            }
+            return Path.GetFileName(fullPath);
         }
 
         public static int ToHashCode(string value)
