@@ -23,8 +23,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             var fileName = BundleStorage.Create(source, filePath, string.Empty, options.OutputFolder);
             if (LocationStorage.TryCreate(fileName, ".json", options.FileMode, out fileName))
             {
-                using var fs = Decrypt(source.OpenRead(filePath));
-                fs.SaveAs(fileName);
+                using var fs = source.OpenRead(filePath);
+                using var os = Decrypt(fs);
+                os.SaveAs(fileName);
             }
             return true;
         }
@@ -40,9 +41,9 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 
-        private static Stream Decrypt(Stream input)
+        public static Stream Decrypt(Stream input)
         {
-            using var reader = new StreamReader(input);
+            using var reader = new StreamReader(input, leaveOpen: true);
             var sb = new StringBuilder();
             while (true)
             {
