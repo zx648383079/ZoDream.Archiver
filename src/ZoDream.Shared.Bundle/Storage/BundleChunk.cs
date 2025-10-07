@@ -43,6 +43,13 @@ namespace ZoDream.Shared.Bundle
             return BundleStorage.Create(source, sourcePath, fileName, outputFolder);
         }
 
-      
+        public bool Exists(string filePath)
+        {
+            return source.Exists(filePath);
+        }
+        public IEnumerable<string> FindFiles(string folder, string fileName)
+        {
+            return source.FindFiles(folder, fileName);
+        }
     }
 }

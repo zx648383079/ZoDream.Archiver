@@ -31,10 +31,12 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
         public IBundleBinaryReader Parse(Stream input, IFilePath sourcePath)
         {
-            if (sourcePath.Name == "spine.bundle")
+            var pos = input.Position;
+            if (input.ReadByte() == 0xAA)
             {
-                input = new XORStream(input, [0xFF], 64);
+                input = new XORStream(input, [0xFF], 0x3f);
             }
+            input.Position = pos;
             return new BundleBinaryReader(input, EndianType.BigEndian);
         }
 

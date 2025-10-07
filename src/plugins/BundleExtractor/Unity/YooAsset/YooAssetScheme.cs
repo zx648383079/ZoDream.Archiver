@@ -6,6 +6,7 @@ using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
+using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.YooAsset
 {
@@ -39,7 +40,7 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
                 }
                 if (!item.Contains("ManifestFiles"))
                 {
-                    new YooAssetReader(fs, item, YooAssetType.Apk).Write(_mapper);
+                    Add(new YooAssetReader(fs, item, YooAssetType.Apk).Read());
                     continue;
                 }
                 var size = fs.Length;
@@ -52,10 +53,22 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
             }
             if (!string.IsNullOrEmpty(hotfixPath))
             {
-                new YooAssetReader(File.OpenRead(hotfixPath), hotfixPath,
-                    YooAssetType.Hotfix).Write(_mapper);
+                Add(new YooAssetReader(File.OpenRead(hotfixPath), hotfixPath,
+                    YooAssetType.Hotfix).Read());
             }
             return res;
+        }
+
+        private void Add(IEnumerable<KeyValuePair<string, string>> items)
+        {
+            foreach (var item in items)
+            {
+                if (!source.Exists(item.Key))
+                {
+                    continue;
+                }
+                _mapper.Add(item.Value, item.Key);
+            }
         }
 
         public IEnumerable<string> GetDirectories(params string[] searchPatternItems)
@@ -100,14 +113,27 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
 
         public IEnumerable<string> GetFiles(params string[] searchPatternItems)
         {
-            return source.GetFiles(searchPatternItems);
+            foreach (var item in _mapper.Keys)
+            {
+                if (searchPatternItems.Length == 0)
+                {
+                    yield return item;
+                    continue;
+                }
+                if (BundleStorage.IsMatch(Path.GetFileName(item), searchPatternItems))
+                {
+                    yield return item;
+                    continue;
+                }
+            }
+            //return source.GetFiles(searchPatternItems);
         }
 
         public string GetRelativePath(string filePath)
         {
             //if (_mapper.TryGet(filePath, out var res))
             //{
-            //    return source.GetRelativePath(res);
+            //    return res;//source.GetRelativePath(res);
             //}
             return source.GetRelativePath(filePath);
         }
@@ -115,6 +141,34 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
         public IEnumerable<string> Glob(params string[] searchPatternItems)
         {
             return source.Glob(searchPatternItems);
+        }
+
+        public bool Exists(string filePath)
+        {
+            if (LocationStorage.IsFullPath(filePath))
+            {
+                return source.Exists(filePath);
+            }
+            return _mapper.TryGet(filePath, out _);
+        }
+        public IEnumerable<string> FindFiles(string folder, string fileName)
+        {
+            if (LocationStorage.IsFullPath(folder))
+            {
+                foreach (var item in source.FindFiles(folder, fileName))
+                {
+                    yield return item;
+                }
+            } else
+            {
+                foreach (var item in _mapper.Keys)
+                {
+                    if (item.StartsWith(folder) && item.LastIndexOf(fileName) > folder.Length)
+                    {
+                        yield return item;
+                    }
+                }
+            }
         }
 
         public Stream OpenRead(IFilePath filePath)

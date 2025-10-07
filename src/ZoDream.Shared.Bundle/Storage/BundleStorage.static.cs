@@ -12,7 +12,7 @@ namespace ZoDream.Shared.Bundle
 {
     public partial class BundleStorage
     {
-        internal static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
+        public static bool IsMatch(ReadOnlySpan<char> name, params string[] patternItems)
         {
             if (patternItems.Length == 0)
             {

@@ -50,6 +50,15 @@ namespace ZoDream.Shared.Bundle
             return BundleStorage.Glob(_entryItems, searchPatternItems, SearchTarget.Both);
         }
 
+        public bool Exists(string filePath)
+        {
+            return File.Exists(filePath);
+        }
+        public IEnumerable<string> FindFiles(string folder, string fileName)
+        {
+            return BundleStorage.GetFiles(folder, fileName);
+        }
+
         public Stream OpenRead(IFilePath filePath)
         {
             return File.OpenRead(filePath.FullPath);

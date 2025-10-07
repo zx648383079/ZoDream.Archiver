@@ -17,5 +17,8 @@ namespace ZoDream.Shared.Bundle
         /// <param name="searchPatternItems"></param>
         /// <returns></returns>
         public IEnumerable<string> Glob(params string[] searchPatternItems);
+
+        public bool Exists(string filePath);
+        public IEnumerable<string> FindFiles(string folder, string fileName);
     }
 }

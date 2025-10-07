@@ -28,5 +28,7 @@ namespace ZoDream.Shared.Bundle
         /// <returns></returns>
         public string Create(IFilePath sourcePath, string outputFolder);
         public string Create(IFilePath sourcePath, string fileName, string outputFolder);
+        public bool Exists(string filePath);
+        public IEnumerable<string> FindFiles(string folder, string fileName);
     }
 }

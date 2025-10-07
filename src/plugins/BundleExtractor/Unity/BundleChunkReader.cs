@@ -307,15 +307,16 @@ namespace ZoDream.BundleExtractor
                 return target.Value;
             }
             var resourceFilePath = FindFile(fileName, source.FullPath);
-            if (File.Exists(resourceFilePath))
+            if (!string.IsNullOrWhiteSpace(resourceFilePath))
             {
                 if (_resourceItems.TryGetValue(fileName, out target))
                 {
                     return target.Value;
                 }
-                var stream = File.OpenRead(resourceFilePath);
+                var resourcePath = new FilePath(resourceFilePath);
+                var stream = _fileItems.OpenRead(resourcePath);
                 _resourceItems.TryAdd(fileName, new KeyValuePair<IFilePath, Stream>(
-                    new FilePath(resourceFilePath),
+                    resourcePath,
                     stream));
                 _service.Get<ITemporaryStorage>().Add(stream);
                 return stream;
@@ -336,11 +337,11 @@ namespace ZoDream.BundleExtractor
             if (!string.IsNullOrEmpty(folder))
             {
                 var filePath = Path.Combine(folder, name);
-                if (File.Exists(filePath))
+                if (_fileItems.Exists(filePath))
                 {
                     return filePath;
                 }
-                foreach (var item in BundleStorage.GetFiles(folder, name))
+                foreach (var item in _fileItems.FindFiles(folder, name))
                 {
                     return item;
                 }
@@ -348,7 +349,7 @@ namespace ZoDream.BundleExtractor
             folder = _options.Entrance;
             if (!string.IsNullOrEmpty(folder))
             {
-                foreach (var item in BundleStorage.GetFiles(folder, name))
+                foreach (var item in _fileItems.FindFiles(folder, name))
                 {
                     return item;
                 }

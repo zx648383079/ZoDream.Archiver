@@ -28,9 +28,10 @@ namespace ZoDream.BundleExtractor.Engines
             {
                 return new BundleSplitter(100);
             }
+            var maxBatchCount = Math.Max(o.MaxBatchCount, 1);
             if (o.OnlyDependencyTask || string.IsNullOrWhiteSpace(o.DependencySource))
             {
-                return new BundleSplitter(Math.Max(o.MaxBatchCount, 1));
+                return new BundleSplitter(maxBatchCount);
             }
             if (!service.TryGet<IDependencyDictionary>(out var dict))
             {
@@ -48,7 +49,7 @@ namespace ZoDream.BundleExtractor.Engines
                 }
                 service.Add(dict);
             }
-            return new BundleDependencySplitter(dict);
+            return new BundleDependencySplitter(dict, maxBatchCount);
         }
 
         public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
