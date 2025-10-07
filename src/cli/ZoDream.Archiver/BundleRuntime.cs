@@ -33,6 +33,7 @@ namespace ZoDream.Archiver
                 FileMode = ArchiveExtractMode.Overwrite,
                 OutputFolder = Path.Combine(rootFolder, "output"),
                 Entrance = Path.Combine(rootFolder, "resources"),
+                ModelFormat = "gltf",
                 DependencySource = Path.Combine(rootFolder, "dependencies.bin"),
                 OnlyDependencyTask = false,
                 MaxBatchCount = 30,
