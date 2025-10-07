@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
@@ -16,6 +17,10 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
 
         public uint Count => source.Count;
 
+        public bool IsMatch()
+        {
+            return source.GetFiles("*.bytes").Any();
+        }
 
         public uint Analyze(CancellationToken token = default)
         {

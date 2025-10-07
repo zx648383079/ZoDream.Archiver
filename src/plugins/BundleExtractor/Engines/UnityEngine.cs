@@ -54,7 +54,8 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
         {
-            return new YooAssetScheme(fileItems);
+            var next = new YooAssetScheme(fileItems);
+            return next.IsMatch() ? next : fileItems;
         }
 
         public IDependencyBuilder GetBuilder(IBundleOptions options)
