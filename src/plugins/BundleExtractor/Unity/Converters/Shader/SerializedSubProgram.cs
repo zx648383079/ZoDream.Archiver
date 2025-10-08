@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public static bool HasGlobalLocalKeywordIndices(SerializedType type)
         {
-            return Convert.ToHexString(type.OldTypeHash) switch
+            return type is not null && Convert.ToHexString(type.OldTypeHash) switch
             {
                 "E99740711222CD922E9A6F92FF1EB07A" or
                 "450A058C218DAF000647948F2F59DA6D" or
@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         }
         public static bool HasInstancedStructuredBuffers(SerializedType type)
         {
-            return Convert.ToHexString(type.OldTypeHash) switch
+            return type is not null && Convert.ToHexString(type.OldTypeHash) switch
             {
                 "E99740711222CD922E9A6F92FF1EB07A" or
                 "B239746E4EC6E4D6D7BA27C84178610A" or
@@ -30,7 +30,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             };
         }
         public static bool HasIsAdditionalBlob(SerializedType type) 
-            => Convert.ToHexString(type.OldTypeHash) == "B239746E4EC6E4D6D7BA27C84178610A";
+            => type is not null && Convert.ToHexString(type.OldTypeHash) == "B239746E4EC6E4D6D7BA27C84178610A";
 
         public override SerializedSubProgram? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {

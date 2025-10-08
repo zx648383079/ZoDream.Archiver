@@ -19,7 +19,22 @@ namespace ZoDream.BundleExtractor.Unity.YooAsset
 
         public bool IsMatch()
         {
-            return source.GetFiles("*.bytes").Any();
+            var buffer = new byte[4];
+            foreach (var item in source.GetFiles("*.bytes").Take(5))
+            {
+                using var fs = File.OpenRead(item);
+                if (fs.Length < 10)
+                {
+                    continue;
+                }
+                fs.ReadExactly(buffer);
+                fs.Seek(0, SeekOrigin.Begin);
+                if (BitConverter.ToUInt32(buffer) == YooAssetReader.Signature)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public uint Analyze(CancellationToken token = default)
