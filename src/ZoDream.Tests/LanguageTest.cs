@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
@@ -30,10 +30,10 @@ namespace ZoDream.Tests
         {
             var root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../../src/plugins"));
             var folder = Path.Combine(root, "BundleExtractor/Unity/Converters");
-            var entry = new BundleChunk(folder);
+            var entry = new BundleSource([folder]);
             using var sb = new CodeWriter();
             var regex = new Regex(@"class\s+(.+?Converter)\s+:");
-            foreach (var item in entry)
+            foreach (var item in entry.GetFiles())
             {
                 var text = File.ReadAllText(item);
                 foreach (Match match in regex.Matches(text))

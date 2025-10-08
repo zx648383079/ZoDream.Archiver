@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZoDream.LuaDecompiler;
 using ZoDream.LuaDecompiler.Models;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Language;
 
 namespace ZoDream.Tests

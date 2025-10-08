@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,6 +51,12 @@ namespace ZoDream.Shared.Bundle
         public IEnumerable<string> FindFiles(string folder, string fileName)
         {
             return source.FindFiles(folder, fileName);
+        }
+
+        public static IBundleChunk CreateFrom(params string[] files)
+        {
+            var source = new BundleSource(files);
+            return new BundleChunk(source, source.GetFiles().Select(i => (IFilePath)new FilePath(i)).ToArray(), []);
         }
     }
 }

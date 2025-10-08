@@ -1,7 +1,8 @@
-﻿using System.Text;
+using System.Text;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Cocos;
 using ZoDream.KhronosExporter;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression.Own;
 using ZoDream.Shared.IO;
 
@@ -93,7 +94,8 @@ namespace ZoDream.Tests
         public void TestBc()
         {
             var src = "F:\\apk\\test\\check_version_view.lua";
-            new BlowfishReader([src]).ExtractTo("F:\\apk\\test_output", Shared.Models.ArchiveExtractMode.Overwrite);
+            new BlowfishReader(BundleChunk.CreateFrom(src))
+                .ExtractTo("F:\\apk\\test_output", Shared.Models.ArchiveExtractMode.Overwrite);
             Assert.IsTrue(true);
         }
     }
