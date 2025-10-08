@@ -1,4 +1,4 @@
-﻿namespace ZoDream.Shared.Logging
+namespace ZoDream.Shared.Logging
 {
     public class ProgressLogger(ILogger host, bool isMaster) : IProgressLogger
     {
@@ -20,9 +20,14 @@
             }
         }
 
+        public void Add(int offset = 1)
+        {
+            Value += offset;
+        }
+
         public static ProgressLogger operator +(ProgressLogger arg, int offset)
         {
-            arg.Value += offset;
+            arg.Add(offset);
             return arg;
         }
 

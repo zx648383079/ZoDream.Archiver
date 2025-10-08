@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
@@ -43,10 +43,7 @@ namespace ZoDream.BundleExtractor
                     }
                     PrepareExport(i, asset);
                 }
-                if (progress is not null)
-                {
-                    progress.Value++;
-                }
+                progress?.Add(1);
             }
         }
 
@@ -114,10 +111,7 @@ namespace ZoDream.BundleExtractor
                         Logger?.Log(LogLevel.Error, e, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
                     }
                 }
-                if (progress is not null)
-                {
-                    progress.Value++;
-                }
+                progress?.Add(1);
             }
         }
 

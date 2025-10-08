@@ -73,7 +73,7 @@ namespace ZoDream.BundleExtractor
                 }
                 temporary.Clear();
                 builder?.Flush();
-                progress.Value += next.Count;
+                progress.Add(next.Count);
                 if (!onlyDependencyTask)
                 {
                     service?.SavePoint(fileItems.GetHashCode(), (uint)progress.Value);

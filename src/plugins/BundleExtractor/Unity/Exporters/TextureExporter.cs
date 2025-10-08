@@ -1,6 +1,7 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -85,7 +86,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     res.Height, res.TextureFormat, resource.Version);
                 image = data?.ToImage();
             }
-            
             if (!flip || image == null)
             {
                 return image;

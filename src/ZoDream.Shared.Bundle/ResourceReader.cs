@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
@@ -25,7 +22,6 @@ namespace ZoDream.Shared.Bundle
             var logger = service.Get<ILogger>();
             var progress = logger?.CreateSubProgress("Extract file...", 
                 fileItems is IBundleChunk c ? c.Count : fileItems.Count);
-            var i = 0;
             foreach (var item in fileItems.Items)
             {
                 if (token.IsCancellationRequested)
@@ -34,10 +30,7 @@ namespace ZoDream.Shared.Bundle
                 }
                 using var reader = scheme.Open(item.FullPath);
                 reader?.ExtractTo(folder, mode, token);
-                if (progress is not null)
-                {
-                    progress.Value = i++;
-                }
+                progress?.Add(1);
             }
         }
 

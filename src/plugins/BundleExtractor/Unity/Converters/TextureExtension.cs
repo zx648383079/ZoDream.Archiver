@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using System;
 using System.Buffers;
 using System.IO;
@@ -213,7 +213,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 data.ReadExactly(buffer, 0, length);
                 return BitmapFactory.Decode(painter.Decode(buffer.AsSpan(0, length), width, height), width, height, SKColorType.Rgba8888);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }

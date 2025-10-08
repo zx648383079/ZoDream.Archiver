@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -166,6 +166,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             foreach (var ptr in _shaders)
             {
+                if (ptr.Index < 0)
+                {
+                    continue;
+                }
                 var exporter = new ShaderExporter(ptr.Index, (ISerializedFile)ptr.Resource);
                 exporter.SaveAs(Path.Combine(folder, 
                     string.IsNullOrWhiteSpace(exporter.FileName) ? ptr.PathID.ToString() : exporter.FileName

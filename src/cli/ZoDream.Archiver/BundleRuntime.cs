@@ -1,7 +1,6 @@
 using ZoDream.BundleExtractor;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Producers;
-using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -10,7 +9,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver
 {
-    public class BundleRuntime(string rootFolder) : IConsoleRuntime
+    public class BundleRuntime(string rootFolder, int skipCount = 0) : IConsoleRuntime
     {
         public Task RunAsync(CancellationToken token = default)
         {
@@ -30,14 +29,20 @@ namespace ZoDream.Archiver
             {
                 Platform = "Android",
                 Engine = "Unity",
+                Package = "fake",
                 FileMode = ArchiveExtractMode.Overwrite,
                 OutputFolder = Path.Combine(rootFolder, "output"),
                 Entrance = Path.Combine(rootFolder, "resources"),
                 ModelFormat = "gltf",
                 DependencySource = Path.Combine(rootFolder, "dependencies.bin"),
                 OnlyDependencyTask = false,
-                MaxBatchCount = 30,
+                MaxBatchCount = 100,
             };
+            if (!Directory.Exists(options.Entrance))
+            {
+                logger.Error($"<{options.Entrance}> Not Found!");
+                return;
+            }
             IBundleSource source = new BundleSource([
                 options.Entrance,
                 Path.Combine(rootFolder, "files")
@@ -46,7 +51,7 @@ namespace ZoDream.Archiver
             var engine = new BundleExtractor.Engines.UnityEngine(service);
             var producer = new UnknownProducer();
 
-            var scanner = new QooElementScanner(source, options);
+            var scanner =  producer.CreateParser(options);//new QooElementScanner(source, options);
             var temporary = new TemporaryStorage();
             service.Add<ITemporaryStorage>(temporary);
             service.Add<ILogger>(logger);
@@ -67,13 +72,22 @@ namespace ZoDream.Archiver
             source.Analyze(token);
             logger.Info($"Found {source.Count} files.");
             var chunk = engine.CreateSplitter(options);
-            var filter = new BundleMultipleFilter([engine, scanner]);
+            var filter = new BundleMultipleFilter([engine]);
+            if (scanner is IBundleFilter f)
+            {
+                filter.Add(f);
+            }
             var progress = logger.CreateProgress("Extract Chunk ...", source.Count);
+            progress.Value = skipCount;
+            if (progress.Value > 0)
+            {
+                logger.Info($"Skip {progress.Value} files.");
+            }
             foreach (var item in source.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (filter.IsMatch(item))
                 {
-                    progress.Value++;
+                    progress.Add(1);
                     continue;
                 }
                 if (!chunk.TrySplit(item, source, out var next))
@@ -85,9 +99,10 @@ namespace ZoDream.Archiver
                 hander.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
                 temporary.Clear();
                 builder?.Flush();
-                progress.Value += next.Count;
+                progress.Add(next.Count);
             }
             builder?.Dispose();
+            logger.Info($"Finished!");
         }
 
         private void Logger_OnProgress(ProgressLogger progress)
@@ -97,7 +112,7 @@ namespace ZoDream.Archiver
                 int originalLeft = Console.CursorLeft;
                 int originalTop = Console.CursorTop;
 
-                Console.SetCursorPosition(0, progress.IsMaster ? 1 : 2);
+                Console.SetCursorPosition(0, progress.IsMaster ? 0 : 1);
 
                 var val = (int)((double)progress / 5);
                 var text = $"{progress.Title}: [{new string('=', val)}{new string(' ', 20 - val)}] {progress.Value}/{progress.Max}";
@@ -112,7 +127,16 @@ namespace ZoDream.Archiver
 
         private void Logger_OnLog(string message, LogLevel level)
         {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]{level}:{message}");
+            var originalColor = Console.ForegroundColor;
+            Console.Write($"[{DateTime.Now:HH:mm:ss}]{level}:");
+            Console.ForegroundColor = level switch
+            {
+                LogLevel.Error => ConsoleColor.Red,
+                LogLevel.Warn => ConsoleColor.Yellow,
+                _ => originalColor
+            };
+            Console.WriteLine(message);
+            Console.ForegroundColor = originalColor;
         }
     }
 }

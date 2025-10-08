@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -61,10 +60,7 @@ namespace ZoDream.BundleExtractor
                 {
                     item.Value.SaveAs(fileName);
                 }
-                if (progress is not null)
-                {
-                    progress.Value++;
-                }
+                progress?.Add(1);
             }
         }
         internal void ExportAssets(HashSet<string> entryItems, string folder, ArchiveExtractMode mode, CancellationToken token)
@@ -79,14 +75,16 @@ namespace ZoDream.BundleExtractor
                         , folder), mode);
                 }
                 exporter.Dispose();
+                progress?.Add(1);
             }
             _exporterItems.Clear();
-            progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Count);
+            progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Sum(i => i.Count));
             foreach (var asset in _assetItems)
             {
                 var sourcePath = FilePath.GetFilePath(asset.FullPath);
                 if (!entryItems.Contains(sourcePath))
                 {
+                    progress?.Add(asset.Count);
                     continue;
                 }
                 for (var i = 0; i < asset.Count; i++)
@@ -131,10 +129,7 @@ namespace ZoDream.BundleExtractor
                 {
                     return;
                 }
-                if (progress is not null)
-                {
-                    progress.Value++;
-                }
+                progress?.Add(asset.Count);
                 Shared.Clear();
             }
         }

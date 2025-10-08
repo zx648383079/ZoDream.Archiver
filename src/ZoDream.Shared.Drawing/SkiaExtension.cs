@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using System;
 using System.IO;
 using System.Numerics;
@@ -104,6 +104,10 @@ namespace ZoDream.Shared.Drawing
 
         public static void SaveAs(this SKImage image, string fileName)
         {
+            if (image is null)
+            {
+                return;
+            }
             using var fs = File.OpenWrite(fileName);
             using var pixMap = image.PeekPixels();
             pixMap?.Encode(fs, ConvertFormat(fileName), 100);
