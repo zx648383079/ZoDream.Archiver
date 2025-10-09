@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
@@ -109,6 +110,11 @@ namespace ZoDream.BundleExtractor
                     catch (Exception e)
                     {
                         Logger?.Log(LogLevel.Error, e, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
+                        //if (GC.GetTotalMemory(false) > Math.Pow(1024, 3) * 5)
+                        //{
+                        //    // 限制最大内存占用
+                        //    return;
+                        //}
                     }
                 }
                 progress?.Add(1);

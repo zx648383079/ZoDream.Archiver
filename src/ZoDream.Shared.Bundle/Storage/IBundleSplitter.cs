@@ -9,5 +9,6 @@ namespace ZoDream.Shared.Bundle
         public IEnumerable<IBundleChunk> Split(IBundleSource items);
 
         public bool TrySplit(IFilePath filePath, IBundleSource source, [NotNullWhen(true)] out IBundleChunk? chunk);
+        public bool TryFinish(IBundleSource source, [NotNullWhen(true)] out IBundleChunk? chunk);
     }
 }

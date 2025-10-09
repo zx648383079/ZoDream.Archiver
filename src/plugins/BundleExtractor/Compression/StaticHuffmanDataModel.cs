@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ZoDream.BundleExtractor.Compression
 {
@@ -6,7 +6,7 @@ namespace ZoDream.BundleExtractor.Compression
     {
         public uint TotalSyms;
         public byte[] CodeSizes = [];
-        public DecoderTables DecodeTables;
+        public DecoderTables DecodeTables = new();
 
 
 

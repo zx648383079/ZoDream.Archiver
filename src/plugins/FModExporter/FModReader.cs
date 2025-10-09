@@ -1,4 +1,4 @@
-﻿using FMOD;
+using FMOD;
 using System.Runtime.InteropServices;
 using System;
 using System.IO;
@@ -133,7 +133,7 @@ namespace ZoDream.FModExporter
 
         private void SoundToWav(Sound sound, Func<BinaryWriter> outputFn)
         {
-            var result = sound.getFormat(out _, out _, out int channels, out int bits);
+            var result = sound.getFormat(out var soundType, out var format, out var channels, out var bits);
             if (result != RESULT.OK)
             {
                 return;
@@ -164,7 +164,7 @@ namespace ZoDream.FModExporter
                 output.Write("WAVE"u8);
                 output.Write("fmt "u8);
                 output.Write(16U);
-                output.Write((short)1);
+                output.Write((short)(format == SOUND_FORMAT.PCMFLOAT ? 3 : 1));
                 output.Write((short)channels);
                 output.Write(sampleRate);
                 output.Write(sampleRate * channels * bits / 8);

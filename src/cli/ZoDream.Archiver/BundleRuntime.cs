@@ -29,14 +29,14 @@ namespace ZoDream.Archiver
             {
                 Platform = "Android",
                 Engine = "Unity",
-                Package = "fake",
+                //Package = "fake",
                 FileMode = ArchiveExtractMode.Overwrite,
                 OutputFolder = Path.Combine(rootFolder, "output"),
                 Entrance = Path.Combine(rootFolder, "resources"),
                 ModelFormat = "gltf",
                 DependencySource = Path.Combine(rootFolder, "dependencies.bin"),
                 OnlyDependencyTask = false,
-                MaxBatchCount = 100,
+                MaxBatchCount = 10,
             };
             if (!Directory.Exists(options.Entrance))
             {
@@ -71,7 +71,7 @@ namespace ZoDream.Archiver
             source = engine.Unpack(source, options);
             source.Analyze(token);
             logger.Info($"Found {source.Count} files.");
-            var chunk = engine.CreateSplitter(options);
+            var splitter = engine.CreateSplitter(options);
             var filter = new BundleMultipleFilter([engine]);
             if (scanner is IBundleFilter f)
             {
@@ -83,6 +83,7 @@ namespace ZoDream.Archiver
             {
                 logger.Info($"Skip {progress.Value} files.");
             }
+            IBundleChunk? next;
             foreach (var item in source.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (filter.IsMatch(item))
@@ -90,10 +91,19 @@ namespace ZoDream.Archiver
                     progress.Add(1);
                     continue;
                 }
-                if (!chunk.TrySplit(item, source, out var next))
+                if (!splitter.TrySplit(item, source, out next))
                 {
                     continue;
                 }
+                logger.Info($"Extract {next.Count} files ...");
+                var hander = engine.CreateHandler(next, options);
+                hander.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
+                temporary.Clear();
+                builder?.Flush();
+                progress.Add(next.Count);
+            }
+            if (splitter.TryFinish(source, out next))
+            {
                 logger.Info($"Extract {next.Count} files ...");
                 var hander = engine.CreateHandler(next, options);
                 hander.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);

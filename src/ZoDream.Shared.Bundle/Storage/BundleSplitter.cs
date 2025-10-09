@@ -13,12 +13,17 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerable<IBundleChunk> Split(IBundleSource items)
         {
+            IBundleChunk? chunk;
             foreach (var item in items.GetFiles())
             {
-                if (TrySplit(FilePath.Parse(item), items, out var chunk))
+                if (TrySplit(FilePath.Parse(item), items, out chunk))
                 {
                     yield return chunk;
                 }
+            }
+            if (TryFinish(items, out chunk))
+            {
+                yield return chunk;
             }
         }
 
@@ -30,9 +35,26 @@ namespace ZoDream.Shared.Bundle
                 chunk = null;
                 return false;
             }
-            chunk = new BundleChunk(source, _chunkItems.ToArray(), []);
-            _chunkItems.Clear();
+            chunk = GetChunk(source);
             return true;
+        }
+
+        public bool TryFinish(IBundleSource source, [NotNullWhen(true)] out IBundleChunk? chunk)
+        {
+            if (_chunkItems.Count == 0)
+            {
+                chunk = null;
+                return false;
+            }
+            chunk = GetChunk(source);
+            return true;
+        }
+
+        private IBundleChunk GetChunk(IBundleSource source)
+        {
+            var chunk = new BundleChunk(source, _chunkItems.ToArray(), []);
+            _chunkItems.Clear();
+            return chunk;
         }
     }
 }

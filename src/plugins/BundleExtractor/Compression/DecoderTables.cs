@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,7 +43,7 @@ namespace ZoDream.BundleExtractor.Compression
 
             foreach (var c in p_codesizes.Take((int)num_syms))
             {
-                if (c != 0)
+                if (c != 0 && c < num_codes.Length)
                 {
                     num_codes[c]++;
                 }
@@ -101,7 +101,7 @@ namespace ZoDream.BundleExtractor.Compression
             {
                 uint c = p_codesizes[i];
 
-                if (c != 0)
+                if (c != 0 && c < num_codes.Length)
                 {
                     int code_index = (int)c;
 
@@ -127,7 +127,7 @@ namespace ZoDream.BundleExtractor.Compression
                 table_bits = 0;
             }
 
-            this.TableBits = table_bits;
+            TableBits = table_bits;
             if (table_bits != 0)
             {
                 uint table_size = 1u << (int)table_bits;

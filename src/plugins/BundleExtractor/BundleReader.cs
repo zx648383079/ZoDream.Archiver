@@ -51,16 +51,37 @@ namespace ZoDream.BundleExtractor
             scheme.Service.Add(builder);
             var temporary = scheme.Service.Get<ITemporaryStorage>();
             var splitter = engine.CreateSplitter(options);
+            IBundleChunk? next;
             foreach (var item in fileItems.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (token.IsCancellationRequested)
                 {
                     break;
                 }
-                if (!splitter.TrySplit(item, fileItems, out var next))
+                if (!splitter.TrySplit(item, fileItems, out next))
                 {
                     continue;
                 }
+                logger.Info($"Extract {next.Count} files ...");
+                try
+                {
+                    using var hander = engine.CreateHandler(next, options);
+                    hander?.ExtractTo(folder, mode, token);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.Message);
+                }
+                temporary.Clear();
+                builder?.Flush();
+                progress.Add(next.Count);
+                if (!onlyDependencyTask)
+                {
+                    service?.SavePoint(fileItems.GetHashCode(), (uint)progress.Value);
+                }
+            }
+            if (splitter.TryFinish(fileItems, out next))
+            {
                 logger.Info($"Extract {next.Count} files ...");
                 try
                 {
