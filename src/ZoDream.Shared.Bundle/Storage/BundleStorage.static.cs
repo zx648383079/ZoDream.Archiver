@@ -61,6 +61,10 @@ namespace ZoDream.Shared.Bundle
                 {
                     break;
                 }
+                if (string.IsNullOrWhiteSpace(item))
+                {
+                    continue;
+                }
                 if (File.Exists(item))
                 {
                     count++;
@@ -103,6 +107,10 @@ namespace ZoDream.Shared.Bundle
             };
             foreach (var item in fileItems)
             {
+                if (string.IsNullOrWhiteSpace(item))
+                {
+                    continue;
+                }
                 if (File.Exists(item))
                 {
                     if (target == SearchTarget.Files && IsMatch(Path.GetFileName(item), searchPatternItems))

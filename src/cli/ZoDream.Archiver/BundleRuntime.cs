@@ -1,6 +1,4 @@
 using ZoDream.BundleExtractor;
-using ZoDream.BundleExtractor.Platforms;
-using ZoDream.BundleExtractor.Producers;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -9,7 +7,11 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver
 {
-    public class BundleRuntime(string rootFolder, int skipCount = 0) : IConsoleRuntime
+    public class BundleRuntime(
+        string rootFolder, 
+        BundleOptions options,
+        int skipCount = 0
+        ) : IConsoleRuntime
     {
         public Task RunAsync(CancellationToken token = default)
         {
@@ -25,40 +27,36 @@ namespace ZoDream.Archiver
             var logger = new EventLogger();
             logger.OnLog += Logger_OnLog;
             logger.OnProgress += Logger_OnProgress;
-            var options = new BundleOptions()
-            {
-                Platform = "Android",
-                Engine = "Unity",
-                //Package = "fake",
-                FileMode = ArchiveExtractMode.Overwrite,
-                OutputFolder = Path.Combine(rootFolder, "output"),
-                Entrance = Path.Combine(rootFolder, "resources"),
-                ModelFormat = "gltf",
-                DependencySource = Path.Combine(rootFolder, "dependencies.bin"),
-                OnlyDependencyTask = false,
-                MaxBatchCount = 10,
-            };
             if (!Directory.Exists(options.Entrance))
             {
                 logger.Error($"<{options.Entrance}> Not Found!");
                 return;
             }
-            IBundleSource source = new BundleSource([
-                options.Entrance,
-                Path.Combine(rootFolder, "files")
-            ]);
-            var service = new BundleService();
-            var engine = new BundleExtractor.Engines.UnityEngine(service);
-            var producer = new UnknownProducer();
-
-            var scanner =  producer.CreateParser(options);//new QooElementScanner(source, options);
-            var temporary = new TemporaryStorage();
+            var entryFolder = new List<string>
+            {
+                options.Entrance
+            };
+            var extraFolder = Path.Combine(rootFolder, "files");
+            if (Directory.Exists(extraFolder))
+            {
+                entryFolder.Add(extraFolder);
+            }
+            IBundleSource source = new BundleSource(entryFolder);
+            using var service = new BundleService();
+            using var temporary = new TemporaryStorage();
             service.Add<ITemporaryStorage>(temporary);
             service.Add<ILogger>(logger);
+
+            using var scheme = new BundleScheme(service);
+            var engine = scheme.Get<IBundleEngine>(options);
+            var producer = scheme.Get<IBundleProducer>(options);
+
+            var scanner =  producer.CreateParser(options);//new QooElementScanner(source, options);
+    
             service.Add<IBundleOptions>(options);
             service.Add<IBundleProducer>(producer);
-            service.Add<IBundlePlatform>(new AndroidPlatformScheme());
             service.Add<IBundleEngine>(engine);
+            service.Add<IBundlePlatform>(scheme.Get<IBundlePlatform>(options));
             service.Add<IBundleParser>(scanner);
 
             service.Add<IBundleCodec>(new BundleCodec());
@@ -72,7 +70,11 @@ namespace ZoDream.Archiver
             source.Analyze(token);
             logger.Info($"Found {source.Count} files.");
             var splitter = engine.CreateSplitter(options);
-            var filter = new BundleMultipleFilter([engine]);
+            var filter = new BundleMultipleFilter();
+            if (engine is IBundleFilter ef)
+            {
+                filter.Add(ef);
+            }
             if (scanner is IBundleFilter f)
             {
                 filter.Add(f);
