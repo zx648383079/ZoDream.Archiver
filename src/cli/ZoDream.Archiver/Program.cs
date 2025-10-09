@@ -42,7 +42,6 @@ namespace ZoDream.Archiver
             var platformArg = new Option<string>("platform", "-a")
             {
                 Description = "平台",
-                DefaultValueFactory = _ => "Android"
             };
             var producerArg = new Option<string>("producer", "-c")
             {
@@ -53,11 +52,24 @@ namespace ZoDream.Archiver
                 Description = "游戏引擎",
                 DefaultValueFactory = _ => "Unity"
             };
+            var typeTreeArg = new Option<FileInfo>("type", "-t")
+            {
+                Description = "TypeNodeTree文件"
+            };
             rootCommand.Add(fileArg);
             rootCommand.Add(skipArg);
             rootCommand.Add(outputArg);
+            rootCommand.Add(batchArg);
+            rootCommand.Add(packageArg);
+            rootCommand.Add(versionArg);
+            rootCommand.Add(dependencyArg);
+            rootCommand.Add(platformArg);
+            rootCommand.Add(producerArg);
+            rootCommand.Add(engineArg);
+            rootCommand.Add(typeTreeArg);
             rootCommand.SetAction((argv, token) => {
                 var rootFolder = argv.GetRequiredValue(fileArg).FullName;
+                var resFolder = Path.Combine(rootFolder, "resources");
                 var options = new BundleOptions()
                 {
                     Platform = argv.GetValue(platformArg),
@@ -67,9 +79,10 @@ namespace ZoDream.Archiver
                     Version = argv.GetValue(versionArg),
                     FileMode = ArchiveExtractMode.Overwrite,
                     OutputFolder = argv.GetValue(outputArg)!.FullName,
-                    Entrance = Path.Combine(rootFolder, "resources"),
+                    Entrance = Directory.Exists(resFolder) ? resFolder : rootFolder,
                     ModelFormat = "gltf",
                     MaxBatchCount = argv.GetValue(batchArg),
+                    TypeTree = argv.GetValue(typeTreeArg)?.FullName ?? string.Empty,
                 };
                 if (argv.GetValue(dependencyArg))
                 {

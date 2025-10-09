@@ -1,4 +1,4 @@
-﻿using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -34,5 +34,9 @@ namespace ZoDream.Shared.Bundle
         /// 当前是否只执行建立依赖关系任务
         /// </summary>
         public bool OnlyDependencyTask { get; }
+        /// <summary>
+        /// 类型结构解析JSON文件
+        /// </summary>
+        public string TypeTree { get; }
     }
 }

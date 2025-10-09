@@ -37,6 +37,7 @@ namespace ZoDream.Shared.Bundle
 
         public string DependencySource { get; set; } = string.Empty;
         public bool OnlyDependencyTask { get; set; }
+        public string TypeTree { get; set; } = string.Empty;
         #endregion
 
     }

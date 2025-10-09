@@ -25,6 +25,24 @@ namespace ZoDream.Tests
             Assert.IsTrue(res.Length > 0);
         }
 
+        [TestMethod]
+        public void TestParse()
+        {
+            var fileName = "2021.3.40f1.json";
+            if (!File.Exists(fileName))
+            {
+                return;
+            }
+            using var fs = File.OpenRead(fileName);
+            var reader = new TypeNodeReader(fs);
+            var data = reader.Read();
+            var writer = new TypeSourceWriter(data);
+            using var sb = new CodeWriter();
+            writer.Write(sb);
+            var res = sb.ToString();
+            Assert.IsTrue(res.Length > 0);
+        }
+
         //[TestMethod]
         public void TestExtract()
         {

@@ -99,8 +99,12 @@ namespace ZoDream.BundleExtractor
                             {
                                 res = cvt.Read(reader, targetType, serializer);
                             }
+                        } 
+                        else
+                        {
+                            res = serializer.Deserialize(reader, targetType);
                         }
-                        
+
                         if (res is Object o)
                         {
                             asset[i] = o;

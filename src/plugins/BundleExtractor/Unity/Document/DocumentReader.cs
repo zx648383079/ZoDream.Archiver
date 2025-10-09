@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -66,7 +66,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             ReadObject(ref obj, doc.Children[0].Children, reader);
         }
 
-        private void ReadObject(ref object instance, VirtualNode[] nodes, IBundleBinaryReader reader)
+        internal void ReadObject(ref object instance, VirtualNode[] nodes, IBundleBinaryReader reader)
         {
             var type = instance.GetType();
             foreach (var node in nodes)

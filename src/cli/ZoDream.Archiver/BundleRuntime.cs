@@ -1,4 +1,5 @@
 using ZoDream.BundleExtractor;
+using ZoDream.BundleExtractor.Unity;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -48,6 +49,7 @@ namespace ZoDream.Archiver
             service.Add<ILogger>(logger);
 
             using var scheme = new BundleScheme(service);
+            scheme.LoadEnvironment(source, options);
             var engine = scheme.Get<IBundleEngine>(options);
             var producer = scheme.Get<IBundleProducer>(options);
 
@@ -60,10 +62,25 @@ namespace ZoDream.Archiver
             service.Add<IBundleParser>(scanner);
 
             service.Add<IBundleCodec>(new BundleCodec());
-            service.Add(producer.CreateSerializer(options));
+
+            IBundleSerializer serializer;
+            if (!string.IsNullOrWhiteSpace(options.TypeTree) && engine is BundleExtractor.Engines.UnityEngine)
+            {
+                serializer = TypeTreeSerializer.CreateForm(options.TypeTree);
+            }
+            else
+            {
+                serializer = producer.CreateSerializer(options);
+            }
+            service.Add(serializer);
 
             var builder = engine.GetBuilder(options);
             service.Add(builder);
+            Console.WriteLine($"Entrance: {options.Entrance}");
+            Console.WriteLine($"          {options.Platform} {options.Engine}");
+            Console.WriteLine($"Output: {options.OutputFolder}");
+            
+
 
             logger.Info("Analyzing ...");
             source = engine.Unpack(source, options);
@@ -86,7 +103,7 @@ namespace ZoDream.Archiver
                 logger.Info($"Skip {progress.Value} files.");
             }
             IBundleChunk? next;
-            foreach (var item in source.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
+            foreach (var item in source.GetFiles("*.bundle").Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (filter.IsMatch(item))
                 {
