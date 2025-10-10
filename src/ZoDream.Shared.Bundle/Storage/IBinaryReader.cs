@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
@@ -107,7 +107,16 @@ namespace ZoDream.Shared.Bundle
 
         public void ReadExactly(Span<byte> buffer);
 
+        /// <summary>
+        /// 读取 int 长度的内容，流的指针移动
+        /// </summary>
+        /// <returns></returns>
         public Stream ReadAsStream();
+        /// <summary>
+        /// 截取 length  长度的内容，流的指针移动 length 
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public Stream ReadAsStream(long length);
 
         public void AlignStream();

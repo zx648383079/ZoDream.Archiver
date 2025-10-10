@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 
@@ -8,9 +8,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
     {
         public override SpriteSettings? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
+            return CreateFrom(reader.ReadUInt32());
+        }
+
+        public static SpriteSettings CreateFrom(uint val)
+        {
             var res = new SpriteSettings
             {
-                SettingsRaw = reader.ReadUInt32()
+                SettingsRaw = val
             };
 
             res.Packed = res.SettingsRaw & 1; //1

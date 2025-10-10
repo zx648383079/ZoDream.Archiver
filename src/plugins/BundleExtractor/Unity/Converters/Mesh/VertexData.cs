@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +46,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
-        private void GetStreams(VertexData res, Version version)
+        internal static void GetStreams(VertexData res, Version version)
         {
             
             if (res.Channels.Length == 0)

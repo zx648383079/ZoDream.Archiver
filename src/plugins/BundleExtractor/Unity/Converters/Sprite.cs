@@ -1,13 +1,27 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class SpriteConverter : BundleConverter<Sprite>
+    internal sealed class SpriteConverter : BundleConverter<Sprite>, IElementTypeLoader
     {
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
+        {
+            var version = reader.Get<Version>();
+            var res = new Sprite();
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
+            if (res.RD.VertexData is not null)
+            {
+                VertexDataConverter.GetStreams(res.RD.VertexData, version);
+            }
+            return res;
+        }
         public override Sprite? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var target = reader.Get<BuildTarget>();
@@ -64,5 +78,6 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             return res;
         }
 
+       
     }
 }

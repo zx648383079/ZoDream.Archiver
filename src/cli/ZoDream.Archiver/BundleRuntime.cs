@@ -103,7 +103,7 @@ namespace ZoDream.Archiver
                 logger.Info($"Skip {progress.Value} files.");
             }
             IBundleChunk? next;
-            foreach (var item in source.GetFiles("*.bundle").Skip((int)progress.Value).Select(i => new FilePath(i)))
+            foreach (var item in source.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (filter.IsMatch(item))
                 {

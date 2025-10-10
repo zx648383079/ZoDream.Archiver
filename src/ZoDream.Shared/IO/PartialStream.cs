@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ZoDream.Shared.Interfaces;
 
@@ -87,7 +87,7 @@ namespace ZoDream.Shared.IO
             var max = _beginPosition + _byteLength;
             var pos = origin switch
             {
-                SeekOrigin.Current => _baseStream.Position + offset,
+                SeekOrigin.Current => _current + offset,
                 SeekOrigin.End => _beginPosition + _byteLength + offset,
                 _ => _beginPosition + offset,
             };

@@ -233,7 +233,9 @@ namespace ZoDream.Shared.Bundle
         }
         public Stream ReadAsStream(long length)
         {
-            return new PartialStream(BaseStream, length);
+            var res = new PartialStream(BaseStream, Position, length);
+            Position += length;
+            return res;
         }
 
         protected override void Dispose(bool disposing)

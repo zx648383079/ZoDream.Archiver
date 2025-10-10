@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Converters;
@@ -274,6 +275,14 @@ namespace ZoDream.BundleExtractor.Unity.Document
             {
                 return Enum.ToObject(type, val);
             }
+            if (type == typeof(SpriteSettings))
+            {
+                return SpriteSettingsConverter.CreateFrom((uint)val);
+            }
+            if (val is ulong l && type == typeof(long))
+            {
+                return (long)l;
+            }
             return Convert.ChangeType(val, type);
         }
 
@@ -393,7 +402,11 @@ namespace ZoDream.BundleExtractor.Unity.Document
                     result = reader.ReadBoolean();
                     return true;
                 case "string":
-                    result = reader.ReadAlignedString();
+                    result = reader.ReadString();
+                    if (node.MetaFlag.IsAnyChildUsesAlignBytes())
+                    {
+                        reader.AlignStream();   
+                    }
                     return true;
                 default:
                     result = null;
@@ -406,6 +419,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
             var res = new OrderedDictionary();
             foreach (var item in items)
             {
+                if (res.Contains(item.Name))
+                {
+                    continue;
+                }
                 res.Add(item.Name, Read(item, reader));
             }
             return res;

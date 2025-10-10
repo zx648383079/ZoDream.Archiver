@@ -113,11 +113,10 @@ namespace ZoDream.BundleExtractor.Compression
                     uint sorted_pos = sorted_positions[code_index];
                     sorted_positions[code_index]++;
 
-                    if (sorted_pos >= total_used_syms)
+                    if (sorted_pos >= total_used_syms || sorted_pos >= SortedSymbolOrder.Count)
                     {
                         return false;
                     }
-
                     SortedSymbolOrder[(int)sorted_pos] = (ushort)i;
                 }
             }
@@ -154,7 +153,12 @@ namespace ZoDream.BundleExtractor.Compression
 
                     for (uint code = min_code; code <= max_code; code++)
                     {
-                        uint sym_index = SortedSymbolOrder[(int)(val_ptr + code - min_code)];
+                        var symbolIndex = val_ptr + code - min_code;
+                        if (symbolIndex >= SortedSymbolOrder.Count)
+                        {
+                            return false;
+                        }
+                        uint sym_index = SortedSymbolOrder[(int)symbolIndex];
 
                         if (p_codesizes[sym_index] != codesize)
                         {
