@@ -31,6 +31,10 @@ namespace ZoDream.Archiver
             {
                 Description = "包名"
             };
+            var keyArg = new Option<string>("key", "-k")
+            {
+                Description = "密钥Key"
+            };
             var versionArg = new Option<string>("version", "-v")
             {
                 Description = "自定义版本号"
@@ -56,28 +60,36 @@ namespace ZoDream.Archiver
             {
                 Description = "TypeNodeTree文件"
             };
+            var modeArg = new Option<ArchiveExtractMode>("mode", "-m")
+            {
+                Description = "重复文件处理方式",
+                DefaultValueFactory = _ => ArchiveExtractMode.Overwrite
+            };
             rootCommand.Add(fileArg);
             rootCommand.Add(skipArg);
             rootCommand.Add(outputArg);
             rootCommand.Add(batchArg);
             rootCommand.Add(packageArg);
+            rootCommand.Add(keyArg);
             rootCommand.Add(versionArg);
             rootCommand.Add(dependencyArg);
             rootCommand.Add(platformArg);
             rootCommand.Add(producerArg);
             rootCommand.Add(engineArg);
             rootCommand.Add(typeTreeArg);
+            rootCommand.Add(modeArg);
             rootCommand.SetAction((argv, token) => {
                 var rootFolder = argv.GetRequiredValue(fileArg).FullName;
                 var resFolder = Path.Combine(rootFolder, "resources");
                 var options = new BundleOptions()
                 {
+                    Password = argv.GetValue(keyArg),
                     Platform = argv.GetValue(platformArg),
                     Engine = argv.GetValue(engineArg),
                     Package = argv.GetValue(packageArg),
                     Producer = argv.GetValue(producerArg),
                     Version = argv.GetValue(versionArg),
-                    FileMode = ArchiveExtractMode.Overwrite,
+                    FileMode = argv.GetValue(modeArg),
                     OutputFolder = argv.GetValue(outputArg)!.FullName,
                     Entrance = Directory.Exists(resFolder) ? resFolder : rootFolder,
                     ModelFormat = "gltf",
@@ -86,7 +98,8 @@ namespace ZoDream.Archiver
                 };
                 if (argv.GetValue(dependencyArg))
                 {
-                    options.DependencySource = Path.Combine(rootFolder, "dependencies.bin");
+                    options.DependencySource = Path.Combine(rootFolder == options.Entrance ? 
+                        Path.GetDirectoryName(rootFolder) : rootFolder, "dependencies.bin");
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
                 var runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));

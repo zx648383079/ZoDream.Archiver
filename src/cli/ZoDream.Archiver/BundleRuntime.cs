@@ -49,7 +49,12 @@ namespace ZoDream.Archiver
             service.Add<ILogger>(logger);
 
             using var scheme = new BundleScheme(service);
+            var extraPackage = options.Package;
             scheme.LoadEnvironment(source, options);
+            if (!string.IsNullOrWhiteSpace(extraPackage) && extraPackage != options.Package)
+            {
+                options.Package += "." + extraPackage;
+            }
             var engine = scheme.Get<IBundleEngine>(options);
             var producer = scheme.Get<IBundleProducer>(options);
 
@@ -77,7 +82,15 @@ namespace ZoDream.Archiver
             var builder = engine.GetBuilder(options);
             service.Add(builder);
             Console.WriteLine($"Entrance: {options.Entrance}");
+            if (!string.IsNullOrWhiteSpace(options.Package))
+            {
+                Console.WriteLine($"          {options.Package} {options.DisplayName}");
+            }
             Console.WriteLine($"          {options.Platform} {options.Engine}");
+            if (!string.IsNullOrWhiteSpace(options.DependencySource))
+            {
+                Console.WriteLine($"Dependency: {options.DependencySource}");
+            }
             Console.WriteLine($"Output: {options.OutputFolder}");
             
 
@@ -96,7 +109,7 @@ namespace ZoDream.Archiver
             {
                 filter.Add(f);
             }
-            var progress = logger.CreateProgress("Extract Chunk ...", source.Count);
+            var progress = logger.CreateProgress(options.OnlyDependencyTask ? "Build Dependency" : "Extract Chunk", source.Count);
             progress.Value = skipCount;
             if (progress.Value > 0)
             {
