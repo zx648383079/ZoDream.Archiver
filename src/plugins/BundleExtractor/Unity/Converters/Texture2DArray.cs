@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
@@ -9,7 +9,7 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class Texture2DArrayConverter : BundleConverter<Texture2DArray>, IElementTypeLoader
+    internal sealed class Texture2DArrayConverter : BundleConverter<Texture2DArray>, ITypeTreeConverter
     {
         public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
         {

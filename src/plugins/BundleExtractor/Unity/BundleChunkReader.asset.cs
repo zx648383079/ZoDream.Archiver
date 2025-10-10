@@ -88,17 +88,11 @@ namespace ZoDream.BundleExtractor
                         var doc = asset.GetType(i);
                         object? res = null;
                         // 默认 object 不做转化，所以为 null
-                        if (serializer.Converters.TryGet(targetType, out var cvt))
+                        if (doc?.Count > 0 && serializer.Converters.TryGet(targetType, out var cvt) 
+                            && cvt is ITypeTreeConverter tl)
                         {
-                            if (doc?.Count > 0 && cvt is IElementTypeLoader tl)
-                            {
-                                res = tl.Read(reader, targetType, doc);
-                            }
-                            else
-                            {
-                                res = cvt.Read(reader, targetType, serializer);
-                            }
-                        } 
+                            res = tl.Read(reader, targetType, doc);
+                        }
                         else
                         {
                             res = serializer.Deserialize(reader, targetType);
@@ -172,7 +166,7 @@ namespace ZoDream.BundleExtractor
             var doc = asset.GetType(entryId);
             if (serializer.Converters.TryGet(targetType, out var cvt))
             {
-                if (doc?.Count > 0 && cvt is IElementTypeLoader tl)
+                if (doc?.Count > 0 && cvt is ITypeTreeConverter tl)
                 {
                     return (T)tl.Read(reader, targetType, doc);
                 }

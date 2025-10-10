@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
@@ -8,7 +8,7 @@ using Version = UnityEngine.Version;
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
 
-    internal class AnimationClipConverter : BundleConverter<AnimationClip>, IElementTypeLoader
+    internal class AnimationClipConverter : BundleConverter<AnimationClip>, ITypeTreeConverter
     {
         public static void ReadBase(AnimationClip res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)

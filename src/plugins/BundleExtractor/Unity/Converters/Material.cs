@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
@@ -7,7 +7,7 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class MaterialConverter : BundleConverter<Material>, IElementTypeLoader
+    internal sealed class MaterialConverter : BundleConverter<Material>, ITypeTreeConverter
     {
         public static void ReadBase(Material res, IBundleBinaryReader reader, 
             IBundleSerializer serializer, Action cb)

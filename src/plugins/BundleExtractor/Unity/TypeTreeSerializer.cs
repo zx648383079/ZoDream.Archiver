@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.Shared.Bundle;
 using ZoDream.SourceGenerator;
@@ -10,7 +11,7 @@ namespace ZoDream.BundleExtractor.Unity
 {
     public class TypeTreeSerializer(VirtualDocument doc) : IBundleSerializer
     {
-        public IBundleConverterCollection Converters { get; set; } = new BundleConverterCollection();
+        public IBundleConverterCollection Converters { get; set; } = new BundleConverterCollection(UnityConverter.Converters);
 
  
         public T? Deserialize<T>(IBundleBinaryReader reader)
@@ -28,6 +29,11 @@ namespace ZoDream.BundleExtractor.Unity
             if (maps is null)
             {
                 return null;
+            }
+            if (Converters.TryGet(objectType, out var converter) && converter is ITypeTreeConverter tl)
+            {
+                // 一些需要读取数据后进行预处理的
+                return tl.Read(reader, objectType, new VirtualDocument(doc.Version, [maps]));
             }
             var instance = Activator.CreateInstance(objectType)!;
             new DocumentReader(resource).ReadObject(ref instance, maps.Children, reader);

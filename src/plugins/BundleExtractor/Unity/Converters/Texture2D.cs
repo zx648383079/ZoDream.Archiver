@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
@@ -44,7 +44,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         }
     }
 
-    internal sealed class Texture2DConverter : BundleConverter<Texture2D>, IElementTypeLoader
+    internal sealed class Texture2DConverter : BundleConverter<Texture2D>, ITypeTreeConverter
     {
         public object? Read(IBundleBinaryReader reader, Type targetType, VirtualDocument typeMaps)
         {

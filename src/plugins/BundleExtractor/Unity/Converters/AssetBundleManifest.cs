@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Document;
@@ -6,7 +6,7 @@ using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    public class AssetBundleManifestConverter : BundleConverter<AssetBundleManifest>, IElementTypeLoader
+    public class AssetBundleManifestConverter : BundleConverter<AssetBundleManifest>, ITypeTreeConverter
     {
         public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
         {

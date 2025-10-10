@@ -8,7 +8,7 @@ using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
-    internal sealed class SpriteConverter : BundleConverter<Sprite>, IElementTypeLoader
+    internal sealed class SpriteConverter : BundleConverter<Sprite>, ITypeTreeConverter
     {
         public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
         {
@@ -16,7 +16,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             var res = new Sprite();
             var container = reader.Get<ISerializedFile>();
             new DocumentReader(container).Read(typeMaps, reader, res);
-            if (res.RD.VertexData is not null)
+            if (res.RD?.VertexData is not null)
             {
                 VertexDataConverter.GetStreams(res.RD.VertexData, version);
             }

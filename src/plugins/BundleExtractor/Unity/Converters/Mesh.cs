@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using UnityEngine;
+using UnityEngine.Document;
+using ZoDream.BundleExtractor.Unity.Document;
 using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.IO;
@@ -13,8 +15,17 @@ using Version = UnityEngine.Version;
 namespace ZoDream.BundleExtractor.Unity.Converters
 {
     
-    internal class MeshConverter : BundleConverter<Mesh>
+    internal class MeshConverter : BundleConverter<Mesh>, ITypeTreeConverter
     {
+        public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
+        {
+            var res = new Mesh();
+            var container = reader.Get<ISerializedFile>();
+            new DocumentReader(container).Read(typeMaps, reader, res);
+
+            ProcessData(res, reader);
+            return res;
+        }
         public override Mesh? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var res = new Mesh();
