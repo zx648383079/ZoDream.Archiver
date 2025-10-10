@@ -72,6 +72,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
             var type = instance.GetType();
             foreach (var node in nodes)
             {
+                if (node.Name == "m_ObjectHideFlags" && reader.Get<BuildTarget>() != BuildTarget.NoTarget)
+                {
+                    continue;
+                }
                 var fieldName = ConvertFieldName(node.Name, instance);
                 var field = type.GetField(fieldName);
                 if (field is not null)

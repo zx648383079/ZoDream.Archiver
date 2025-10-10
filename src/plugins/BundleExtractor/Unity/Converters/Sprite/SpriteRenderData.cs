@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
@@ -25,7 +25,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
             if (version.GreaterThanOrEquals(5, 6)) //5.6 and up
             {
-                res.SubMeshes = reader.ReadArray(_ => serializer.Deserialize<SubMesh>(reader));
+                var subMeshCount = reader.ReadInt32();
+                if (subMeshCount > short.MaxValue)
+                {
+                    throw new OutOfMemoryException("SpriteRender SubMesh Count too large");
+                }
+                res.SubMeshes = reader.ReadArray(subMeshCount, _ => serializer.Deserialize<SubMesh>(reader));
 
                 res.IndexBuffer = reader.ReadArray(r => r.ReadByte());
                 reader.AlignStream();

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -158,14 +157,17 @@ namespace ZoDream.SourceGenerator
                         writer.WriteFormat("public {0}[] {1};", type.Key, field).WriteLine(true);
                         _cvtWriter.WriteFormat("res.{0} = reader.ReadArray({1}, _ => {2});",
                             field, arrayItems[name] + 1, type.Value).WriteLine(true);
+                        WriteAlign(_cvtWriter, item);
                         continue;
                     }
                     writer.WriteFormat("public {0} {1};", type.Key, field).WriteLine(true);
                     _cvtWriter.WriteFormat("res.{0} = {1};",
                         field, type.Value).WriteLine(true);
+                    WriteAlign(_cvtWriter, item);
                     continue;
                 }
                 WriteProperty(writer, item);
+                WriteAlign(_cvtWriter, item);
             }
             writer.WriteOutdentLine().Write("}").WriteLine(true);
             _cvtWriter.Write("return res;")
@@ -173,7 +175,14 @@ namespace ZoDream.SourceGenerator
                 .WriteOutdentLine().Write("}").WriteLine(true);
         }
 
-
+        private void WriteAlign(ICodeWriter writer, VirtualNode item)
+        {
+            if (item.MetaFlag.HasFlag(TransferMetaFlags.AlignBytes) || 
+                (item.Type == "string" && item.MetaFlag.HasFlag(TransferMetaFlags.AnyChildUsesAlignBytes)))
+            {
+                writer.Write("reader.AlignStream();").WriteLine(true);
+            }
+        }
 
         private void WriteProperty(ICodeWriter writer, VirtualNode node)
         {
@@ -298,7 +307,7 @@ namespace ZoDream.SourceGenerator
                 "int" or "SInt32" => "reader.ReadInt32()",
                 "SInt64" or "long long" => "reader.ReadInt64()",
                 "UInt64" or "unsigned long long" or "FileSize" => "reader.ReadInt64()",
-                "string" => "reader.ReadAlignedString()",
+                "string" => "reader.ReadString()",
                 "float" => "reader.ReadSingle()",
                 "double" => "reader.ReadDouble()",
                 "bool" => "reader.ReadBoolean()",

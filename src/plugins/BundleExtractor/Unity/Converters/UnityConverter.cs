@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.Document;
@@ -156,6 +156,8 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             new SpriteVertexConverter(),
 
             new MonoScriptConverter(),
+            new CanvasRendererConverter(),
+            new RenderTextureConverter(),
         ];
         public static void ReadTexture(Texture res, IBundleBinaryReader reader, IBundleSerializer serializer)
         {

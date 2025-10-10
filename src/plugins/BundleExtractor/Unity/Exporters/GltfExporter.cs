@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -987,7 +987,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             }
             foreach (var texEnv in mat.SavedProperties.TexEnvs)
             {
-                if (!texEnv.Value.Texture.TryGet<Texture2D>(out var image)) //TODO other Texture
+                if (!texEnv.Value.Texture.TryGet(out var t) || t is not Texture2D image) //TODO other Texture
                 {
                     continue;
                 }

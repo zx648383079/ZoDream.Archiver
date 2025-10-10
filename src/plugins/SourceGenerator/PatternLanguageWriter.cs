@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine.Document;
@@ -130,17 +130,27 @@ namespace ZoDream.SourceGenerator
                     if (match.Success)
                     {
                         writer.WriteFormat("Array<{0}, {1}> {2};", type, arrayItems[name] + 1, field).WriteLine(true);
+                        WriteAlign(writer, item);
                         continue;
                     }
                     writer.WriteFormat("{0} {1};", type, field).WriteLine(true);
+                    WriteAlign(writer, item);
                     continue;
                 }
                 WriteProperty(writer, item);
+                WriteAlign(writer, item);
             }
             writer.WriteOutdentLine().Write("};").WriteLine(true);
         }
 
-
+        private void WriteAlign(ICodeWriter writer, VirtualNode item)
+        {
+            if (item.MetaFlag.HasFlag(TransferMetaFlags.AlignBytes) ||
+                (item.Type == "string" && item.MetaFlag.HasFlag(TransferMetaFlags.AnyChildUsesAlignBytes)))
+            {
+                writer.Write("zodream::AlignTo<4>;").WriteLine(true);
+            }
+        }
 
         private void WriteProperty(ICodeWriter writer, VirtualNode node)
         {

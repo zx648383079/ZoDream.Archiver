@@ -13,7 +13,13 @@ namespace ZoDream.BundleExtractor.Unity
     {
         public IBundleConverterCollection Converters { get; set; } = new BundleConverterCollection(UnityConverter.Converters);
 
- 
+
+        public VirtualDocument Get(Type objectType)
+        {
+            var maps = doc.Children.Where(i => i.Type == objectType.Name).FirstOrDefault();
+            return new VirtualDocument(doc.Version, maps is null ? [] : [maps]);
+        }
+
         public T? Deserialize<T>(IBundleBinaryReader reader)
         {
             return (T?)Deserialize(reader, typeof(T));

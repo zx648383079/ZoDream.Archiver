@@ -1,6 +1,6 @@
-﻿namespace UnityEngine
+namespace UnityEngine
 {
-    public class CanvasRenderer : Object
+    public class CanvasRenderer : Component
     {
     }
 }

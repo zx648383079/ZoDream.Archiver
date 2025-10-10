@@ -59,7 +59,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
         public static OrderedDictionary? Deserialize(int entryId, ISerializedFile resource)
         {
-            return resource.Container.Shared.GetOrAdd(entryId, () => {
+            return resource.Container.Shared.GetOrAdd(entryId.GetHashCode(), () => {
                 var doc = resource.GetType(entryId);
                 if (doc is null)
                 {

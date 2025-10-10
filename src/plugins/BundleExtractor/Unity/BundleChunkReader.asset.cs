@@ -154,6 +154,8 @@ namespace ZoDream.BundleExtractor
                 NativeClassID.VideoClip => typeof(VideoClip),
                 NativeClassID.ResourceManager => typeof(ResourceManager),
                 NativeClassID.AssetBundleManifest => typeof(AssetBundleManifest),
+                NativeClassID.CanvasRenderer => typeof(CanvasRenderer),
+                NativeClassID.RenderTexture => typeof(RenderTexture),
                 _ => typeof(Object),
             };
         }
@@ -164,16 +166,14 @@ namespace ZoDream.BundleExtractor
             var reader = asset.OpenRead(entryId);
             var targetType = typeof(T);//ConvertToClassType((NativeClassID)obj.ClassID);
             var doc = asset.GetType(entryId);
-            if (serializer.Converters.TryGet(targetType, out var cvt))
+            if (doc?.Count > 0 && serializer.Converters.TryGet(targetType, out var cvt)
+                            && cvt is ITypeTreeConverter tl)
             {
-                if (doc?.Count > 0 && cvt is ITypeTreeConverter tl)
-                {
-                    return (T)tl.Read(reader, targetType, doc);
-                }
-                else
-                {
-                    return (T)cvt.Read(reader, targetType, serializer);
-                }
+                return (T)tl.Read(reader, targetType, doc);
+            }
+            else
+            {
+                return (T)serializer.Deserialize(reader, targetType);
             }
             return default;
         }

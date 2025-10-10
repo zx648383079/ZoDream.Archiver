@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -707,7 +707,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 iMat.Textures = [];
                 foreach (var texEnv in mat.SavedProperties.TexEnvs)
                 {
-                    if (!texEnv.Value.Texture.TryGet<Texture2D>(out var m_Texture2D)) //TODO other Texture
+                    if (!texEnv.Value.Texture.TryGet(out var t) || t is not Texture2D image) //TODO other Texture
                     {
                         continue;
                     }
@@ -728,32 +728,32 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     texture.Dest = dest;
 
                     var ext = $".png";
-                    if (_textureNameDictionary.TryGetValue(m_Texture2D, out var textureName))
+                    if (_textureNameDictionary.TryGetValue(image, out var textureName))
                     {
                         texture.Name = textureName;
                     }
-                    //else if (FbxImportedHelpers.FindTexture(m_Texture2D.Name + ext, TextureList) != null) //已有相同名字的图片
+                    //else if (FbxImportedHelpers.FindTexture(image.Name + ext, TextureList) != null) //已有相同名字的图片
                     //{
                     //    for (int i = 1; ; i++)
                     //    {
-                    //        var name = m_Texture2D.Name + $" ({i}){ext}";
+                    //        var name = image.Name + $" ({i}){ext}";
                     //        if (FbxImportedHelpers.FindTexture(name, TextureList) == null)
                     //        {
                     //            texture.Name = name;
-                    //            _textureNameDictionary.Add(m_Texture2D, name);
+                    //            _textureNameDictionary.Add(image, name);
                     //            break;
                     //        }
                     //    }
                     //}
                     else
                     {
-                        texture.Name = m_Texture2D.Name + ext;
-                        _textureNameDictionary.Add(m_Texture2D, texture.Name);
+                        texture.Name = image.Name + ext;
+                        _textureNameDictionary.Add(image, texture.Name);
                     }
 
                     texture.Offset = texEnv.Value.Offset;
                     texture.Scale = texEnv.Value.Scale;
-                    ConvertTexture2D(m_Texture2D, texture.Name);
+                    ConvertTexture2D(image, texture.Name);
                 }
 
                 MaterialList.Add(iMat);
