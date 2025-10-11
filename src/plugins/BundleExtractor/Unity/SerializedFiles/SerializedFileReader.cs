@@ -43,7 +43,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                     AddDependency(new EntryName(item.PathName));
                 } else
                 {
-                    AddDependency(new FilePathName(item.GetFilePath()));
+                    AddDependency(new UnknownName(item.PathName));
                 }
             }
             _children = new Object?[_metadata.Object.Length];

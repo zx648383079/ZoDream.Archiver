@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
@@ -7,6 +7,20 @@ namespace ZoDream.BundleExtractor.Unity
 {
     public static class FileNameHelper
     {
+
+        public static bool IsMatch(IFilePath filePath, IFileName name, StringComparison comparison)
+        {
+            if (name is FilePathName)
+            {
+                return filePath is not IEntryPath && filePath.Name.Equals(name.Name, comparison);
+            }
+            if (name is EntryName)
+            {
+                return filePath is IEntryPath && filePath.Name.Equals(name.Name, comparison);
+            }
+            return filePath.Name.Equals(name.Name, comparison);
+        }
+
         /// <summary>
         /// 创建新的路径
         /// </summary>

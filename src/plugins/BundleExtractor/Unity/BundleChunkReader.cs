@@ -93,7 +93,7 @@ namespace ZoDream.BundleExtractor
             {
                 return index;
             }
-            var i = _assetItems.FindIndex(x => x.FullPath.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+            var i = _assetItems.FindIndex(x => FileNameHelper.IsMatch(x.FullPath, fileName, StringComparison.OrdinalIgnoreCase));
             _assetIndexItems.TryAdd(fileName, i);
             return i;
         }

@@ -5,7 +5,8 @@ using IOPath = System.IO.Path;
 
 namespace ZoDream.Shared.Models
 {
-    public readonly struct FilePathName(string name) : IFileName
+
+    public readonly struct UnknownName(string name) : IFileName
     {
         public readonly string Name => name;
 
@@ -16,12 +17,12 @@ namespace ZoDream.Shared.Models
 
         public readonly bool Equals(IFileName? other)
         {
-            return Name.Equals(other?.Name);
+            return other is UnknownName && Name.Equals(other?.Name);
         }
 
         public readonly bool Equals(IFileName? other, StringComparison comparisonType)
         {
-            return Name.Equals(other?.Name, comparisonType);
+            return other is UnknownName && Name.Equals(other?.Name, comparisonType);
         }
 
         public readonly bool Equals(IFilePath? other)
@@ -42,6 +43,56 @@ namespace ZoDream.Shared.Models
         public readonly bool Equals(IEntryPath? other, StringComparison comparisonType)
         {
             return Name.Equals(other?.Name, comparisonType);
+        }
+
+        public readonly bool Equals(string? other)
+        {
+            return Name.Equals(other);
+        }
+
+        public readonly bool Equals(string? other, StringComparison comparisonType)
+        {
+            return Name.Equals(other, comparisonType);
+        }
+    }
+
+    public readonly struct FilePathName(string name) : IFileName
+    {
+        public readonly string Name => name;
+
+        public readonly override string ToString()
+        {
+            return Name;
+        }
+
+        public readonly bool Equals(IFileName? other)
+        {
+            return other is FilePathName && Name.Equals(other?.Name);
+        }
+
+        public readonly bool Equals(IFileName? other, StringComparison comparisonType)
+        {
+            return other is FilePathName && Name.Equals(other?.Name, comparisonType);
+        }
+
+        public readonly bool Equals(IFilePath? other)
+        {
+            return Name.Equals(other?.Name);
+        }
+
+        public readonly bool Equals(IFilePath? other, StringComparison comparisonType)
+        {
+            return Name.Equals(other?.Name, comparisonType);
+        }
+
+        public readonly bool Equals(IEntryPath? other)
+        {
+            return other is not null && Name.Equals(IOPath.GetFileName(other.FilePath));
+        }
+
+        public readonly bool Equals(IEntryPath? other, StringComparison comparisonType)
+        {
+            return other is not null && Name.Equals(IOPath.GetFileName(other.FilePath), comparisonType);
         }
 
         public readonly bool Equals(string? other)
