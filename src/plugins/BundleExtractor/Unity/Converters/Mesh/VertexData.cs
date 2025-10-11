@@ -48,11 +48,14 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
         internal static void GetStreams(VertexData res, Version version)
         {
-            
             if (res.Channels.Length == 0)
             {
                 res.Streams = [];
                 return;
+            }
+            for (int i = 0; i < res.Channels.Length; i++)
+            {
+                res.Channels[i].Dimension &= 0xF;
             }
             var items = new List<StreamInfo>();
             var streamCount = res.Channels.Max(x => x.Stream) + 1;

@@ -20,9 +20,27 @@ namespace ZoDream.BundleExtractor.Unity.Converters
         public object? Read(IBundleBinaryReader reader, Type target, VirtualDocument typeMaps)
         {
             var res = new Mesh();
+            var version = reader.Get<Version>();
             var container = reader.Get<ISerializedFile>();
             new DocumentReader(container).Read(typeMaps, reader, res);
-
+            if (res.IndexBuffer?.Length > 0)
+            {
+                {
+                    var buffer = new ReadOnlySpan<byte>(res.IndexBuffer);
+                    var bitCount = res.Use16BitIndices ? 2 : 4;
+                    res.IndexBufferFormat = new uint[buffer.Length / bitCount];
+                    for (var i = 0; i < res.IndexBufferFormat.Length; i++)
+                    {
+                        var current = buffer.Slice(i * bitCount, bitCount);
+                        res.IndexBufferFormat[i] = bitCount == 2 ? reader.ReadUInt16(current) : reader.ReadUInt16(current);
+                    }
+                }
+                res.IndexBuffer = null;
+            }
+            if (res.VertexData is not null)
+            {
+                VertexDataConverter.GetStreams(res.VertexData, version);
+            }
             ProcessData(res, reader);
             return res;
         }
@@ -63,19 +81,18 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         (version.Equals(2017, 3) && m_MeshCompression == 0)
                     )//2017.3.xfx with no compression
                     {
-                        var m_IndexFormat = reader.ReadInt32();
-                        res.Use16BitIndices = m_IndexFormat == 0;
+                        res.IndexFormat = reader.ReadInt32();
                     }
 
                     int m_IndexBuffer_size = reader.ReadInt32();
                     if (res.Use16BitIndices)
                     {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
+                        res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
                         reader.AlignStream();
                     }
                     else
                     {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
+                        res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
                     }
                 }
 
@@ -192,7 +209,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             res.Name = reader.ReadAlignedString();
             if (version.LessThan(3, 5)) //3.5 down
             {
-                res.Use16BitIndices = reader.ReadInt32() > 0;
+                res.IndexFormat = reader.ReadInt32() > 0 ? 0 : 1;
             }
 
             if (version.LessThanOrEquals(2, 5)) //2.5 and down
@@ -201,16 +218,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
                 if (res.Use16BitIndices)
                 {
-                    res.IndexBuffer = new uint[m_IndexBuffer_size / 2];
-                    for (int i = 0; i < m_IndexBuffer_size / 2; i++)
-                    {
-                        res.IndexBuffer[i] = reader.ReadUInt16();
-                    }
+                    res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 2, _ => (uint)reader.ReadUInt16());
                     reader.AlignStream();
                 }
                 else
                 {
-                    res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, (r, _) => r.ReadUInt32());
+                    res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 4, _ => reader.ReadUInt32());
                 }
             }
 
@@ -615,7 +628,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             //IndexBuffer
             if (res.CompressedMesh.Triangles.NumItems > 0)
             {
-                res.IndexBuffer = Array.ConvertAll(PackedIntVectorConverter.UnpackInts(res.CompressedMesh.Triangles), x => (uint)x);
+                res.IndexBufferFormat = Array.ConvertAll(PackedIntVectorConverter.UnpackInts(res.CompressedMesh.Triangles), x => (uint)x);
             }
             //Color
             if (res.CompressedMesh.Colors.NumItems > 0)
@@ -647,9 +660,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 {
                     for (int i = 0; i < indexCount; i += 3)
                     {
-                        items.Add(res.IndexBuffer[firstIndex + i]);
-                        items.Add(res.IndexBuffer[firstIndex + i + 1]);
-                        items.Add(res.IndexBuffer[firstIndex + i + 2]);
+                        items.Add(res.IndexBufferFormat[firstIndex + i]);
+                        items.Add(res.IndexBufferFormat[firstIndex + i + 1]);
+                        items.Add(res.IndexBufferFormat[firstIndex + i + 2]);
                     }
                 }
                 else if (version.LessThan(4) || topology == GfxPrimitiveType.TriangleStrip)
@@ -658,9 +671,9 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     uint triIndex = 0;
                     for (int i = 0; i < indexCount - 2; i++)
                     {
-                        var a = res.IndexBuffer[firstIndex + i];
-                        var b = res.IndexBuffer[firstIndex + i + 1];
-                        var c = res.IndexBuffer[firstIndex + i + 2];
+                        var a = res.IndexBufferFormat[firstIndex + i];
+                        var b = res.IndexBufferFormat[firstIndex + i + 1];
+                        var c = res.IndexBufferFormat[firstIndex + i + 2];
 
                         // skip degenerates
                         if (a == b || a == c || b == c)
@@ -687,12 +700,12 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                 {
                     for (int q = 0; q < indexCount; q += 4)
                     {
-                        items.Add(res.IndexBuffer[firstIndex + q]);
-                        items.Add(res.IndexBuffer[firstIndex + q + 1]);
-                        items.Add(res.IndexBuffer[firstIndex + q + 2]);
-                        items.Add(res.IndexBuffer[firstIndex + q]);
-                        items.Add(res.IndexBuffer[firstIndex + q + 2]);
-                        items.Add(res.IndexBuffer[firstIndex + q + 3]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q + 1]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q + 2]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q + 2]);
+                        items.Add(res.IndexBufferFormat[firstIndex + q + 3]);
                     }
                     //fix indexCount
                     m_SubMesh.IndexCount = indexCount / 2 * 3;

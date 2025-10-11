@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Numerics;
 using UnityEngine;
@@ -400,7 +400,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                         var ResourceFlags = reader.ReadUInt32();
 
                         var RootClusterPage = reader.ReadInt32();
-                        res.IndexBuffer = reader.ReadArray(RootClusterPage / 4, r => r.ReadUInt32());
+                        res.IndexBufferFormat = reader.ReadArray(RootClusterPage / 4, r => r.ReadUInt32());
 
                         var ImposterAtlas = reader.ReadArray(_ => reader.ReadUInt16());
                         reader.ReadArray<VGPackedHierarchyNode>(serializer);
@@ -417,21 +417,20 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
 
                     //Unity fixed it in 2017.3.1p1 and later versions
                     if (
-                    version.GreaterThanOrEquals(2017, 4) ||
-                    version.Equals(2017, 3, 1, VersionType.Patch, 1) || 
-                    (version.Equals(2017, 3) && m_MeshCompression == 0))//2017.3.xfx with no compression
+                        version.GreaterThanOrEquals(2017, 4) ||
+                        version.Equals(2017, 3, 1, VersionType.Patch, 1) || 
+                        (version.Equals(2017, 3) && m_MeshCompression == 0))//2017.3.xfx with no compression
                     {
-                        var m_IndexFormat = reader.ReadInt32();
-                        res.Use16BitIndices = m_IndexFormat == 0;
+                        res.IndexFormat = reader.ReadInt32();
                         int m_IndexBuffer_size = reader.ReadInt32();
                         if (res.Use16BitIndices)
                         {
-                            res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
+                            res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 2, r => (uint)r.ReadUInt16());
                             reader.AlignStream();
                         }
                         else
                         {
-                            res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
+                            res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 4, r => r.ReadUInt32());
                         }
                     }
 

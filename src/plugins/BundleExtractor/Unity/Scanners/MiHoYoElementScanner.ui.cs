@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
@@ -363,19 +363,18 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
                     if (version.GreaterThanOrEquals(2017, 3, 1, VersionType.Patch, 1) 
                     && m_MeshCompression == 0)//2017.3.xfx with no compression
                     {
-                        var m_IndexFormat = reader.ReadInt32();
-                        res.Use16BitIndices = m_IndexFormat == 0;
+                        res.IndexFormat = reader.ReadInt32();
                     }
 
                     int m_IndexBuffer_size = reader.ReadInt32();
                     if (res.Use16BitIndices)
                     {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 2, (r, _) => (uint)r.ReadUInt16());
+                        res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 2, (r, _) => (uint)r.ReadUInt16());
                         reader.AlignStream();
                     }
                     else
                     {
-                        res.IndexBuffer = reader.ReadArray(m_IndexBuffer_size / 4, (r, _) => r.ReadUInt32());
+                        res.IndexBufferFormat = reader.ReadArray(m_IndexBuffer_size / 4, (r, _) => r.ReadUInt32());
                     }
                 }
 

@@ -2,14 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.Document;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.Shared;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Converters;
+using ZoDream.Shared.Numerics;
 using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor.Unity.Document
@@ -93,7 +96,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             }
         }
 
-        private object? ReadType(Type type, VirtualNode node, IBundleBinaryReader reader)
+        private object? ReadType(Type targetType, VirtualNode node, IBundleBinaryReader reader)
         {
             var align = node.MetaFlag.IsAlignBytes();
             if (TryRead(node, reader, out var value))
@@ -102,7 +105,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 {
                     reader.AlignStream();
                 }
-                return ConvertType(value, type);
+                return ConvertType(value, targetType);
             }
             var isFromType = false;
             switch (node.Type)
@@ -118,7 +121,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
                         Expectation.ThrowIfNot(childNode.Length == 2);
                         Type childType = null;
                         var inType = typeof(IEnumerable<>);
-                        foreach (var item in type.GetInterfaces())
+                        foreach (var item in targetType.GetInterfaces())
                         {
                             if (item.IsGenericType && item.GetGenericTypeDefinition() == inType)
                             {
@@ -131,9 +134,9 @@ namespace ZoDream.BundleExtractor.Unity.Document
                                 Activator.CreateInstance(childType, 
                                     ReadType(childType.GenericTypeArguments[0], childNode[0], reader),
                                     ReadType(childType.GenericTypeArguments[1], childNode[1], reader)));
-                        if (!type.IsArray)
+                        if (!targetType.IsArray)
                         {
-                            value = Activator.CreateInstance(type, [Convert.ChangeType(value, childType)]);
+                            value = Activator.CreateInstance(targetType, [Convert.ChangeType(value, childType)]);
                         }
                         isFromType = true;
                         break;
@@ -141,10 +144,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 case "TypelessData":
                     {
                         var size = reader.ReadInt32();
-                        if (type == typeof(Stream))
+                        if (targetType == typeof(Stream))
                         {
                             value = reader.ReadAsStream(size);
-                        } else if (type == typeof(byte[]))
+                        } else if (targetType == typeof(byte[]))
                         {
                             value = reader.ReadBytes(size);
                         } else
@@ -163,26 +166,35 @@ namespace ZoDream.BundleExtractor.Unity.Document
                             {
                                 align = true;
                             }
+                            
                             int size = reader.ReadInt32();
                             var itemNode = node.Children[0].Children[1];
-                            var itemType = type.IsArray ? type.GetElementType() : type.GenericTypeArguments[0];
-                            value = ReadArray(itemType, size, () => ReadType(itemType, itemNode, reader));
-                            if (!type.IsArray)
+                            var itemType = targetType.IsArray ? targetType.GetElementType() : targetType.GenericTypeArguments[0];
+
+                            // 一些 byte[] 转 int[] 需要特别注意 
+#if DEBUG
+                            if (itemNode.Type == "UInt8" && itemType != typeof(byte))
                             {
-                                value = Activator.CreateInstance(type, [value]);
+                                throw new ArgumentException($"{itemNode.Type}[] can't convert to {itemType}[]");
+                            }
+#endif
+                            value = ReadArray(itemType, size, () => ReadType(itemType, itemNode, reader));
+                            if (!targetType.IsArray)
+                            {
+                                value = Activator.CreateInstance(targetType, [value]);
                             }
                             isFromType = true;
                         }
-                        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IPPtr<>))
+                        else if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(IPPtr<>))
                         {
                             var pptr = (object)new PPtr();
                             ReadObject(ref pptr, node.Children, reader);
                             return Activator.CreateInstance(
-                                typeof(ObjectPPtr<>).MakeGenericType(type.GenericTypeArguments), [resource, pptr]);
+                                typeof(ObjectPPtr<>).MakeGenericType(targetType.GenericTypeArguments), [resource, pptr]);
                         }
                         else //Class
                         {
-                            value = Activator.CreateInstance(type);
+                            value = Activator.CreateInstance(targetType);
                             ReadObject(ref value, node.Children, reader);
                             isFromType = true;
                         }
@@ -197,7 +209,7 @@ namespace ZoDream.BundleExtractor.Unity.Document
             {
                 return value;
             }
-            return ConvertType(value, type);
+            return ConvertType(value, targetType);
         }
 
         private static Array ReadArray(Type itemType, int length, Func<object?> cb)
@@ -361,6 +373,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
 
         private static bool TryRead(VirtualNode node, IBundleBinaryReader reader, [NotNullWhen(true)] out object? result)
         {
+            if (TryReadMix(node, reader, out result))
+            {
+                return true;
+            }
             switch (node.Type)
             {
                 case "SInt8":
@@ -405,17 +421,38 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 case "bool":
                     result = reader.ReadBoolean();
                     return true;
-                case "string":
-                    result = reader.ReadString();
-                    if (node.MetaFlag.IsAnyChildUsesAlignBytes())
-                    {
-                        reader.AlignStream();   
-                    }
-                    return true;
                 default:
                     result = null;
                     return false;
             }
+        }
+        /// <summary>
+        /// 读取一些合并的内容
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="reader"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private static bool TryReadMix(VirtualNode node, IBundleBinaryReader reader, [NotNullWhen(true)] out object? result)
+        {
+            if (node.Type == "string")
+            {
+                result = reader.ReadString();
+            }
+            else if (node.Type == "ColorRGBA" && node.Children.Length == 1)
+            {
+                result = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+            }
+            else
+            {
+                result = null;
+                return false;
+            }
+            if (node.MetaFlag.IsAnyChildUsesAlignBytes())
+            {
+                reader.AlignStream();
+            }
+            return true;
         }
 
         private OrderedDictionary ReadDict(IEnumerable<VirtualNode> items, IBundleBinaryReader reader)
@@ -493,11 +530,28 @@ namespace ZoDream.BundleExtractor.Unity.Document
             fieldName = StringConverter.Studly(fieldName);
             if (host is ResourceSource && fieldName == "Path")
             {
-                fieldName = "Source";
+                return "Source";
+            }
+            else if (host is Vector4)
+            {
+                return fieldName switch
+                {
+                    "Width" or "B" => "Z",
+                    "Height" or "A" => "W",
+                    "R" => "X",
+                    "G" => "Y",
+                    _ => fieldName
+                };
+            }
+            else if (host is Matrix4x4)
+            {
+                // Matrix3x4
+                // E00 to M11
+                return $"M{(char)(fieldName[1] + 1)}{(char)(fieldName[2] + 1)}";
             }
             else if (fieldName == "Namespace")
             {
-                fieldName = "NameSpace";
+                return "NameSpace";
             }
             return fieldName;
         }

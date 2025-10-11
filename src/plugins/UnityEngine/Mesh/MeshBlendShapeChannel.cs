@@ -1,5 +1,3 @@
-﻿using ZoDream.Shared.Bundle;
-
 namespace UnityEngine
 {
     public struct MeshBlendShapeChannel

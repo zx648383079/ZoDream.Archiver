@@ -134,6 +134,8 @@ namespace ZoDream.Shared.Bundle
 
         public ulong Read7BitEncodedUInt64();
         #endregion
+
+
         #region 设置获取一些已知信息
         public void Add(string name, object value);
         public void Add<T>(T value);

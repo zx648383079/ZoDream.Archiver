@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+using System;
 using System.Numerics;
 
 namespace ZoDream.Shared.Numerics

@@ -25,9 +25,7 @@ namespace ZoDream.Archiver
         {
             Console.WriteLine();
             Console.WriteLine();
-            var logger = new EventLogger();
-            logger.OnLog += Logger_OnLog;
-            logger.OnProgress += Logger_OnProgress;
+            var logger = new ConsoleLogger();
             if (!Directory.Exists(options.Entrance))
             {
                 logger.Error($"<{options.Entrance}> Not Found!");
@@ -145,40 +143,6 @@ namespace ZoDream.Archiver
             }
             builder?.Dispose();
             logger.Info($"Finished!");
-        }
-
-        private void Logger_OnProgress(ProgressLogger progress)
-        {
-            lock (Console.Out)
-            {
-                int originalLeft = Console.CursorLeft;
-                int originalTop = Console.CursorTop;
-
-                Console.SetCursorPosition(0, progress.IsMaster ? 0 : 1);
-
-                var val = (int)((double)progress / 5);
-                var text = $"{progress.Title}: [{new string('=', val)}{new string(' ', 20 - val)}] {progress.Value}/{progress.Max}";
-                Console.Write(text);
-                if (text.Length < Console.BufferWidth)
-                {
-                    Console.Write(new string(' ', Console.BufferWidth - text.Length));
-                }
-                Console.SetCursorPosition(originalLeft, originalTop);
-            }
-        }
-
-        private void Logger_OnLog(string message, LogLevel level)
-        {
-            var originalColor = Console.ForegroundColor;
-            Console.Write($"[{DateTime.Now:HH:mm:ss}]{level}:");
-            Console.ForegroundColor = level switch
-            {
-                LogLevel.Error => ConsoleColor.Red,
-                LogLevel.Warn => ConsoleColor.Yellow,
-                _ => originalColor
-            };
-            Console.WriteLine(message);
-            Console.ForegroundColor = originalColor;
         }
     }
 }

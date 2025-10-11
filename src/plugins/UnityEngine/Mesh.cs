@@ -1,12 +1,15 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace UnityEngine
 {
     public sealed class Mesh : Object
     {
-        public bool Use16BitIndices = true;
+
+        public int IndexFormat;
+        public bool Use16BitIndices => IndexFormat == 0;
         public SubMesh[] SubMeshes;
-        public uint[] IndexBuffer;
+        public byte[]? IndexBuffer;
+        public uint[] IndexBufferFormat;
         public BlendShapeData Shapes;
         public Matrix4x4[] BindPose;
         public uint[] BoneNameHashes;

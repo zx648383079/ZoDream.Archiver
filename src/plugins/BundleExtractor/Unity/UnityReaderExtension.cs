@@ -1,7 +1,11 @@
-﻿using System.Numerics;
+using System;
+using System.Buffers.Binary;
+using System.Numerics;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Numerics;
+using Object = UnityEngine.Object;
+using Version = UnityEngine.Version;
 
 namespace ZoDream.BundleExtractor.Unity
 {
@@ -56,6 +60,26 @@ namespace ZoDream.BundleExtractor.Unity
             return buffer;
         }
 
+        #region 拓展一些字节操作
+        public static uint ReadUInt32(this IBundleBinaryReader reader,
+            ReadOnlySpan<byte> data)
+        {
+            if (reader.EndianType == Shared.Models.EndianType.BigEndian)
+            {
+                return BinaryPrimitives.ReadUInt32BigEndian(data);
+            }
+            return BinaryPrimitives.ReadUInt32LittleEndian(data);
+        }
+        public static ushort ReadUInt16(this IBundleBinaryReader reader,
+            ReadOnlySpan<byte> data)
+        {
+            if (reader.EndianType == Shared.Models.EndianType.BigEndian)
+            {
+                return BinaryPrimitives.ReadUInt16BigEndian(data);
+            }
+            return BinaryPrimitives.ReadUInt16LittleEndian(data);
+        }
+        #endregion
 
         public static int[] ReadInt32Array(this IBundleBinaryReader reader)
         {

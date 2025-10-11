@@ -5,7 +5,7 @@ namespace ZoDream.Archiver
 {
     public class TransformRuntime(string rootFolder) : IConsoleRuntime
     {
-        private static readonly char[] _spinner = ['|', '/', '-', '\\'];
+        
         public Task RunAsync(CancellationToken token = default)
         {
             Task.Factory.StartNew(() => WriteSpinner(token), token);
@@ -55,8 +55,7 @@ namespace ZoDream.Archiver
             var counter = 0;
             while (!token.IsCancellationRequested)
             {
-                WriteTopLine($"[{_spinner[counter % _spinner.Length]}] 处理中...");
-                counter++;
+                WriteTopLine($"[{ConsoleLogger.GetSpinner(counter ++)}] 处理中...");
                 Thread.Sleep(100);
             }
         }
