@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace ZoDream.BundleExtractor
 {
     internal partial class UnityBundleChunkReader
     {
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Dictionary<NativeClassID, Type> _exportItems = new() 
         {
             {NativeClassID.TextAsset, typeof(RawExporter)},
@@ -31,6 +32,7 @@ namespace ZoDream.BundleExtractor
             {NativeClassID.Texture2D, typeof(TextureExporter)},
             {NativeClassID.Sprite, typeof(TextureExporter)},
         };
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<IMultipartExporter> _exporterItems = [];
         /// <summary>
         /// 导出资源
@@ -145,9 +147,15 @@ namespace ZoDream.BundleExtractor
             {
                 return false;
             }
-            if (resource[entryId] is not MonoBehaviour behaviour 
-                || !behaviour.Script.TryGet(out var script) 
-                || behaviour.GameObject?.Index < 0)
+            if (resource[entryId] is not MonoBehaviour behaviour)
+            {
+                return false;
+            }
+            if (!behaviour.Script.TryGet(out var script))
+            {
+                return false;
+            }
+            if (behaviour.GameObject?.Index < 0)
             {
                 return false;
             }

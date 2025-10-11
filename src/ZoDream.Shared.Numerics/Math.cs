@@ -1,4 +1,4 @@
-﻿namespace ZoDream.Shared.Numerics
+namespace ZoDream.Shared.Numerics
 {
     public static class MathEx
     {
@@ -10,7 +10,7 @@
         /// <returns></returns>
         public static int Ceiling(int val, int divisor)
         {
-            return val % divisor + (val % divisor == 0 ? 0 : 1);
+            return val / divisor + (val % divisor == 0 ? 0 : 1);
         }
     }
 }

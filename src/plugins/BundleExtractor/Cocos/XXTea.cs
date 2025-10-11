@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Numerics;
 
@@ -34,7 +35,12 @@ namespace ZoDream.BundleExtractor.Cocos
 
         public byte[] Encrypt(byte[] input, int inputLength)
         {
-            throw new NotImplementedException();
+            var buffer = new byte[inputLength];
+            Buffer.BlockCopy(input, 0, buffer, 0, inputLength);
+            var byteSpan = new Span<byte>(buffer, 0, inputLength);
+            Span<uint> uintSpan = MemoryMarshal.Cast<byte, uint>(byteSpan);
+            Encrypt(uintSpan, Keys);
+            return buffer;
         }
 
         public void Encrypt(Stream input, Stream output)
@@ -71,7 +77,12 @@ namespace ZoDream.BundleExtractor.Cocos
 
         public byte[] Decrypt(byte[] input, int inputLength)
         {
-            throw new NotImplementedException();
+            var buffer = new byte[inputLength];
+            Buffer.BlockCopy(input, 0, buffer, 0, inputLength);
+            var byteSpan = new Span<byte>(buffer, 0, inputLength);
+            Span<uint> uintSpan = MemoryMarshal.Cast<byte, uint>(byteSpan);
+            Decrypt(uintSpan, Keys);
+            return buffer;
         }
 
         public void Decrypt(Stream input, Stream output)

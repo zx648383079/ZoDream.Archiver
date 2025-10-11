@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -40,13 +41,17 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 } else if (item.PathNameOrigin.StartsWith("archive:/"))
                 {
                     AddDependency(new EntryName(item.PathName));
+                } else
+                {
+                    AddDependency(new FilePathName(item.GetFilePath()));
                 }
             }
             _children = new Object?[_metadata.Object.Length];
             _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));
         }
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IArchiveOptions? _options;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IBundleBinaryReader _reader;
         private readonly SerializedFileHeader _header = new();
         private readonly SerializedFileMetadata _metadata = new();

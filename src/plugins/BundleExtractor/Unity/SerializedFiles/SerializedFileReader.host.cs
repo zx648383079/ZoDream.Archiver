@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -26,12 +26,13 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// </summary>
         private readonly Object?[] _children;
         public IBundleContainer? Container { get; set; }
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public ILogger? Logger => Container?.Logger;
         public IFilePath FullPath { get; private set; }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public FormatVersion Format => _header.Version;
         public Version Version => _metadata.Version;
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public BuildTarget Platform => _metadata.TargetPlatform;
 
         public int Count => _metadata.Object.Length;

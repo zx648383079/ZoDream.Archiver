@@ -38,7 +38,7 @@ namespace ZoDream.BundleExtractor
             fileItems.Analyze(token);
             logger.Info($"Found {fileItems.Count} files.");
             var service = scheme.Service;
-            var progress = logger.CreateProgress("Extract Chunk ...", fileItems.Count);
+            var progress = logger.CreateProgress(onlyDependencyTask ? "Build Dependency ..." : "Extract Chunk ...", fileItems.Count);
             if (!onlyDependencyTask && service.TryLoadPoint(fileItems.GetHashCode(), out var record))
             {
                 progress.Value = (int)record;
@@ -51,12 +51,26 @@ namespace ZoDream.BundleExtractor
             scheme.Service.Add(builder);
             var temporary = scheme.Service.Get<ITemporaryStorage>();
             var splitter = engine.CreateSplitter(options);
+            var filter = new BundleMultipleFilter();
+            if (engine is IBundleFilter ef)
+            {
+                filter.Add(ef);
+            }
+            if (service.TryGet<IBundleParser>(out var s) && s is IBundleFilter sf)
+            {
+                filter.Add(sf);
+            }
             IBundleChunk? next;
             foreach (var item in fileItems.GetFiles().Skip((int)progress.Value).Select(i => new FilePath(i)))
             {
                 if (token.IsCancellationRequested)
                 {
                     break;
+                }
+                if (filter.IsMatch(item))
+                {
+                    progress.Add(1);
+                    continue;
                 }
                 if (!splitter.TrySplit(item, fileItems, out next))
                 {

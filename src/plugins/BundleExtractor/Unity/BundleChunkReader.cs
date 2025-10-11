@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -34,22 +35,31 @@ namespace ZoDream.BundleExtractor
             _dependency = onlyDependencyTask ? _service.Get<IDependencyBuilder>() : null;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IBundleChunk _fileItems;
         private readonly IBundleOptions _options;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IEntryService _service;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly UnityBundleScheme _scheme;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IDependencyBuilder? _dependency;
         private ArchiveExtractMode _extractMode;
         private string _extractFolder = string.Empty;
         private readonly List<ISerializedFile> _assetItems = [];
         private readonly ConcurrentDictionary<IFileName, int> _assetIndexItems = [];
         private readonly ConcurrentDictionary<string, KeyValuePair<IFilePath, Stream>> _resourceItems = [];
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly List<string> _importItems = [];
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HashSet<string> _resourceFileHash = [];
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HashSet<string> _importFileHash = [];
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HashSet<string> _assetFileHash = [];
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IBundleSharedBag Shared { get; private set; } = new BundleSharedBag();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IAssemblyReader Assembly 
         {
             get {
@@ -67,8 +77,9 @@ namespace ZoDream.BundleExtractor
             }
         }
         public ISerializedFile? this[int index] => _assetItems[index];
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public ILogger? Logger => _service.Get<ILogger>();
-
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IBundleExtractOptions Options => (IBundleExtractOptions)_options;
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -122,7 +122,7 @@ namespace ZoDream.Archiver.ViewModels
                 while (!token.IsCancellationRequested)
                 {
                     Thread.Sleep(1000);
-                    _app.DispatcherQueue.TryEnqueue(() => {
+                    _app.DispatcherQueue?.TryEnqueue(() => {
                         Computed();
                     });
                 }
