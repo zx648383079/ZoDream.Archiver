@@ -35,16 +35,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             CombineFormats(_header.Version, _metadata);
             foreach (var item in _metadata.Externals)
             {
-                if (item.PathNameOrigin.StartsWith("Library/"))
-                {
-                    AddDependency(new FilePathName(item.PathName));
-                } else if (item.PathNameOrigin.StartsWith("archive:/"))
-                {
-                    AddDependency(new EntryName(item.PathName));
-                } else
-                {
-                    AddDependency(new UnknownName(item.PathName));
-                }
+                AddDependency(FileNameHelper.ParseIdentifier(item.PathNameOrigin));
             }
             _children = new Object?[_metadata.Object.Length];
             _objectIdMap = ImmutableDictionary.CreateRange(_metadata.Object.Select((item, i) => new KeyValuePair<long, int>(item.FileID, i)));

@@ -21,6 +21,23 @@ namespace ZoDream.BundleExtractor.Unity
             return filePath.Name.Equals(name.Name, comparison);
         }
 
+        public static IFileName ParseIdentifier(string filePath)
+        {
+            if (filePath.StartsWith(LibraryFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                return new FilePathName(filePath[LibraryFolder.Length..]);
+            }
+            if (filePath.StartsWith(ResourcesFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                return new FilePathName(filePath[ResourcesFolder.Length..]);
+            }
+            if (filePath.StartsWith(ArchivePrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return new EntryName(Path.GetFileName(filePath));
+            }
+            return new UnknownName(filePath);
+        }
+
         /// <summary>
         /// 创建新的路径
         /// </summary>
@@ -105,39 +122,6 @@ namespace ZoDream.BundleExtractor.Unity
             return fileName is EngineGeneratedF;
         }
 
-        public static string FixFileIdentifier(string name)
-        {
-            name = name.ToLowerInvariant();
-            name = FixDependencyName(name);
-            name = FixResourcePath(name);
-            return name;
-        }
-
-        public static string FixDependencyName(string dependency)
-        {
-            if (dependency.StartsWith(LibraryFolder, StringComparison.Ordinal))
-            {
-                return dependency[LibraryFolder.Length..];
-            }
-            else if (dependency.StartsWith(ResourcesFolder, StringComparison.Ordinal))
-            {
-                return dependency[ResourcesFolder.Length..];
-            }
-            return dependency;
-        }
-
-        public static string FixResourcePath(string resourcePath)
-        {
-            const string archivePrefix = "archive:/";
-            if (resourcePath.StartsWith(archivePrefix, StringComparison.Ordinal))
-            {
-                return Path.GetFileName(resourcePath);
-            }
-            else
-            {
-                return resourcePath;
-            }
-        }
 
         /// <summary>
         /// Remove .dll extension from the assembly name and add the "Assembly - " prefix if appropriate.
@@ -185,6 +169,7 @@ namespace ZoDream.BundleExtractor.Unity
 
         public const string LibraryFolder = "library/";
         public const string ResourcesFolder = "resources/";
+        public const string ArchivePrefix = "archive:/";
         public const string DefaultResourceName1 = "unity default resources";
         public const string DefaultResourceName2 = "unity_default_resources";
         public const string EditorResourceName = "unity editor resources";

@@ -242,7 +242,7 @@ namespace ZoDream.BundleExtractor.Unity.Converters
 
         public static OrderedDictionary? ToType(VirtualDocument? types, int entryId, ISerializedFile resource)
         {
-            if (types != null)
+            if (types?.Count > 0)
             {
                 return new DocumentReader(resource).Read(types, resource.OpenRead(entryId));
             }

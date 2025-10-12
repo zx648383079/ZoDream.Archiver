@@ -77,7 +77,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             IAssemblyReader assembly, DocumentReader converter)
         {
             var doc = GetTypeNode(ptr, assembly);
-            if (doc is null)
+            if (doc is null || doc.Count == 0)
             {
                 return null;
             }

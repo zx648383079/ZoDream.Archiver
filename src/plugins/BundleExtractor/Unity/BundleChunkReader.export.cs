@@ -72,9 +72,16 @@ namespace ZoDream.BundleExtractor
             {
                 if(!exporter.IsEmpty)
                 {
-                    exporter.SaveAs(_fileItems.Create(exporter.SourcePath,
+                    try
+                    {
+                        exporter.SaveAs(_fileItems.Create(exporter.SourcePath,
                             exporter.FileName
                         , folder), mode);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger?.Log(LogLevel.Error, e, string.Empty);
+                    }
                 }
                 exporter.Dispose();
                 progress?.Add(1);

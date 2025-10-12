@@ -86,7 +86,12 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 return null;
             }
             var i = _metadata.Object[index].SerializedTypeIndex;
-            return i < 0 ? null : _metadata.Types[i].OldType;
+            if (i < 0)
+            {
+                return null;
+            }
+            var res = _metadata.Types[i].OldType;
+            return res?.Count > 0 ? res : null;
         }
 
         /// <summary>

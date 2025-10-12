@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -101,11 +101,12 @@ namespace ZoDream.BundleExtractor.Unity.Document
         public static VirtualNode[] BuildTree(VirtualNode[] items)
         {
             var offset = 0;
-            return BuildTree(items, ref offset);
+            return BuildTree(items, ref offset, out _);
         }
 
-        private static VirtualNode[] BuildTree(VirtualNode[] items, ref int offset)
+        private static VirtualNode[] BuildTree(VirtualNode[] items, ref int offset, out bool anyChildAlign)
         {
+            anyChildAlign = false;
             if (offset >= items.Length)
             {
                 return [];
@@ -115,6 +116,10 @@ namespace ZoDream.BundleExtractor.Unity.Document
             {
                 items[offset]
             };
+            if (res[0].MetaFlag.HasFlag(TransferMetaFlags.AlignBytes))
+            {
+                anyChildAlign = true;
+            }
             while (++offset < items.Length)
             {
                 var next = items[offset].Depth;
@@ -125,10 +130,20 @@ namespace ZoDream.BundleExtractor.Unity.Document
                 }
                 if (next > depth)
                 {
-                    res.Last().Children = BuildTree(items, ref offset);
+                    var last = res.Last();
+                    last.Children = BuildTree(items, ref offset, out var childIsAlign);
+                    if (childIsAlign)
+                    {
+                        last.MetaFlag |= TransferMetaFlags.AnyChildUsesAlignBytes;
+                        anyChildAlign = true;
+                    }
                     continue;
                 }
                 res.Add(items[offset]);
+                if (items[offset].MetaFlag.HasFlag(TransferMetaFlags.AlignBytes))
+                {
+                    anyChildAlign = true;
+                }
             }
             return [.. res];
         }

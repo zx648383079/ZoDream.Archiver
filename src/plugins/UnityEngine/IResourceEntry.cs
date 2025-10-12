@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
 
@@ -20,7 +20,11 @@ namespace UnityEngine
         /// <param name="index"></param>
         /// <returns></returns>
         public IBundleBinaryReader OpenRead(int index);
-
+        /// <summary>
+        /// 获取 type tree 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public VirtualDocument? GetType(int index);
         public Stream OpenResource(ResourceSource source);
     }

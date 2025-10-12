@@ -94,6 +94,10 @@ namespace ZoDream.BundleExtractor
                 return index;
             }
             var i = _assetItems.FindIndex(x => FileNameHelper.IsMatch(x.FullPath, fileName, StringComparison.OrdinalIgnoreCase));
+            if (i < 0)
+            {
+                Logger?.Warning($"Need: {fileName}");
+            }
             _assetIndexItems.TryAdd(fileName, i);
             return i;
         }

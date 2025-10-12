@@ -1,4 +1,4 @@
-﻿using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Bundle;
 
 namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 {
@@ -31,17 +31,17 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
                 Type = (AssetType)reader.ReadInt32();
             }
             PathNameOrigin = reader.ReadStringZeroTerm();
-            PathName = FileNameHelper.FixFileIdentifier(PathNameOrigin);
+            //PathName = FileNameHelper.FixFileIdentifier(PathNameOrigin);
         }
 
-        public string GetFilePath()
-        {
-            if (Type == AssetType.Meta)
-            {
-                return Guid.ToString();
-            }
-            return PathName;
-        }
+        //public string GetFilePath()
+        //{
+        //    if (Type == AssetType.Meta)
+        //    {
+        //        return Guid.ToString();
+        //    }
+        //    return PathName;
+        //}
 
         public override string? ToString()
         {
@@ -55,7 +55,7 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
         /// <summary>
         /// File path without such prefixes as archive:/directory/fileName
         /// </summary>
-        public string PathName { get; set; }
+        //public string PathName { get; set; }
 
         /// <summary>
         /// Virtual asset path. Used for cached files, otherwise it's empty.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             _converter = new(resource);
             var obj = _resource[_entryId] as GameObject;
             Expectation.ThrowIfNot(obj is not null);
-            FileName = obj.Name ?? string.Empty;
+            FileName = LocationStorage.CreateSafeFileName($"{obj.Name}_{entryId}_");
             Initialize(obj);
         }
         public CubismExporter(IPPtr<GameObject> ptr)
@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly int _entryId;
         private readonly ISerializedFile _resource;
 
-        public bool IsEmpty => _moc is null;
+        public bool IsEmpty => _moc is null && _textures.Count == 0;
         public string FileName { get; private set; }
         public IFilePath SourcePath => _resource.FullPath;
 
@@ -66,7 +66,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             transform = TransformConverter.GetRoot(transform);
             foreach (var item in TransformConverter.ForEachTree(transform))
             {
-                if (item.GameObject?.TryGet(out var obj) != true)
+                if (item.GameObject?.TryGet(out var obj) != true || item.GameObject.IsExclude)
                 {
                     continue;
                 }
