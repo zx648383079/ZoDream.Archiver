@@ -1,18 +1,16 @@
 using System;
 using System.Linq;
-using ZoDream.BundleExtractor.Cocos;
-using ZoDream.BundleExtractor.Producers;
+using ZoDream.BundleExtractor.Xna;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class CocosEngine : IBundleEngine
+    public class XnaEngine(IEntryService service) : IBundleEngine
     {
-
-        internal const string EngineName = "Cocos";
+        internal const string EngineName = "XNA";
 
         public string AliasName => EngineName;
-
 
         public IBundleSplitter CreateSplitter(IBundleOptions options)
         {
@@ -31,23 +29,17 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
-            if (options.Producer == PaperProducer.ProducerName)
-            {
-                return new BlowfishReader(fileItems);
-            }
-            return null;
+            return new ResourceReader(fileItems, new XnbScheme(service, options), service);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
-            if (fileItems.Glob("cocos").Any())
+            if (fileItems.GetFiles("*.xnb").Any())
             {
                 options.Engine = EngineName;
                 return true;
             }
             return false;
         }
-
-
     }
 }

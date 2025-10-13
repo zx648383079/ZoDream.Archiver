@@ -1,14 +1,14 @@
-﻿using System.IO;
+using System.IO;
 using ZoDream.ChmExtractor.Lzx;
 
 namespace ZoDream.ChmExtractor
 {
     public static class LzxCodec
     {
-        public static void Decode(Stream input, Stream output, int windowSize)
+        public static void Decode(Stream input, Stream output)
         {
             var decoder = new LzxDecoder(16);
-            long seekPos = input.Position;
+            var seekPos = input.Position;
             while (input.Position - 14 < input.Length)
             {
                 input.Seek(seekPos, SeekOrigin.Begin);

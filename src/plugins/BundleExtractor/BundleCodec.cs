@@ -3,6 +3,7 @@ using LzhamWrapper.Enums;
 using LzhamWrapper.Parameters;
 using System.Buffers;
 using System.IO;
+using ZoDream.ChmExtractor;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Compression.Lz4;
@@ -32,8 +33,16 @@ namespace ZoDream.BundleExtractor
                 BundleCodecType.Lzma => LzmaCodec.Decode(input, uncompressedSize),
                 BundleCodecType.Lz4 or BundleCodecType.Lz4HC or BundleCodecType.Lz4Inv or BundleCodecType.Lz4Lit4 or BundleCodecType.Lz4Lit5 or BundleCodecType.Lz4Mr0k => DecodeLz4(input, type, (int)uncompressedSize),
                 BundleCodecType.Lzham => DecodeLzham(input),
+                BundleCodecType.Lzx => DecodeLzx(input, uncompressedSize),
                 _ => input,
             };
+        }
+
+        public static Stream DecodeLzx(Stream input, long uncompressedSize)
+        {
+            var ms = new MemoryStream((int)uncompressedSize);
+            LzxCodec.Decode(input, ms);
+            return ms;
         }
 
         public static Stream DecodeLz4(Stream input, BundleCodecType codecType, int uncompressedSize)

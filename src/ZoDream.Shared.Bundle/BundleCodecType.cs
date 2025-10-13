@@ -1,4 +1,4 @@
-﻿namespace ZoDream.Shared.Bundle
+namespace ZoDream.Shared.Bundle
 {
     public enum BundleCodecType
     {
@@ -12,5 +12,7 @@
         Zstd,
         Lz4Lit4,
         Lz4Lit5,
+
+        Lzx = 0x80,
     }
 }

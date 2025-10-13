@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
@@ -28,8 +29,15 @@ namespace ZoDream.Shared.Bundle
                 {
                     return;
                 }
-                using var reader = scheme.Open(item.FullPath);
-                reader?.ExtractTo(folder, mode, token);
+                try
+                {
+                    using var reader = scheme.Open(item.FullPath);
+                    reader?.ExtractTo(folder, mode, token);
+                }
+                catch (Exception ex)
+                {
+                    logger?.Log(LogLevel.Error, ex, item.FullPath);
+                }
                 progress?.Add(1);
             }
         }
