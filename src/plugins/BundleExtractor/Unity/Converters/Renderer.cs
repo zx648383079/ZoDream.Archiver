@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
@@ -77,6 +77,22 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         var m_RayTraceProcedural = reader.ReadByte();
                     }
                     reader.AlignStream();
+                    if (version.GreaterThanOrEquals(2023, 2)) //2023.2 and up
+                    {
+                        var m_RayTracingAccelStructBuildFlagsOverride = reader.ReadByte();
+                        var m_RayTracingAccelStructBuildFlags = reader.ReadByte();
+                    }
+                    if (version.GreaterThanOrEquals(2023, 3)) //2023.3 and up
+                    {
+                        var m_SmallMeshCulling = reader.ReadByte();
+                    }
+                    reader.AlignStream();
+                    if (version.GreaterThanOrEquals(6000, 2)) //6000.2 and up
+                    {
+                        var m_ForceMeshLod = reader.ReadInt16();
+                        reader.AlignStream();
+                        var m_MeshLodSelectionBias = reader.ReadSingle();
+                    }
                 }
                 else
                 {

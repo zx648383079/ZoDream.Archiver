@@ -7,6 +7,9 @@ namespace UnityEngine
 
         public int IndexFormat;
         public bool Use16BitIndices => IndexFormat == 0;
+
+        public MeshLodInfo MeshLodInfo { get; set; }
+
         public SubMesh[] SubMeshes;
         public byte[]? IndexBuffer;
         public uint[] IndexBufferFormat;

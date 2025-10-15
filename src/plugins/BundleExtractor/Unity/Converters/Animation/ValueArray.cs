@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using ZoDream.Shared.Bundle;
 using Version = UnityEngine.Version;
@@ -37,6 +37,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                     res.IntValues = reader.ReadInt32Array();
                     res.BoolValues = reader.ReadArray(r => r.ReadBoolean());
                     reader.AlignStream();
+                }
+                if (version.GreaterThanOrEquals(6000, 2))
+                {
+                    res.EntityIdValues = reader.ReadInt32Array();
                 }
             }
             return res;

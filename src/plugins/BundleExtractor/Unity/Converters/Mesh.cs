@@ -261,7 +261,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
                         res.StreamData.Source);
                 }
             }
-            
+            if (version.GreaterThanOrEquals(6000, 2))
+            {
+                // res.MeshLodInfo = reader.Get<MeshLodInfo>();
+            }
             ProcessData(res, reader);
         }
 

@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace UnityEngine
 {
@@ -11,6 +11,7 @@ namespace UnityEngine
         public Vector3[] PositionValues { get; set; }
         public Vector4[] QuaternionValues { get; set; }
         public Vector3[] ScaleValues { get; set; }
+        public int[] EntityIdValues { get; set; }
     }
 
 }

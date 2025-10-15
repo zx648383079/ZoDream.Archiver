@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using UnityEngine.Document;
@@ -99,6 +99,14 @@ namespace ZoDream.SourceGenerator
                 }
             }
             return [.. res];
+        }
+
+
+        public static VirtualDocument LoadFile(string fileName)
+        {
+            using var fs = File.OpenRead(fileName);
+            var reader = new TypeNodeReader(fs);
+            return reader.Read();
         }
     }
 }
