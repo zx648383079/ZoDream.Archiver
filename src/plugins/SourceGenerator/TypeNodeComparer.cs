@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Document;
 
 namespace ZoDream.SourceGenerator
@@ -33,6 +32,17 @@ namespace ZoDream.SourceGenerator
                 }
                 diffItems.Add(item);
             }
+            // TODO 获取父级
+            //foreach (var item in DeepEach(source))
+            //{
+            //    foreach (var child in diffItems)
+            //    {
+            //        if (Contains(item, child))
+            //        {
+            //            diffItems.Add(child);
+            //        }
+            //    }
+            //}
             res.Children = diffItems.ToArray();
             return res;
         }
@@ -77,15 +87,38 @@ namespace ZoDream.SourceGenerator
             return node.MetaFlag.HasFlag(TransferMetaFlags.AlignBytes);
         }
 
+        private static bool Contains(VirtualNode parent, VirtualNode child)
+        {
+            if (parent.Type == child.Type)
+            {
+                return false;
+            }
+            if (parent.Children is null || parent.Children.Length == 0)
+            {
+                return false;
+            }
+            foreach (var item in parent.Children)
+            {
+                if (item.Type == child.Type)
+                {
+                    return true;
+                }
+                foreach (var it in GetNodeType(item))
+                {
+                    if (it == child.Type)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         private static IEnumerable<VirtualNode> DeepEach(IEnumerable<VirtualNode> items)
         {
             foreach (var item in items)
             {
-                if (item.Type is "string" or "TypelessData" 
-                    or "bool" or "double" 
-                    or "float" or "UInt64" or  "unsigned long long" or "FileSize" or "long long" 
-                    or "SInt64" or "UInt32" or  "unsigned int" or "Type*" or "int" or "SInt32" 
-                    or "UInt16" or "unsigned short" or "short" or "SInt16" or "UInt8" or "char" or "SInt8")
+                if (IsValueType(item))
                 {
                     continue;
                 }
@@ -101,6 +134,36 @@ namespace ZoDream.SourceGenerator
                     }
                 }
             }
+        }
+
+        private static IEnumerable<string> GetNodeType(VirtualNode node)
+        {
+            if (node.Type is "Array" or "map" or "set" or "vector")
+            {
+                foreach (var item in GetNodeType(node.Children[1]))
+                {
+                    yield return item;
+                }
+            }
+            else if (node.Type is "pair")
+            {
+                foreach(var item in node.Children)
+                {
+                    yield return item.Type;
+                }
+            } else
+            {
+                yield return node.Type;
+            }
+        }
+
+        private static bool IsValueType(VirtualNode node)
+        {
+            return node.Type is "string" or "TypelessData"
+                    or "bool" or "double"
+                    or "float" or "UInt64" or "unsigned long long" or "FileSize" or "long long"
+                    or "SInt64" or "UInt32" or "unsigned int" or "Type*" or "int" or "SInt32"
+                    or "UInt16" or "unsigned short" or "short" or "SInt16" or "UInt8" or "char" or "SInt8"
         }
     }
 }

@@ -84,7 +84,7 @@ namespace ZoDream.BundleExtractor
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex.Message);
+                    logger.Log(ex);
                 }
                 temporary.Clear();
                 builder?.Flush();
@@ -104,7 +104,7 @@ namespace ZoDream.BundleExtractor
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex.Message);
+                    logger.Log(ex);
                 }
                 temporary.Clear();
                 builder?.Flush();
