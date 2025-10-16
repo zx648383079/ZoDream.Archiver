@@ -225,7 +225,7 @@ namespace ZoDream.BundleExtractor
             }
             catch (Exception e)
             {
-                Logger?.Error(e.Message);
+                Logger?.Log(LogLevel.Error, e, fullName);
             }
         }
 
@@ -243,7 +243,7 @@ namespace ZoDream.BundleExtractor
             }
             catch (Exception e)
             {
-                Logger?.Error(e.Message);
+                Logger?.Log(LogLevel.Error, e, fullName.FullPath);
             }
         }
         private void LoadFile(IBundleBinaryReader stream, 
