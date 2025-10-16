@@ -163,7 +163,7 @@ namespace ZoDream.SourceGenerator
                     or "bool" or "double"
                     or "float" or "UInt64" or "unsigned long long" or "FileSize" or "long long"
                     or "SInt64" or "UInt32" or "unsigned int" or "Type*" or "int" or "SInt32"
-                    or "UInt16" or "unsigned short" or "short" or "SInt16" or "UInt8" or "char" or "SInt8"
+                    or "UInt16" or "unsigned short" or "short" or "SInt16" or "UInt8" or "char" or "SInt8";
         }
     }
 }
