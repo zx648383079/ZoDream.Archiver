@@ -1,10 +1,15 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using ZoDream.BundleExtractor.RpgMarker;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class RPGMakerEngine : IBundleEngine
+    public class RPGMakerEngine(IEntryService service) : IBundleEngine, IBundleFilter
     {
         internal const string EngineName = "RPG Maker";
 
@@ -16,6 +21,10 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
         {
+            if (string.IsNullOrEmpty(options.Password))
+            {
+                TryGetKey(fileItems, options);
+            }
             return fileItems;
         }
         public IDependencyBuilder GetBuilder(IBundleOptions options)
@@ -24,7 +33,16 @@ namespace ZoDream.BundleExtractor.Engines
         }
         public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
-            return null;
+            return new MvScheme(fileItems, service, options);
+        }
+
+        public bool IsMatch(IFilePath filePath)
+        {
+            if (Path.GetExtension(filePath.Name) is ".ogg_" or ".png_")
+            {
+                return false;
+            }
+            return true;
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
@@ -32,10 +50,39 @@ namespace ZoDream.BundleExtractor.Engines
             if (fileItems.GetFiles("*.rpgmv*", "*.rgss*").Any())
             {
                 options.Engine = EngineName;
+                TryGetKey(fileItems, options);
                 return true;
             }
             return false;
         }
 
+        private void TryGetKey(IBundleSource fileItems, IBundleOptions options)
+        {
+            if (options is not BundleOptions o)
+            {
+                return;
+            }
+            foreach (var item in fileItems.GetFiles("System.json"))
+            {
+                using var fs = fileItems.OpenRead(new FilePath(item));
+                using var doc = JsonDocument.Parse(fs);
+                if (doc.RootElement.TryGetProperty("encryptionKey", out var ele))
+                {
+                    o.Password = ele.GetString();
+                    return;
+                }
+            }
+            if (string.IsNullOrEmpty(o.Password))
+            {
+                foreach (var item in fileItems.GetFiles("*.png_"))
+                {
+                    using var fs = fileItems.OpenRead(new FilePath(item));
+                    o.Password = MvScheme.GetKey(fs);
+                    return;
+                }
+            }
+        }
+
+        
     }
 }

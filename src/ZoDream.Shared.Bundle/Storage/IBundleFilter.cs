@@ -9,6 +9,11 @@ namespace ZoDream.Shared.Bundle
     /// </summary>
     public interface IBundleFilter
     {
+        /// <summary>
+        /// 是否匹配到
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>true 为排除</returns>
         public bool IsMatch(IFilePath filePath);
     }
 
