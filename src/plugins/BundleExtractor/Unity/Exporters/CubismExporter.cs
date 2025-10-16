@@ -73,7 +73,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 item.GameObject.IsExclude = true;
                 if (item == transform)
                 {
-                    FileName = obj.Name ?? string.Empty;
+                    FileName = LocationStorage.CreateSafeFileName($"{obj.Name}_{_resource.GetHashCode()}_{_entryId}_");
                 }
                 foreach (var pptr in obj.Components)
                 {
@@ -219,7 +219,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 return;
             }
-            using var writer = JsonExporter.OpenWrite(fileName);
+            using var fs = File.Create(fileName);
+            using var writer = JsonExporter.OpenWrite(fs);
             writer.WriteStartObject();
             writer.WritePropertyName("Version");
             writer.WriteNumberValue(3);
@@ -267,14 +268,16 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             if (_physics?.IsNotNull == true && LocationStorage.TryCreate(baseFileName, ".physics3.json", mode, out fileName))
             {
-                using var sb = JsonExporter.OpenWrite(fileName);
+                using var childFs = File.Create(fileName);
+                using var sb = JsonExporter.OpenWrite(childFs);
                 SavePhysics(sb);
                 writer.WritePropertyName("Physics");
                 writer.WriteStringValue(Path.GetFileName(fileName));
             }
             if (_poseParts.Count > 0 && LocationStorage.TryCreate(baseFileName, ".pose3.json", mode, out fileName))
             {
-                using var sb = JsonExporter.OpenWrite(fileName);
+                using var childFs = File.Create(fileName);
+                using var sb = JsonExporter.OpenWrite(childFs);
                 SavePose(sb);
                 writer.WritePropertyName("Pose");
                 writer.WriteStringValue(Path.GetFileName(fileName));
@@ -282,7 +285,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             if ((_parametersCdi.Count > 0 || _partsCdi.Count > 0)
                 && LocationStorage.TryCreate(baseFileName, ".cdi3.json", mode, out fileName))
             {
-                using var sb = JsonExporter.OpenWrite(fileName);
+                using var childFs = File.Create(fileName);
+                using var sb = JsonExporter.OpenWrite(childFs);
                 SavCdi(sb);
                 writer.WritePropertyName("DisplayInfo");
                 writer.WriteStringValue(Path.GetFileName(fileName));
@@ -302,7 +306,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    using var sb = JsonExporter.OpenWrite(fileName);
+                    using var childFs = File.Create(fileName);
+                    using var sb = JsonExporter.OpenWrite(childFs);
                     SaveMotion(sb, data);
                     if (maps.TryGetValue(behaviour.Name, out List<string>? value))
                     {
@@ -346,7 +351,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    using var sb = JsonExporter.OpenWrite(fileName);
+                    using var childFs = File.Create(fileName);
+                    using var sb = JsonExporter.OpenWrite(childFs);
                     SaveExpression(sb, data);
                     writer.WriteStartObject();
                     writer.WritePropertyName("Name");
@@ -403,6 +409,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
 
             writer.WriteEndArray();
             writer.WriteEndObject();
+            writer.Flush();
         }
 
         private void SaveMotion(Utf8JsonWriter writer, CubismFadeMotionData data)

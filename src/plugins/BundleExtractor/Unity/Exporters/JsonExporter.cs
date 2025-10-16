@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ZoDream.Shared.Bundle;
@@ -31,10 +31,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             JsonSerializer.Serialize(fs, resource[entryId], Options);
         }
 
-
-        public static Utf8JsonWriter OpenWrite(string fileName)
+        public static Utf8JsonWriter OpenWrite(Stream output)
         {
-            return new(File.Create(fileName), new JsonWriterOptions()
+            return new(output, new JsonWriterOptions()
             {
                 Indented = Options.WriteIndented,
                 IndentCharacter = Options.IndentCharacter,

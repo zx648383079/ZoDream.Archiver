@@ -58,7 +58,7 @@ namespace ZoDream.BundleExtractor
                     continue;
                 }
                 var fileName = _fileItems.Create(item.Key, string.Empty, folder);
-                if (!string.IsNullOrEmpty(Path.GetExtension(fileName)) && LocationStorage.TryCreate(fileName, ArchiveExtractMode.Skip, out fileName))
+                if (IsResourceFile(Path.GetExtension(fileName)?.ToLower()) && LocationStorage.TryCreate(fileName, ArchiveExtractMode.Skip, out fileName))
                 {
                     item.Value.SaveAs(fileName);
                 }
@@ -80,7 +80,7 @@ namespace ZoDream.BundleExtractor
                     }
                     catch (Exception e)
                     {
-                        Logger?.Log(LogLevel.Error, e, string.Empty);
+                        Logger?.Log(e);
                     }
                 }
                 exporter.Dispose();
@@ -228,5 +228,18 @@ namespace ZoDream.BundleExtractor
             return null;
         }
 
+
+        private static bool IsResourceFile(string? extension)
+        {
+            if (string.IsNullOrEmpty(extension))
+            {
+                return false;
+            }
+            if (extension is ".exe" or ".dll" or ".so" or ".ab" or ".asset" or ".ress")
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
