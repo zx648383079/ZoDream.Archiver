@@ -1,10 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Il2CppDumper;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Storage.Pickers;
@@ -152,8 +151,9 @@ namespace ZoDream.Archiver.ViewModels
             if (options is IBundleOptions b && !string.IsNullOrWhiteSpace(b.Entrance))
             {
                 OutputFolder = Path.GetDirectoryName(b.Entrance) ?? options.OutputFolder;
-                MetadataPath = Directory.GetFiles(b.Entrance, "global-metadata.dat", SearchOption.AllDirectories).FirstOrDefault() ?? string.Empty;
-                Il2cppPath = Directory.GetFiles(b.Entrance, "*il2cpp.*", SearchOption.AllDirectories).FirstOrDefault() ?? string.Empty;
+                MetadataPath = ConvertDumper.GetMetadataPath(b.Entrance);
+                Il2cppPath = ConvertDumper.GetAssemblyPath(b.Entrance);
+                
             }
         }
 

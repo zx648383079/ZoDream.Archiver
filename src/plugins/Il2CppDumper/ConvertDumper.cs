@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Logging;
 using ZoDream.Shared.Models;
 
@@ -196,6 +197,18 @@ namespace Il2CppDumper
         {
             _il2Cpp?.Dispose();
             _metadata?.Dispose();
+        }
+
+        public static string GetMetadataPath(string folder)
+        {
+            return BundleStorage.GetFiles(folder, "global-metadata.dat").FirstOrDefault() ?? string.Empty;
+        }
+
+        public static string GetAssemblyPath(string folder)
+        {
+            return BundleStorage.Glob(
+                [folder], 
+                ["*il2cpp.*t", "GameAssembly.dll"], SearchTarget.Files).FirstOrDefault() ?? string.Empty;
         }
     }
 }

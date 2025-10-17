@@ -235,7 +235,7 @@ namespace ZoDream.BundleExtractor
             {
                 return false;
             }
-            if (extension is ".exe" or ".dll" or ".so" or ".ab" or ".asset" or ".ress")
+            if (extension is ".exe" or ".dll" or ".so" or ".dat" or ".ab" or ".asset" or ".ress")
             {
                 return false;
             }
