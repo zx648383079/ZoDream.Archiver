@@ -1,7 +1,9 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
+using ZoDream.BundleExtractor.Compression;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -12,7 +14,7 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.RpgMarker
 {
-    public class MvScheme(IBundleChunk fileItems, IEntryService service, IBundleOptions options) : IBundleHandler
+    public partial class MvScheme(IBundleChunk fileItems, IEntryService service, IBundleOptions options) : IBundleHandler
     {
         const int HeaderLength = 16;
         private static readonly byte[] Signature = "RPGMV"u8.ToArray();
@@ -47,19 +49,52 @@ namespace ZoDream.BundleExtractor.RpgMarker
                     progress?.Add(1);
                     continue;
                 }
-                var fileName = fileItems.Create(item, folder);
+                var i = item.Name.LastIndexOf('.');
+                var fileName = fileItems.Create(item, item.Name[..i] + GetExtension(item.Name[i..]), folder);
                 if (!LocationStorage.TryCreate(fileName, mode, out fileName))
                 {
                     progress?.Add(1);
                     continue;
                 }
-                new XORStream(new PartialStream(fs), keys).SaveAs(fileName);
+                new XORStream(new PartialStream(fs), keys, keys.Length - 1).SaveAs(fileName);
                 progress?.Add(1);
             }
         }
 
         public void Dispose()
         {
+        }
+
+        private static string GetExtension(string extension)
+        {
+            if (extension.EndsWith('_'))
+            {
+                return extension.TrimEnd('_');
+            }
+            return extension.ToLower() switch
+            {
+                ".rpgmvp" => ".png",
+                ".rpgmvm" => ".m4a",
+                ".rpgmvo" => ".ogg"
+            };
+        }
+
+
+        public static bool TryGetKeyFromJson(Stream input, out string key)
+        {
+            key = string.Empty;
+            var text = LocationStorage.ReadText(input);
+            if (!text.Contains('{'))
+            {
+                text = LZString.DecompressFromBase64(text);
+            }
+            var match = JsonKeyRegex().Match(text);
+            if (match.Success)
+            {
+                key = match.Groups[1].Value;
+                return true;
+            }
+            return false;
         }
 
         public static string GetKey(Stream input)
@@ -104,5 +139,8 @@ namespace ZoDream.BundleExtractor.RpgMarker
                 ArrayPool<byte>.Shared.Return(buffer);
             }
         }
+
+        [GeneratedRegex(@"""encryptionKey""\s*:\s*""([^""]+)""")]
+        private static partial Regex JsonKeyRegex();
     }
 }

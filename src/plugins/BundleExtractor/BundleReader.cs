@@ -145,7 +145,7 @@ namespace ZoDream.BundleExtractor
             var options = service.Get<IBundleOptions>();
             var instance = producer.CreateSerializer(options);
             service.Add(instance);
-            var last = instance.Converters.Last();
+            var last = instance.Converters.LastOrDefault();
             var storage = last is IBundleParser s ? s : producer.CreateParser(options);
             service.Add(storage);
             service.Add(storage is IBundleCodec codec ? codec : service.Get<BundleCodec>());

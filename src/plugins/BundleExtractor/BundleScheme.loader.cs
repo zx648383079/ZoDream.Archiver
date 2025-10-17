@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using ZoDream.BundleExtractor.Engines;
 using ZoDream.BundleExtractor.Platforms;
@@ -18,6 +18,8 @@ namespace ZoDream.BundleExtractor
             typeof(RenPyEngine),
             typeof(RPGMakerEngine),
             typeof(TyranoEngine),
+            typeof(XnaEngine),
+            typeof(RSGameEngine),
             typeof(UnknownEngine),
 
             typeof(WindowsPlatformScheme),

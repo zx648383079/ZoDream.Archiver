@@ -1,8 +1,14 @@
-﻿using System.IO;
+using System.IO;
 using ZoDream.Shared.IO;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
+    /// <summary>
+    /// ^ 编解码
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="xorPad"></param>
+    /// <param name="maxPosition">包含</param>
     internal class XORStream(
         Stream input,
         byte[] xorPad, long maxPosition = 0) : DeflateStream(input)

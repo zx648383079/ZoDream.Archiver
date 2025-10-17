@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using ZoDream.BundleExtractor.RpgMarker;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -38,7 +37,8 @@ namespace ZoDream.BundleExtractor.Engines
 
         public bool IsMatch(IFilePath filePath)
         {
-            if (Path.GetExtension(filePath.Name) is ".ogg_" or ".png_")
+            if (Path.GetExtension(filePath.Name) is ".ogg_" or ".png_" or ".m4a_" 
+                or ".rpgmvp" or ".rpgmvm" or ".rpgmvo")
             {
                 return false;
             }
@@ -65,16 +65,15 @@ namespace ZoDream.BundleExtractor.Engines
             foreach (var item in fileItems.GetFiles("System.json"))
             {
                 using var fs = fileItems.OpenRead(new FilePath(item));
-                using var doc = JsonDocument.Parse(fs);
-                if (doc.RootElement.TryGetProperty("encryptionKey", out var ele))
+                if (MvScheme.TryGetKeyFromJson(fs, out var key))
                 {
-                    o.Password = ele.GetString();
+                    o.Password = key;
                     return;
                 }
             }
             if (string.IsNullOrEmpty(o.Password))
             {
-                foreach (var item in fileItems.GetFiles("*.png_"))
+                foreach (var item in fileItems.GetFiles("*.png_", "*.rpgmvp"))
                 {
                     using var fs = fileItems.OpenRead(new FilePath(item));
                     o.Password = MvScheme.GetKey(fs);
