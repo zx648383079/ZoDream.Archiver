@@ -396,9 +396,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             var shape = mesh.Shapes.Shapes[frameIdx];
 
                             var vertexEnd = shape.FirstVertex + shape.VertexCount;
-                            var vertItems = new float[shape.VertexCount * 3];
-                            var normalItems = new float[shape.VertexCount * 3];
-                            var tangentItems = new float[shape.VertexCount * 4];
+                            var vertItems = new List<float>((int)shape.VertexCount * 3);
+                            var normalItems = new List<float>((int)shape.VertexCount * 3);
+                            var tangentItems = new List<float>((int)shape.VertexCount * 4);
                             for (uint j = shape.FirstVertex; j < vertexEnd; j++)
                             {
                                 var morphVertex = mesh.Shapes.Vertices[(int)j];
@@ -418,15 +418,15 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             }
                             var target = new Dictionary<string, int>()
                             {
-                                {"POSITION", _root.CreateVectorAccessor("blendShapeName", vertItems, (int)shape.VertexCount) }
+                                {"POSITION", _root.CreateVectorAccessor("blendShapeName", vertItems.ToArray(), (int)shape.VertexCount) }
                             };
                             if (shape.HasNormals)
                             {
-                                target.Add("NORMAL", _root.CreateVectorAccessor("blendShapeName", normalItems, (int)shape.VertexCount));
+                                target.Add("NORMAL", _root.CreateVectorAccessor("blendShapeName", normalItems.ToArray(), (int)shape.VertexCount));
                             }
                             if (shape.HasTangents)
                             {
-                                target.Add("TANGENT", _root.CreateVectorAccessor("blendShapeName", tangentItems, (int)shape.VertexCount));
+                                target.Add("TANGENT", _root.CreateVectorAccessor("blendShapeName", tangentItems.ToArray(), (int)shape.VertexCount));
                             }
                             // TODO 
                             (node.Primitives[0].Targets ??= []).Add(target);
@@ -607,9 +607,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 var indexCount = (int)mesh.SubMeshes[i].IndexCount;
                 var end = sum + indexCount / 3;
                 int? materialIndex = null;
-                if (meshR is not null && i - firstSubMesh < meshR.Materials.Length)
+                var mi = i - firstSubMesh;
+                if (meshR?.Materials is not null && mi >= 0 && mi < meshR.Materials.Length)
                 {
-                    if (meshR.Materials[i - firstSubMesh].TryGet(out var m_Material))
+                    if (meshR.Materials[mi].TryGet(out var m_Material))
                     {
                         materialIndex = AddMaterial(m_Material);
                     }
