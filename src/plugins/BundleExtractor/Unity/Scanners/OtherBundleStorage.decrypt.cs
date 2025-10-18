@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner
+    public partial class OtherBundleElementScanner
     {
         internal static void JumpNotZeroString(Stream input)
         {

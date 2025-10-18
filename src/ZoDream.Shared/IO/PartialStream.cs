@@ -24,8 +24,9 @@ namespace ZoDream.Shared.IO
         { 
         }
 
-        public PartialStream(Stream stream, long beginPosition, long byteLength)
+        public PartialStream(Stream stream, long beginPosition, long byteLength, bool leaveStreamOpen = true)
         {
+            _leaveStreamOpen = leaveStreamOpen;
             var source = stream;
             if (stream is PartialStream ps)
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -62,10 +62,15 @@ namespace ZoDream.Shared.Storage
             // 替换非法字符
             var invalidChars = Path.GetInvalidFileNameChars();
             var sb = new StringBuilder();
-
+            var i = fileName.LastIndexOf('.');
+            var j = 0;
             foreach (var c in fileName)
             {
-                sb.Append(invalidChars.Contains(c) ? replacement : c);
+                if (j < 200 || (i > 0 && j >= i))
+                {
+                    sb.Append(invalidChars.Contains(c) ? replacement : c);
+                }
+                j++;
             }
             return sb.ToString();
         }

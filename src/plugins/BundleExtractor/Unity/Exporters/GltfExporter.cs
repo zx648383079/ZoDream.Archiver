@@ -575,7 +575,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         {
             if (string.IsNullOrEmpty(FileName) && !string.IsNullOrEmpty(mesh.Name))
             {
-                FileName = mesh.Name + _entryFileId.ToString()[^3..];
+                FileName = mesh.Name + _entryFileId.ToString().PadLeft(6, '0')[^3..];
             }
             if (_nodeItems.TryGetValue(meshId, out var cacheIndex))
             {

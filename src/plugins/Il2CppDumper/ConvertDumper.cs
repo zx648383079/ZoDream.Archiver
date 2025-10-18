@@ -208,7 +208,7 @@ namespace Il2CppDumper
         {
             return BundleStorage.Glob(
                 [folder], 
-                ["*il2cpp.*t", "GameAssembly.dll"], SearchTarget.Files).FirstOrDefault() ?? string.Empty;
+                ["*il2cpp.*", "GameAssembly.dll"], SearchTarget.Files).FirstOrDefault() ?? string.Empty;
         }
     }
 }

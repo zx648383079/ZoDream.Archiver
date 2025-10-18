@@ -3,7 +3,9 @@
     x:Class="ZoDream.Archiver.Dialogs.DumpDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bhv="using:ZoDream.Archiver.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ivy="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:ZoDream.Archiver.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:ZoDream.Archiver.ViewModels"
@@ -56,7 +58,11 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Text="{Binding Il2cppPath, Mode=TwoWay}" />
+                    <TextBox CanDrag="True" Text="{Binding Il2cppPath, Mode=TwoWay}">
+                        <ivy:Interaction.Behaviors>
+                            <bhv:DragFileBehavior Command="{Binding DragCommand}" />
+                        </ivy:Interaction.Behaviors>
+                    </TextBox>
                     <Button
                         Grid.Column="1"
                         Command="{Binding Il2cppCommand}"

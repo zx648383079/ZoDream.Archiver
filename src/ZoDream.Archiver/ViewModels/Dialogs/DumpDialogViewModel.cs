@@ -2,10 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Il2CppDumper;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
@@ -19,6 +22,7 @@ namespace ZoDream.Archiver.ViewModels
             OpenCommand = new RelayCommand(TapOpen);
             MetadataCommand = new RelayCommand(TapMetadata);
             Il2cppCommand = new RelayCommand(TapIl2cpp);
+            DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(OnDragFile);
         }
 
         private readonly AppViewModel _app = App.ViewModel;
@@ -106,6 +110,17 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand OpenCommand { get; private set; }
         public ICommand MetadataCommand { get; private set; }
         public ICommand Il2cppCommand { get; private set; }
+
+        public ICommand DragCommand { get; private set; }
+
+        private void OnDragFile(IEnumerable<IStorageItem>? items)
+        {
+            var fileName = items?.FirstOrDefault()?.Path;
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                Il2cppPath = fileName;
+            }
+        }
 
         private async void TapOpen()
         {

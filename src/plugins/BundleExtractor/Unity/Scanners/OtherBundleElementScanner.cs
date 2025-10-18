@@ -5,7 +5,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.Scanners
 {
-    internal partial class OtherBundleElementScanner(ICommandArguments package, IBundleOptions options) : IBundleParser
+    public partial class OtherBundleElementScanner(ICommandArguments package, IBundleOptions options) : IBundleParser
     {
 
         public bool IsCounterSide => package.Contains("cs");

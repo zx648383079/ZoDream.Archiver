@@ -103,8 +103,8 @@ namespace ZoDream.Archiver
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
                 IConsoleRuntime runtime;
-                runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
-                //runtime = new TransformRuntime(options.OutputFolder);
+                // runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
+                runtime = new TransformRuntime(rootFolder, options);
                 return runtime.RunAsync(token);
             });
             return await rootCommand.Parse(args).InvokeAsync();
