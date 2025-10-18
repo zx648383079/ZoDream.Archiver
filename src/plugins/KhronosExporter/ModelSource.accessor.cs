@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Numerics;
 using ZoDream.KhronosExporter.Models;
@@ -238,12 +238,12 @@ namespace ZoDream.KhronosExporter
         {
             if (vectorCount < 1)
             {
-                throw new ArgumentException(nameof(vectorCount));
+                throw new ArgumentException(null, nameof(vectorCount));
             }
             var step = values.Length / vectorCount;
             if (step < 2 || step > 4)
             {
-                throw new ArgumentException(nameof(step));
+                throw new ArgumentException(null, nameof(step));
             }
             var (bufferViewIndex, bufferOffset) = TryCreateBufferView("Vectors_" + step, () => new BufferView()
             {

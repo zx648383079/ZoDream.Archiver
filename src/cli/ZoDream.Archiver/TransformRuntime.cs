@@ -1,3 +1,5 @@
+using System;
+using System.Text.RegularExpressions;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
 
@@ -15,6 +17,28 @@ namespace ZoDream.Archiver
         }
 
         public void Run(CancellationToken token = default)
+        {
+            DeleteFile(token);
+        }
+
+        private void DeleteFile(CancellationToken token = default)
+        {
+            var regex = new Regex(@"^-?\d{16,}\.json$");
+            foreach (var item in Directory.GetFiles(rootFolder, "*.json", SearchOption.AllDirectories))
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                if (regex.IsMatch(Path.GetFileName(item)))
+                {
+                    File.Delete(item);
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]Delete: {item}");
+                }
+            }
+        }
+
+        private void Decrypt(CancellationToken token = default)
         {
             var buffer = new byte[3];
             var signature = new byte[] { 0xEF, 0xBB, 0xBF };

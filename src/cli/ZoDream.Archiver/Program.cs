@@ -102,11 +102,11 @@ namespace ZoDream.Archiver
                         Path.GetDirectoryName(rootFolder) : rootFolder, "dependencies.bin");
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
-                var runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
+                IConsoleRuntime runtime;
+                runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
+                //runtime = new TransformRuntime(options.OutputFolder);
                 return runtime.RunAsync(token);
             });
-            
-            // runtime = new TransformRuntime(Path.Combine(rootFolder, "output"));
             return await rootCommand.Parse(args).InvokeAsync();
         }
 

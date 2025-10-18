@@ -586,7 +586,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             #region 转换 Mesh
             var psItems = new List<MeshPrimitive>();
             var hasUv = mesh.UV0?.Length > 0;
-            var vStep = ComputeStep(mesh.Vertices.Length, mesh.VertexCount, 3, 4);
+            var vStep = ComputeStep(mesh.Vertices?.Length ?? 0, mesh.VertexCount, 3, 4);
             var uStep = ComputeStep(mesh.UV0?.Length??0, mesh.VertexCount, 4, 2, 3);
             var nStep = ComputeStep(mesh.Normals?.Length??0, mesh.VertexCount, 3, 4);
             var cStep = ComputeStep(mesh.Colors?.Length??0, mesh.VertexCount, 3, 4);
@@ -774,7 +774,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                         );
                     }
                 }
-
+                if (positionItems.Count == 0)
+                {
+                    continue;
+                }
                 var ps = new MeshPrimitive
                 {
                     Mode = PrimitiveType.TRIANGLES,
