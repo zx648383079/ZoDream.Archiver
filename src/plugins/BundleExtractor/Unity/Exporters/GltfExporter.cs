@@ -1332,8 +1332,14 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             } 
             else
             {
-                var cachedData = new Dictionary<int, List<float>[]>(); 
-                var m_Clip = animator.MuscleClip.Clip;
+                
+                
+                var m_Clip = animator.MuscleClip?.Clip;
+                if (m_Clip?.StreamedClip is null)
+                {
+                    return;
+                }
+                var cachedData = new Dictionary<int, List<float>[]>();
                 var streamedFrames = m_Clip.StreamedClip.Data;
                 var m_ClipBindingConstant = animator.ClipBindingConstant ?? ClipConverter.ConvertValueArrayToGenericBinding(m_Clip);
                 for (int frameIndex = 1; frameIndex < streamedFrames.Length - 1; frameIndex++)
