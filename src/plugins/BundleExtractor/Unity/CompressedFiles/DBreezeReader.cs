@@ -22,6 +22,8 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 
         public const string FileName = "_DBreezeResources";
 
+        private readonly byte[] _buffer = new byte[8];
+
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {
@@ -30,12 +32,15 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 return;
             }
             var fs = ReadStream(o);
-            var buffer = fs.ReadBytes(4);
+            var readLen = fs.Read(_buffer, 0, 4);
             fs.Position = 0;
             var leaveOpen = true;
-            if (buffer.Equal([0x04,0x22,0x4D, 0x18]))
+            if (readLen == 4 && _buffer.StartsWith([0x04,0x22,0x4D, 0x18]))
             {
-                fs = LZ4Frame.Decode(fs, 0, true).AsStream();
+                var ms = new MemoryStream();
+                using var s = LZ4Frame.Decode(fs, 0, true).AsStream();
+                s.CopyTo(ms);
+                fs = ms;
                 leaveOpen = false;
             }
             if (entry.Name.StartsWith("utex2."))
@@ -76,12 +81,15 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                 return false;
             }
             var fs = ReadStream(o);
-            var buffer = fs.ReadBytes(4);
+            var readLen = fs.Read(_buffer, 0, 4);
             fs.Position = 0;
             var leaveOpen = true;
-            if (buffer.Equal([0x04, 0x22, 0x4D, 0x18]))
+            if (readLen == 4 && _buffer.StartsWith([0x04, 0x22, 0x4D, 0x18]))
             {
-                fs = LZ4Frame.Decode(fs, 0, true).AsStream();
+                var ms = new MemoryStream();
+                using var s = LZ4Frame.Decode(fs, 0, true).AsStream();
+                s.CopyTo(ms);
+                fs = ms;
                 leaveOpen = false;
             }
             var fileName = Path.Combine(folder, entry.Name);
@@ -96,14 +104,14 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             }
             else
             {
-                buffer = fs.ReadBytes(8);
+                readLen = fs.Read(_buffer, 0, 8);
                 fs.Position = 0;
                 var ext = string.Empty;
-                if (buffer.StartsWith("OggS"))
+                if (readLen >= 4 && _buffer.StartsWith("OggS"))
                 {
                     ext = ".ogg";
                 }
-                else if (buffer.Equal("UnityFS\x00"))
+                else if (readLen == 8 && _buffer.StartsWith("UnityFS\x00"))
                 {
                     ext = ".ab";
                     isRaw = false;
@@ -123,12 +131,15 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
         private void ExtractTo(ArchiveEntry entry, string folder, ArchiveExtractMode mode)
         {
             var fs = ReadStream(entry);
-            var buffer = fs.ReadBytes(4);
+            var readLen = fs.Read(_buffer, 0, 4);
             fs.Position = 0;
             var leaveOpen = true;
-            if (buffer.Equal([0x04, 0x22, 0x4D, 0x18]))
+            if (readLen == 4 && _buffer.StartsWith([0x04, 0x22, 0x4D, 0x18]))
             {
-                fs = LZ4Frame.Decode(fs, 0, true).AsStream();
+                var ms = new MemoryStream();
+                using var s = LZ4Frame.Decode(fs, 0, true).AsStream();
+                s.CopyTo(ms);
+                fs = ms;
                 leaveOpen = false;
             }
             if (entry.Name.StartsWith("utex2."))
@@ -138,14 +149,14 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
             }
             else
             {
-                buffer = fs.ReadBytes(8);
+                readLen = fs.Read(_buffer, 0, 8);
                 fs.Position = 0;
                 var ext = string.Empty;
-                if (buffer.StartsWith("OggS"))
+                if (readLen >= 4 && _buffer.StartsWith("OggS"))
                 {
                     ext = ".ogg";
                 }
-                else if (buffer.Equal("UnityFS\x00"))
+                else if (readLen == 8 && _buffer.StartsWith("UnityFS\x00"))
                 {
                     ext = ".ab";
                 }
@@ -188,9 +199,13 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
                     }
                     input.Seek(length, SeekOrigin.Current);
                 }
-                length = ReadBeInt32(1);
-                var name = Encoding.UTF8.GetString(input.ReadBytes(length));
+                int nameLen = ReadBeInt32(1);
+                if (nameLen == 0)
+                {
+                    continue;
+                }
                 length = ReadBeInt32(4);
+                string? name = Encoding.UTF8.GetString(input.ReadBytes(nameLen));
                 var offset = input.Position;
                 yield return new ArchiveEntry(name, offset, length);
                 pos = offset + length;
@@ -206,11 +221,13 @@ namespace ZoDream.BundleExtractor.Unity.CompressedFiles
 
         private int ReadBeInt32(int length)
         {
-            if (length == 1)
+            var readLen = input.Read(_buffer, 0, length);
+            var res = 0;
+            for (int i = 0; i < readLen; i++)
             {
-                return input.ReadByte();
+                res = (res << 8) + _buffer[i];
             }
-            return BinaryPrimitives.ReadInt32BigEndian(input.ReadBytes(3));
+            return res;
         }
 
         public void Dispose()
