@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -21,7 +21,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                                       "// NOTE: This is *not* a valid shader file\n" +
                                       "//\n" +
                                       "///////////////////////////////////////////\n";
-        public string FileName => resource[entryId].Name;
+        public string FileName => resource[entryId]?.Name ?? string.Empty;
         public void SaveAs(string fileName, ArchiveExtractMode mode)
         {
             if (resource[entryId] is not Shader shader)
