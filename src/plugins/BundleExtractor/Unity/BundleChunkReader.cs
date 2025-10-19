@@ -298,7 +298,8 @@ namespace ZoDream.BundleExtractor
                 }
                 var entryPath = fullName.Combine(item.Name);
                 _dependency?.AddEntry(entryPath);
-                if (reader is IRawEntryReader r && r.TryExtractTo(item, _extractFolder, _extractMode))
+                if (reader is IRawEntryReader r && r.TryExtractTo(item, 
+                    _fileItems.Create(fullName, string.Empty, _extractFolder), _extractMode))
                 {
                     continue;
                 }
