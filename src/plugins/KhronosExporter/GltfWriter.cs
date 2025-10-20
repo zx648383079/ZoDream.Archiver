@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,6 +16,7 @@ namespace ZoDream.KhronosExporter
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
             Converters =
                 {
                     new EnumNameConverter<PropertyPath>(),
