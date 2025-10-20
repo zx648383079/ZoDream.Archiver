@@ -70,7 +70,14 @@ namespace ZoDream.BundleExtractor
                 instance = new AssemblyReader();
                 if (!string.IsNullOrWhiteSpace(_options.Entrance))
                 {
-                    instance.Load(FileNameHelper.CombineIf(Path.GetDirectoryName(_options.Entrance), "DummyDll"));
+                    var dllFolder = FileNameHelper.CombineIf(Path.GetDirectoryName(_options.Entrance), "DummyDll");
+                    if (Directory.Exists(dllFolder))
+                    {
+                        instance.Load(dllFolder);
+                    } else
+                    {
+                        Logger?.Warning($"'{dllFolder}' not found!");
+                    }
                 }
                 _service.Add(instance);
                 return instance;

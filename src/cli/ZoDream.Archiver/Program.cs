@@ -65,6 +65,10 @@ namespace ZoDream.Archiver
                 Description = "重复文件处理方式",
                 DefaultValueFactory = _ => ArchiveExtractMode.Overwrite
             };
+            var notArg = new Option<bool>("not")
+            {
+                Description = "是否是预处理文件",
+            };
             rootCommand.Add(fileArg);
             rootCommand.Add(skipArg);
             rootCommand.Add(outputArg);
@@ -78,6 +82,7 @@ namespace ZoDream.Archiver
             rootCommand.Add(engineArg);
             rootCommand.Add(typeTreeArg);
             rootCommand.Add(modeArg);
+            rootCommand.Add(notArg);
             rootCommand.SetAction((argv, token) => {
                 var rootFolder = argv.GetRequiredValue(fileArg).FullName;
                 var resFolder = Path.Combine(rootFolder, "resources");
@@ -103,8 +108,13 @@ namespace ZoDream.Archiver
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
                 IConsoleRuntime runtime;
-                // runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
-                runtime = new TransformRuntime(rootFolder, options);
+                if (argv.GetValue(notArg))
+                {
+                    runtime = new TransformRuntime(rootFolder, options);
+                } else
+                {
+                    runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
+                }
                 return runtime.RunAsync(token);
             });
             return await rootCommand.Parse(args).InvokeAsync();
