@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Buffers.Binary;
-using System.Linq;
 
 namespace ZoDream.Shared.Drawing
 {
@@ -71,62 +70,23 @@ namespace ZoDream.Shared.Drawing
 
         
     }
-    public class RGBASwapDecoder(byte[] maps) : SwapBufferDecoder
+    public class RGBASwapDecoder(ColorSwapper swapper) : SwapBufferDecoder
     {
-        public const string RGBA = "RGBA";
-        public const string ARGB = "ARGB";
-        public const string BGRA = "BGRA";
-        public const string ABGR = "ABGR";
-        const byte R = 0;
-        const byte G = 1;
-        const byte B = 2;
-        const byte A = 3;
-        const byte X = 9;
-
-
-
-        public RGBASwapDecoder(string name) : this(ConvertMap(name))
-        {
-
-        }
         /// <summary>
         /// 一个颜色空间占的字节数
         /// </summary>
         public virtual int ColorSpaceSize => 1;
-        public override int ColorSize => maps.Length * ColorSpaceSize;
-
-        internal static byte[] ConvertMap(string name)
-        {
-            return ConvertMap(name.ToCharArray());
-        }
-
-        private static byte[] ConvertMap(params char[] maps)
-        {
-            return maps.Select(code => {
-                return code switch
-                {
-                    'R' or 'r' => R,
-                    'G' or 'g' => G,
-                    'B' or 'b' => B,
-                    'A' or 'a' => A,
-                    _ => X
-                };
-            }).Where(i => i < 0).Take(4).ToArray();
-        }
+        public override int ColorSize => swapper.KeyCount * ColorSpaceSize;
 
         protected override void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            for (var i = 0; i < maps.Length; i++)
+            foreach (var pair in swapper)
             {
-                if (maps[i] == X)
-                {
-                    continue;
-                }
-                Decode(i, input, inputOffset + i * ColorSpaceSize, output, outputOffset + maps[i]);
+                Decode(pair.Key, input, inputOffset + pair.Key * ColorSpaceSize, output, outputOffset + pair.Value);
             }
-            if (!maps.Contains(A))
+            if (swapper.TryContainsValue(ColorChannel.A, out var to) && !swapper.ContainsKey(ColorChannel.A))
             {
-                output[outputOffset + A] = byte.MaxValue;
+                output[outputOffset + to] = byte.MaxValue;
             }
         }
         /// <summary>
@@ -144,13 +104,9 @@ namespace ZoDream.Shared.Drawing
 
         protected override void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            for (var i = 0; i < maps.Length; i++)
+            foreach (var pair in swapper)
             {
-                if (maps[i] == X)
-                {
-                    continue;
-                }
-                Encode(i, input, inputOffset + maps[i], output, outputOffset + i * ColorSpaceSize);
+                Encode(pair.Key, input, inputOffset + pair.Value, output, outputOffset + pair.Key * ColorSpaceSize);
             }
         }
         /// <summary>
@@ -171,34 +127,41 @@ namespace ZoDream.Shared.Drawing
     /// 半个字节
     /// </summary>
     /// <param name="maps"></param>
-    public class NibbleSwapDecoder(byte[] maps) : SwapBufferDecoder
+    public class NibbleSwapDecoder(ColorSwapper swapper) : SwapBufferDecoder
     {
-        public NibbleSwapDecoder(string name) : this(RGBASwapDecoder.ConvertMap(name))
-        {
 
-        }
-        public override int ColorSize => maps.Length / 2;
+        private readonly byte[] _buffer = new byte[swapper.KeyCount];
+        public override int ColorSize => swapper.KeyCount / 2;
 
         protected override void Decode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            for (var i = 0; i < maps.Length; i += 2)
+            var next = output[outputOffset..];
+            for (var i = 0; i < swapper.KeyCount; i += 2)
             {
                 var val = input[inputOffset + i / 2];
-                output[outputOffset + maps[i]] = (byte)((val & 0x0F) << 4);
-                output[outputOffset + maps[i + 1]] = (byte)(val & 0xF0);
+                swapper.Write(next, i, (byte)((val & 0x0F) << 4));
+                swapper.Write(next, i + 1, (byte)(val & 0xF0));
             }
         }
 
         protected override void Encode(ReadOnlySpan<byte> input, int inputOffset, Span<byte> output, int outputOffset)
         {
-            for (var i = 0; i < maps.Length; i += 2)
+            foreach (var pair in swapper)
             {
-                output[outputOffset + i / 2] = (byte)((input[inputOffset + maps[i]] << 4) & 0x0F + input[inputOffset + maps[i + 1]] & 0xf0);
+                _buffer[pair.Key] = input[inputOffset + pair.Value];
+            }
+            if (swapper.TryContainsKey(ColorChannel.A, out var to) && !swapper.ContainsValue(ColorChannel.A))
+            {
+                _buffer[to] = byte.MaxValue;
+            }
+            for (var i = 0; i < swapper.KeyCount; i += 2)
+            {
+                output[outputOffset + i / 2] = (byte)((_buffer[i] << 4) & 0x0F + _buffer[i + 1] & 0xf0);
             }
         }
     }
 
-    public class FloatSwapDecoder(string name) : RGBASwapDecoder(name)
+    public class FloatSwapDecoder(ColorSwapper swapper) : RGBASwapDecoder(swapper)
     {
         public override int ColorSpaceSize => 4;
 
@@ -214,7 +177,7 @@ namespace ZoDream.Shared.Drawing
         }
     }
 
-    public class ShortSwapDecoder(string name) : RGBASwapDecoder(name)
+    public class ShortSwapDecoder(ColorSwapper swapper) : RGBASwapDecoder(swapper)
     {
         public override int ColorSpaceSize => 2;
 
@@ -231,7 +194,7 @@ namespace ZoDream.Shared.Drawing
         }
     }
 
-    public class HalfSwapDecoder(string name) : RGBASwapDecoder(name)
+    public class HalfSwapDecoder(ColorSwapper swapper) : RGBASwapDecoder(swapper)
     {
         public override int ColorSpaceSize => 2;
 

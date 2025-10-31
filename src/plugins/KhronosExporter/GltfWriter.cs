@@ -65,6 +65,8 @@ namespace ZoDream.KhronosExporter
             if (data is ModelSource s)
             {
                 s.FlushBuffer();
+                var mainName = Path.GetFileNameWithoutExtension(s.FileName);
+                var mainFolder = Path.GetDirectoryName(s.FileName)!;
                 foreach (var item in s.Buffers)
                 {
                     if (!string.IsNullOrWhiteSpace(item.Uri))
@@ -73,7 +75,15 @@ namespace ZoDream.KhronosExporter
                     }
                     var ms = s.GetStream(item);
                     ms.Position = 0;
-                    item.Uri = ms.ToBase64String("application/gltf-buffer");
+                    // JSON 限制
+                    if (ms.Length <= 100_000_000)
+                    {
+                        item.Uri = ms.ToBase64String("application/gltf-buffer");
+                        continue;
+                    }
+                    var name = $"{mainName}_extra_{item.Name}.bin";
+                    ms.SaveAs(Path.Combine(mainFolder, name));
+                    item.Uri = name;
                 }
                 s.ResourceClear();
             }

@@ -395,6 +395,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                             node.Weights.Add(mesh.Shapes.FullWeights[frameIdx]);
                             var shape = mesh.Shapes.Shapes[frameIdx];
 
+                            if (shape.VertexCount < 1)
+                            {
+                                continue;
+                            }
+
                             var vertexEnd = shape.FirstVertex + shape.VertexCount;
                             var vertItems = new List<float>((int)shape.VertexCount * 3);
                             var normalItems = new List<float>((int)shape.VertexCount * 3);

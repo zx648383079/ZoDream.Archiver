@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.Shared.Drawing
 {
-    public class ARGBF() : FloatSwapDecoder("ARGB")
+    public class ARGBF() : FloatSwapDecoder(ColorSwapper.ARGB)
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.Shared.Drawing
 {
-    public class RGBAH() : HalfSwapDecoder("RGBA")
+    public class RGBAH() : HalfSwapDecoder(ColorSwapper.RGBA)
     {
         
     }

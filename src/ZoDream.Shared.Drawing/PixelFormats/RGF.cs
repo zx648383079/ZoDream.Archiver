@@ -1,6 +1,6 @@
 ﻿namespace ZoDream.Shared.Drawing
 {
-    public class RGF() : FloatSwapDecoder("RG")
+    public class RGF() : FloatSwapDecoder(new ColorSwapper([ColorChannel.R, ColorChannel.G]))
     {
     }
 }

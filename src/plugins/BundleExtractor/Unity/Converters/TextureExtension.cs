@@ -211,7 +211,10 @@ namespace ZoDream.BundleExtractor.Unity.Converters
             {
                 data.Position = 0;
                 data.ReadExactly(buffer, 0, length);
-                return BitmapFactory.Decode(painter.Decode(buffer.AsSpan(0, length), width, height), width, height, SKColorType.Rgba8888);
+                return BitmapFactory.Decode(painter.Decode(buffer.AsSpan(0, length), width, height), width, height,
+                    format is TextureFormat.DXT1 or TextureFormat.DXT3 or TextureFormat.DXT5 // unity 版本的区别
+                    ? SKColorType.Bgra8888 :
+                    SKColorType.Rgba8888);
             }
             catch (Exception)
             {
