@@ -310,10 +310,14 @@ namespace ZoDream.BundleExtractor
                 {
                     continue;
                 }
+                if (item.Length > int.MaxValue)
+                {
+                    Logger?.Warning($"{entryPath} is too long<{item.Length}>");
+                    continue;
+                }
                 var ms = temporary.Create();
                 reader.ExtractTo(item, ms);
                 ms.Position = 0;
-
                 LoadFile(ms, entryPath, token);
             }
             stream.BaseStream.Dispose();

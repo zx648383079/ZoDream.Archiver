@@ -36,6 +36,10 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 return input;
             }
+            if (input.Length < FileStreamBundleHeader.UnityFSMagic.Length)
+            {
+                return input;
+            }
             var beginAt = input.Position;
             var next = new XORStream(input, args.Keys, args.MaxPosition);
             var magic = next.ReadBytes(FileStreamBundleHeader.UnityFSMagic.Length);

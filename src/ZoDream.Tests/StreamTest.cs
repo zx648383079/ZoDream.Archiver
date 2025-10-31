@@ -23,6 +23,25 @@ namespace ZoDream.Tests
         }
 
         [TestMethod]
+        public void TestXOR()
+        {
+            byte[] buffer = [0x93, 0xa8, 0xaf, 0xb2];
+            var target = "UnityFS"u8;
+            var key = new byte[Math.Min(buffer.Length, target.Length)];
+            var isSame = true;
+            for (int i = 0; i < key.Length; i++)
+            {
+                key[i] = (byte)(buffer[i] ^ target[i]);
+                if (i > 0 && key[i] != key[0])
+                {
+                    isSame = false;
+                }
+            }
+            var format = isSame ? key[0].ToString("X") : Convert.ToHexString(key);
+            Assert.AreNotEqual(0x0, key[0]);
+        }
+
+        [TestMethod]
         public void TestCached()
         {
             var str = "测试测hi克服asdasd的困难开发那是肯定asdasdas能进卡空间的asdasdasdasdasd妇女健asdasd康四点八九可能比较空洞看到你可能是看得见";
