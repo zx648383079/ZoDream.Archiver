@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Language;
 using ZoDream.SourceGenerator;
 
@@ -33,9 +34,7 @@ namespace ZoDream.Tests
             {
                 return;
             }
-            using var fs = File.OpenRead(fileName);
-            var reader = new TypeNodeReader(fs);
-            var data = reader.Read();
+            var data = TypeNodeReader.LoadFile(fileName);
             var writer = new TypeSourceWriter(data);
             using var sb = new CodeWriter();
             writer.Write(sb);
@@ -62,7 +61,16 @@ namespace ZoDream.Tests
             var res = sb.ToString();
             Assert.IsTrue(res.Length > 0);
         }
+        [TestMethod]
+        public void TestCompare()
+        {
+            var rootFolder = "D:\\Downloads\\d";
+            var data = TypeNodeReader.LoadFile(Path.Combine(rootFolder, "2022.3.27f1.json"));
+            var next = TypeNodeReader.LoadFile(Path.Combine(rootFolder, "2022.3.26f1.json"));
+            var comparer = new TypeNodeComparer();
+            var res = comparer.Compare(data, next);
+            Assert.IsTrue(res?.Children?.Length > 0);
+        }
 
-        
     }
 }

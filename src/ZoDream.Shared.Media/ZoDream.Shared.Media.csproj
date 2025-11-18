@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<LangVersion>13</LangVersion>
 		<BaseOutputPath>..\bin\</BaseOutputPath>
@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
+	  <PackageReference Include="FFmpeg.AutoGen" Version="8.0.0" />
 	  <PackageReference Include="FFmpeg4Sharp" Version="7.0.1" />
 	</ItemGroup>
 

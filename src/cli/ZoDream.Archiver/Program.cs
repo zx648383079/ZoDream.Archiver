@@ -20,7 +20,7 @@ namespace ZoDream.Archiver
             var outputArg = new Option<DirectoryInfo>("output", "-o")
             {
                 Description = "输出到文件夹",
-                DefaultValueFactory = argv => argv.GetRequiredValue(fileArg).CreateSubdirectory("output")
+                DefaultValueFactory = argv => argv.GetValue(fileArg)?.CreateSubdirectory("output")
             };
             var batchArg = new Option<int>("batch", "-b")
             {
