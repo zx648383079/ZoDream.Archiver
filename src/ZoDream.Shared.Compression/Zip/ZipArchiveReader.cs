@@ -1,5 +1,4 @@
-﻿using SharpCompress.Archives;
-using SharpCompress.Archives.Zip;
+﻿using SharpCompress.Archives.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +33,7 @@ namespace ZoDream.Shared.Compression.Zip
 
         public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)
         {
-            _reader.ExtractToDirectory(folder, progressFn, token);
+            CompressHelper.ExtractToDirectory(_reader, folder, mode, progressFn, token);
         }
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
