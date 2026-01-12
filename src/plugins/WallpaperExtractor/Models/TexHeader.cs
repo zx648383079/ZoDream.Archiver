@@ -20,7 +20,7 @@ namespace ZoDream.WallpaperExtractor.Models
 
 
 
-        public int BVersion { get; set; }
+        public int BodyVersion { get; set; }
 
         public FreeImageFormat ImageFormat { get; set; }
 

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.WallpaperExtractor.Models
 {
+    [Flags]
     internal enum TexFlags: uint
     {
         None = 0,
@@ -15,7 +12,7 @@ namespace ZoDream.WallpaperExtractor.Models
         // Placeholders
         Unk3 = 8,
         Unk4 = 16,
-        Unk5 = 32,
+        IsVideoTexture = 32,
         Unk6 = 64,
         Unk7 = 128,
     }

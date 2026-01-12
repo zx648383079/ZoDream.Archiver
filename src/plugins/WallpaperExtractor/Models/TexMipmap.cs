@@ -16,10 +16,8 @@ namespace ZoDream.WallpaperExtractor.Models
                 return buffer;
             }
             var target = new byte[DecompressedBytesCount];
-            LZ4Codec.Decode(buffer, target);
+            LZ4Codec.Decode(buffer, 0, buffer.Length, target, 0, target.Length);
             return target;
-            //var target = CompressHelper.Lz4Decompress(buffer, DecompressedBytesCount);
-            //return target;
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZoDream.WallpaperExtractor.Models
+﻿namespace ZoDream.WallpaperExtractor.Models
 {
     internal enum FreeImageFormat: int
     {
@@ -118,5 +112,10 @@ namespace ZoDream.WallpaperExtractor.Models
 
         // RAW camera image (*.*)
         FIF_RAW = 34,
+
+        /// <summary>
+        /// RAW camera MP4 (*.mp4)
+        /// </summary>
+        FIF_MP4 = 35,
     }
 }

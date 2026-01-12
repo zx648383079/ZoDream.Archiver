@@ -15,7 +15,7 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
         public override void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
-            Expectation.ThrowIfNotSignature(signature == MagicString);
+            Expectation.ThrowIfNotSignature(MagicString, signature);
             Version = UnityBundleVersion.BF_520_x;
             UnityWebBundleVersion = "5.x.x";
             UnityWebMinimumRevision = "2017.4.30f1";

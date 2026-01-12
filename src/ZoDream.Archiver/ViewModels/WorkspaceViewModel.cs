@@ -119,7 +119,7 @@ namespace ZoDream.Archiver.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex);
                 }
                 app.CloseProgress();
                 app.Success("解压已完成！");

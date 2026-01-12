@@ -55,7 +55,7 @@ namespace ZoDream.WallpaperExtractor
             }
         }
 
-        private bool IsTex(BinaryReader reader)
+        private static bool IsTex(BinaryReader reader)
         {
             var position = reader.BaseStream.Position;
             try

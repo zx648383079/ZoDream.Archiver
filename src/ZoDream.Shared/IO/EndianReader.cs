@@ -270,22 +270,6 @@ namespace ZoDream.Shared.IO
             }
         }
 
-        public void ReadExactly(Span<byte> buffer)
-        {
-            Span<byte> buffer2 = buffer;
-            do
-            {
-                int num = Read(buffer2);
-                if (num == 0)
-                {
-                    throw new EndOfStreamException($"End of stream. Expected to read {buffer.Length} bytes, but only read {checked(buffer.Length - buffer2.Length)} bytes.");
-                }
-
-                buffer2 = buffer2[num..];
-            }
-            while (buffer2.Length > 0);
-        }
-
         //
         // 摘要:
         //     Read C like UTF8 format zero terminated string

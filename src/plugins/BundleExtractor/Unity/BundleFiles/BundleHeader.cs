@@ -18,7 +18,7 @@ namespace ZoDream.BundleExtractor.Unity.BundleFiles
         public virtual void Read(IBundleBinaryReader reader)
         {
             var signature = reader.ReadStringZeroTerm();
-            Expectation.ThrowIfNotSignature(signature == MagicString);
+            Expectation.ThrowIfNotSignature(MagicString, signature);
             Version = (UnityBundleVersion)reader.ReadInt32();
             Expectation.ThrowIfNotVersion(Version >= 0);
             UnityWebBundleVersion = reader.ReadStringZeroTerm();

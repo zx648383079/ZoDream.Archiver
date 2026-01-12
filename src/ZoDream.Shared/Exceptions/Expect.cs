@@ -24,11 +24,20 @@ namespace ZoDream.Shared
             }
         }
 
+
         public static void ThrowIfNotSignature(bool condition, [CallerMemberName] string message = "")
         {
             if (!condition)
             {
                 throw new SignatureException(message);
+            }
+        }
+
+        public static void ThrowIfNotSignature(string expected, string actual, [CallerMemberName] string message = "")
+        {
+            if (expected != actual)
+            {
+                throw new SignatureException($"{message} '{actual}' is not '{expected}'");
             }
         }
 

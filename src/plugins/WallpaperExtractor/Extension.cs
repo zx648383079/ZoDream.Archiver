@@ -89,6 +89,7 @@ namespace ZoDream.WallpaperExtractor
                 FreeImageFormat.FIF_PFM => "pfm",
                 FreeImageFormat.FIF_PICT => "pict",
                 FreeImageFormat.FIF_RAW => "raw",
+                FreeImageFormat.FIF_MP4 => "mp4",
                 _ => "png",
             };
         }

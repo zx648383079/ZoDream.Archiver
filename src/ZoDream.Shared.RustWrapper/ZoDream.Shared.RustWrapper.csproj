@@ -3,7 +3,7 @@
   <PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<LangVersion>13</LangVersion>
+		<LangVersion>14</LangVersion>
 		<Version>1.0.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<BaseOutputPath>..\bin\</BaseOutputPath>

@@ -1,9 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection.PortableExecutable;
 using System.Threading;
 using ZoDream.Shared;
 using ZoDream.Shared.Drawing;
@@ -37,13 +35,21 @@ namespace ZoDream.WallpaperExtractor
         private void ExtractToImage(TexMipmap tex, TexHeader header, 
             Func<TexHeader, Stream> cb)
         {
-            using var bitmap = tex.Decode(header.Format).ToImage();
-            if (bitmap == null)
+            if (header.ImageFormat != FreeImageFormat.FIF_UNKNOWN)
             {
+                using var fs = cb(header);
+                fs.Write(tex.Read());
                 return;
+            } else
+            {
+                using var bitmap = tex.Decode(header.Format).ToImage();
+                if (bitmap == null)
+                {
+                    return;
+                }
+                using var fs = cb(header);
+                bitmap.Encode(fs, header.ImageFormat.Parse(), 100);
             }
-            using var fs = cb(header);
-            bitmap.Encode(fs, header.ImageFormat.Parse(), 100);
         }
 
         public void ExtractTo(string outputFile)
@@ -57,7 +63,7 @@ namespace ZoDream.WallpaperExtractor
             var imageItems = new TexMipmap[imageCount][];
             for (var i = 0; i < imageCount; i++)
             {
-                imageItems[i] = ReadTexImage(header.BVersion > 1);
+                imageItems[i] = ReadTexImage(header.BodyVersion);
             }
             if (!header.IsGift)
             {
@@ -126,9 +132,9 @@ namespace ZoDream.WallpaperExtractor
         {
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
             var magic = reader.ReadNZeroString(16);
-            Expectation.ThrowIfNotSignature(magic == "TEXV0005");
+            Expectation.ThrowIfNotSignature("TEXV0005", magic);
             magic = reader.ReadNZeroString(16);
-            Expectation.ThrowIfNotSignature(magic == "TEXI0001");
+            Expectation.ThrowIfNotSignature("TEXI0001", magic);
             var header = new TexHeader()
             {
                 Format = (TexFormat)reader.ReadInt32(),
@@ -140,38 +146,62 @@ namespace ZoDream.WallpaperExtractor
                 UnkInt0 = reader.ReadUInt32()
             };
             magic = reader.ReadNZeroString(16);
-            Expectation.ThrowIfNotSignature(magic is "TEXB0001" or "TEXB0002" or "TEXB0003");
-            header.BVersion = int.Parse(magic[4..]);
+            Expectation.ThrowIfNotSignature(magic is "TEXB0001" or "TEXB0002" or "TEXB0003" or "TEXB0004");
+            header.BodyVersion = int.Parse(magic[4..]);
             var imageCount = reader.ReadInt32();
-            header.ImageFormat = header.BVersion == 3 ? (FreeImageFormat)reader.ReadInt32() : FreeImageFormat.FIF_UNKNOWN;
+            var format = header.BodyVersion >= 3 ? reader.ReadInt32() : (int)FreeImageFormat.FIF_UNKNOWN;
+            if (format > 0xFF)
+            {
+                format = (int)FreeImageFormat.FIF_UNKNOWN;
+            }
+            header.ImageFormat = (FreeImageFormat)format;
+            if (header.BodyVersion >= 4)
+            {
+                var isVideoMp4 = reader.ReadInt32() == 1;
+                if (header.ImageFormat == FreeImageFormat.FIF_UNKNOWN && isVideoMp4)
+                {
+                    header.ImageFormat = FreeImageFormat.FIF_MP4;
+                }
+                if (header.ImageFormat != FreeImageFormat.FIF_MP4)
+                {
+                    header.BodyVersion = 3;
+                }
+            }
             return (header, imageCount);
         }
 
-        private TexMipmap[] ReadTexImage(bool versionV2Laster)
+        private TexMipmap[] ReadTexImage(int version)
         {
             var mipmapCount = reader.ReadInt32();
             var items = new TexMipmap[mipmapCount];
             for (var i = 0; i < mipmapCount; i++)
             {
-                items[i] = ReadTexMipmap(versionV2Laster);
+                items[i] = ReadTexMipmap(version);
             }
             return items;
         }
 
-        private TexMipmap ReadTexMipmap(bool versionV2Laster)
+        private TexMipmap ReadTexMipmap(int version)
         {
+            if (version >= 4)
+            {
+                Expectation.ThrowIfNot(reader.ReadInt32() == 1);
+                Expectation.ThrowIfNot(reader.ReadInt32() == 2);
+                reader.ReadNString();
+                Expectation.ThrowIfNot(reader.ReadInt32() == 1);
+            }
             var width = reader.ReadInt32();
             var height = reader.ReadInt32();
             var isLZ4Compressed = false;
             var decompressedBytesCount = 0;
-            if (versionV2Laster)
+            if (version > 1)
             {
                 isLZ4Compressed = reader.ReadInt32() == 1;
                 decompressedBytesCount = reader.ReadInt32();
             }
             var length = reader.ReadInt32();
             return new TexMipmap(width, height, decompressedBytesCount,
-                isLZ4Compressed, new PartialStream(reader.BaseStream, length));
+                isLZ4Compressed, reader.ReadAsStream(length));
         }
 
         private TexFrame ReadTexFrame(bool versionV2Laster)
