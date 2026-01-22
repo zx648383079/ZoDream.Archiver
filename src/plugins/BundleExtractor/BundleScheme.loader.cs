@@ -20,6 +20,7 @@ namespace ZoDream.BundleExtractor
             typeof(TyranoEngine),
             typeof(XnaEngine),
             typeof(RSGameEngine),
+            typeof(IFActionEngine),
             typeof(UnknownEngine),
 
             typeof(WindowsPlatformScheme),
