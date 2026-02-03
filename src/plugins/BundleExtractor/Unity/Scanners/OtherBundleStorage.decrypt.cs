@@ -36,6 +36,11 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             {
                 return input;
             }
+            return ParseXor(input, args);
+        }
+
+        public static Stream ParseXor(Stream input, XorCommandArgument args)
+        {
             if (input.Length < FileStreamBundleHeader.UnityFSMagic.Length)
             {
                 return input;

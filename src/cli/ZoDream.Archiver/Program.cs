@@ -65,7 +65,7 @@ namespace ZoDream.Archiver
                 Description = "重复文件处理方式",
                 DefaultValueFactory = _ => ArchiveExtractMode.Overwrite
             };
-            var notArg = new Option<bool>("not")
+            var notArg = new Option<bool>("--not")
             {
                 Description = "是否是预处理文件",
             };

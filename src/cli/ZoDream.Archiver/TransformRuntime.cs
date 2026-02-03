@@ -28,7 +28,11 @@ namespace ZoDream.Archiver
             }
             if (package.Contains("fake"))
             {
-                FakeFile(token);
+                RepairFile(OtherBundleElementScanner.ParseFakeHeader, token);
+            }
+            if (package.TryGet<XorCommandArgument>("xor", out var args))
+            {
+                RepairFile(fs => OtherBundleElementScanner.ParseXor(fs, args), token);
             }
             if (package.Contains("player"))
             {
@@ -47,7 +51,7 @@ namespace ZoDream.Archiver
             WriteLine("Extract Finish!");
         }
 
-        private void FakeFile(CancellationToken token = default)
+        private void RepairFile(Func<Stream, Stream> handler, CancellationToken token = default)
         {
             var count = 0;
             foreach (var item in Directory.GetFiles(rootFolder, "*.bundle", SearchOption.AllDirectories))
@@ -57,7 +61,7 @@ namespace ZoDream.Archiver
                     return;
                 }
                 using var fs = File.Open(item, FileMode.Open, FileAccess.ReadWrite);
-                var res = OtherBundleElementScanner.ParseFakeHeader(fs);
+                var res = handler.Invoke(fs);
                 if (res == fs)
                 {
                     continue;

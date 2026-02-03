@@ -65,6 +65,10 @@ namespace ZoDream.Tests
         public void TestCompare()
         {
             var rootFolder = "D:\\Downloads\\d";
+            if (!Directory.Exists(rootFolder))
+            {
+                return;
+            }
             var data = TypeNodeReader.LoadFile(Path.Combine(rootFolder, "2022.3.27f1.json"));
             var next = TypeNodeReader.LoadFile(Path.Combine(rootFolder, "2022.3.26f1.json"));
             var comparer = new TypeNodeComparer();
