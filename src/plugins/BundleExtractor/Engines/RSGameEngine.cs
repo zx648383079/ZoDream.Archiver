@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.RSGame;
 using ZoDream.Shared.Bundle;
@@ -47,7 +48,10 @@ namespace ZoDream.BundleExtractor.Engines
             }
             return false;
         }
-
+        public Task<ICommandArguments?> RecognizeAsync(IStorageFileEntry filePath, CancellationToken token = default)
+        {
+            return Task.FromResult<ICommandArguments?>(null);
+        }
         public bool CanExecute(IBundleRequest request)
         {
             return request is IFileRequest;

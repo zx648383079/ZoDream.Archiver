@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Egret;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Engines
@@ -44,7 +46,10 @@ namespace ZoDream.BundleExtractor.Engines
             }
             return false;
         }
-
+        public Task<ICommandArguments?> RecognizeAsync(IStorageFileEntry filePath, CancellationToken token = default)
+        {
+            return Task.FromResult<ICommandArguments?>(null);
+        }
         public bool CanExecute(IBundleRequest request)
         {
             return request is IFileRequest f && f.Name.EndsWith(".json");

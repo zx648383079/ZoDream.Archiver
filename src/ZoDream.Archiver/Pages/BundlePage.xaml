@@ -47,6 +47,7 @@
                 <AppBarButton Command="{Binding ExplorerCommand}" />
                 <AppBarButton Command="{Binding DumpCommand}" />
                 <AppBarButton Command="{Binding CodeCommand}" />
+                <AppBarButton Command="{Binding RecognizeCommand}" />
                 <AppBarButton Command="{Binding LogCommand}" />
             </CommandBar.SecondaryCommands>
         </CommandBar>

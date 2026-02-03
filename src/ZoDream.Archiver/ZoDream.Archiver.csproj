@@ -34,6 +34,7 @@
     <None Remove="Dialogs\PasswordDialog.xaml" />
     <None Remove="Dialogs\ProgressDialog.xaml" />
     <None Remove="Dialogs\PropertyDialog.xaml" />
+    <None Remove="Dialogs\RecognizeDialog.xaml" />
     <None Remove="Dialogs\RequestDialog.xaml" />
     <None Remove="Dialogs\SearchDialog.xaml" />
     <None Remove="Dialogs\SettingDialog.xaml" />
@@ -103,6 +104,9 @@
     <None Update="Assets\Logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Dialogs\RecognizeDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Dialogs\DumpDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

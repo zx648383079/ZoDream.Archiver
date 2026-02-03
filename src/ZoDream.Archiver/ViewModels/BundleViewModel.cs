@@ -36,6 +36,7 @@ namespace ZoDream.Archiver.ViewModels
             CodeCommand = UICommand.Code(TapCode);
             LogCommand = UICommand.Log(TapLog);
             DumpCommand = UICommand.Dump(TapDump);
+            RecognizeCommand = UICommand.Recognize(TapRecognize);
             _service = _app.Service;
             _scheme = new(_service);
             LoadSetting();
@@ -81,6 +82,8 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand ExplorerCommand {  get; private set; }
         public ICommand CodeCommand {  get; private set; }
+
+        public ICommand RecognizeCommand { get; private set; }
         public ICommand LogCommand {  get; private set; }
 
         private void TapLog()
@@ -92,6 +95,27 @@ namespace ZoDream.Archiver.ViewModels
                 fileName = Path.GetDirectoryName(fileName);
             }
             Process.Start("explorer", $"/select,{fileName}");
+        }
+
+        private async void TapRecognize()
+        {
+            if (FileItems.Count == 0)
+            {
+                await _app.ConfirmAsync("请选择文件");
+                return;
+            }
+            var args = SelectedItems?.Length > 0 ? SelectedItems : FileItems.ToArray();
+            var fileName = args.Where(i => !i.IsDirectory).Select(i => 
+                ((EntryViewModel)i).FullPath).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                await _app.ConfirmAsync("请选择文件，暂不支持文件夹");
+                return;
+            }
+            var picker = new RecognizeDialog();
+            var model = picker.ViewModel;
+            model.Load(_scheme, _options, fileName);
+            await _app.OpenDialogAsync(picker);
         }
 
         private async void TapCode()

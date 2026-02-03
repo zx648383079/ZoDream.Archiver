@@ -195,5 +195,17 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
+
+        public static ICommand Recognize(Action execute) => Recognize(new RelayCommand(execute));
+        public static ICommand Recognize(ICommand command) => new XamlUICommand()
+        {
+            Label = "文件识别",
+            Description = "对选中文件进行识别",
+            IconSource = new FontIconSource()
+            {
+                Glyph = "\uEC5A"
+            },
+            Command = command
+        };
     }
 }

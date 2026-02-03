@@ -3,6 +3,7 @@ using ZoDream.Shared.Bundle;
 using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace ZoDream.BundleExtractor
 {
@@ -62,6 +63,24 @@ namespace ZoDream.BundleExtractor
             }
         }
 
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            foreach (var item in this)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append('.');
+                }
+                if (item.Value is EmptyCommandArgument)
+                {
+                    sb.Append(item.Key);
+                    continue;
+                }
+                sb.Append(item.Value.ToString());
+            }
+            return sb.ToString();
+        }
 
         public static ICommandArguments Create(string? package)
         {

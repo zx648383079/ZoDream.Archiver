@@ -8,7 +8,7 @@ namespace ZoDream.Shared.Bundle
 
     public interface ICommandArguments
     {
-
+        public int Count { get; }
         public bool Contains(string cmd);
         public void Add(string cmd, ICommandArgument args);
         public bool TryGet<T>(string cmd, [NotNullWhen(true)] out T? args) where T : ICommandArgument;

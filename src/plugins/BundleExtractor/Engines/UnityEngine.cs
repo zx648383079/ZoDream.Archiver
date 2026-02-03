@@ -1,9 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.BundleFiles;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
@@ -87,6 +93,30 @@ namespace ZoDream.BundleExtractor.Engines
                 return true;
             }
             return false;
+        }
+
+        public async Task<ICommandArguments?> RecognizeAsync(IStorageFileEntry filePath, CancellationToken token = default)
+        {
+            var data = new PackageArguments();
+            using var fs = await filePath.OpenReadAsync();
+            var pos = OtherBundleElementScanner.FindUnityFS(fs);
+            if (pos > 0)
+            {
+                data.Add(SkipCommandArgument.TagName, new SkipCommandArgument(pos));
+            } else if (pos < 0)
+            {
+                var keys = XORStream.Recognize(fs, Encoding.ASCII.GetBytes(FileStreamBundleHeader.UnityFSMagic));
+                if (!string.IsNullOrEmpty(keys))
+                {
+                    data.Add(XorCommandArgument.TagName, 
+                        new XorCommandArgument(Convert.FromHexString(keys)));
+                }
+                else
+                {
+                    data.Add(UnknownCommandArgument.TagName, UnknownCommandArgument.Instance);
+                }
+            }
+            return data;
         }
 
         public IDependencyDictionary LoadDependency(string fileName)

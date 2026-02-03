@@ -55,7 +55,25 @@ namespace ZoDream.BundleExtractor.Unity.Scanners
             }
             return input;
         }
-
+        public static long FindUnityFS(Stream input)
+        {
+            var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)
+            {
+                IsMatchFirst = true,
+                MaxPosition = 1024
+            };
+            while (finder.MatchFile(input))
+            {
+                var pos = finder.BeginPosition.First();
+                var size = GetBundleFileSize(input, pos);
+                if (pos + size == input.Length)
+                {
+                    return pos;
+                }
+            }
+            input.Position = 0;
+            return -1;
+        }
         public static Stream ParseFakeHeader(Stream input)
         {
             var finder = new StreamFinder(FileStreamBundleHeader.UnityFSMagic)

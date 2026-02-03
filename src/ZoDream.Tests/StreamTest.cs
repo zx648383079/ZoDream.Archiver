@@ -1,6 +1,7 @@
 using System.Text;
 using ZoDream.AutodeskExporter;
 using ZoDream.BundleExtractor.Cocos;
+using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.KhronosExporter;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Compression.Own;
@@ -27,18 +28,8 @@ namespace ZoDream.Tests
         {
             byte[] buffer = [0x93, 0xa8, 0xaf, 0xb2];
             var target = "UnityFS"u8;
-            var key = new byte[Math.Min(buffer.Length, target.Length)];
-            var isSame = true;
-            for (int i = 0; i < key.Length; i++)
-            {
-                key[i] = (byte)(buffer[i] ^ target[i]);
-                if (i > 0 && key[i] != key[0])
-                {
-                    isSame = false;
-                }
-            }
-            var format = isSame ? key[0].ToString("X") : Convert.ToHexString(key);
-            Assert.AreNotEqual(0x0, key[0]);
+            var format = XORStream.Recognize(buffer, target);
+            Assert.IsEmpty(format);
         }
 
         [TestMethod]
