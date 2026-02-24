@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.Shared.Bundle

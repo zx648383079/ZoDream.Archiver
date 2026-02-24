@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Text.RegularExpressions;
 using ZoDream.BundleExtractor;
+using ZoDream.BundleExtractor.Eastward;
 using ZoDream.BundleExtractor.Unity.PlayerAsset;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
@@ -36,18 +37,22 @@ namespace ZoDream.Archiver
             }
             if (package.Contains("player"))
             {
-                ExtractFile(token);
+                ExtractFile(source => new PlayerAssetScheme(source), token);
+            }
+            if (package.Contains("eastward"))
+            {
+                ExtractFile(source => new EastwardScheme(source), token);
             }
             if (package.Contains("qoo"))
             {
                 Decrypt(token);
             }
         }
-        private void ExtractFile(CancellationToken token = default)
+        private void ExtractFile(Func<IBundleSource, IBundleHandler> hander, CancellationToken token = default)
         {
             var source = new BundleSource([rootFolder]);
-            using var hander = new PlayerAssetScheme(source);
-            hander.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
+            using var scheme = hander.Invoke(source);
+            scheme.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
             WriteLine("Extract Finish!");
         }
 
