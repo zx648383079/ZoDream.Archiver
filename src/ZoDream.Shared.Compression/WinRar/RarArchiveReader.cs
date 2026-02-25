@@ -13,10 +13,10 @@ namespace ZoDream.Shared.Compression.WinRar
 
         public RarArchiveReader(Stream stream, IArchiveOptions options)
         {
-            _reader = RarArchive.Open(stream, CompressHelper.Convert(options));
+            _reader = RarArchive.OpenArchive(stream, CompressHelper.Convert(options));
         }
 
-        private readonly RarArchive _reader;
+        private readonly IRarArchive _reader;
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {

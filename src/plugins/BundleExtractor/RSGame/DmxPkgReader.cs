@@ -1,3 +1,4 @@
+using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,9 @@ namespace ZoDream.BundleExtractor.RSGame
  
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
-            using var archive = ZipArchive.Open(input);
-            var dicItems = new Dictionary<string, ZipArchiveEntry>();
-            var datItems = new Dictionary<string, ZipArchiveEntry>();
+            using var archive = ZipArchive.OpenArchive(input);
+            var dicItems = new Dictionary<string, IArchiveEntry>();
+            var datItems = new Dictionary<string, IArchiveEntry>();
             foreach (var item in archive.Entries)
             {
                 if (item.IsDirectory || string.IsNullOrEmpty(item.Key))

@@ -51,7 +51,7 @@ namespace ZoDream.Shared.Compression
             {
                 return reader;
             }
-            var reader2 = ReaderFactory.Open(stream, CompressHelper.Convert(options));
+            var reader2 = ReaderFactory.OpenReader(stream, CompressHelper.Convert(options));
             if (reader2 is not null)
             {
                 return new CompressReader(reader2);

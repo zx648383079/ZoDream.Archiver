@@ -1,4 +1,5 @@
-﻿using SharpCompress.Archives.Tar;
+﻿using SharpCompress.Archives;
+using SharpCompress.Archives.Tar;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,10 +14,10 @@ namespace ZoDream.Shared.Compression.Tar
 
         public TarArchiveReader(Stream stream, IArchiveOptions options)
         {
-            _reader = TarArchive.Open(stream, CompressHelper.Convert(options));
+            _reader = TarArchive.OpenArchive(stream, CompressHelper.Convert(options));
         }
 
-        private readonly TarArchive _reader;
+        private readonly IArchive _reader;
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {

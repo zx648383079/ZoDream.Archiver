@@ -1,5 +1,6 @@
 ﻿using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
+using SharpCompress.Writers.Zip;
 using System.IO;
 using ZoDream.Shared.Interfaces;
 
@@ -9,10 +10,10 @@ namespace ZoDream.Shared.Compression.Zip
     {
         public ZipArchiveWriter(Stream stream, IArchiveOptions options)
         {
-            _writer = ZipArchive.Open(stream, CompressHelper.Convert(options));
+            _writer = ZipArchive.OpenArchive(stream, CompressHelper.Convert(options));
         }
 
-        private readonly ZipArchive _writer;
+        private readonly IWritableArchive<ZipWriterOptions> _writer;
 
         public IReadOnlyEntry AddEntry(string name, string fullPath)
         {

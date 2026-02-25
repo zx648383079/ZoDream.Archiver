@@ -11,7 +11,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.PlayerAsset
 {
-    public class PlayerAssetScheme(IBundleSource source) : IBundleSource, IBundleHandler
+    public class PlayerAssetBundle(IBundleSource source) : IBundleSource, IBundleHandler
     {
 
         private readonly Dictionary<IFilePath, Tuple<long, long>> _maps = [];

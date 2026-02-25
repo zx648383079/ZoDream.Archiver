@@ -17,9 +17,8 @@ namespace ZoDream.BundleExtractor.Eastward
     public class HmgReader(BinaryReader reader, string fileName) : IArchiveReader
     {
         private const string MagicHeader = "PGF";
-        
 
-        public void ExtractTo(IReadOnlyEntry entry, Stream output)
+        public void ExtractTo(Stream output)
         {
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
             Expectation.ThrowIfNotSignature(MagicHeader, Encoding.ASCII.GetString(reader.ReadBytes(3)));
@@ -51,6 +50,11 @@ namespace ZoDream.BundleExtractor.Eastward
                 ArrayPool<byte>.Shared.Return(buffer);
                 ArrayPool<byte>.Shared.Return(target);
             }
+        }
+
+        public void ExtractTo(IReadOnlyEntry entry, Stream output)
+        {
+            ExtractTo(output);
         }
 
         public void ExtractToDirectory(string folder, ArchiveExtractMode mode, Action<double>? progressFn = null, CancellationToken token = default)

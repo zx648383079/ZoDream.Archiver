@@ -12,7 +12,7 @@ namespace ZoDream.Shared.Compression
             var properties = new byte[PropertiesSize];
             input.ReadExactly(properties, 0, PropertiesSize);
             var headlessSize = input.Length - input.Position;
-            return new LzmaStream(properties, input, headlessSize, -1, null, false);
+            return LzmaStream.Create(properties, input, headlessSize, -1, null, false);
         }
     }
 }

@@ -3,7 +3,6 @@ using SharpCompress.Common;
 using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ZoDream.Shared.Interfaces;
@@ -37,17 +36,13 @@ namespace ZoDream.Shared.Compression
             ArchiveExtractMode mode, Action<double>? progressFn = null, 
             CancellationToken token = default)
         {
-            var options = new ExtractionOptions()
-            {
-                Overwrite = mode == ArchiveExtractMode.Overwrite,
-            };
             if (archive.IsSolid || archive.Type == ArchiveType.SevenZip)
             {
                 using var reader = archive.ExtractAllEntries();
-                reader.WriteAllToDirectory(outputFolder, options);
+                reader.WriteAllToDirectory(outputFolder);
                 return;
             }
-            var totalBytes = archive.TotalUncompressSize;
+            var totalBytes = archive.TotalUncompressedSize;
             var bytesRead = 0L;
 
             var seenDirectories = new HashSet<string>();
@@ -73,7 +68,7 @@ namespace ZoDream.Shared.Compression
                     }
                     continue;
                 }
-                entry.WriteToDirectory(outputFolder, options);
+                entry.WriteToDirectory(outputFolder);
 
                 bytesRead += entry.Size;
                 progressFn?.Invoke(bytesRead / totalBytes);

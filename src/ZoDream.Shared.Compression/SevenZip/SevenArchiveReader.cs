@@ -1,4 +1,5 @@
-﻿using SharpCompress.Archives.SevenZip;
+﻿using SharpCompress.Archives;
+using SharpCompress.Archives.SevenZip;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,10 +14,10 @@ namespace ZoDream.Shared.Compression.SevenZip
 
         public SevenArchiveReader(Stream stream, IArchiveOptions options)
         {
-            _reader = SevenZipArchive.Open(stream, CompressHelper.Convert(options));
+            _reader = SevenZipArchive.OpenArchive(stream, CompressHelper.Convert(options));
         }
 
-        private readonly SevenZipArchive _reader;
+        private readonly IArchive _reader;
 
         public void ExtractTo(IReadOnlyEntry entry, Stream output)
         {

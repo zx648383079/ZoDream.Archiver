@@ -37,22 +37,25 @@ namespace ZoDream.Archiver
             }
             if (package.Contains("player"))
             {
-                ExtractFile(source => new PlayerAssetScheme(source), token);
+                ExtractFile(source => [new PlayerAssetBundle(source)], token);
             }
             if (package.Contains("eastward"))
             {
-                ExtractFile(source => new EastwardScheme(source), token);
+                ExtractFile(source => new EastwardScheme().Open(source), token);
             }
             if (package.Contains("qoo"))
             {
                 Decrypt(token);
             }
         }
-        private void ExtractFile(Func<IBundleSource, IBundleHandler> hander, CancellationToken token = default)
+        private void ExtractFile(Func<IBundleSource, IEnumerable<IBundleHandler>> hander, CancellationToken token = default)
         {
             var source = new BundleSource([rootFolder]);
-            using var scheme = hander.Invoke(source);
-            scheme.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
+            foreach (var scheme in hander.Invoke(source))
+            {
+                scheme.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
+                scheme.Dispose();
+            }
             WriteLine("Extract Finish!");
         }
 

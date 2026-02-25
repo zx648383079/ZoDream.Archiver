@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
+using ZoDream.FModExporter;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -9,7 +10,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Eastward
 {
-    public class EastwardScheme(IBundleSource fileItems) : IArchiveScheme, IBundleHandler
+    public class EastwardScheme : IArchiveScheme
     {
         public IArchiveWriter Create(Stream stream, IArchiveOptions? options = null)
         {
@@ -30,6 +31,10 @@ namespace ZoDream.BundleExtractor.Eastward
             {
                 return new GReader(new EndianReader(stream, EndianType.LittleEndian, options?.LeaveStreamOpen == true));
             }
+            if (fileName.EndsWith(".bank"))
+            {
+                return new RiffReader(stream, options);
+            }
             if (HmgReader.IsSupport(buffer))
             {
                 return new HmgReader(new BinaryReader(stream), fileName);
@@ -42,27 +47,14 @@ namespace ZoDream.BundleExtractor.Eastward
             return Task.FromResult(Open(stream, filePath, fileName, options));
         }
 
-        public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
+
+        public IEnumerable<EastwardAssetBundle> Open(IBundleSource source)
         {
-            foreach (var item in fileItems.GetFiles())
+            foreach (var item in source.GetFiles("config.g"))
             {
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                var path = new FilePath(item);
-                using var fs = fileItems.OpenRead(path);
-                using var reader = Open(fs, path.FullPath, path.Name);
-                if (reader is null)
-                {
-                    continue;
-                }
-                reader.ExtractToDirectory(folder, mode, null, token);
+                yield return new EastwardAssetBundle(source, item, this);
             }
         }
 
-        public void Dispose()
-        {
-        }
     }
 }

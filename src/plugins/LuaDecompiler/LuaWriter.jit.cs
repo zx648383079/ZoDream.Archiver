@@ -167,7 +167,7 @@ namespace ZoDream.LuaDecompiler
                     {
                         var begin = code.B;
                         var count = (int)cd - code.B + 1;
-                        var args = new string[count];
+                        var args = new string[Math.Max(count, 0)];
                         for (int i = 0; i < count; i++)
                         {
                             args[i] = TranslateNotSet(chunk, begin + i, JitOperandFormat.VAR);
@@ -223,8 +223,10 @@ namespace ZoDream.LuaDecompiler
                         if (chunk.MoveNext())
                         {
                             var next = (JitOperandCode)chunk.CurrentOpcode;
-                            Expectation.ThrowIfNot(next.Operand == JitOperand.GSET);
-                            fn = chunk.ConstantItems[next.D].Value.ToString();
+                            if (next.Operand == JitOperand.GSET)
+                            {
+                                fn = chunk.ConstantItems[next.D].Value.ToString();
+                            }
                         }
                         var sub = chunk.PrototypeItems[(int)chunk.ConstantItems[cd].Value];
                         var args = new string[sub.ParameterCount];
@@ -642,7 +644,7 @@ namespace ZoDream.LuaDecompiler
             }
             if (format == JitOperandFormat.STR)
             {
-                return $"\"{chunk.ConstantItems[value].Value}\"";
+                return chunk.ConstantItems.Length <= value ? "\"\"" :  $"\"{chunk.ConstantItems[value].Value}\"";
             }
             if (format == JitOperandFormat.TAB)
             {

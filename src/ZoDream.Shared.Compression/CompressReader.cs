@@ -12,7 +12,7 @@ namespace ZoDream.Shared.Compression
     {
         public CompressReader(Stream stream, IArchiveOptions options)
         {
-            _reader = ReaderFactory.Open(stream, CompressHelper.Convert(options));
+            _reader = ReaderFactory.OpenReader(stream, CompressHelper.Convert(options));
         }
 
         public CompressReader(IReader reader)
@@ -53,7 +53,7 @@ namespace ZoDream.Shared.Compression
                 {
                     continue;
                 }
-                _reader.WriteEntryToDirectory(folder, new() { Overwrite = mode == ArchiveExtractMode.Overwrite});
+                _reader.WriteEntryToDirectory(folder);
                 progressFn?.Invoke(i += .1);
             }
         }
