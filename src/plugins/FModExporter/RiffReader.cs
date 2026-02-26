@@ -63,8 +63,8 @@ namespace ZoDream.FModExporter
                 {
                     return;
                 }
-                new FModReader(new PartialStream(input, ((ArchiveEntry)item).Offset, item.Length), item.Name, options)
-                    .ExtractToDirectory(folder, mode, null, token);
+                using var reader = new FModReader(new PartialStream(input, ((ArchiveEntry)item).Offset, item.Length), item.Name, options);
+                reader.ExtractToDirectory(folder, mode, null, token);
                 progressFn?.Invoke((double)(++i) / items.Length);
             }
         }

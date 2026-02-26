@@ -1,5 +1,4 @@
-﻿using FMOD;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,13 +9,18 @@ using ZoDream.LuaDecompiler;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
+using ZoDream.Shared.Language;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Eastward
 {
-    public class EastwardAssetBundle(IBundleSource source, string configPath, IArchiveScheme scheme) : IBundleSource, IBundleHandler
+    public class EastwardAssetBundle(IBundleSource source, string configPath, IArchiveScheme scheme, IBundleOptions options) : IBundleSource, IBundleHandler
     {
+
+        private string _assetLibrary = "config/asset_index";
+        private string _scriptLibrary = "config/script_library";
+        private string _textureLibrary = "config/texture_index";
         private readonly string _rootFolder = Path.GetDirectoryName(configPath)!;
         private readonly Dictionary<string, GReader> _archiveItems = [];
         private readonly Dictionary<string, EastwardAssetInfo> _items = [];
@@ -78,27 +82,24 @@ namespace ZoDream.BundleExtractor.Eastward
 
         public uint Analyze(CancellationToken token = default)
         {
-            var assetLibrary = "config/asset_index";
-            var scriptLibrary = "config/script_library";
-            var textureLibrary = "config/texture_index";
             ReadDocument("config/game_config", doc => {
                 var root = doc.RootElement;
                 if (root.TryGetProperty("asset_library", out var ele))
                 {
-                    assetLibrary = ele.GetString() ?? assetLibrary;
+                    _assetLibrary = ele.GetString() ?? _assetLibrary;
                 }
                 if (root.TryGetProperty("script_library", out ele))
                 {
-                    scriptLibrary = ele.GetString() ?? scriptLibrary;
+                    _scriptLibrary = ele.GetString() ?? _scriptLibrary;
                 }
                 if (root.TryGetProperty("texture_library", out ele))
                 {
-                    textureLibrary = ele.GetString() ?? textureLibrary;
+                    _textureLibrary = ele.GetString() ?? _textureLibrary;
                 }
             });
-            LoadAssetLibrary(assetLibrary);
-            LoadScriptLibrary(scriptLibrary);
-            LoadTextureIndex(textureLibrary);
+            LoadAssetLibrary(_assetLibrary);
+            LoadScriptLibrary(_scriptLibrary);
+            LoadTextureIndex(_textureLibrary);
             return (uint)_items.Count;
         }
 
@@ -171,17 +172,39 @@ namespace ZoDream.BundleExtractor.Eastward
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
             Analyze(token);
+            var bundleFolder = Path.Combine(folder, Path.GetFileName(_rootFolder));
+#if DEBUG
+            SaveRaw(Path.Combine(bundleFolder, _assetLibrary), _assetLibrary, mode);
+            SaveRaw(Path.Combine(bundleFolder, _textureLibrary), _textureLibrary, mode);
+            SaveRaw(Path.Combine(bundleFolder, _scriptLibrary), _scriptLibrary, mode);
+#endif
             foreach (var item in _items)
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                ExtractTo(folder, mode, item.Value);
+                if (item.Value.Type is "msprite")
+                {
+                    // 不能单独导出，需要跟 texture 导出
+                    continue;
+                }
+                ExtractTo(bundleFolder, mode, item.Value, item.Key);
+            }
+            foreach (var item in Directory.GetFiles(_rootFolder, "*.bank", SearchOption.AllDirectories))
+            {
+                using var fs = File.OpenRead(item);
+                using var reader = scheme.Open(fs, item, Path.GetFileName(item));
+                if (reader is null)
+                {
+                    continue;
+                }
+                var outputPath = Path.Combine(bundleFolder, Path.GetRelativePath(_rootFolder, item));
+                reader?.ExtractToDirectory(Path.GetDirectoryName(outputPath)!, mode, null, token);
             }
         }
 
-        private void ExtractTo(string folder, ArchiveExtractMode mode, EastwardAssetInfo assetInfo)
+        private void ExtractTo(string folder, ArchiveExtractMode mode, EastwardAssetInfo assetInfo, string exportName)
         {
             var assetName = assetInfo.AssetName;
             var fileType = assetInfo.FileType;
@@ -209,26 +232,26 @@ namespace ZoDream.BundleExtractor.Eastward
                 case "texture_processor":
                     return;
                 case "named_tileset_pack":
-                    SaveRaw(Path.Combine(folder, objectFiles["atlas"]), objectFiles["atlas"], mode);
-                    SaveRaw(Path.Combine(folder, objectFiles["def"]), objectFiles["def"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["atlas"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["def"], mode);
                     return;
                 case "named_tileset":
                     return;
                 case "deck_pack_raw":
                 case "deck_pack":
-                    SaveBatch(folder, objectFiles["export"], mode, i => i.EndsWith(".hmg"));
+                    SaveBatch(Path.Combine(folder, exportName), assetName, mode, i => i.EndsWith(".hmg"));
                     return;
 
                 case "font_ttf":
-                    SaveRaw(Path.Combine(folder, objectFiles["font"]), objectFiles["font"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["font"], mode);
                     return;
                 case "font_bmfont":
-                    SaveRaw(Path.Combine(folder, objectFiles["font"]), objectFiles["font"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["font"], mode);
                     return;
                 case "shader_script":
                 // Since we cannot compile/decompile shaders...
                 case "glsl":
-                    SaveRaw(Path.Combine(folder, objectFiles["src"]), objectFiles["src"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["src"], mode);
                     return;
                 case "texture":
                     if (objectFiles.Count == 0)
@@ -237,11 +260,21 @@ namespace ZoDream.BundleExtractor.Eastward
                         {
                             return;
                         }
-                        SaveBatch(folder, atlasPath, mode, i => !i.EndsWith(".json"));
+                        SaveBatch(Path.Combine(folder, exportName), atlasPath, mode, i => !i.EndsWith(".json"));
                         return;
                     }
+                    if (fileType == "v" && assetName.EndsWith("_texture"))
+                    {
+                        var parentName = Path.GetDirectoryName(assetName)!.Replace('\\', '/');
+                        if (_items.TryGetValue(parentName, out var extra))
+                        {
+                            ExtractTo(folder, mode, extra, exportName + ".json");
+                        }
 
-                    SaveTexture(Path.Combine(folder, objectFiles["pixmap"]), objectFiles["pixmap"], mode);
+                        SaveTexture(Path.Combine(folder, exportName), objectFiles["pixmap"], mode);
+                        return;
+                    }
+                    SaveTexture(Path.Combine(folder, exportName), objectFiles["pixmap"], mode);
                     return;
                 case "fs_project":
                     return;
@@ -250,7 +283,7 @@ namespace ZoDream.BundleExtractor.Eastward
                 case "fs_folder":
                     return;
                 case "lua":
-                    SaveLua(Path.Combine(folder, assetName), _scriptItems[assetName], mode);
+                    SaveLua(Path.Combine(folder, exportName), _scriptItems[assetName], mode);
                     return;
                 case "data_json":
                 case "data_csv":
@@ -261,23 +294,23 @@ namespace ZoDream.BundleExtractor.Eastward
                 case "asset_map":
                 case "multi_texture":
                 case "tb_scheme":
-                    SaveRaw(Path.Combine(folder, objectFiles["data"]), objectFiles["data"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["data"], mode);
                     return;
                 case "locale_pack":
-                    SaveBatch(folder, objectFiles["data"], mode);
+                    SaveBatch(Path.Combine(folder, exportName), assetName, mode);
                     return;
                 case "raw":
                 case "movie":
-                    SaveRaw(Path.Combine(folder, objectFiles["data"]), objectFiles["data"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["data"], mode);
                     return;
                 case "sq_script":
-                    SaveRaw(Path.Combine(folder, objectFiles["data"]), objectFiles["data"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["data"], mode);
                     return;
                 case "msprite":
-                    SaveRaw(Path.Combine(folder, objectFiles["def"]), objectFiles["def"], mode);
+                    SaveAtlas(Path.Combine(folder, exportName), objectFiles["def"], mode);
                     return;
                 case "proto":
-                    SaveRaw(Path.Combine(folder, objectFiles["def"]), objectFiles["def"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["def"], mode);
                     return;
 
                 case "effect":
@@ -294,26 +327,26 @@ namespace ZoDream.BundleExtractor.Eastward
                 case "render_target":
                 case "ui_style":
                 case "deck2d":
-                    SaveRaw(Path.Combine(folder, objectFiles["def"]), objectFiles["def"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["def"], mode);
                     return;
 
                 case "scene":
                     if (fileType == "d")
                     {
-                        SaveBatch(folder, objectFiles["def"], mode);
+                        SaveBatch(Path.Combine(folder, exportName), assetName, mode);
                         return;
                     }
-                    SaveRaw(Path.Combine(folder, objectFiles["def"]), objectFiles["def"], mode);
+                    SaveRaw(Path.Combine(folder, exportName, "default.scene_group"), objectFiles["def"], mode);
                     return;
 
                 case "mesh":
-                    SaveBatch(folder, objectFiles["mesh"], mode);
+                    SaveBatch(Path.Combine(folder, exportName), assetName, mode);
                     return;
                 case "com_script":
-                    SaveRaw(Path.Combine(folder, objectFiles["script"]), objectFiles["script"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["script"], mode);
                     return;
                 case "lut_texture":
-                    SaveRaw(Path.Combine(folder, objectFiles["texture"]), objectFiles["texture"], mode);
+                    SaveRaw(Path.Combine(folder, exportName), objectFiles["texture"], mode);
                     return;
             }
         }
@@ -329,8 +362,51 @@ namespace ZoDream.BundleExtractor.Eastward
             });
         }
 
+        private void SaveAtlas(string outputPath, string sourcePath, ArchiveExtractMode mode)
+        {
+            if (options is IBundleExtractOptions o && !o.EnabledSpine)
+            {
+                return;
+            }
+            ReadAs(sourcePath, fs => {
+                if (!LocationStorage.TryCreate(outputPath, ".json", mode, out outputPath))
+                {
+                    return;
+                }
+                fs.SaveAs(outputPath);
+                fs.Seek(0, SeekOrigin.Begin);
+                using var doc = JsonDocument.Parse(fs);
+                if (doc.RootElement.TryGetProperty("modules", out var ele))
+                {
+                    using var writer = new CodeWriter(File.Create(outputPath[..^5] + ".atlas"));
+                    writer.WriteLine(Path.GetFileNameWithoutExtension(outputPath) + ".png")
+                        // .WriteLine($"size: 0,0")
+                        .WriteLine("format: RGBA8888")
+                        .WriteLine("filter: Linear,Linear")
+                        .WriteLine("repeat: none");
+                    foreach (var item in ele.EnumerateObject())
+                    {
+                        var rect = item.Value.GetProperty("rect").EnumerateArray().Select(i => i.TryGetInt32(out var res) ? res : (int)i.GetDouble()).ToArray();
+                        writer.Write(item.Name)
+                            .WriteIndentLine()
+                            .WriteLine("rotate: false", true)
+                            .WriteFormat("xy: {0}, {1}", rect[0], rect[1]).WriteLine(true)
+                            .WriteFormat("size: {0}, {1}", rect[2], rect[3]).WriteLine(true)
+                            .WriteFormat("orig: {0}, {1}", rect[2], rect[3]).WriteLine(true)
+                            .WriteLine("offset: 0, 0", true)
+                            .Write("index: -1")
+                            .WriteOutdentLine();
+                    }
+                }
+            });
+        }
+
         private void SaveLua(string outputPath, string sourcePath, ArchiveExtractMode mode)
         {
+            if (options is IBundleExtractOptions o && !o.EnabledLua)
+            {
+                return;
+            }
             ReadAs(sourcePath, fs => {
                 var decompressor = new LuaScheme();
                 var res = decompressor.Open(fs);
@@ -353,6 +429,10 @@ namespace ZoDream.BundleExtractor.Eastward
 
         private void SaveTexture(string outputPath, string sourcePath, ArchiveExtractMode mode)
         {
+            if (options is IBundleExtractOptions o && !o.EnabledImage)
+            {
+                return;
+            }
             ReadAs(sourcePath, fs => 
             {
                 if (LocationStorage.TryCreate(outputPath, ".png", mode, out var fileName))

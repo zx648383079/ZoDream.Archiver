@@ -48,11 +48,11 @@ namespace ZoDream.BundleExtractor.Eastward
         }
 
 
-        public IEnumerable<EastwardAssetBundle> Open(IBundleSource source)
+        public IEnumerable<EastwardAssetBundle> Open(IBundleSource source, IBundleOptions options)
         {
             foreach (var item in source.GetFiles("config.g"))
             {
-                yield return new EastwardAssetBundle(source, item, this);
+                yield return new EastwardAssetBundle(source, item, this, options);
             }
         }
 

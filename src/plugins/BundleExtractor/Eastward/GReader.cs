@@ -3,10 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Xml.Linq;
 using ZoDream.Shared;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
@@ -23,34 +21,6 @@ namespace ZoDream.BundleExtractor.Eastward
         private readonly Dictionary<string, ArchiveEntry> _entries = ReadAll(reader).ToDictionary(i => i.Name);
         public IEnumerable<string> Keys => _entries.Keys;
 
-        public string ReadText(string name)
-        {
-            if (!_entries.TryGetValue(name, out var entry))
-            {
-                return string.Empty;
-            }
-            reader.BaseStream.Seek(entry.Offset, SeekOrigin.Begin);
-            if (!entry.IsEncrypted)
-            {
-                return Encoding.UTF8.GetString(reader.ReadBytes((int)entry.CompressedLength));
-            }
-            using var decompressor = new Decompressor();
-            var uncompressedSize = (int)entry.Length;
-            var compressedSize = (int)entry.CompressedLength;
-            var buffer = ArrayPool<byte>.Shared.Rent(compressedSize);
-            var target = ArrayPool<byte>.Shared.Rent(uncompressedSize);
-            try
-            {
-                reader.Read(buffer, 0, compressedSize);
-                decompressor.Unwrap(buffer, 0, compressedSize, target, 0, uncompressedSize);
-                return Encoding.UTF8.GetString(target, 0, uncompressedSize);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-                ArrayPool<byte>.Shared.Return(target);
-            }
-        }
 
         public Stream ReadAsStream(string name)
         {
@@ -80,65 +50,13 @@ namespace ZoDream.BundleExtractor.Eastward
             }
         }
 
-        public T? ReadAs<T>(string name)
-        {
-            if (!_entries.TryGetValue(name, out var entry))
-            {
-                return default;
-            }
-            reader.BaseStream.Seek(entry.Offset, SeekOrigin.Begin);
-            if (!entry.IsEncrypted)
-            {
-                return JsonSerializer.Deserialize<T>(reader.ReadAsStream(entry.CompressedLength));
-            }
-            using var decompressor = new Decompressor();
-            var uncompressedSize = (int)entry.Length;
-            var compressedSize = (int)entry.CompressedLength;
-            var buffer = ArrayPool<byte>.Shared.Rent(compressedSize);
-            var target = ArrayPool<byte>.Shared.Rent(uncompressedSize);
-            try
-            {
-                reader.Read(buffer, 0, compressedSize);
-                decompressor.Unwrap(buffer, 0, compressedSize, target, 0, uncompressedSize);
-                return JsonSerializer.Deserialize<T>(target.AsSpan()[..uncompressedSize]);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-                ArrayPool<byte>.Shared.Return(target);
-            }
-        }
 
         public void ReadDocument(string name, Action<JsonDocument> cb)
         {
-            if (!_entries.TryGetValue(name, out var entry))
-            {
-                return;
-            }
-            reader.BaseStream.Seek(entry.Offset, SeekOrigin.Begin);
-            if (!entry.IsEncrypted)
-            {
-                using var doc = JsonDocument.Parse(reader.ReadAsStream(entry.CompressedLength));
+            ExtractTo(name, fs => {
+                using var doc = JsonDocument.Parse(fs);
                 cb.Invoke(doc);
-                return;
-            }
-            using var decompressor = new Decompressor();
-            var uncompressedSize = (int)entry.Length;
-            var compressedSize = (int)entry.CompressedLength;
-            var buffer = ArrayPool<byte>.Shared.Rent(compressedSize);
-            var target = ArrayPool<byte>.Shared.Rent(uncompressedSize);
-            try
-            {
-                reader.Read(buffer, 0, compressedSize);
-                decompressor.Unwrap(buffer, 0, compressedSize, target, 0, uncompressedSize);
-                using var doc = JsonDocument.Parse(target.AsMemory()[..uncompressedSize]);
-                cb.Invoke(doc);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-                ArrayPool<byte>.Shared.Return(target);
-            }
+            });
         }
 
         public void ExtractTo(string name, Action<Stream> cb)

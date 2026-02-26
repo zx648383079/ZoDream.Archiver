@@ -41,7 +41,7 @@ namespace ZoDream.Archiver
             }
             if (package.Contains("eastward"))
             {
-                ExtractFile(source => new EastwardScheme().Open(source), token);
+                ExtractFile(source => new EastwardScheme().Open(source, options), token);
             }
             if (package.Contains("qoo"))
             {
