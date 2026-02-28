@@ -17,7 +17,7 @@ namespace ZoDream.BundleExtractor.Xna
         private static readonly string Signature = "XNB";
         private BundleCodecType _codecType = BundleCodecType.Unknown;
 
-        private IBundleSerializer _serializer = service.Get<IBundleSerializer>();
+        private readonly IBundleSerializer _serializer = service.Get<IBundleSerializer>();
         private KeyValuePair<string, Version>[] _typeItems = [];
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Xna
                 return;
             }
             var length = reader.ReadUInt32();
-            Expectation.ThrowIfNot(length != reader.Length);
+            Expectation.ThrowIfNot(length == reader.Length, $"Length: {length} != {reader.Length}");
             Stream next = new PartialStream(reader.BaseStream);
             if (_codecType > BundleCodecType.Unknown)
             {
@@ -44,7 +44,7 @@ namespace ZoDream.BundleExtractor.Xna
                 _typeItems[i] = new KeyValuePair<string, Version>(type, new Version((int)version, 0));
             }
             var entryBeginTag = nextReader.Read7BitEncodedInt();
-            Expectation.ThrowIf(entryBeginTag != 0);
+            Expectation.ThrowIf(entryBeginTag != 0, $"Tag: {entryBeginTag} != 0");
             reader.Add(this);
             while (reader.RemainingLength > 0)
             {
