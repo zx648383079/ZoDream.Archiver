@@ -9,10 +9,15 @@ namespace ZoDream.BundleExtractor.Xna.Converters
     {
         public override SoundEffect? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            Expectation.ThrowIfNot(reader.ReadInt32() == 18);
+            var count = reader.ReadInt32();
+            Expectation.ThrowIfNot(count == 18);
             return new SoundEffect()
             {
-
+                Header = reader.ReadBytes(count),
+                Data = reader.ReadAsStream(),
+                LoopStart = reader.ReadInt32(),
+                LoopLength = reader.ReadInt32(),
+                Duration = reader.ReadInt32(),// ms
             };
         }
     }

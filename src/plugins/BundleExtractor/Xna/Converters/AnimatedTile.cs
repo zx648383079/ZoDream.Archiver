@@ -27,7 +27,7 @@ namespace ZoDream.BundleExtractor.Xna.Converters
                 switch (code)
                 {
                     case 'T':
-                        tileSheet.Add(reader.ReadString());
+                        tileSheet.Add(XnbReader.ReadString(reader));
                         sheetIndex++;
                         break;
                     case 'S':

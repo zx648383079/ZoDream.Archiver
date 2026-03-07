@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
     public class StateConstant
     {

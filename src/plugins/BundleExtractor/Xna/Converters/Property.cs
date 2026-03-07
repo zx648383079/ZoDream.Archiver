@@ -10,7 +10,7 @@ namespace ZoDream.BundleExtractor.Xna.Converters
         {
             var res = new Property()
             {
-                Key = reader.ReadString(),
+                Key = XnbReader.ReadString(reader),
                 Type = reader.ReadByte()
             };
             res.Value = res.Type switch
@@ -18,7 +18,7 @@ namespace ZoDream.BundleExtractor.Xna.Converters
                 0 => reader.ReadByte(),
                 1 => reader.ReadInt32(),
                 2 => reader.ReadSingle(),
-                3 => reader.ReadString(),
+                3 => XnbReader.ReadString(reader),
                 _ => throw new NotSupportedException()
             };
 

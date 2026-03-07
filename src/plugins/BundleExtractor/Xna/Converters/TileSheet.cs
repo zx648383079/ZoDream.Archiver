@@ -10,9 +10,9 @@ namespace ZoDream.BundleExtractor.Xna.Converters
         {
             var res = new TileSheet()
             {
-                Id = reader.ReadString(),
-                Description = reader.ReadString(),
-                Image = reader.ReadString(),
+                Id = XnbReader.ReadString(reader),
+                Description = XnbReader.ReadString(reader),
+                Image = XnbReader.ReadString(reader),
                 SheetSize = XnbReader.ReadVector2I(reader),
                 TileSize = XnbReader.ReadVector2I(reader),
                 Margin = XnbReader.ReadVector2I(reader),

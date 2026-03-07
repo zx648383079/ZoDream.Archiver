@@ -7,7 +7,7 @@ namespace ZoDream.BundleExtractor.Xna.Converters
     {
         public override string? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
-            return reader.Read7BitEncodedString();
+            return XnbReader.ReadString(reader);
         }
     }
 }

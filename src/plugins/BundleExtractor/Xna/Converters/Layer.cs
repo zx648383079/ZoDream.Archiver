@@ -11,9 +11,9 @@ namespace ZoDream.BundleExtractor.Xna.Converters
         public override Layer? Read(IBundleBinaryReader reader, Type objectType, IBundleSerializer serializer)
         {
             var res = new Layer();
-            res.Id = reader.ReadString();
+            res.Id = XnbReader.ReadString(reader);
             res.Visible = reader.ReadByte();
-            res.Description = reader.ReadString();
+            res.Description = XnbReader.ReadString(reader);
             res.LayerSize = XnbReader.ReadVector2I(reader);
             res.TileSize = XnbReader.ReadVector2I(reader);
             res.Properties = reader.ReadArray(_ => serializer.Deserialize<Property>(reader));
@@ -56,7 +56,7 @@ namespace ZoDream.BundleExtractor.Xna.Converters
                             num3++;
                             break;
                         case 'T':
-                            tileSheet.Add(reader.ReadString());
+                            tileSheet.Add(XnbReader.ReadString(reader));
                             break;
                         default:
                             throw new NotSupportedException();
