@@ -24,7 +24,13 @@ namespace ZoDream.BundleExtractor.Xna.Converters
                 Duration = reader.ReadInt32(),// ms
             };
         }
-
+        public void SaveAs(object? instance, string fileName, ArchiveExtractMode mode)
+        {
+            if (instance is SoundEffect o)
+            {
+                SaveAs(o, fileName, mode);
+            }
+        }
         public void SaveAs(SoundEffect instance, string fileName, ArchiveExtractMode mode)
         {
             if (!LocationStorage.TryCreate(fileName, ".wav", mode, out fileName))

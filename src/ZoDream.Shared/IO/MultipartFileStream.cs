@@ -18,6 +18,9 @@ namespace ZoDream.Shared.IO
         /// 执行销毁时不销毁的流
         /// </summary>
         private int _leaveOpenStream = -1;
+
+        public int Count => _items.Length;
+
         public override bool CanRead => true;
 
         public override bool CanSeek => true;
@@ -25,6 +28,8 @@ namespace ZoDream.Shared.IO
         public override bool CanWrite => false;
 
         public override long Length => _items.Sum(t => t.Length);
+
+        public Stream this[int index] => _items[index];
 
         public override long Position {
             get {

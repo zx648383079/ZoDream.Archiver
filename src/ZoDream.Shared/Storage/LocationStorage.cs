@@ -96,7 +96,7 @@ namespace ZoDream.Shared.Storage
         /// <returns></returns>
         public static bool TryCreate(string fileName, string extension, ArchiveExtractMode mode, out string fullPath)
         {
-            if (string.IsNullOrWhiteSpace(extension) && !extension.StartsWith('.'))
+            if (!string.IsNullOrWhiteSpace(extension) && !extension.StartsWith('.'))
             {
                 extension = "." + extension;
             }

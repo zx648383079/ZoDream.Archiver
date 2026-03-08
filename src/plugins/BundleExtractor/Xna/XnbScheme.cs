@@ -85,7 +85,9 @@ namespace ZoDream.BundleExtractor.Xna
 
         public IBundleHandler? Open(Stream stream, string fileName)
         {
-            return new XnbReader(new BundleBinaryReader(stream, EndianType.LittleEndian, leaveOpen: false), service, options);
+            return new XnbReader(
+                new BundleBinaryReader(stream, EndianType.LittleEndian, leaveOpen: false), 
+                Path.GetFileName(fileName), service, options);
         }
     }
 }

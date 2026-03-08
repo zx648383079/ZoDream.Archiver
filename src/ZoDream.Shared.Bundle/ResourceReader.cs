@@ -32,7 +32,8 @@ namespace ZoDream.Shared.Bundle
                 try
                 {
                     using var reader = scheme.Open(item.FullPath);
-                    reader?.ExtractTo(folder, mode, token);
+                    // TODO 直接输出到目录还是输出到相对目录
+                    reader?.ExtractTo(fileItems.Create(item, folder), mode, token);
                 }
                 catch (Exception ex)
                 {

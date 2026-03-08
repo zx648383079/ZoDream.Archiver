@@ -13,20 +13,29 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Numerics;
+using ZoDream.Shared.Storage;
 using Version = System.Version;
 
 namespace ZoDream.BundleExtractor.Xna
 {
-    public class XnbReader(IBundleBinaryReader reader, IEntryService service, IBundleOptions options) : IBundleHandler
+    public class XnbReader(IBundleBinaryReader reader, string fileName, IEntryService service, IBundleOptions options) : IBundleHandler
     {
         private static readonly string Signature = "XNB";
         private BundleCodecType _codecType = BundleCodecType.Unknown;
 
         private readonly IBundleSerializer _serializer = service.Get<IBundleSerializer>();
         private KeyValuePair<string, Version>[] _typeItems = [];
+        private ArchiveExtractMode _exportMode;
+        private string _exportPath;
 
         public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
         {
+            _exportMode = mode;
+            _exportPath = folder.EndsWith(fileName) ? folder : Path.Combine(folder, fileName);
+            if (_exportPath.EndsWith(".xnb"))
+            {
+                _exportPath = _exportPath[..^4];
+            }
             if (!ReadHeader())
             {
                 return;
@@ -49,14 +58,18 @@ namespace ZoDream.BundleExtractor.Xna
                 var version = nextReader.ReadUInt32();
                 _typeItems[i] = new KeyValuePair<string, Version>(type, new Version((int)version, 0));
             }
-            // var sharedCount = nextReader.Read7BitEncodedInt();
             var entryBeginTag = nextReader.Read7BitEncodedInt();
+            if (entryBeginTag != 0)
+            {
+                // var sharedCount = entryBeginTag;
+                entryBeginTag = nextReader.Read7BitEncodedInt();
+            } 
             Expectation.ThrowIf(entryBeginTag != 0, $"Tag: {entryBeginTag} != 0");
             nextReader.Add(this);
             while (nextReader.RemainingLength > 0)
             {
                 entryBeginTag = nextReader.Read7BitEncodedInt();
-                var entry = ReadObject(nextReader, entryBeginTag - 1);
+                ReadObject(nextReader, entryBeginTag - 1);
             }
         }
 
@@ -73,20 +86,18 @@ namespace ZoDream.BundleExtractor.Xna
             switch (args[0])
             {
                 // Dictionary
-                case "Microsoft.Xna.Framework.Content.DictionaryReader":
+                case "Dictionary":
                     return ReadDictionary(reader, args[1], args[2]);
-                case "Microsoft.Xna.Framework.Content.EnumReader":
+                case "Enum":
                     return ReadObject(reader, args[1]);
                 // Array
-                case "Microsoft.Xna.Framework.Content.ArrayReader":
-                case "Microsoft.Xna.Framework.Content.ListReader":
-                case "System.Collections.Generic.List":
                 case "Array":
+                case "List":
                     return ReadArray(reader, args[1]);
             }
             if (!unknowTag || IsValueType(args[0]))
             {
-                return _serializer.Deserialize(reader, ToType(args[0]));
+                return Deserialize(reader, ToType(args[0], type), args[0]);
             }
             var entryBeginTag = reader.Read7BitEncodedInt();
             if (entryBeginTag == 0)
@@ -96,7 +107,39 @@ namespace ZoDream.BundleExtractor.Xna
             return ReadObject(reader, entryBeginTag - 1);
         }
 
-        
+        private object? Deserialize(IBundleBinaryReader reader, Type objectType, string sourceType)
+        {
+            if (!_serializer.Converters.TryGet(objectType, out var converter))
+            {
+                return null;
+            }
+            var res = converter.Read(reader, objectType, _serializer);
+            if (res is null)
+            {
+                return res;
+            }
+            if (res is string s)
+            {
+                SaveAs(s, sourceType);
+            } else if (converter is IBundleConvertExporter exporter)
+            {
+                exporter.SaveAs(res, _exportPath, _exportMode);
+            }
+            return res;
+        }
+
+        private void SaveAs(string instance, string sourceType)
+        {
+            if (string.IsNullOrWhiteSpace(instance))
+            {
+                return;
+            }
+            if (!LocationStorage.TryCreate(_exportPath, sourceType.ToLower(), _exportMode, out var outputPath))
+            {
+                return;
+            }
+            File.WriteAllText(outputPath, instance);
+        }
 
         internal object? ReadArray(IBundleBinaryReader reader, string type)
         {
@@ -128,93 +171,92 @@ namespace ZoDream.BundleExtractor.Xna
             }
             return true;
         }
-
         private static Type ToType(string type)
+        {
+            return ToType(type, type);
+        }
+        private static Type ToType(string type, string sourceType)
         {
             return type switch
             {
-                "Microsoft.Xna.Framework.Content.BooleanReader" or "System.Boolean" => typeof(bool),
+                "Boolean" => typeof(bool),
                 // Char
-                "Microsoft.Xna.Framework.Content.CharReader" or "System.Char" => typeof(char),
+                "Char" => typeof(char),
                 // Int32
-                "Microsoft.Xna.Framework.Content.Int32Reader" or "System.Int32" => typeof(int),
-                "Microsoft.Xna.Framework.Content.Int16Reader" or "System.Int16" => typeof(short),
-                "Microsoft.Xna.Framework.Content.Int64Reader"
-                or "Microsoft.Xna.Framework.Content.TimeSpanReader" 
-                or "System.Int64" => typeof(long),
-                "Microsoft.Xna.Framework.Content.SByteReader" or "System.SByte" => typeof(sbyte),
-                "Microsoft.Xna.Framework.Content.ByteReader" or "System.Byte" => typeof(byte),
-                "Microsoft.Xna.Framework.Content.SingleReader" or "System.Single" => typeof(float),
-                "Microsoft.Xna.Framework.Content.UInt16Reader" or "System.UInt16" => typeof(ushort),
-                "Microsoft.Xna.Framework.Content.UInt32Reader" or "System.UInt32" => typeof(uint),
-                "Microsoft.Xna.Framework.Content.UInt64Reader" or "System.UInt64" => typeof(ulong),
+                "Int32" => typeof(int),
+                "Int16" => typeof(short),
+                "TimeSpan" or "Int64" => typeof(long),
+                "SByte" => typeof(sbyte),
+                "Byte" => typeof(byte),
+                "Single" => typeof(float),
+                "UInt16" => typeof(ushort),
+                "UInt32" => typeof(uint),
+                "UInt64" => typeof(ulong),
                 // String
-                "Microsoft.Xna.Framework.Content.StringReader" or "System.String" => typeof(string),
+                "String" or "XmlSource" or "Lua" or "Anim" or "Tx" 
+                or "Tsx" or "Tmx" or "Cmx" => typeof(string),
                 // Texture2D
-                "Microsoft.Xna.Framework.Content.Texture2DReader" => typeof(Texture2D),
-                "Microsoft.Xna.Framework.Content.Texture3DReader" => typeof(Texture3D),
-                "Microsoft.Xna.Framework.Content.TextureCubeReader" => typeof(TextureCube),
-                "Microsoft.Xna.Framework.Content.BoundingBoxReader" => typeof(MinMaxAABB),
-                "Microsoft.Xna.Framework.Content.ColorReader" => typeof(Color),
-                "Microsoft.Xna.Framework.Content.BoundingFrustumReader" 
-                or "Microsoft.Xna.Framework.Content.MatrixReader" => typeof(Matrix4x4),
-                "Microsoft.Xna.Framework.Content.BoundingSphereReader" => typeof(Vector4),
-                "Microsoft.Xna.Framework.Content.CurveReader" => typeof(FloatCurve),
-                "Microsoft.Xna.Framework.Content.DateTimeReader" => typeof(DateTime),
-                "Microsoft.Xna.Framework.Content.DecimalConverter" => typeof(decimal),
-                "Microsoft.Xna.Framework.Content.DoubleReader" => typeof(double),
-                "Microsoft.Xna.Framework.Content.IndexBufferReader" => typeof(IndexBuffer),
+                "Texture2D" => typeof(Texture2D),
+                "Texture3D" => typeof(Texture3D),
+                "TextureCube" => typeof(TextureCube),
+                "BoundingBox" => typeof(MinMaxAABB),
+                "Color" => typeof(Color),
+                "BoundingFrustum" 
+                or "Matrix" => typeof(Matrix4x4),
+                "BoundingSphere" => typeof(Vector4),
+                "Curve" => typeof(FloatCurve),
+                "DateTime" => typeof(DateTime),
+                "Decimal" => typeof(decimal),
+                "Double" => typeof(double),
+                "IndexBuffer" => typeof(IndexBuffer),
                 // Vector2
-                "Microsoft.Xna.Framework.Content.Vector2Reader" or "Microsoft.Xna.Framework.Vector2" => typeof(Vector2),
+                "Vector2" => typeof(Vector2),
                 // Vector3
-                "Microsoft.Xna.Framework.Content.Vector3Reader" or "Microsoft.Xna.Framework.Vector3" => typeof(Vector3),
+                "Vector3" => typeof(Vector3),
                 // Vector3
-                "Microsoft.Xna.Framework.Content.Vector4Reader" 
-                or "Microsoft.Xna.Framework.Content.PlaneReader"
-                or "Microsoft.Xna.Framework.Vector4" => typeof(Vector4),
-                "Microsoft.Xna.Framework.Content.QuaternionReader" => typeof(Quaternion),
+                "Vector4" 
+                or "Plane" => typeof(Vector4),
+                "Quaternion" => typeof(Quaternion),
                 // SpriteFont
-                "Microsoft.Xna.Framework.Content.SpriteFontReader" => typeof(SpriteFont),
-                "Microsoft.Xna.Framework.Content.RayReader" => typeof(Ray),
-                "Microsoft.Xna.Framework.Content.VertexBufferReader" => typeof(VertexBuffer),
-                "Microsoft.Xna.Framework.Content.VertexDeclarationReader" => typeof(VertexDeclaration),
-                "Microsoft.Xna.Framework.Content.VideoReader" => typeof(VideoClip),
+                "SpriteFont" => typeof(SpriteFont),
+                "Ray" => typeof(Ray),
+                "VertexBuffer" => typeof(VertexBuffer),
+                "VertexDeclaration" => typeof(VertexDeclaration),
+                "Video" => typeof(VideoClip),
 
-                "Microsoft.Xna.Framework.Content.SkinnedEffectReader" => typeof(SkinnedEffect),
-                "Microsoft.Xna.Framework.Content.EffectMaterialReader" => typeof(EffectMaterial),
-                "Microsoft.Xna.Framework.Content.DualTextureEffectReader" => typeof(DualTextureEffect),
+                "SkinnedEffect" => typeof(SkinnedEffect),
+                "EffectMaterial" => typeof(EffectMaterial),
+                "DualTextureEffect" => typeof(DualTextureEffect),
                 // Rectangle
-                "Microsoft.Xna.Framework.Content.PointReader" => typeof(Vector2Int),
-                "Microsoft.Xna.Framework.Content.RectangleReader" or "Microsoft.Xna.Framework.Rectangle" => typeof(Vector4Int),
+                "Point" => typeof(Vector2Int),
+                "Rectangle" => typeof(Vector4Int),
                 // Effect
-                "Microsoft.Xna.Framework.Content.EffectReader" or "Microsoft.Xna.Framework.Graphics.Effect" => typeof(Effect),
+                "Effect" => typeof(Effect),
                 // xTile TBin
-                "xTile.Pipeline.TideReader" => typeof(Stream),
-                "BmFont.XmlSourceReader" => typeof(string),
-                "Microsoft.Xna.Framework.Content.SoundEffectReader" or "Microsoft.Xna.Framework.SoundEffect" => typeof(SoundEffect),
-                "Microsoft.Xna.Framework.Content.SongReader" => typeof(Song),
-                _ => throw new Shared.NotSupportedException(type),
+                "Tide" => typeof(Stream),
+                "SoundEffect" => typeof(SoundEffect),
+                "Song" => typeof(Song),
+                _ => throw new Shared.NotSupportedException(sourceType),
             };
         }
 
-        private bool IsValueType(string type)
+        private static bool IsValueType(string type)
         {
             return type switch
             {
-                "Microsoft.Xna.Framework.Content.BooleanReader" or "System.Boolean" 
-                or "Microsoft.Xna.Framework.Content.CharReader" or "System.Char"
-                or "Microsoft.Xna.Framework.Content.Int32Reader" or "System.Int32"
-                or "Microsoft.Xna.Framework.Content.Int16Reader" or "System.Int16"
-                or "Microsoft.Xna.Framework.Content.Int64Reader"
-                or "Microsoft.Xna.Framework.Content.TimeSpanReader"
-                or "System.Int64"
-                or "Microsoft.Xna.Framework.Content.SByteReader" or "System.SByte"
-                or "Microsoft.Xna.Framework.Content.ByteReader" or "System.Byte"
-                or "Microsoft.Xna.Framework.Content.SingleReader" or "System.Single"
-                or "Microsoft.Xna.Framework.Content.UInt16Reader" or "System.UInt16"
-                or "Microsoft.Xna.Framework.Content.UInt32Reader" or "System.UInt32"
-                or "Microsoft.Xna.Framework.Content.UInt64Reader" or "System.UInt64"
-                or "Microsoft.Xna.Framework.Content.StringReader" or "System.String" => true,
+                "Boolean" 
+                or "Char"
+                or "Int32"
+                or "Int16"
+                or "Int64"
+                or "TimeSpan"
+                or "SByte"
+                or "Byte"
+                or "Single"
+                or "UInt16"
+                or "UInt32"
+                or "UInt64"
+                or "String" => true,
                 _ => false,
             };
         }
@@ -223,6 +265,7 @@ namespace ZoDream.BundleExtractor.Xna
             reader.Dispose();
         }
 
+        
 
         private static string[] SplitType(string type)
         {
@@ -233,17 +276,36 @@ namespace ZoDream.BundleExtractor.Xna
                 {
                     return ["Array", type[..^2]];
                 }
-                return [type];
+                return [ShortType(type)];
             }
             var res = new List<string>(3)
             {
-                type[..i]
+                ShortType(type[..i])
             };
             foreach (Match item in Regex.Matches(type[i..], @"\[([^\[\]]+)\]"))
             {
-                res.Add(item.Groups[1].Value.Split(',', 2)[0]);
+                res.Add(item.Groups[1].Value);
             }
             return [..res];
+        }
+
+        private static string ShortType(string type)
+        {
+            var i = type.IndexOf(',');
+            if (i > 0)
+            {
+                type = type[..i];
+            }
+            i = type.LastIndexOf('.');
+            if (i >= 0)
+            {
+                type = type[(i + 1)..];
+            }
+            if (type.EndsWith("Reader"))
+            {
+                return type[..^6];
+            }
+            return type;
         }
 
         internal static Vector2Int ReadVector2I(IBundleBinaryReader reader)
