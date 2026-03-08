@@ -171,8 +171,8 @@ namespace ZoDream.BundleExtractor.Xna
                 // Vector3
                 "Microsoft.Xna.Framework.Content.Vector4Reader" 
                 or "Microsoft.Xna.Framework.Content.PlaneReader"
-                or "Microsoft.Xna.Framework.Content.QuaternionReader"
                 or "Microsoft.Xna.Framework.Vector4" => typeof(Vector4),
+                "Microsoft.Xna.Framework.Content.QuaternionReader" => typeof(Quaternion),
                 // SpriteFont
                 "Microsoft.Xna.Framework.Content.SpriteFontReader" => typeof(SpriteFont),
                 "Microsoft.Xna.Framework.Content.RayReader" => typeof(Ray),

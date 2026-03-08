@@ -7,4 +7,9 @@ namespace ZoDream.Shared.Bundle
         public string FileName { get; }
         public void SaveAs(string fileName, ArchiveExtractMode mode);
     }
+
+    public interface IBundleConvertExporter<T>
+    {
+        public void SaveAs(T instance, string fileName, ArchiveExtractMode mode);
+    }
 }

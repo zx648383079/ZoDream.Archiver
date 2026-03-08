@@ -45,6 +45,8 @@ namespace ZoDream.Shared.Bundle
         public long ReadInt64();
         public sbyte ReadSByte();
         public float ReadSingle();
+
+        public char ReadChar();
         /// <summary>
         /// 前读取 int32 的长度，再读取字符
         /// </summary>

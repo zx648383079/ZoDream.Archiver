@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using ZoDream.BundleExtractor.Engines;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.BundleExtractor.Xna;
 using ZoDream.Shared.Bundle;
 using UnityE = ZoDream.BundleExtractor.Engines.UnityEngine;
 
@@ -22,6 +24,10 @@ namespace ZoDream.BundleExtractor.Producers
             if (options.Engine == UnityE.EngineName)
             {
                 return new BundleSerializer(UnityConverter.Converters);
+            }
+            if (options.Engine == XnaEngine.EngineName)
+            {
+                return new BundleSerializer(XnbScheme.Converters);
             }
             return new BundleSerializer();
         }

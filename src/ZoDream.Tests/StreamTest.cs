@@ -29,7 +29,7 @@ namespace ZoDream.Tests
             byte[] buffer = [0x93, 0xa8, 0xaf, 0xb2];
             var target = "UnityFS"u8;
             var format = XORStream.Recognize(buffer, target);
-            Assert.IsEmpty(format);
+            Assert.IsNotEmpty(format);
         }
 
         [TestMethod]

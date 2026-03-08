@@ -1,4 +1,3 @@
-using System;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
