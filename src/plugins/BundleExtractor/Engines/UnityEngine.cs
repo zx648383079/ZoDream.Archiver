@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ZoDream.BundleExtractor.Platforms;
 using ZoDream.BundleExtractor.Unity;
+using ZoDream.BundleExtractor.Unity.Addressables;
 using ZoDream.BundleExtractor.Unity.BundleFiles;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.BundleExtractor.Unity.YooAsset;
@@ -60,8 +60,19 @@ namespace ZoDream.BundleExtractor.Engines
 
         public IBundleSource Unpack(IBundleSource fileItems, IBundleOptions options)
         {
-            var next = new YooAssetScheme(fileItems);
-            return next.IsMatch() ? next : fileItems;
+            var items = new IAssetBundleSource[]
+            {
+                new YooAssetScheme(fileItems),
+                new FileAssetBundle(fileItems)
+            };
+            foreach (var item in items)
+            {
+                if (item.IsMatch())
+                {
+                    return item;
+                }
+            }
+            return fileItems;
         }
 
         public IDependencyBuilder GetBuilder(IBundleOptions options)

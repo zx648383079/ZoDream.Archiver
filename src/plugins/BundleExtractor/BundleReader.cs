@@ -35,6 +35,10 @@ namespace ZoDream.BundleExtractor
             logger.Info($"Engine: {engine.AliasName}");
             logger.Info("Analyzing ...");
             fileItems = engine.Unpack(fileItems, options);
+            if (fileItems is IAssetBundleSource ab)
+            {
+                logger.Info($"Pack: {ab.AliasName}");
+            }
             fileItems.Analyze(token);
             logger.Info($"Found {fileItems.Count} files.");
             var service = scheme.Service;

@@ -11,12 +11,18 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.BundleExtractor.Unity.PlayerAsset
 {
-    public class PlayerAssetBundle(IBundleSource source) : IBundleSource, IBundleHandler
+    public class PlayerAssetBundle(IBundleSource source) : IBundleSource, IBundleHandler, IAssetBundleSource
     {
+        public string AliasName => "playerassets";
 
         private readonly Dictionary<IFilePath, Tuple<long, long>> _maps = [];
 
         public uint Count => source.Count;
+
+        public bool IsMatch()
+        {
+            return source.GetFiles("playerassets.assets").Any();
+        }
 
         public uint Analyze(CancellationToken token = default)
         {

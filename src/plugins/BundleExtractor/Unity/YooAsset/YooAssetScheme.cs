@@ -11,8 +11,10 @@ using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.YooAsset
 {
-    public class YooAssetScheme(IBundleSource source) : IBundleSource
+    public class YooAssetScheme(IBundleSource source) : IBundleSource, IAssetBundleSource
     {
+        public string AliasName => "yoo.asset";
+
         private readonly IBundleMapper _mapper = new BundleMapper();
 
         public uint Count => source.Count;

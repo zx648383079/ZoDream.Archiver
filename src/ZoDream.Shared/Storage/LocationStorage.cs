@@ -220,27 +220,30 @@ namespace ZoDream.Shared.Storage
             return new StreamWriter(fs, encoding);
         }
 
-
-        public static string GetMD5(string fileName)
+        /// <summary>
+        /// 获取大写 MD5
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static string HashFile(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
             {
                 return string.Empty;
             }
             using var fs = new FileStream(fileName, FileMode.Open);
-            return GetMD5(fs);
+            return HashFile(fs);
         }
-
-        public static string GetMD5(Stream fs)
+        /// <summary>
+        /// 获取大写 MD5
+        /// </summary>
+        /// <param name="fs"></param>
+        /// <returns></returns>
+        public static string HashFile(Stream fs)
         {
             var md5 = MD5.Create();
             var res = md5.ComputeHash(fs);
-            var sb = new StringBuilder();
-            foreach (var b in res)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-            return sb.ToString();
+            return Convert.ToHexString(res);
         }
     }
 }
