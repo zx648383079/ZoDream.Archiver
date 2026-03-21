@@ -67,6 +67,13 @@ namespace ZoDream.Archiver.ViewModels
             set => SetProperty(ref _platformIndex, value);
         }
 
+        private string _version = string.Empty;
+
+        public string Version {
+            get => _version;
+            set => SetProperty(ref _version, value);
+        }
+
         private string _applicationId = string.Empty;
 
         public string ApplicationId {
@@ -95,6 +102,8 @@ namespace ZoDream.Archiver.ViewModels
                 OnPropertyChanged(nameof(IsValid));
             }
         }
+
+
 
         private string _password = string.Empty;
 
@@ -312,6 +321,7 @@ namespace ZoDream.Archiver.ViewModels
                 PlatformIndex = IndexOf(PlatformItems, options.Platform);
                 EngineIndex = IndexOf(EngineItems, options.Engine);
                 Entrance = options.Entrance ?? string.Empty;
+                Version = options.Version ?? string.Empty;
             }
             if (options is IArchiveExtractOptions o)
             {
@@ -361,6 +371,7 @@ namespace ZoDream.Archiver.ViewModels
                 o.EnabledMesh = EnabledMesh && EnabledModel;
                 o.OnlyDependencyTask = _isCreateDependencyTask;
                 o.EnabledResource = EnabledResource;
+                o.Version = Version;
             }
             if (!string.IsNullOrWhiteSpace(ApplicationId))
             {

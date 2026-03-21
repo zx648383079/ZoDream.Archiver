@@ -77,6 +77,7 @@ namespace ZoDream.BundleExtractor
                     } else
                     {
                         Logger?.Warning($"'{dllFolder}' not found!");
+                        instance.Load(_options.Entrance);
                     }
                 }
                 _service.Add(instance);

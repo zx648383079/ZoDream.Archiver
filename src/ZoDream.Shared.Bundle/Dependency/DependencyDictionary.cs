@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ZoDream.Shared.Bundle
@@ -48,28 +49,48 @@ namespace ZoDream.Shared.Bundle
 
         public bool TryGet(IEnumerable<string> files, out string[] items)
         {
-            #region 简单版 // 只循环一次
-            //var source = files.ToArray();
-            //var res = new HashSet<string>();
-            //foreach (var item in source)
-            //{
-            //    if (!TryGetValue(item, out var entry))
-            //    {
-            //        continue;
-            //    }
-            //    foreach (var it in entry.Dependencies)
-            //    {
-            //        if (source.Contains(it))
-            //        {
-            //            continue;
-            //        }
-            //        res.Add(it);
-            //    }
-            //}
-            //items = [.. res];
-            //return items.Length > 0;
-            #endregion
+            return TryGet(files, false, out items);
+        }
 
+        public bool TryGet(IEnumerable<string> files, Func<string, bool>? filterFn, out string[] items)
+        {
+            var res = new HashSet<string>();
+            var source = files.ToArray();
+            var data = source;
+            while (data.Length > 0)
+            {
+                var next = new List<string>();
+                foreach (var item in data)
+                {
+                    if (!TryGetValue(item, out var entry))
+                    {
+                        continue;
+                    }
+                    foreach (var it in entry.Dependencies)
+                    {
+                        if (source.Contains(it) || res.Contains(it))
+                        {
+                            continue;
+                        }
+                        if (filterFn?.Invoke(it) != false)
+                        {
+                            next.Add(it);
+                        }
+                        res.Add(it);
+                    }
+                }
+                data = [.. next];
+            }
+            items = [.. res];
+            return items.Length > 0;
+        }
+
+        public bool TryGet(IEnumerable<string> files, bool isFast, out string[] items)
+        {
+            if (isFast)
+            {
+                return TryFastGet(files, out items);
+            }
             #region 复杂版 // 获取全部的依赖
             var res = new HashSet<string>();
             var source = files.ToArray();
@@ -89,11 +110,37 @@ namespace ZoDream.Shared.Bundle
                         {
                             continue;
                         }
+                        // 需要排除语言包的多次引用
                         next.Add(it);
                         res.Add(it);
                     }
                 }
                 data = [.. next];
+            }
+            items = [.. res];
+            return items.Length > 0;
+            #endregion
+        }
+
+        private bool TryFastGet(IEnumerable<string> files, out string[] items)
+        {
+            #region 简单版 // 只循环一次
+            var source = files.ToArray();
+            var res = new HashSet<string>();
+            foreach (var item in source)
+            {
+                if (!TryGetValue(item, out var entry))
+                {
+                    continue;
+                }
+                foreach (var it in entry.Dependencies)
+                {
+                    if (source.Contains(it))
+                    {
+                        continue;
+                    }
+                    res.Add(it);
+                }
             }
             items = [.. res];
             return items.Length > 0;

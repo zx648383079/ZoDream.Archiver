@@ -35,27 +35,36 @@
                             Content="&#xE8DA;"
                             Style="{StaticResource IconBtn}" />
                     </Grid>
-
-                    <ComboBox
-                        Header="Same File"
-                        ItemsSource="{Binding TypeItems}"
-                        SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <ComboBox
-                            Header="Game Engine"
-                            ItemsSource="{Binding EngineItems}"
-                            SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
 
+                        <ComboBox
+                            Header="Same File"
+                            ItemsSource="{Binding TypeItems}"
+                            SelectedIndex="{Binding TypeIndex, Mode=TwoWay}" />
                         <ComboBox
                             Grid.Column="1"
                             Header="Platform"
                             ItemsSource="{Binding PlatformItems}"
                             SelectedIndex="{Binding PlatformIndex, Mode=TwoWay}" />
+                        <ComboBox
+                            Grid.Row="1"
+                            Header="Game Engine"
+                            ItemsSource="{Binding EngineItems}"
+                            SelectedIndex="{Binding EngineIndex, Mode=TwoWay}" />
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Header="Version"
+                            PlaceholderText="默认自动识别"
+                            Text="{Binding Version, Mode=TwoWay}" />
                     </Grid>
 
                     <TextBlock Style="{StaticResource InputHeaderTb}" Text="Entrance Folder" />

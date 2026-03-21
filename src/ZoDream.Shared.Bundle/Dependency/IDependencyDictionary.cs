@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ZoDream.Shared.Bundle
 {
@@ -33,5 +34,21 @@ namespace ZoDream.Shared.Bundle
         /// <returns></returns>
         public bool TryGet(string fileName, out string[] items);
         public bool TryGet(IEnumerable<string> files, out string[] items);
+        /// <summary>
+        /// 根据文件获取依赖文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="filterFn">手动过滤一些非必要的引用文件, true 为需要无尽模式</param>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        public bool TryGet(IEnumerable<string> files, Func<string, bool>? filterFn, out string[] items);
+        /// <summary>
+        /// 根据文件获取依赖文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="isFast">是否启用快速模式</param>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        public bool TryGet(IEnumerable<string> files, bool isFast, out string[] items);
     }
 }
