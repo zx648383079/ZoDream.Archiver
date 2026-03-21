@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ZoDream.BundleExtractor;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.Shared.Bundle;
@@ -9,7 +10,7 @@ using ZoDream.Shared.Models;
 namespace ZoDream.Archiver
 {
     public class BundleRuntime(
-        string rootFolder, 
+        [MinLength(1)] string[] folderItems, 
         BundleOptions options,
         int skipCount = 0
         ) : IConsoleRuntime
@@ -33,13 +34,14 @@ namespace ZoDream.Archiver
             }
             var entryFolder = new List<string>
             {
-                options.Entrance
+                options.Entrance,
             };
-            var extraFolder = Path.Combine(rootFolder, "files");
+            var extraFolder = Path.Combine(folderItems[0], "files");
             if (Directory.Exists(extraFolder))
             {
                 entryFolder.Add(extraFolder);
             }
+            entryFolder.AddRange(folderItems.Skip(1));
             IBundleSource source = new BundleSource(entryFolder);
             using var service = new BundleService();
             using var temporary = new TemporaryStorage();

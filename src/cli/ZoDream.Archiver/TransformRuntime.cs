@@ -1,7 +1,9 @@
 using System.Buffers;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using ZoDream.BundleExtractor;
 using ZoDream.BundleExtractor.Eastward;
+using ZoDream.BundleExtractor.Unity.Addressables;
 using ZoDream.BundleExtractor.Unity.PlayerAsset;
 using ZoDream.BundleExtractor.Unity.Scanners;
 using ZoDream.Shared.Bundle;
@@ -9,7 +11,7 @@ using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver
 {
-    public class TransformRuntime(string rootFolder, BundleOptions options) : IConsoleRuntime
+    public class TransformRuntime([MinLength(1)] string[] folderItems, BundleOptions options) : IConsoleRuntime
     {
         
         public Task RunAsync(CancellationToken token = default)
@@ -39,6 +41,10 @@ namespace ZoDream.Archiver
             {
                 ExtractFile(source => [new PlayerAssetBundle(source)], token);
             }
+            if (package.Contains("addressables"))
+            {
+                ExtractFile(source => [new FileAssetBundle(source)], token);
+            }
             if (package.Contains("eastward"))
             {
                 ExtractFile(source => new EastwardScheme().Open(source, options), token);
@@ -50,7 +56,7 @@ namespace ZoDream.Archiver
         }
         private void ExtractFile(Func<IBundleSource, IEnumerable<IBundleHandler>> hander, CancellationToken token = default)
         {
-            var source = new BundleSource([rootFolder]);
+            var source = new BundleSource(folderItems);
             foreach (var scheme in hander.Invoke(source))
             {
                 scheme.ExtractTo(options.OutputFolder, ArchiveExtractMode.Overwrite, token);
@@ -60,6 +66,13 @@ namespace ZoDream.Archiver
         }
 
         private void RepairFile(Func<Stream, Stream> handler, CancellationToken token = default)
+        {
+            foreach (var item in folderItems)
+            {
+                RepairFile(item, handler, token);
+            }
+        }
+        private static void RepairFile(string rootFolder, Func<Stream, Stream> handler, CancellationToken token = default)
         {
             var count = 0;
             foreach (var item in Directory.GetFiles(rootFolder, "*.bundle", SearchOption.AllDirectories))
@@ -122,6 +135,14 @@ namespace ZoDream.Archiver
 
         private void DeleteFile(CancellationToken token = default)
         {
+            foreach (var item in folderItems)
+            {
+                DeleteFile(item, token);
+            }
+        }
+
+        private static void DeleteFile(string rootFolder, CancellationToken token = default)
+        {
             var regex = new Regex(@"^-?\d{16,}\.json$");
             var count = 0;
             foreach (var item in Directory.GetFiles(rootFolder, "*.json", SearchOption.AllDirectories))
@@ -141,6 +162,13 @@ namespace ZoDream.Archiver
         }
 
         private void Decrypt(CancellationToken token = default)
+        {
+            foreach (var item in folderItems)
+            {
+                Decrypt(item, token);
+            }
+        }
+        private static void Decrypt(string rootFolder, CancellationToken token = default)
         {
             var buffer = new byte[3];
             var signature = new byte[] { 0xEF, 0xBB, 0xBF };

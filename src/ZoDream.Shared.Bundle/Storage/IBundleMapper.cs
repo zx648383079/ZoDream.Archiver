@@ -12,6 +12,8 @@ namespace ZoDream.Shared.Bundle
 
         public IEnumerable<string> Keys { get; }
 
+        public void Clear();
+
         public void Add(string fromPath, string toPath);
         public bool TryGet(string fromPath, [NotNullWhen(true)] out string? toPath);
     }

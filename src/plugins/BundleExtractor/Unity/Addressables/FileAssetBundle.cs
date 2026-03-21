@@ -6,12 +6,13 @@ using System.Threading;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
+using ZoDream.Shared.IO;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
 namespace ZoDream.BundleExtractor.Unity.Addressables
 {
-    public class FileAssetBundle(IBundleSource source) : IBundleSource, IAssetBundleSource
+    public class FileAssetBundle(IBundleSource source) : IBundleSource, IAssetBundleSource, IBundleHandler
     {
         public string AliasName => "com.unity.addressables";
 
@@ -27,6 +28,7 @@ namespace ZoDream.BundleExtractor.Unity.Addressables
         public uint Analyze(CancellationToken token = default)
         {
             var res = source.Analyze(token);
+            _mapper.Clear();
             AnalyzePath();
             return res;
         }
@@ -110,6 +112,26 @@ namespace ZoDream.BundleExtractor.Unity.Addressables
                     _mapper.Add(target, item);
                 }
             }
+        }
+
+        public void ExtractTo(string folder, ArchiveExtractMode mode, CancellationToken token = default)
+        {
+            _mapper.Clear();
+            AnalyzeHash();
+            foreach (var item in _mapper.Keys)
+            {
+                if (!LocationStorage.TryCreate(Path.Combine(folder, item), mode, out var outputPath))
+                {
+                    continue;
+                }
+                using var bfs = source.OpenRead(new FilePath(item));
+                bfs.SaveAs(outputPath);
+            }
+        }
+
+        public void Dispose()
+        {
+            _mapper.Clear();
         }
 
         public bool Exists(string filePath)

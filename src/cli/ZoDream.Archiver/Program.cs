@@ -22,6 +22,10 @@ namespace ZoDream.Archiver
                 Description = "输出到文件夹",
                 DefaultValueFactory = argv => argv.GetValue(fileArg)?.CreateSubdirectory("output")
             };
+            var withArg = new Option<DirectoryInfo>("with", "-w")
+            {
+                Description = "附加文件夹",
+            };
             var batchArg = new Option<int>("batch", "-b")
             {
                 Description = "最大批处理数量",
@@ -82,6 +86,7 @@ namespace ZoDream.Archiver
             rootCommand.Add(engineArg);
             rootCommand.Add(typeTreeArg);
             rootCommand.Add(modeArg);
+            rootCommand.Add(withArg);
             rootCommand.Add(notArg);
             rootCommand.SetAction((argv, token) => {
                 var rootFolder = argv.GetRequiredValue(fileArg).FullName;
@@ -107,13 +112,22 @@ namespace ZoDream.Archiver
                         Path.GetDirectoryName(rootFolder) : rootFolder, "dependencies.bin");
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
+                var folderItems = new List<string>()
+                {
+                    rootFolder,
+                };
+                var appendFile = argv.GetValue(withArg)?.FullName;
+                if (!string.IsNullOrWhiteSpace(appendFile))
+                {
+                    folderItems.Add(appendFile);
+                }
                 IConsoleRuntime runtime;
                 if (argv.GetValue(notArg))
                 {
-                    runtime = new TransformRuntime(rootFolder, options);
+                    runtime = new TransformRuntime([..folderItems], options);
                 } else
                 {
-                    runtime = new BundleRuntime(rootFolder, options, argv.GetValue(skipArg));
+                    runtime = new BundleRuntime([..folderItems], options, argv.GetValue(skipArg));
                 }
                 return runtime.RunAsync(token);
             });
