@@ -1,5 +1,6 @@
 using System.CommandLine;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Models;
 
 namespace ZoDream.Archiver
@@ -9,9 +10,9 @@ namespace ZoDream.Archiver
         static async Task<int> Main(string[] args)
         {
             var rootCommand = new RootCommand("资源提取");
-            var fileArg = new Argument<DirectoryInfo>("file")
+            var fileArg = new Argument<string>("file")
             {
-                Description = "目标文件夹"
+                Description = "目标文件夹或者manifest项目文件"
             };
             var skipArg = new Option<int>("skip", "-s")
             {
@@ -20,7 +21,6 @@ namespace ZoDream.Archiver
             var outputArg = new Option<DirectoryInfo>("output", "-o")
             {
                 Description = "输出到文件夹",
-                DefaultValueFactory = argv => argv.GetValue(fileArg)?.CreateSubdirectory("output")
             };
             var withArg = new Option<DirectoryInfo>("with", "-w")
             {
@@ -89,33 +89,50 @@ namespace ZoDream.Archiver
             rootCommand.Add(withArg);
             rootCommand.Add(notArg);
             rootCommand.SetAction((argv, token) => {
-                var rootFolder = argv.GetRequiredValue(fileArg).FullName;
-                var resFolder = Path.Combine(rootFolder, "resources");
-                var options = new BundleOptions()
+                var rootFolder = argv.GetRequiredValue(fileArg);
+                int skipCount = argv.GetValue(skipArg);
+                var output = argv.GetValue(outputArg);
+                BundleOptions options;
+                var folderItems = new List<string>();
+                if (Directory.Exists(rootFolder))
                 {
-                    Password = argv.GetValue(keyArg),
-                    Platform = argv.GetValue(platformArg),
-                    Engine = argv.GetValue(engineArg),
-                    Package = argv.GetValue(packageArg),
-                    Producer = argv.GetValue(producerArg),
-                    Version = argv.GetValue(versionArg),
-                    FileMode = argv.GetValue(modeArg),
-                    OutputFolder = argv.GetValue(outputArg)!.FullName,
-                    Entrance = Directory.Exists(resFolder) ? resFolder : rootFolder,
-                    ModelFormat = "gltf",
-                    MaxBatchCount = argv.GetValue(batchArg),
-                    TypeTree = argv.GetValue(typeTreeArg)?.FullName ?? string.Empty,
-                };
+                    var resFolder = Path.Combine(rootFolder, "resources");
+                    folderItems.Add(rootFolder);
+                    options = new BundleOptions()
+                    {
+                        Password = argv.GetValue(keyArg),
+                        Platform = argv.GetValue(platformArg),
+                        Engine = argv.GetValue(engineArg),
+                        Package = argv.GetValue(packageArg),
+                        Producer = argv.GetValue(producerArg),
+                        Version = argv.GetValue(versionArg),
+                        FileMode = argv.GetValue(modeArg),
+                        OutputFolder = output?.FullName ?? Path.Combine(rootFolder, "output"),
+                        Entrance = Directory.Exists(resFolder) ? resFolder : rootFolder,
+                        ModelFormat = "gltf",
+                        MaxBatchCount = argv.GetValue(batchArg),
+                        TypeTree = argv.GetValue(typeTreeArg)?.FullName ?? string.Empty,
+                    };
+                } else
+                {
+                    var manifest = new BundleManifestReader().ReadFrom(rootFolder);
+                    if (manifest is null)
+                    {
+                        throw new ArgumentNullException(nameof(manifest));
+                    }
+                    options = manifest.Options;
+                    if (manifest.Skip > 0)
+                    {
+                        skipCount = manifest.Skip;
+                    }
+                    folderItems.AddRange(manifest.Files);
+                }
                 if (argv.GetValue(dependencyArg))
                 {
-                    options.DependencySource = Path.Combine(rootFolder == options.Entrance ? 
+                    options.DependencySource = Path.Combine(rootFolder == options.Entrance ?
                         Path.GetDirectoryName(rootFolder) : rootFolder, "dependencies.bin");
                     options.OnlyDependencyTask = !File.Exists(options.DependencySource);
                 }
-                var folderItems = new List<string>()
-                {
-                    rootFolder,
-                };
                 var appendFile = argv.GetValue(withArg)?.FullName;
                 if (!string.IsNullOrWhiteSpace(appendFile))
                 {
@@ -127,7 +144,7 @@ namespace ZoDream.Archiver
                     runtime = new TransformRuntime([..folderItems], options);
                 } else
                 {
-                    runtime = new BundleRuntime([..folderItems], options, argv.GetValue(skipArg));
+                    runtime = new BundleRuntime([..folderItems], options, skipCount);
                 }
                 return runtime.RunAsync(token);
             });

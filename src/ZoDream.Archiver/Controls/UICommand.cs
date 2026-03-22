@@ -100,6 +100,30 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
+
+        public static ICommand LoadManifest(Action execute) => LoadManifest(new RelayCommand(execute));
+        public static ICommand LoadManifest(ICommand command) => new XamlUICommand()
+        {
+            Label = "Load Manifest",
+            Description = "Load manifest.json",
+            IconSource = new SymbolIconSource()
+            {
+                Symbol = Symbol.ProtectedDocument
+            },
+            Command = command
+        };
+
+        public static ICommand SaveManifest(Action execute) => SaveManifest(new RelayCommand(execute));
+        public static ICommand SaveManifest(ICommand command) => new XamlUICommand()
+        {
+            Label = "Save Manifest",
+            Description = "Save manifest.json",
+            IconSource = new SymbolIconSource()
+            {
+                Symbol = Symbol.SaveLocal
+            },
+            Command = command
+        };
         public static ICommand AddFolder(Action execute) => AddFolder(new RelayCommand(execute));
         public static ICommand AddFolder(ICommand command) => new XamlUICommand()
         {

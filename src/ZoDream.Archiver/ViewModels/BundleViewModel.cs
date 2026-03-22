@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,7 @@ using ZoDream.Archiver.Controls;
 using ZoDream.Archiver.Dialogs;
 using ZoDream.BundleExtractor;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Bundle.Storage;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.IO;
 using ZoDream.Shared.Media;
@@ -25,6 +27,8 @@ namespace ZoDream.Archiver.ViewModels
         public BundleViewModel()
         {
             AddCommand = UICommand.Add(TapAdd);
+            LoadManifestCommand = UICommand.LoadManifest(TapLoadManifest);
+            SaveManifestCommand = UICommand.SaveManifest(TapSaveManifest);
             AddFolderCommand = UICommand.AddFolder(TapAddFolder);
             DeleteCommand = UICommand.Delete(TapDelete);
             
@@ -45,7 +49,8 @@ namespace ZoDream.Archiver.ViewModels
         private readonly AppViewModel _app = App.ViewModel;
         private readonly IEntryService _service;
         private readonly BundleScheme _scheme;
-        private readonly BundleOptions _options = new();
+        private string _manifestPath = string.Empty;
+        private BundleOptions _options = new();
 
         private ObservableCollection<EntryViewModel> _fileItems = [];
 
@@ -69,6 +74,8 @@ namespace ZoDream.Archiver.ViewModels
         }
 
 
+        public ICommand LoadManifestCommand { get; private set; }
+        public ICommand SaveManifestCommand { get; private set; }
         public ICommand AddCommand { get; private set; }
         public ICommand AddFolderCommand { get; private set; }
 
@@ -86,6 +93,66 @@ namespace ZoDream.Archiver.ViewModels
         public ICommand RecognizeCommand { get; private set; }
         public ICommand LogCommand {  get; private set; }
 
+        private async void TapLoadManifest()
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".json");
+            _app.InitializePicker(picker);
+            var res = await picker.PickSingleFileAsync();
+            if (res is null)
+            {
+                return;
+            }
+            var manifest = new BundleManifestReader().ReadFrom(res.Path);
+            if (manifest is null)
+            {
+                return;
+            }
+            _options = manifest.Options;
+            _manifestPath = res.Path;
+            FileItems.Clear();
+            foreach (var item in manifest.Files)
+            {
+                FileItems.Add(new EntryViewModel(item));
+            }
+            var hashCode = BundleStorage.ToHashCode(manifest.Files.Order().ToArray());
+            if (!_options.OnlyDependencyTask)
+            {
+                _service.SavePoint(hashCode, manifest.Skip);
+            }
+        }
+
+        private async void TapSaveManifest()
+        {
+            if (FileItems.Count == 0)
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(_manifestPath))
+            {
+                var picker = new FileSavePicker();
+                picker.FileTypeChoices.Add("manifest.json", [".json"]);
+                picker.SuggestedFileName = "manifest";
+                App.ViewModel.InitializePicker(picker);
+                var res = await picker.PickSaveFileAsync();
+                if (res is null)
+                {
+                    return;
+                }
+                _manifestPath = res.Path;
+            }
+            var manifest = new BundleManifest()
+            {
+                Options = _options,
+                Files = FileItems.Select(i => i.FullPath).ToArray()
+            };
+            var hashCode = BundleStorage.ToHashCode(manifest.Files.Order().ToArray());
+            if (!_options.OnlyDependencyTask && _service.TryLoadPoint(hashCode, out var rec))
+            {
+                manifest.Skip = rec;
+            }
+            new BundleManifestReader().WriteTo(_manifestPath, manifest);
+        }
         private void TapLog()
         {
             _app.Logger?.Dispose();

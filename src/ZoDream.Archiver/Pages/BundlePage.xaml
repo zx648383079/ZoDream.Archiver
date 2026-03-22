@@ -44,6 +44,8 @@
             <AppBarButton Command="{Binding DeleteCommand}" />
             <AppBarButton Command="{Binding SettingCommand}" />
             <CommandBar.SecondaryCommands>
+                <AppBarButton Command="{Binding LoadManifestCommand}" />
+                <AppBarButton Command="{Binding SaveManifestCommand}" />
                 <AppBarButton Command="{Binding ExplorerCommand}" />
                 <AppBarButton Command="{Binding DumpCommand}" />
                 <AppBarButton Command="{Binding CodeCommand}" />

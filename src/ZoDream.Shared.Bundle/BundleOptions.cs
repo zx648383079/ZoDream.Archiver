@@ -47,17 +47,32 @@ namespace ZoDream.Shared.Bundle
 
         public BundleOptions(IArchiveOptions? options): base(options)
         {
-            if (options is not IBundleOptions o)
+            if (options is IBundleOptions o)
             {
-                return;
+                Engine = o.Engine;
+                Platform = o.Platform;
+                Package = o.Package;
+                Producer = o.Producer;
+                Version = o.Version;
+                Entrance = o.Entrance;
+                DisplayName = o.DisplayName;
             }
-            Engine = o.Engine;
-            Platform = o.Platform;
-            Package = o.Package;
-            Producer = o.Producer;
-            Version = o.Version;
-            Entrance = o.Entrance;
-            DisplayName = o.DisplayName;
+            if (options is IBundleExtractOptions b)
+            {
+                DependencySource = b.DependencySource;
+                EnabledAudio = b.EnabledAudio;
+                EnabledImage = b.EnabledImage;
+                EnabledLua = b.EnabledLua;
+                EnabledModel = b.EnabledModel;
+                EnabledShader = b.EnabledShader;
+                EnabledSpine = b.EnabledSpine;
+                EnabledVideo = b.EnabledVideo;
+                EnabledJson = b.EnabledJson;
+                ModelFormat = b.ModelFormat;
+                EnabledMesh = b.EnabledMesh && b.EnabledModel;
+                MaxBatchCount = b.MaxBatchCount;
+                EnabledResource = b.EnabledResource;
+            }
         }
 
         public void Load(IBundleOptions? options)
