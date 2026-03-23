@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
     internal enum MocParameterType: uint
     {
-        NORMAL = 0,
-        BLEND_SHAPE = 1,
+        Normal = 0,
+        BlendShape = 1,
     }
     internal class MocParameterOffsetPtr
     {

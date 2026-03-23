@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using ZoDream.Shared.Bundle;
 
 namespace ZoDream.Live2dExporter.Models
 {
+    internal enum MocBlendMode: byte
+    {
+        Normal = 0,
+        Additive = 1 << 0,
+        Multiplicative = 1 << 1,
+    }
     internal class MocDrawableFlags(byte code)
     {
-        public byte BlendMode { get; private set; } = (byte)(code & 0b11);
+        public MocBlendMode BlendMode { get; private set; } = (MocBlendMode)(code & 0b11);
         public bool IsDoubleSided { get; private set; } = ((code >> 2) & 0x1) != 0;
         public bool IsInverted { get; private set; } = ((code >> 3) & 0x1) != 0;
     }

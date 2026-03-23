@@ -602,8 +602,8 @@ namespace ZoDream.AutodeskExporter
 
                 foreach (var scaling in track.Scalings)
                 {
-                    var value = scaling.value;
-                    var lTime = new FbxTime(scaling.time);
+                    var value = scaling.Value;
+                    var lTime = new FbxTime(scaling.Time);
                     lCurveSX.KeySet(lCurveSX.KeyAdd(lTime), lTime, value.X);
                     lCurveSY.KeySet(lCurveSY.KeyAdd(lTime), lTime, value.Y);
                     lCurveSZ.KeySet(lCurveSZ.KeyAdd(lTime), lTime, value.Z);
@@ -611,8 +611,8 @@ namespace ZoDream.AutodeskExporter
 
                 foreach (var rotation in track.Rotations)
                 {
-                    var value = rotation.value;
-                    var lTime = new FbxTime(rotation.time);
+                    var value = rotation.Value;
+                    var lTime = new FbxTime(rotation.Time);
                     lCurveRX.KeySet(lCurveRX.KeyAdd(lTime), lTime, value.X);
                     lCurveRY.KeySet(lCurveRY.KeyAdd(lTime), lTime, value.Y);
                     lCurveRZ.KeySet(lCurveRZ.KeyAdd(lTime), lTime, value.Z);
@@ -620,8 +620,8 @@ namespace ZoDream.AutodeskExporter
 
                 foreach (var translation in track.Translations)
                 {
-                    var value = translation.value;
-                    var lTime = new FbxTime(translation.time);
+                    var value = translation.Value;
+                    var lTime = new FbxTime(translation.Time);
                     lCurveTX.KeySet(lCurveTX.KeyAdd(lTime), lTime, value.X);
                     lCurveTY.KeySet(lCurveTY.KeyAdd(lTime), lTime, value.Y);
                     lCurveTZ.KeySet(lCurveTZ.KeyAdd(lTime), lTime, value.Z);
@@ -666,10 +666,10 @@ namespace ZoDream.AutodeskExporter
 
                             foreach (var keyframe in blendShape.Keyframes)
                             {
-                                var lTime = new FbxTime(keyframe.time);
+                                var lTime = new FbxTime(keyframe.Time);
 
                                 var keyIndex = lAnimCurve.KeyAdd(lTime);
-                                lAnimCurve.KeySetValue(keyIndex, keyframe.value);
+                                lAnimCurve.KeySetValue(keyIndex, keyframe.Value);
                                 lAnimCurve.KeySetInterpolation(keyIndex, FbxAnimCurve.EInterpolationType.eInterpolationCubic);
                             }
 

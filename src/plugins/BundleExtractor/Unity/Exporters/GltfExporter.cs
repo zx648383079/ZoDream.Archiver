@@ -1337,8 +1337,6 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             } 
             else
             {
-                
-                
                 var m_Clip = animator.MuscleClip?.Clip;
                 if (m_Clip?.StreamedClip is null)
                 {

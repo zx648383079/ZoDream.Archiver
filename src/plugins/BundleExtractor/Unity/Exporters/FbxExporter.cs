@@ -1,4 +1,3 @@
-using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -658,16 +657,18 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 {
                     return iMat;
                 }
-                iMat = new FbxImportedMaterial();
-                iMat.Name = mat.Name;
-                //default values
-                iMat.Diffuse = new(0.8f, 0.8f, 0.8f, 1);
-                iMat.Ambient = new(0.2f, 0.2f, 0.2f, 1);
-                iMat.Emissive = new(0, 0, 0, 1);
-                iMat.Specular = new(0.2f, 0.2f, 0.2f, 1);
-                iMat.Reflection = new(0, 0, 0, 1);
-                iMat.Shininess = 20f;
-                iMat.Transparency = 0f;
+                iMat = new FbxImportedMaterial
+                {
+                    Name = mat.Name,
+                    //default values
+                    Diffuse = new(0.8f, 0.8f, 0.8f, 1),
+                    Ambient = new(0.2f, 0.2f, 0.2f, 1),
+                    Emissive = new(0, 0, 0, 1),
+                    Specular = new(0.2f, 0.2f, 0.2f, 1),
+                    Reflection = new(0, 0, 0, 1),
+                    Shininess = 20f,
+                    Transparency = 0f
+                };
                 foreach (var col in mat.SavedProperties.Colors)
                 {
                     switch (col.Key)
@@ -962,8 +963,10 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     bPath = GetPathByChannelName(channelName);
                 }
                 var bTrack = iAnim.FindTrack(bPath);
-                bTrack.BlendShape = new FbxImportedBlendShape();
-                bTrack.BlendShape.ChannelName = channelName;
+                bTrack.BlendShape = new FbxImportedBlendShape
+                {
+                    ChannelName = channelName
+                };
                 bTrack.BlendShape.Keyframes.Add(new FbxImportedKeyframe<float>(time, data[curveIndex++ + offset]));
             }
             else if (binding.TypeID == NativeClassID.Transform)

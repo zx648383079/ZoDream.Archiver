@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Hashing;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
@@ -54,8 +56,11 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         private readonly HashSet<string> _partNames = [];
         private readonly HashSet<IPPtr<MonoBehaviour>> _partsCdi = [];
         private readonly HashSet<IPPtr<MonoBehaviour>> _motions = [];
+        private readonly HashSet<IPPtr<AnimationClip>> _motion2s = [];
         private readonly HashSet<IPPtr<MonoBehaviour>> _expressions = [];
         private readonly HashSet<IPPtr<Texture2D>> _textures = [];
+
+        private readonly Dictionary<uint, string> _bonePathHash = [];
 
         private void Initialize(GameObject game)
         {
@@ -64,6 +69,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 return;
             }
             transform = TransformConverter.GetRoot(transform);
+            CreateBonePathHash(transform);
             foreach (var item in TransformConverter.ForEachTree(transform))
             {
                 if (item.GameObject?.TryGet(out var obj) != true || item.GameObject.IsExclude)
@@ -82,67 +88,103 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     {
                         continue;
                     }
-                    if (instance is not MonoBehaviour behaviour)
+                    if (instance is Animator animator)
                     {
+                        Add(animator);
                         continue;
                     }
-                    if (!behaviour.Script.TryGet(out var script))
+                    if (instance is MonoBehaviour behaviour)
                     {
+                        Add(obj, pptr, behaviour);
                         continue;
                     }
-                    switch (script.ClassName)
-                    {
-                        case "CubismModel":
-                            GetModel(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismPhysicsController":
-                            _physics = pptr.Create<MonoBehaviour>(pptr);
-                            break;
-                        case "CubismFadeController":
-                            GetFadeController(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismExpressionController":
-                            GetExpressionList(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismRenderer":
-                            GetRenderTexture(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismExpressionData":
-                            _expressions.Add(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismFadeMotionData":
-                            _motions.Add(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismFadeMotionList":
-                            GetFadeList(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismEyeBlinkParameter":
-                            _eyeBlinkParameters.Add(obj.Name);
-                            break;
-                        case "CubismMouthParameter":
-                            _lipSyncParameters.Add(obj.Name);
-                            break;
-                        case "CubismParameter":
-                            _parameterNames.Add(obj.Name);
-                            break;
-                        case "CubismPart":
-                            _partNames.Add(obj.Name);
-                            break;
-                        case "CubismPosePart":
-                            _poseParts.Add(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismDisplayInfoParameterName":
-                            _parametersCdi.Add(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        case "CubismDisplayInfoPartName":
-                            _partsCdi.Add(pptr.Create<MonoBehaviour>(pptr));
-                            break;
-                        default:
-                            break;
-                    }
+                    
                 }
             }
             
+        }
+
+        private void Add(Animator animator)
+        {
+            if (!animator.Controller.TryGet(out var controller))
+            {
+                return;
+            }
+            if (controller is not AnimatorOverrideController overrideController)
+            {
+                Add((AnimatorController)controller);
+                return;
+            }
+            if (overrideController.Controller.TryGet(out var animatorController))
+            {
+                Add((AnimatorController)animatorController);
+            }
+        }
+
+        private void Add(AnimatorController controller)
+        {
+            foreach (var pptr in controller.AnimationClips)
+            {
+                _motion2s.Add(pptr);
+            }
+        }
+
+        private void Add(GameObject obj, IPPtr<Component> pptr, MonoBehaviour behaviour)
+        {
+            if (!behaviour.Script.TryGet(out var script))
+            {
+                return;
+            }
+            switch (script.ClassName)
+            {
+                case "CubismModel":
+                    GetModel(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismPhysicsController":
+                    _physics = pptr.Create<MonoBehaviour>(pptr);
+                    break;
+                case "CubismFadeController":
+                    GetFadeController(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismExpressionController":
+                    GetExpressionList(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismRenderer":
+                    GetRenderTexture(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismExpressionData":
+                    _expressions.Add(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismFadeMotionData":
+                    _motions.Add(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismFadeMotionList":
+                    GetFadeList(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismEyeBlinkParameter":
+                    _eyeBlinkParameters.Add(obj.Name);
+                    break;
+                case "CubismMouthParameter":
+                    _lipSyncParameters.Add(obj.Name);
+                    break;
+                case "CubismParameter":
+                    _parameterNames.Add(obj.Name);
+                    break;
+                case "CubismPart":
+                    _partNames.Add(obj.Name);
+                    break;
+                case "CubismPosePart":
+                    _poseParts.Add(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismDisplayInfoParameterName":
+                    _parametersCdi.Add(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                case "CubismDisplayInfoPartName":
+                    _partsCdi.Add(pptr.Create<MonoBehaviour>(pptr));
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void GetModel(IPPtr<MonoBehaviour> ptr)
@@ -235,6 +277,9 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 reader.Position = behaviour.DataOffset;
                 var length = reader.ReadUInt32();
                 reader.ReadAsStream(length).SaveAs(fileName);
+                // var moc = new MocReader().Read();
+                // CreateBonePathHash(moc.PartNames, "Parts/");
+                // CreateBonePathHash(moc.ParamNames, "Parameters/");
                 writer.WritePropertyName("Moc");
                 writer.WriteStringValue(Path.GetFileName(fileName));
             }
@@ -291,7 +336,7 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WritePropertyName("DisplayInfo");
                 writer.WriteStringValue(Path.GetFileName(fileName));
             }
-            if (_motions.Count > 0)
+            if (_motions.Count > 0 || _motion2s.Count > 0)
             {
                 var childFolder = Path.Combine(folder, "motions");
                 var maps = new SortedDictionary<string, List<string>>();
@@ -316,6 +361,28 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                     else
                     {
                         maps.Add(behaviour.Name, [Path.GetFileName(fileName)]);
+                    }
+                }
+                foreach (var ptr in _motion2s)
+                {
+                    if (!ptr.TryGet(out var clip))
+                    {
+                        continue;
+                    }
+                    if (!LocationStorage.TryCreate(Path.Combine(childFolder, clip.Name), ".motion3.json", mode, out fileName))
+                    {
+                        continue;
+                    }
+                    using var childFs = File.Create(fileName);
+                    using var sb = JsonExporter.OpenWrite(childFs);
+                    SaveMotion(sb, clip);
+                    if (maps.TryGetValue(clip.Name, out List<string>? value))
+                    {
+                        value.Add(Path.GetFileName(fileName));
+                    }
+                    else
+                    {
+                        maps.Add(clip.Name, [Path.GetFileName(fileName)]);
                     }
                 }
                 writer.WritePropertyName("Motions");
@@ -474,6 +541,8 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
                 writer.WriteNumberValue(data.ParameterFadeOutTimes[i]);
                 writer.WritePropertyName("Segments");
                 writer.WriteStartArray();
+                writer.WriteNumberValue(data.ParameterCurves[i].Curve[0].Time);
+                writer.WriteNumberValue(data.ParameterCurves[i].Curve[0].Value);
                 for (var j = 1; j < curveItems.Length; j++)
                 {
                     var curve = curveItems[j];
@@ -561,6 +630,219 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             writer.WriteStartArray();
             writer.WriteEndArray();
             writer.WriteEndObject();
+        }
+
+        private void SaveMotion(Utf8JsonWriter writer, AnimationClip clip)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("Version");
+            writer.WriteNumberValue(3);
+
+
+            writer.WritePropertyName("Curves");
+            writer.WriteStartArray();
+            var cachedData = new Dictionary<string, KeyValuePair<string, List<Keyframe<float>>>>();
+            var m_Clip = clip.MuscleClip.Clip;
+            var streamedFrames = m_Clip.StreamedClip.Data;
+            var m_ClipBindingConstant = clip.ClipBindingConstant;
+            for (int frameIndex = 1; frameIndex < streamedFrames.Length - 1; frameIndex++)
+            {
+                var frame = streamedFrames[frameIndex];
+                for (int curveIndex = 0; curveIndex < frame.KeyList.Length; curveIndex++)
+                {
+                    var curveFrame = frame.KeyList[curveIndex];
+                    var binding = AnimationClipBindingConstantConverter.FindBinding(m_ClipBindingConstant, curveFrame.Index);
+                    GetPathFromHash(binding, out var target, out var boneName);
+                    if (string.IsNullOrWhiteSpace(boneName))
+                    {
+                        continue;
+                    }
+                    if (!cachedData.TryGetValue(boneName, out var track))
+                    {
+                        track = new(target, []);
+                        cachedData.Add(boneName, track);
+                    }
+                    track.Value.Add(new()
+                    {
+                        Time = frame.Time,
+                        Value = curveFrame.Value,
+                        InSlope = curveFrame.InSlope,
+                        OutSlope = curveFrame.OutSlope,
+                        // coeff
+                    });
+                }
+            }
+            var m_DenseClip = m_Clip.DenseClip;
+            var streamCount = m_Clip.StreamedClip.CurveCount;
+            for (int frameIndex = 0; frameIndex < m_DenseClip.FrameCount; frameIndex++)
+            {
+                var time = m_DenseClip.BeginTime + frameIndex / m_DenseClip.SampleRate;
+                var frameOffset = frameIndex * m_DenseClip.CurveCount;
+                for (int curveIndex = 0; curveIndex < m_DenseClip.CurveCount; curveIndex++)
+                {
+                    var index = streamCount + curveIndex;
+                    ReadCurveData(cachedData, m_ClipBindingConstant, 
+                        (int)index, time, m_DenseClip.SampleArray, 
+                        (int)frameOffset, curveIndex);
+                }
+            }
+            if (m_Clip.ConstantClip != null)
+            {
+                var m_ConstantClip = m_Clip.ConstantClip.Value;
+                var denseCount = m_Clip.DenseClip.CurveCount;
+                var time2 = 0.0f;
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int curveIndex = 0; curveIndex < m_ConstantClip.Data.Length; curveIndex++)
+                    {
+                        var index = streamCount + denseCount + curveIndex;
+                        ReadCurveData(cachedData, m_ClipBindingConstant, 
+                            (int)index, time2, m_ConstantClip.Data, 0, curveIndex);
+                    }
+                    time2 = clip.MuscleClip.StopTime;
+                }
+            }
+
+            var curveCount = 0;
+            var totalSegmentCount = 0;
+            var totalPointCount = 0;
+            var i = -1;
+            foreach (var item in cachedData)
+            {
+                i++;
+                writer.WriteStartObject();
+                writer.WritePropertyName("Target");
+                writer.WriteStringValue(item.Value.Key);
+                writer.WritePropertyName("Id");
+                writer.WriteStringValue(item.Key);
+                writer.WritePropertyName("FadeInTime");
+                writer.WriteNumberValue(-1);
+                writer.WritePropertyName("FadeOutTime");
+                writer.WriteNumberValue(-1);
+                writer.WritePropertyName("Segments");
+                writer.WriteStartArray();
+                writer.WriteNumberValue(0);
+                writer.WriteNumberValue(item.Value.Value[0].Value);
+                for (var j = 1; j < item.Value.Value.Count; j++)
+                {
+                    var curve = item.Value.Value[j];
+                    var preCurve = item.Value.Value[j - 1];
+                    var nextCurve = item.Value.Value.ElementAtOrDefault(j + 1);
+                    if (Math.Abs(curve.Time - preCurve.Time - 0.01f) < 0.0001f) // InverseSteppedSegment
+                    {
+                        if (nextCurve.Value == curve.Value)
+                        {
+                            writer.WriteNumberValue(3f); // Segment ID
+                            writer.WriteNumberValue(nextCurve.Time);
+                            writer.WriteNumberValue(nextCurve.Value);
+                            j += 1;
+                            totalPointCount += 1;
+                            totalSegmentCount++;
+                            continue;
+                        }
+                    }
+                    if (float.IsPositiveInfinity(curve.InSlope)) // SteppedSegment
+                    {
+                        writer.WriteNumberValue(2f); // Segment ID
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
+                        totalPointCount += 1;
+                    }
+                    else if (preCurve.OutSlope == 0f && Math.Abs(curve.InSlope) < 0.0001f) // LinearSegment
+                    {
+                        writer.WriteNumberValue(0f); // Segment ID
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
+                        totalPointCount += 1;
+                    }
+                    else // BezierSegment
+                    {
+                        var tangentLength = (curve.Time - preCurve.Time) / 3f;
+                        writer.WriteNumberValue(1f); // Segment ID
+                        writer.WriteNumberValue(preCurve.Time + tangentLength);
+                        writer.WriteNumberValue(preCurve.OutSlope * tangentLength + (float)preCurve.Value);
+                        writer.WriteNumberValue(curve.Time - tangentLength);
+                        writer.WriteNumberValue(curve.Value - (float)curve.InSlope * tangentLength);
+                        writer.WriteNumberValue(curve.Time);
+                        writer.WriteNumberValue(curve.Value);
+                        totalPointCount += 3;
+                    }
+                    totalSegmentCount++;
+                }
+                curveCount++;
+                totalPointCount++;
+                writer.WriteEndArray();
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+
+
+            writer.WritePropertyName("Meta");
+
+            writer.WriteStartObject();
+            writer.WritePropertyName("Duration");
+            writer.WriteNumberValue(clip.MuscleClip.StopTime);
+            writer.WritePropertyName("Fps");
+            writer.WriteNumberValue(clip.SampleRate);
+            writer.WritePropertyName("Loop");
+            writer.WriteBooleanValue(true);
+            writer.WritePropertyName("AreBeziersRestricted");
+            writer.WriteBooleanValue(true);
+            writer.WritePropertyName("FadeInTime");
+            writer.WriteNumberValue(0);
+            writer.WritePropertyName("FadeOutTime");
+            writer.WriteNumberValue(0);
+            writer.WritePropertyName("UserDataCount");
+            writer.WriteNumberValue(clip.Events.Length);
+            writer.WritePropertyName("CurveCount");
+            writer.WriteNumberValue(curveCount);
+            writer.WritePropertyName("TotalSegmentCount");
+            writer.WriteNumberValue(totalSegmentCount);
+            writer.WritePropertyName("TotalPointCount");
+            writer.WriteNumberValue(totalPointCount);
+            writer.WritePropertyName("TotalUserDataSize");
+            writer.WriteNumberValue(clip.Events.Sum(i => i.Data.Length));
+            writer.WriteEndObject();
+
+
+
+            writer.WritePropertyName("UserData");
+            writer.WriteStartArray();
+            foreach (var item in clip.Events)
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("Time");
+                writer.WriteNumberValue(item.Time);
+                writer.WritePropertyName("Value");
+                writer.WriteStringValue(item.Data);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        private void ReadCurveData(Dictionary<string, KeyValuePair<string, List<Keyframe<float>>>> cachedData, 
+            AnimationClipBindingConstant m_ClipBindingConstant, 
+            int index, float time, float[] data, int offset, int curveIndex)
+        {
+            var binding = AnimationClipBindingConstantConverter.FindBinding(m_ClipBindingConstant, index);
+            GetPathFromHash(binding, out var target, out var boneName);
+            if (string.IsNullOrWhiteSpace(boneName))
+            {
+                return;
+            }
+            if (!cachedData.TryGetValue(boneName, out var track))
+            {
+                track = new(target, []);
+                cachedData.Add(boneName, track);
+            }
+            track.Value.Add(new()
+            {
+                Time = time,
+                Value = data[curveIndex],
+                InSlope = 0,
+                OutSlope = 0,
+            });
         }
 
         private void SaveExpression(Utf8JsonWriter writer, CubismExpressionData data)
@@ -824,6 +1106,85 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
         public void Dispose()
         {
         }
+        #region AnimationClip
+        private void CreateBonePathHash(Transform m_Transform)
+        {
+            var name = FbxExporter.GetTransformPathByFather(m_Transform);
+            var bytes = Encoding.UTF8.GetBytes(name);
+            _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
+            int index;
+            while ((index = name.IndexOf('/')) >= 0)
+            {
+                name = name[(index + 1)..];
+                bytes = Encoding.UTF8.GetBytes(name);
+                _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
+            }
+            foreach (var pptr in m_Transform.Children)
+            {
+                if (pptr.TryGet(out var child))
+                {
+                    CreateBonePathHash(child);
+                }
+            }
+        }
+
+        private void CreateBonePathHash(HashSet<string> ids, string pathType)
+        {
+            foreach (var id in ids)
+            {
+                var name = pathType + id; ;
+                var bytes = Encoding.UTF8.GetBytes(name);
+                _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
+                int index;
+                while ((index = name.IndexOf('/', StringComparison.Ordinal)) >= 0)
+                {
+                    name = name[(index + 1)..];
+                    bytes = Encoding.UTF8.GetBytes(name);
+                    _bonePathHash[Crc32.HashToUInt32(bytes)] = name;
+                }
+            }
+        }
+
+        private void GetPathFromHash(GenericBinding binding, out string target, out string id)
+        {
+            var path = binding.Path;
+            id = string.Empty;
+            target = string.Empty;
+            if (path != 0 && _bonePathHash.TryGetValue(path, out var boneName))
+            {
+                var index = boneName.LastIndexOf('/');
+                id = boneName.Substring(index + 1);
+                target = boneName.Substring(0, index);
+                if (target == "Parameters")
+                {
+                    target = "Parameter";
+                }
+                else if (target == "Parts")
+                {
+                    target = "PartOpacity";
+                }
+            }
+            else if (binding.Script.TryGet<MonoScript>(out var script))
+            {
+                switch (script.ClassName)
+                {
+                    case "CubismRenderController":
+                        target = "Model";
+                        id = "Opacity";
+                        break;
+                    case "CubismEyeBlinkController":
+                        target = "Model";
+                        id = "EyeBlink";
+                        break;
+                    case "CubismMouthController":
+                        target = "Model";
+                        id = "LipSync";
+                        break;
+                }
+            }
+        }
+
+        #endregion
 
         private string GetDisplayName(IPPtr<MonoBehaviour> ptr)
         {

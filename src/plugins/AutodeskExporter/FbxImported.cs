@@ -263,13 +263,13 @@ namespace ZoDream.AutodeskExporter
 
     public class FbxImportedKeyframe<T>
     {
-        public float time { get; set; }
-        public T value { get; set; }
+        public float Time { get; set; }
+        public T Value { get; set; }
 
         public FbxImportedKeyframe(float time, T value)
         {
-            this.time = time;
-            this.value = value;
+            Time = time;
+            Value = value;
         }
     }
 

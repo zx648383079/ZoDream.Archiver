@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Live2dExporter.Models
 {
     internal class MocKeyFormPositionOffsetPtr
     {
-        public uint Xys {  get; set; }
+        public uint Coords {  get; set; }
 
         public void Read(BinaryReader reader)
         {
-            Xys = reader.ReadUInt32();
+            Coords = reader.ReadUInt32();
         }
     }
     internal class MocKeyFormPositionOffset
     {
-        public Vector2[] Xys { get; set; }
+        public Vector2[] Coords { get; set; }
 
         public void Read(BinaryReader reader, int count)
         {
@@ -27,11 +22,11 @@ namespace ZoDream.Live2dExporter.Models
             ptr.Read(reader);
             var pos = reader.BaseStream.Position;
 
-            reader.BaseStream.Seek(ptr.Xys, SeekOrigin.Begin);
-            Xys = new Vector2[count / 2];
+            reader.BaseStream.Seek(ptr.Coords, SeekOrigin.Begin);
+            Coords = new Vector2[count / 2];
             for (var i = 0; i < count; i+= 2)
             {
-                Xys[i / 2] = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+                Coords[i / 2] = new Vector2(reader.ReadSingle(), reader.ReadSingle());
             }
             reader.BaseStream.Seek(pos, SeekOrigin.Begin);
         }
