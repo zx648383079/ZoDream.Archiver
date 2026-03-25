@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace ZoDream.Live2dExporter.Models
 {
@@ -65,54 +68,54 @@ namespace ZoDream.Live2dExporter.Models
         public Vector2[] RuntimePositions => KeyformPositions.Coords;
         public Vector2[] RuntimeUvs => Uvs.Uvs;
 
-        public Vector2 CanvasSize => new(CanvasInfo.CanvasWidth, CanvasInfo.CanvasHeight);
+        public Vector2 CanvasSize => new(CanvasInfo.CanvasWidth / CanvasInfo.PixelsPerUnit, CanvasInfo.CanvasHeight / CanvasInfo.PixelsPerUnit);
 
-        public string[] ParameterIds => [];
+        public string[] ParameterIds => Parameters.Ids;
 
-        public string[] PartIds => [];
+        public string[] PartIds => Parts.Ids;
 
-        public string[] DrawableIds => [];
-
-
-        public int DrawableCount => 0;
+        public string[] DrawableIds => ArtMeshes.Ids;
 
 
+        public int DrawableCount => (int)CountInfo.ArtMeshes;
 
         public int GetDrawableVertexCount(int drawableIndex)
         {
-            return 0;
+            return ArtMeshes.VertexCounts[drawableIndex];
         }
 
         public Vector2[] GetDrawableVertexPositions(int drawableIndex)
         {
-            return [];
+            //var begin = ArtMeshes.PositionIndexSourcesBeginIndices[drawableIndex];
+            //var count = ArtMeshes.PositionIndexSourcesCounts[drawableIndex];
+            //var indices = RuntimeVertexIndices[begin..(begin + count)];
+            var count = GetDrawableVertexCount(drawableIndex);
+            var begin = ArtMeshes.KeyFormSourcesBeginIndices[drawableIndex];
+            var vertexes = ArtMeshes.KeyFormSourcesCounts[drawableIndex];
+            var res = new List<Vector2>();
+            for (int i = 0; i < count; i++)
+            {
+                var positionBegin = ArtMeshKeyforms.KeyFormPositionSourcesBeginIndices[begin + i];
+                res.AddRange(RuntimePositions[positionBegin..(positionBegin + vertexes)]);
+            }
+            return [.. res];
         }
 
         public Vector2[] GetDrawableVertexPositions(int drawableIndex, int vertexCount)
         {
-            var data = GetDrawableVertexPositions(drawableIndex);
-            var res = new Vector2[vertexCount];
-            for (int i = 0; i < vertexCount; i++)
-            {
-                res[i] = data[i];
-            }
-            return res;
+            return [.. GetDrawableVertexPositions(drawableIndex).Take(vertexCount)];
         }
 
         public Vector2[] GetDrawableVertexUvs(int drawableIndex)
         {
-            return [];
+            var begin = ArtMeshes.UvSourcesBeginIndices[drawableIndex];
+            var count = GetDrawableVertexCount(drawableIndex);
+            return RuntimeUvs[begin..(begin + count)];
         }
 
         public Vector2[] GetDrawableVertexUvs(int drawableIndex, int vertexCount)
         {
-            var data = GetDrawableVertexUvs(drawableIndex);
-            var res = new Vector2[vertexCount];
-            for (int i = 0; i < vertexCount; i++)
-            {
-                res[i] = data[i];
-            }
-            return res;
+            return [.. GetDrawableVertexUvs(drawableIndex).Take(vertexCount)];
         }
     }
 }
