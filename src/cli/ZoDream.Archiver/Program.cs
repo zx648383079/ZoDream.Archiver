@@ -123,7 +123,7 @@ namespace ZoDream.Archiver
                     options = manifest.Options;
                     if (manifest.Skip > 0)
                     {
-                        skipCount = manifest.Skip;
+                        skipCount = (int)manifest.Skip;
                     }
                     folderItems.AddRange(manifest.Files);
                 }
