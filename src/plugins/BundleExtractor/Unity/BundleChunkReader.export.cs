@@ -117,12 +117,23 @@ namespace ZoDream.BundleExtractor
                             // 默认 object 不做转化
                             continue;
                         }
-                        var fileName = string.IsNullOrEmpty(obj.Name) ? info.FileID.ToString() 
-                            : obj.Name;
                         var exporter = TryParse(asset, i);
+                        var fileName = exporter?.FileName;
+                        if (string.IsNullOrWhiteSpace(fileName))
+                        {
+                            fileName = obj.Name;
+                        }
+                        if (string.IsNullOrWhiteSpace(fileName))
+                        {
+                            // 没有文件名的统一作为资源可以不导出
+                            if (!Options.EnabledResource)
+                            {
+                                continue;
+                            }
+                            fileName = info.FileID.ToString();
+                        }
                         exporter?.SaveAs(_fileItems.Create(asset.FullPath,
-                            string.IsNullOrEmpty(exporter.FileName) ? fileName : 
-                            exporter.FileName
+                            fileName
                         , folder), mode);
                         if (exporter is IDisposable d)
                         {
