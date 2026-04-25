@@ -32,17 +32,18 @@ namespace ZoDream.Archiver
                 logger.Error($"<{options.Entrance}> Not Found!");
                 return;
             }
-            var entryFolder = new List<string>
+            var entryFolder = new List<string>();
+            if (!folderItems.Where(options.Entrance.StartsWith).Any())
             {
-                options.Entrance,
-            };
+                entryFolder.Add(options.Entrance);
+            }
             var extraFolder = Path.Combine(folderItems[0], "files");
             if (Directory.Exists(extraFolder))
             {
                 entryFolder.Add(extraFolder);
             }
-            entryFolder.AddRange(folderItems.Skip(1));
-            IBundleSource source = new BundleSource(entryFolder);
+            entryFolder.AddRange(folderItems);
+            IBundleSource source = new BundleSource(entryFolder.Distinct());
             using var service = new BundleService();
             using var temporary = new TemporaryStorage();
             service.Add<ITemporaryStorage>(temporary);
