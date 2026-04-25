@@ -40,7 +40,7 @@ namespace ZoDream.BundleExtractor
         /// <param name="folder"></param>
         /// <param name="mode"></param>
         /// <param name="token"></param>
-        internal void ExportResource(HashSet<string> entryItems, string folder, ArchiveExtractMode mode, CancellationToken token)
+        internal void ExportResource(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             if (!Options.EnabledResource)
             {
@@ -51,10 +51,12 @@ namespace ZoDream.BundleExtractor
             {
                 if (item.Value.Position > 0)
                 {
+                    progress?.Add(1);
                     continue;
                 }
-                if (!entryItems.Contains(item.Key.FullPath))
+                if (!IsEntry(item.Key))
                 {
+                    progress?.Add(1);
                     continue;
                 }
                 var fileName = _fileItems.Create(item.Key, string.Empty, folder);
@@ -65,7 +67,7 @@ namespace ZoDream.BundleExtractor
                 progress?.Add(1);
             }
         }
-        internal void ExportAssets(HashSet<string> entryItems, string folder, ArchiveExtractMode mode, CancellationToken token)
+        internal void ExportAssets(string folder, ArchiveExtractMode mode, CancellationToken token)
         {
             var progress = Logger?.CreateSubProgress("Batch Export ...", _exporterItems.Count);
             foreach (var exporter in _exporterItems)
@@ -90,8 +92,7 @@ namespace ZoDream.BundleExtractor
             progress = Logger?.CreateSubProgress("Export assets...", _assetItems.Sum(i => i.Count));
             foreach (var asset in _assetItems)
             {
-                var sourcePath = FilePath.GetFilePath(asset.FullPath);
-                if (!entryItems.Contains(sourcePath))
+                if (!IsEntry(asset))
                 {
                     progress?.Add(asset.Count);
                     continue;
@@ -111,8 +112,7 @@ namespace ZoDream.BundleExtractor
                     var info = asset.Get(i);
                     try
                     {
-                        var obj = asset[i];
-                        if (obj is null)
+                        if (!asset.TryGet(i, out var obj))
                         {
                             // 默认 object 不做转化
                             continue;

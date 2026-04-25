@@ -28,6 +28,7 @@ namespace ZoDream.BundleExtractor
             IBundleOptions options)
         {
             _fileItems = fileItems;
+            _entryItems = _fileItems.Items.Select(i => i.FullPath).ToHashSet();
             _options = options;
             _service = service;
             _scheme = service.Get<UnityBundleScheme>() ?? new();
@@ -37,6 +38,11 @@ namespace ZoDream.BundleExtractor
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IBundleChunk _fileItems;
+        /// <summary>
+        /// 验证是否时入口文件
+        /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly HashSet<string> _entryItems;
         private readonly IBundleOptions _options;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly IEntryService _service;
@@ -185,11 +191,9 @@ namespace ZoDream.BundleExtractor
         {
             _extractMode = mode;
             _extractFolder = folder;
-            var entryItems = new HashSet<string>(); 
             foreach (var item in _fileItems.Items)
             {
                 EnqueueImportQueue(item);
-                entryItems.Add(item.FullPath);
             }
             foreach (var item in _fileItems.Dependencies)
             {
@@ -215,8 +219,8 @@ namespace ZoDream.BundleExtractor
             }
             ReadAssets(token);
             ProcessAssets(token);
-            ExportAssets(entryItems, folder, mode, token);
-            ExportResource(entryItems, folder, mode, token);
+            ExportAssets(folder, mode, token);
+            ExportResource(folder, mode, token);
         }
 
         private void LoadFile(string fullName, CancellationToken token)

@@ -37,5 +37,14 @@ namespace ZoDream.BundleExtractor.Unity
         /// <param name="entryId">资源的序号</param>
         /// <returns></returns>
         public T? ConvertTo<T>(ISerializedFile asset, int entryId);
+        /// <summary>
+        /// 直接获取
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="asset"></param>
+        /// <param name="entryId"></param>
+        /// <returns></returns>
+        public T? Get<T>(ISerializedFile asset, int entryId);
+        
     }
 }

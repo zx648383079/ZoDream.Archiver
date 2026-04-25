@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine.Document;
 using ZoDream.Shared.Bundle;
@@ -7,12 +8,13 @@ namespace UnityEngine
     public interface IResourceEntry
     {
         public int Count { get; }
-        public Object? this[int index] { get; }
 
         public Version Version { get; }
 
         public int IndexOf(long pathID);
         public int IndexOf(Object obj);
+
+        public bool TryGet(int index, [NotNullWhen(true)] out Object? instance);
 
         /// <summary>
         /// 根据序号获取解析流

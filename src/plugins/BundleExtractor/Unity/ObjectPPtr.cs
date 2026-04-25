@@ -33,12 +33,12 @@ namespace ZoDream.BundleExtractor.Unity
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public int Index => IsNotNull ? _resource.IndexOf(PathID) : -1;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public bool IsValid => Index >= 0 && _resource[Index] is T;
+        public bool IsValid => _resource.TryGet(Index, out var o) && o is T;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsNotNull => PathID != 0 && FileID >= 0 && _resource is not null;
 #if DEBUG
-        public Object? Target => Index >= 0 ? _resource[Index] : null;
+        public Object? Target => _resource.TryGet(Index, out var o) ? o : null;
 #endif
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -143,12 +143,7 @@ namespace ZoDream.BundleExtractor.Unity
             var i = Index;
             if (i >= 0)
             {
-                if (_resource[i] is K variable)
-                {
-                    instance = variable;
-                    return true;
-                }
-                instance = _resource.Container!.ConvertTo<K>(_resource, i);
+                instance = _resource.Container!.Get<K>(_resource, i);
                 return instance is not null;
             }
             instance = default;

@@ -4,8 +4,11 @@ using UnityEngine;
 using ZoDream.BundleExtractor.Unity;
 using ZoDream.BundleExtractor.Unity.Converters;
 using ZoDream.BundleExtractor.Unity.Scanners;
+using ZoDream.BundleExtractor.Unity.SerializedFiles;
 using ZoDream.Shared.Bundle;
+using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
+using ZoDream.Shared.Models;
 using Object = UnityEngine.Object;
 
 namespace ZoDream.BundleExtractor
@@ -17,6 +20,11 @@ namespace ZoDream.BundleExtractor
             var progress = Logger?.CreateSubProgress("Process assets...", _assetItems.Count);
             foreach (var asset in _assetItems)
             {
+                if (!IsEntry(asset))
+                {
+                    progress?.Add(1);
+                    continue;
+                }
                 for (var i = 0; i < asset.Count; i++)
                 {
                     if (token.IsCancellationRequested)
@@ -61,6 +69,16 @@ namespace ZoDream.BundleExtractor
             };
         }
 
+        private bool IsEntry(ISerializedFile asset)
+        {
+            return IsEntry(asset.FullPath);
+        }
+
+        private bool IsEntry(IFilePath filePath)
+        {
+            return _entryItems.Contains(FilePath.GetFilePath(filePath));
+        }
+
         private void ReadAssets(CancellationToken token)
         {
             var progress = Logger?.CreateSubProgress(
@@ -69,6 +87,11 @@ namespace ZoDream.BundleExtractor
             var serializer = _service.Get<IBundleSerializer>();
             foreach (var asset in _assetItems)
             {
+                if (!IsEntry(asset))
+                {
+                    progress?.Add(1);
+                    continue;
+                }
                 for (var i = 0; i < asset.Count; i ++)
                 {
                     if (token.IsCancellationRequested)
@@ -81,41 +104,56 @@ namespace ZoDream.BundleExtractor
                     {
                         continue;
                     }
-                    try
-                    {
-                        var reader = asset.OpenRead(i);
-                        var targetType = ConvertToClassType((NativeClassID)info.ClassID);
-                        var doc = asset.GetType(i);
-                        object? res = null;
-                        // 默认 object 不做转化，所以为 null
-                        if (doc?.Count > 0 && serializer.Converters.TryGet(targetType, out var cvt) 
-                            && cvt is ITypeTreeConverter tl)
-                        {
-                            res = tl.Read(reader, targetType, doc);
-                        }
-                        else
-                        {
-                            res = serializer.Deserialize(reader, targetType);
-                        }
-
-                        if (res is Object o)
-                        {
-                            asset[i] = o;
-                            _dependency?.AddEntry(asset.FullPath, info.FileID, o.Name, info.ClassID);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger?.Log(LogLevel.Error, e, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
-                        //if (GC.GetTotalMemory(false) > Math.Pow(1024, 3) * 5)
-                        //{
-                        //    // 限制最大内存占用
-                        //    return;
-                        //}
-                    }
+                    ReadAsset(asset, i, info, serializer);
                 }
                 progress?.Add(1);
             }
+        }
+
+        public Object? ReadAsset(ISerializedFile asset, int entryId)
+        {
+            return ReadAsset(asset, entryId, asset.Get(entryId), _service.Get<IBundleSerializer>());
+        }
+
+        private Object? ReadAsset(ISerializedFile asset, int entryId, 
+            ObjectInfo info, IBundleSerializer serializer)
+        {
+            try
+            {
+                var reader = asset.OpenRead(entryId);
+                var targetType = ConvertToClassType((NativeClassID)info.ClassID);
+                var doc = asset.GetType(entryId);
+                object? res = null;
+                // 默认 object 不做转化，所以为 null
+                if (doc?.Count > 0 && serializer.Converters.TryGet(targetType, out var cvt)
+                    && cvt is ITypeTreeConverter tl)
+                {
+                    res = tl.Read(reader, targetType, doc);
+                }
+                else
+                {
+                    res = serializer.Deserialize(reader, targetType);
+                }
+
+                if (res is Object o)
+                {
+                    asset[entryId] = o;
+                    _dependency?.AddEntry(asset.FullPath, info.FileID, o.Name, info.ClassID);
+                    return o;
+                }
+                asset[entryId] = LoadedFailureObject.Instance;
+            }
+            catch (Exception e)
+            {
+                asset[entryId] = LoadedFailureObject.Instance;
+                Logger?.Log(LogLevel.Error, e, $"<{info.TypeID}>{info.FileID} of {asset.FullPath}");
+                //if (GC.GetTotalMemory(false) > Math.Pow(1024, 3) * 5)
+                //{
+                //    // 限制最大内存占用
+                //    return;
+                //}
+            }
+            return null;
         }
 
         private static Type ConvertToClassType(NativeClassID classID)
@@ -160,6 +198,31 @@ namespace ZoDream.BundleExtractor
             };
         }
 
+        public T? Get<T>(ISerializedFile asset, int entryId)
+        {
+            var exsit = asset[entryId];
+            if (exsit is T o)
+            {
+                return o;
+            }
+            if (exsit is not null)
+            {
+                return ConvertTo<T>(asset, entryId);
+            }
+            if (IsEntry(asset))
+            {
+                return default;
+            }
+            var info = asset.Get(entryId);
+            var toType = typeof(T);
+            var targetType = ConvertToClassType((NativeClassID)info.ClassID);
+            if (targetType == toType || targetType.IsAssignableTo(toType))
+            {
+                return (T)(object)ReadAsset(asset, entryId, info, _service.Get<IBundleSerializer>());
+            }
+            return ConvertTo<T>(asset, entryId);
+        }
+
         public T? ConvertTo<T>(ISerializedFile asset, int entryId)
         {
             var serializer = _service.Get<IBundleSerializer>();
@@ -175,7 +238,6 @@ namespace ZoDream.BundleExtractor
             {
                 return (T)serializer.Deserialize(reader, targetType);
             }
-            return default;
         }
     }
 }

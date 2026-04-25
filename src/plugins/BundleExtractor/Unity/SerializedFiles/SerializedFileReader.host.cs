@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Document;
@@ -44,13 +45,40 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
 
         public Object? this[int index] 
         {
-            get => index >= 0 && index < Count ? _children[index] : null;
+            get {
+                if (index < 0 || index >= Count)
+                {
+                    return null;
+                }
+                return _children[index];
+            }
             set {
                 if (index >= 0 && index < Count)
                 {
                     _children[index] = value;
                 }
             }
+        }
+
+        public bool TryGet(int index, [NotNullWhen(true)] out Object? instance)
+        {
+            if (index < 0 || index >= Count)
+            {
+                instance = null;
+                return false;
+            }
+            if (_children[index] is LoadedFailureObject)
+            {
+                instance = null;
+                return false;
+            }
+            if (_children[index] is null)
+            {
+                instance = (Container as UnityBundleChunkReader)?.ReadAsset(this, index);
+                return instance is not null;
+            }
+            instance = _children[index];
+            return instance is not null;
         }
 
         public int IndexOf(long pathID)

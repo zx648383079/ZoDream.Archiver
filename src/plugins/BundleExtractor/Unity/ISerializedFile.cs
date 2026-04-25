@@ -44,8 +44,12 @@ namespace ZoDream.BundleExtractor.Unity
         /// <param name="index">序号</param>
         /// <returns></returns>
         public bool IsExclude(int index);
-
-        public new Object? this[int index] { get; set; }
+        /// <summary>
+        /// 不要直接调用此方法获取对象
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Object? this[int index] { get; set; }
   
         public IBundleBinaryReader OpenRead(ObjectInfo info);
         /// <summary>
