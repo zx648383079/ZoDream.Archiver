@@ -28,7 +28,7 @@ namespace ZoDream.Archiver
             };
             var batchArg = new Option<int>("batch", "-b")
             {
-                Description = "最大批处理数量",
+                Description = "最大批处理数量:批量奇数为快速模式，偶数为全依赖模式",
                 DefaultValueFactory = _ => 100
             };
             var packageArg = new Option<string>("package", "-p")

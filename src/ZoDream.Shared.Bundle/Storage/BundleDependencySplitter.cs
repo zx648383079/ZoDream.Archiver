@@ -52,7 +52,7 @@ namespace ZoDream.Shared.Bundle.Storage
         {
             var items = _chunkItems.ToArray();
             _chunkItems.Clear();
-            if (dependencies.TryGet(items, maxFileCount < 5, out var depends))
+            if (dependencies.TryGet(items, maxFileCount % 2 == 1, out var depends))
             {
                 return new BundleChunk(source, items, depends);
             }

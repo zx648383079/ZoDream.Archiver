@@ -181,6 +181,7 @@
                             Grid.Row="4"
                             Header="最大批处理数"
                             Minimum="1"
+                            ToolTipService.ToolTip="批量奇数为快速模式，偶数为全依赖模式"
                             Value="{Binding MaxBatchCount, Mode=TwoWay}" />
                     </Grid>
                 </StackPanel>
