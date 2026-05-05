@@ -48,7 +48,7 @@
     <PackageReference Include="LzhamWrapper" Version="0.0.2" />
     <PackageReference Include="Mono.Cecil" Version="0.11.6" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.7" />
-    <PackageReference Include="YamlDotNet" Version="17.0.1" />
+    <PackageReference Include="YamlDotNet" Version="17.1.0" />
   </ItemGroup>
 
 </Project>

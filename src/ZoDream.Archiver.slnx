@@ -1,0 +1,49 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/cli/">
+    <Project Path="cli/ZoDream.Archiver/ZoDream.Archiver.csproj" />
+  </Folder>
+  <Folder Name="/plugins/">
+    <Project Path="plugins/AutodeskExporter/AutodeskExporter.csproj" />
+    <Project Path="plugins/BundleExtractor/BundleExtractor.csproj" />
+    <Project Path="plugins/ChmExtractor/ChmExtractor.csproj" />
+    <Project Path="plugins/ElectronExtractor/ElectronExtractor.csproj" />
+    <Project Path="plugins/EpubExtractor/EpubExtractor.csproj" />
+    <Project Path="plugins/FModExporter/FModExporter.csproj" />
+    <Project Path="plugins/Il2CppDummy/Il2CppDummy.csproj" />
+    <Project Path="plugins/Il2CppDumper/Il2CppDumper.csproj" />
+    <Project Path="plugins/KhronosExporter/KhronosExporter.csproj" />
+    <Project Path="plugins/Live2dExporter/Live2dExporter.csproj" />
+    <Project Path="plugins/LuaDecompiler/LuaDecompiler.csproj" />
+    <Project Path="plugins/PdfInserter/PdfInserter.csproj" />
+    <Project Path="plugins/ShaderDecompiler/ShaderDecompiler.csproj" />
+    <Project Path="plugins/SourceGenerator/SourceGenerator.csproj" />
+    <Project Path="plugins/SpineExporter/SpineExporter.csproj" />
+    <Project Path="plugins/UnityEngine/UnityEngine.csproj" />
+    <Project Path="plugins/WallpaperExtractor/WallpaperExtractor.csproj" />
+  </Folder>
+  <Project Path="ZoDream.Archiver/ZoDream.Archiver.csproj">
+    <Platform Solution="*|Any CPU" Project="x64" />
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+  <Project Path="ZoDream.Shared.Bundle/ZoDream.Shared.Bundle.csproj" />
+  <Project Path="ZoDream.Shared.Compression/ZoDream.Shared.Compression.csproj" />
+  <Project Path="ZoDream.Shared.Drawing/ZoDream.Shared.Drawing.csproj" />
+  <Project Path="ZoDream.Shared.Encryption/ZoDream.Shared.Encryption.csproj" />
+  <Project Path="ZoDream.Shared.Language/ZoDream.Shared.Language.csproj" />
+  <Project Path="ZoDream.Shared.Logging/ZoDream.Shared.Logging.csproj" />
+  <Project Path="ZoDream.Shared.Media/ZoDream.Shared.Media.csproj" />
+  <Project Path="ZoDream.Shared.Net/ZoDream.Shared.Net.csproj" />
+  <Project Path="ZoDream.Shared.Numerics/ZoDream.Shared.Numerics.csproj" />
+  <Project Path="ZoDream.Shared.RustWrapper/ZoDream.Shared.RustWrapper.csproj" />
+  <Project Path="ZoDream.Shared/ZoDream.Shared.csproj" />
+  <Project Path="ZoDream.Tests/ZoDream.Tests.csproj" />
+</Solution>
