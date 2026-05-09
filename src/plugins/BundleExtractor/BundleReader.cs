@@ -33,6 +33,10 @@ namespace ZoDream.BundleExtractor
             var onlyDependencyTask = options is IBundleExtractOptions o && o.OnlyDependencyTask;
             var logger = scheme.Service.Get<ILogger>();
             logger.Info($"Engine: {engine.AliasName}");
+            if (!string.IsNullOrWhiteSpace(options.Version))
+            {
+                logger.Info($"    Version: {options.Version}");
+            }
             logger.Info("Analyzing ...");
             fileItems = engine.Unpack(fileItems, options);
             if (fileItems is IAssetBundleSource ab)

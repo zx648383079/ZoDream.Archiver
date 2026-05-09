@@ -26,7 +26,12 @@ namespace ZoDream.Archiver
         {
             Console.WriteLine();
             Console.WriteLine();
-            var logger = new ConsoleLogger();
+#if DEBUG
+            var logger = new ConsoleLogger(LogLevel.Debug);
+#else
+            var logger = new ConsoleLogger(LogLevel.Info);
+#endif
+
             if (!Directory.Exists(options.Entrance))
             {
                 logger.Error($"<{options.Entrance}> Not Found!");

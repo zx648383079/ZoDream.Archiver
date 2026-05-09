@@ -69,6 +69,11 @@ namespace ZoDream.BundleExtractor
             };
         }
 
+        public bool IsExclude<T>() where T : Object
+        {
+            return Enum.TryParse<NativeClassID>(typeof(T).Name, false, out var res) && IsExclude(res);
+        }
+
         private bool IsEntry(ISerializedFile asset)
         {
             return IsEntry(asset.FullPath);

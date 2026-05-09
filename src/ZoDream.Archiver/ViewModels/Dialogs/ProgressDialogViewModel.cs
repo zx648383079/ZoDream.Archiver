@@ -154,7 +154,7 @@ namespace ZoDream.Archiver.ViewModels
 
         private void Logger_OnLog(string message, LogLevel level)
         {
-            if (level == LogLevel.Warn)
+            if (level == LogLevel.Warn || level < LogLevel.Info)
             {
                 return;
             }

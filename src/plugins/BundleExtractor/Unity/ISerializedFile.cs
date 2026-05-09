@@ -45,6 +45,12 @@ namespace ZoDream.BundleExtractor.Unity
         /// <returns></returns>
         public bool IsExclude(int index);
         /// <summary>
+        /// 判断哪些类型不需要导出
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool IsExclude<T>() where T : Object;
+        /// <summary>
         /// 不要直接调用此方法获取对象
         /// </summary>
         /// <param name="index"></param>

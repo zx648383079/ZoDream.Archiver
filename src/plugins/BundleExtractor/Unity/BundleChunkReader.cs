@@ -265,8 +265,10 @@ namespace ZoDream.BundleExtractor
             var temporary = _service.Get<ITemporaryStorage>();
             temporary.Add(stream.BaseStream);
             stream.Add(_service.Get<IBundleCodec>());
+            var isSetVer = false;
             if (_service.TryGet<Version>(out var version))
             {
+                isSetVer = true;
                 stream.Add(version);
             }
             using var reader = _scheme.Open(stream, fullName, new ArchiveOptions()
@@ -288,6 +290,10 @@ namespace ZoDream.BundleExtractor
             if (reader is SerializedFileReader s)
             {
                 s.Container = this;
+                if (!isSetVer)
+                {
+                    Logger?.Debug($"Version: {s.Version}");
+                }
                 if (s.Version.Type == VersionType.TuanJie && 
                     _service.TryGet<bool>(UnknownProducer.CheckKey, out var check) && check)
                 {

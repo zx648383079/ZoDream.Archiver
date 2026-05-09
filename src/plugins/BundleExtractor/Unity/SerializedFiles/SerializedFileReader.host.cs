@@ -149,6 +149,11 @@ namespace ZoDream.BundleExtractor.Unity.SerializedFiles
             return _excludeItems.Contains(index);
         }
 
+        public bool IsExclude<T>() where T : Object
+        {
+            return Container?.IsExclude<T>() == true;
+        }
+
         public IFileName GetDependency(int index)
         {
             return Dependencies[index];

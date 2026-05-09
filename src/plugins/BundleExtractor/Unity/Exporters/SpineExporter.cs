@@ -163,16 +163,19 @@ namespace ZoDream.BundleExtractor.Unity.Exporters
             {
                 SaveAs(asset, baseFileName, mode);
             }
-            foreach (var ptr in _shaders)
+            if (_resource.IsExclude<Shader>())
             {
-                if (ptr.Index < 0)
+                foreach (var ptr in _shaders)
                 {
-                    continue;
+                    if (ptr.Index < 0)
+                    {
+                        continue;
+                    }
+                    var exporter = new ShaderExporter(ptr.Index, (ISerializedFile)ptr.Resource);
+                    exporter.SaveAs(Path.Combine(folder,
+                        string.IsNullOrWhiteSpace(exporter.FileName) ? ptr.PathID.ToString() : exporter.FileName
+                        ), mode);
                 }
-                var exporter = new ShaderExporter(ptr.Index, (ISerializedFile)ptr.Resource);
-                exporter.SaveAs(Path.Combine(folder, 
-                    string.IsNullOrWhiteSpace(exporter.FileName) ? ptr.PathID.ToString() : exporter.FileName
-                    ), mode);
             }
             foreach (var ptr in _textures)
             {

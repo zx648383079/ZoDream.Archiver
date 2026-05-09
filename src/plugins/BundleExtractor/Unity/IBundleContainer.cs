@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using UnityEngine;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Logging;
@@ -20,6 +21,12 @@ namespace ZoDream.BundleExtractor.Unity
         /// <param name="fileName"></param>
         /// <returns></returns>
         public int IndexOf(IFileName fileName);
+        /// <summary>
+        /// 排除类型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool IsExclude<T>() where T : Object;
 
         public ISerializedFile? this[int index] { get; }
         /// <summary>
