@@ -196,6 +196,30 @@ namespace ZoDream.Archiver.Controls
             Command = command
         };
 
+        public static ICommand Export(Action execute) => Export(new RelayCommand(execute));
+        public static ICommand Export(ICommand command) => new XamlUICommand()
+        {
+            Label = "导出",
+            Description = "导出文件",
+            IconSource = new SymbolIconSource()
+            {
+                Symbol = Symbol.Download
+            },
+            Command = command
+        };
+
+        public static ICommand Import(Action execute) => Import(new RelayCommand(execute));
+        public static ICommand Import(ICommand command) => new XamlUICommand()
+        {
+            Label = "导入",
+            Description = "导入文件",
+            IconSource = new SymbolIconSource()
+            {
+                Symbol = Symbol.Import
+            },
+            Command = command
+        };
+
         public static ICommand Code(Action execute) => Code(new RelayCommand(execute));
         public static ICommand Code(ICommand command) => new XamlUICommand()
         {
@@ -231,5 +255,6 @@ namespace ZoDream.Archiver.Controls
             },
             Command = command
         };
+
     }
 }

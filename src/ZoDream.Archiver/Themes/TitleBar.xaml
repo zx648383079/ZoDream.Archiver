@@ -34,15 +34,19 @@
                                 Height="26"
                                 Margin="8,0,0,0"
                                 Source="{TemplateBinding Icon}" />
-                            <Border Grid.Column="2">
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
                                 <TextBlock
                                     x:Name="AppTitle"
-                                    Grid.Column="1"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Center"
                                     FontWeight="Bold"
                                     Text="{TemplateBinding Title}" />
-                            </Border>
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource SecondaryTextBrush}"
+                                    Text="{TemplateBinding RoutePath}" />
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </ControlTemplate>

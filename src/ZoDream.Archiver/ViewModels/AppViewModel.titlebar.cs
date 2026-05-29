@@ -4,14 +4,11 @@ using Microsoft.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Graphics;
 using ZoDream.Archiver.Controls;
 using Windows.UI;
 using Windows.Foundation;
-using ZoDream.Archiver.Pages;
 
 namespace ZoDream.Archiver.ViewModels
 {
@@ -23,10 +20,7 @@ namespace ZoDream.Archiver.ViewModels
 
         public bool BackEnabled {
             set {
-                if (TitleBar is not null)
-                {
-                    TitleBar.BackVisible = value ? Visibility.Visible : Visibility.Collapsed;
-                }
+                TitleBar?.BackVisible = value ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -94,6 +88,7 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
+            TitleBar.RoutePath = string.Empty;
             TitleBar.BackVisible = _rootFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
         }
 

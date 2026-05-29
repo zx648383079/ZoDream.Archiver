@@ -34,6 +34,14 @@ namespace ZoDream.Archiver.ViewModels
                 DictVisible = value == 3 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
+        private bool _isSettingMode;
+        public bool IsSettingMode { 
+            get => _isSettingMode;
+            set {
+                SetProperty(ref _isSettingMode, value);
+                OnPropertyChanged(nameof(IsValid));
+            }
+        }
 
         public string[] VersionItems => ["默认", "v1", "v2", "v3"];
 
@@ -86,16 +94,21 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         private Visibility _dictVisible = Visibility.Collapsed;
+        
 
         public Visibility DictVisible {
             get => _dictVisible;
             set => SetProperty(ref _dictVisible, value);
         }
-
+        private bool _hideFileName = true;
+        public bool HideFileName { 
+            get => _hideFileName; 
+            set => SetProperty(ref _hideFileName, value); 
+        }
 
         public long SubVolumeLength => SizeConverter.Parse(SubVolumeText, "M");
 
-        public bool IsValid => !string.IsNullOrWhiteSpace(FileName);
+        public bool IsValid => IsSettingMode || !string.IsNullOrWhiteSpace(FileName);
 
         public ICommand OpenCommand { get; private set; }
         public ICommand DictCommand { get; private set; }

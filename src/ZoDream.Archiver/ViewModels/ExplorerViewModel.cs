@@ -28,6 +28,8 @@ namespace ZoDream.Archiver.ViewModels
             BackCommand = UICommand.Backward(TapBack);
             SettingCommand = UICommand.Setting(TapSetting);
             DragCommand = new RelayCommand<IEnumerable<IStorageItem>>(TapDrag);
+            ToggleCommand = new RelayCommand(TapToggle);
+            ExportCommand = UICommand.Export(TapExport);
             _service = _app.Service;
             _storage = new StorageExplorer(_service);
             LoadSetting();
@@ -47,6 +49,16 @@ namespace ZoDream.Archiver.ViewModels
                 _explorer = value;
             }
         }
+        public string RoutePath => _routeItems.Count > 0 ? 
+            _routeItems.Last().FullPath : string.Empty;
+
+        private bool _isBatchMode;
+
+        public bool IsBatchMode {
+            get => _isBatchMode;
+            set => SetProperty(ref _isBatchMode, value);
+        }
+
 
         private ObservableCollection<ISourceEntry> _fileItems = [];
 
@@ -56,13 +68,14 @@ namespace ZoDream.Archiver.ViewModels
         }
 
         private EntryViewModel? _selectedItem;
+        
 
         public EntryViewModel? SelectedItem {
             get => _selectedItem;
             set => SetProperty(ref _selectedItem, value);
         }
 
-        public bool CanGoBack => _routeItems.Count > 0;
+        public bool CanGoBack => _routeItems.Count > (IsBatchMode ? 1 : 0);
 
 
         public ICommand AddCommand { get; private set; }
@@ -70,13 +83,72 @@ namespace ZoDream.Archiver.ViewModels
 
         public ICommand DeleteCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
+        public ICommand ExportCommand { get; private set; }
         public ICommand DragCommand { get; private set; }
         public ICommand ViewCommand { get; private set; }
         public ICommand BackCommand { get; private set; }
 
         public ICommand SettingCommand { get; private set; }
 
+        public ICommand ToggleCommand { get; private set; }
+
+        private async void TapToggle()
+        {
+            IsBatchMode = !IsBatchMode;
+            if (!IsBatchMode)
+            {
+                return;
+            }
+            if (_storage.Items.Count == 0)
+            {
+                var picker = new FolderPicker();
+                picker.FileTypeFilter.Add("*");
+                _app.InitializePicker(picker);
+                picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                var folder = await picker.PickSingleFolderAsync();
+                if (folder is null)
+                {
+                    IsBatchMode = false;
+                    return;
+                }
+                _storage.Add(folder.Path);
+                Open(_storage.Items.Last());
+            }
+            if (_routeItems.Count == 0)
+            {
+                Open(_storage.Items.Last());
+            }
+            TapBatchSetting();
+        }
+
+        private void TapExport()
+        {
+
+        }
+
         private async void TapSetting()
+        {
+            if (IsBatchMode)
+            {
+                TapBatchSetting();
+            } else
+            {
+                TapGlobalSetting();
+            }
+        }
+        private async void TapBatchSetting()
+        {
+            var picker = new CompressDialog();
+            var model = picker.ViewModel;
+            model.IsSettingMode = true;
+            var res = await _app.OpenDialogAsync(picker);
+            if (res != Microsoft.UI.Xaml.Controls.ContentDialogResult.Primary)
+            {
+                return;
+            }
+            // TODO
+        }
+        private async void TapGlobalSetting()
         {
             var picker = new SettingDialog();
             var res = await _app.OpenDialogAsync(picker);
@@ -105,10 +177,8 @@ namespace ZoDream.Archiver.ViewModels
             {
                 return;
             }
-            var last = _routeItems.Count - 1;
-            var item = _routeItems[last];
-            _routeItems.RemoveAt(last);
-            Open(item);
+            _routeItems.RemoveAt(_routeItems.Count - 1);
+            Open(_routeItems.Count > 0 ? _routeItems.Last() : DirectoryEntry.Empty);
         }
 
         private async void TapAdd()
@@ -166,9 +236,18 @@ namespace ZoDream.Archiver.ViewModels
         {
             if (_routeItems.Count > 0 && _routeItems.Last().FullPath == entry.FullPath)
             {
+                OnRouteChanged();
                 return;
             }
             _routeItems.Add(entry);
+            OnRouteChanged();
+        }
+
+        private void OnRouteChanged()
+        {
+            OnPropertyChanged(nameof(CanGoBack));
+            OnPropertyChanged(nameof(RoutePath));
+            App.ViewModel.TitleBar!.RoutePath = RoutePath;
         }
 
         private async void Open(ISourceEntry entry)
@@ -182,12 +261,13 @@ namespace ZoDream.Archiver.ViewModels
             }
             if (e is DirectoryEntryStream items)
             {
+                AddRoute(entry);
                 FileItems.Clear();
                 foreach (var item in items.Items.OrderByDescending(i => i.IsDirectory))
                 {
                     if (item is TopDirectoryEntry)
                     {
-                        AddRoute(item);
+                        // AddRoute(item);
                         // FileItems.Add(item);
                         continue;
                     }
@@ -196,8 +276,8 @@ namespace ZoDream.Archiver.ViewModels
                 if (!items.CanGoBack)
                 {
                     _routeItems.Clear();
+                    OnRouteChanged();
                 }
-                OnPropertyChanged(nameof(CanGoBack));
                 return;
             }
             if (e is MediaEntryStream media)

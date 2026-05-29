@@ -39,6 +39,17 @@ namespace ZoDream.Archiver.Controls
 
 
 
+        public string RoutePath {
+            get { return (string)GetValue(RoutePathProperty); }
+            set { SetValue(RoutePathProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RoutePath.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RoutePathProperty =
+            DependencyProperty.Register(nameof(RoutePath), typeof(string), typeof(AppTitleBar), new PropertyMetadata(string.Empty));
+
+
+
 
         public ImageSource Icon {
             get { return (ImageSource)GetValue(IconProperty); }

@@ -27,10 +27,14 @@
             <AppBarButton Command="{Binding BackCommand}" Visibility="{Binding CanGoBack, Converter={StaticResource ToggleCvt}}" />
             <AppBarButton Command="{Binding AddCommand}" />
             <AppBarButton Command="{Binding AddFolderCommand}" />
-            <AppBarButton Command="{Binding SaveCommand}" />
+            <AppBarButton Command="{Binding SaveCommand}" Visibility="{Binding IsBatchMode, Converter={StaticResource ToggleCvt}, ConverterParameter=False}" />
+            <AppBarButton Command="{Binding ExportCommand}" Visibility="{Binding IsBatchMode, Converter={StaticResource ToggleCvt}}" />
             <AppBarButton Command="{Binding ViewCommand}" />
             <AppBarButton Command="{Binding DeleteCommand}" />
             <AppBarButton Command="{Binding SettingCommand}" />
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Command="{Binding ToggleCommand}" Label="切换管理模式" />
+            </CommandBar.SecondaryCommands>
         </CommandBar>
         <ListView
             Grid.Row="1"
