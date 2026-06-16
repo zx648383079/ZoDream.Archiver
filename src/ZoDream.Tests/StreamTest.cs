@@ -26,7 +26,7 @@ namespace ZoDream.Tests
         [TestMethod]
         public void TestXOR()
         {
-            byte[] buffer = [0x93, 0xa8, 0xaf, 0xb2];
+            byte[] buffer = [0xAA, 0x91, 0x96, 0x8B, 0x86, 0xB9, 0xAC];
             var target = "UnityFS"u8;
             var format = XORStream.Recognize(buffer, target);
             Assert.IsNotEmpty(format);
