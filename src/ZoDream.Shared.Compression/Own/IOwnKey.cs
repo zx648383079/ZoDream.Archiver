@@ -8,5 +8,7 @@ namespace ZoDream.Shared.Compression.Own
         public void Seek(long len, SeekOrigin origin);
 
         public byte ReadByte();
+
+        public void Read(Span<byte> buffer);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ZoDream.Shared.Compression.Own
 {
@@ -21,6 +22,14 @@ namespace ZoDream.Shared.Compression.Own
             foreach (var item in items)
             {
                 item.Seek(len, origin);
+            }
+        }
+
+        public void Read(Span<byte> buffer)
+        {
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = ReadByte();
             }
         }
 

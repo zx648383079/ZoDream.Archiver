@@ -37,7 +37,7 @@ namespace ZoDream.Shared.Compression.Own
                 return;
             }
             offset = pos % _reader.Length;
-            _reader.Seek((long)offset, SeekOrigin.Begin);
+            _reader.Seek(offset, SeekOrigin.Begin);
             _bufferBegin = offset;
             _bufferSize = 0;
             _bufferOffset = 0;
@@ -60,7 +60,13 @@ namespace ZoDream.Shared.Compression.Own
             return _buffer[_bufferOffset++];
         }
 
-
+        public void Read(Span<byte> buffer)
+        {
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = ReadByte();
+            }
+        }
         public void WriteByte(byte[] buffer, int length)
         {
             _reader.Write(Convert(buffer, length));

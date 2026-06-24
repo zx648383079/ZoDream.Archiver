@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -37,6 +38,14 @@ namespace ZoDream.Shared.Compression.Own
                 _ => len
             };
             _position = (int)(pos % _key.Length);
+        }
+
+        public void Read(Span<byte> buffer)
+        {
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = ReadByte();
+            }
         }
 
         public void Dispose()

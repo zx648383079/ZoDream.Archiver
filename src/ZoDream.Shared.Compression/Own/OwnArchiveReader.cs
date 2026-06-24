@@ -21,6 +21,7 @@ namespace ZoDream.Shared.Compression.Own
             _header.Read(stream);
             _compressor = _header.Version switch
             {
+                OwnVersion.V4 => new V4.OwnArchiveCompressor(key),
                 OwnVersion.V3 => new V3.OwnArchiveCompressor(key),
                 OwnVersion.V2 => new V2.OwnArchiveCompressor(key),
                 _ => new OwnArchiveCompressor(key)
