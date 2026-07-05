@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using ZoDream.BundleExtractor.Unity.Converters;
-using ZoDream.BundleExtractor.Xna.Models;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Drawing;
 using ZoDream.Shared.IO;
@@ -19,9 +18,14 @@ namespace ZoDream.BundleExtractor.Xna.Converters
                 TextureFormat = ToFormat(reader.ReadInt32()),
                 Width = reader.ReadInt32(),
                 Height = reader.ReadInt32(),
-                MipCount = reader.ReadInt32(),
             };
-            res.ImageData = new MultipartFileStream(reader.ReadArray(res.MipCount, _ => reader.ReadAsStream()));
+            var levelCount = reader.ReadInt32();
+            var levelCountOutput = levelCount;
+            if (levelCount > 1 && (!XnbReader.IsPowerOfTwo(res.Width) || !XnbReader.IsPowerOfTwo(res.Height)))
+            {
+                levelCountOutput = 1;
+            }
+            res.ImageData = new MultipartFileStream(reader.ReadArray(levelCount, _ => reader.ReadAsStream()));
             return res;
         }
         public void SaveAs(object instance, string fileName, ArchiveExtractMode mode)

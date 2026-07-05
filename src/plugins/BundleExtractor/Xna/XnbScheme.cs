@@ -71,7 +71,9 @@ namespace ZoDream.BundleExtractor.Xna
             new FloatCurveConverter(),
             new VideoConverter(),
 
-
+            // Custom converters
+            new YarnConverter(),
+            new CdbConverter(),
         ];
 
         public IBundleHandler? Open(string fileName)

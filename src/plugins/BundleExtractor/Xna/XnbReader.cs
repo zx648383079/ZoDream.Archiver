@@ -236,6 +236,9 @@ namespace ZoDream.BundleExtractor.Xna
                 "Tide" => typeof(Stream),
                 "SoundEffect" => typeof(SoundEffect),
                 "Song" => typeof(Song),
+                // UNKNOWN
+                "Yarn" => typeof(YarnProject),
+                "Cdb" => typeof(Cdb),
                 _ => throw new Shared.NotSupportedException(sourceType),
             };
         }
@@ -331,6 +334,11 @@ namespace ZoDream.BundleExtractor.Xna
             buffer[0] = b;
             reader.Read(buffer, 1, count - 1);
             return Encoding.UTF8.GetChars(buffer)[0];
+        }
+
+        public static bool IsPowerOfTwo(int value)
+        {
+            return (value > 0) && ((value & (value - 1)) == 0);
         }
     }
 }
