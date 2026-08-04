@@ -1,14 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ZoDream.BundleExtractor.RenPy;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
 
 namespace ZoDream.BundleExtractor.Engines
 {
-    public class RenPyEngine : IBundleEngine
+    public class RenPyEngine(IEntryService service) : IBundleEngine
     {
         internal const string EngineName = "RenPy";
 
@@ -30,12 +30,13 @@ namespace ZoDream.BundleExtractor.Engines
         }
         public IBundleHandler CreateHandler(IBundleChunk fileItems, IBundleOptions options)
         {
-            return null;
+            return new ResourceReader(fileItems, new RenPyScheme(service, options), service);
         }
 
         public bool TryLoad(IBundleSource fileItems, IBundleOptions options)
         {
-            if (fileItems.GetDirectories("renpy").Any())
+            if (fileItems.GetDirectories("renpy").Any() 
+                || fileItems.GetFiles("*.rpa").Any())
             {
                 options.Engine = EngineName;
                 return true;
