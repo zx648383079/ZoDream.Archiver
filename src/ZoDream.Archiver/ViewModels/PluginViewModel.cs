@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using ZoDream.ChmExtractor;
 using ZoDream.EpubExtractor;
+using ZoDream.QuickBMS;
 using ZoDream.Shared.Compression;
 using ZoDream.Shared.Interfaces;
 using ZoDream.WallpaperExtractor;
@@ -13,6 +14,7 @@ namespace ZoDream.Archiver.ViewModels
     {
 
         private readonly IArchiveScheme[] PluginItems = [
+            new QuickBMSScheme(),
             new ChmScheme(),
             new PackageScheme(),
             new EpubScheme(),

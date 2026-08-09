@@ -21,6 +21,7 @@
     <Project Path="plugins/Live2dExporter/Live2dExporter.csproj" />
     <Project Path="plugins/LuaDecompiler/LuaDecompiler.csproj" />
     <Project Path="plugins/PdfInserter/PdfInserter.csproj" />
+    <Project Path="plugins/QuickBMS/QuickBMS.csproj" Id="ad4f3b3b-70c5-4853-b962-e16d56e20df3" />
     <Project Path="plugins/ShaderDecompiler/ShaderDecompiler.csproj" />
     <Project Path="plugins/SourceGenerator/SourceGenerator.csproj" />
     <Project Path="plugins/SpineExporter/SpineExporter.csproj" />

@@ -90,6 +90,7 @@
     <ProjectReference Include="..\plugins\ElectronExtractor\ElectronExtractor.csproj" />
     <ProjectReference Include="..\plugins\EpubExtractor\EpubExtractor.csproj" />
     <ProjectReference Include="..\plugins\Il2CppDumper\Il2CppDumper.csproj" />
+    <ProjectReference Include="..\plugins\QuickBMS\QuickBMS.csproj" />
     <ProjectReference Include="..\plugins\SourceGenerator\SourceGenerator.csproj" />
     <ProjectReference Include="..\plugins\WallpaperExtractor\WallpaperExtractor.csproj" />
     <ProjectReference Include="..\ZoDream.Shared.Compression\ZoDream.Shared.Compression.csproj" />

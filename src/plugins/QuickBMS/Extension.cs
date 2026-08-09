@@ -1,6 +1,6 @@
 ﻿using ZoDream.Shared.Bundle;
 
-namespace ZoDream.BundleExtractor.QuickBMS
+namespace ZoDream.QuickBMS
 {
     public static class Extension
     {

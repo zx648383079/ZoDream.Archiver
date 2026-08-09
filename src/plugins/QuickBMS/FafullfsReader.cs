@@ -9,18 +9,18 @@ using ZoDream.Shared.Interfaces;
 using ZoDream.Shared.Models;
 using ZoDream.Shared.Storage;
 
-namespace ZoDream.BundleExtractor.QuickBMS
+namespace ZoDream.QuickBMS
 {
     public class FafullfsReader(IBundleBinaryReader reader, IArchiveOptions options) 
         : IBundleHandler, IArchiveReader
     {
-        private static readonly string Signature = "FAFULLFS";
+        internal static readonly string Signature = "FAFULLFS";
 
         public void ExtractTo(string folder, 
             ArchiveExtractMode mode, 
             CancellationToken token = default)
         {
-            var entries = ReadEntry();
+            var entries = ReadEntry().ToArray();
             foreach (var item in entries)
             {
                 if (token.IsCancellationRequested)
@@ -34,6 +34,7 @@ namespace ZoDream.BundleExtractor.QuickBMS
 
         public IEnumerable<IReadOnlyEntry> ReadEntry()
         {
+            reader.Position = 0;
             var buffer = reader.ReadBytes(Signature.Length);
             Expectation.ThrowIfNotSignature(buffer.Equal(Signature));
             var fileCount = reader.ReadLongLong();
@@ -65,7 +66,17 @@ namespace ZoDream.BundleExtractor.QuickBMS
                 return;
             }
             reader.Position = o.Offset;
-            reader.ReadAsStream(o.Length).CopyTo(output);
+            if (!entry.Name.EndsWith(".nltx"))
+            {
+                reader.ReadAsStream(o.Length).CopyTo(output);
+                return;
+            }
+            var next = new NltxReader(new BundleBinaryReader(reader.ReadAsStream(o.Length)), entry.Name, options);
+            foreach (var item in next.ReadEntry())
+            {
+                next.ExtractTo(item, output);
+                break;
+            }
         }
 
         private void ExtractTo(IReadOnlyEntry entry, string fileName, ArchiveExtractMode mode)
@@ -99,7 +110,7 @@ namespace ZoDream.BundleExtractor.QuickBMS
 
         public void Dispose()
         {
-            if (options.LeaveStreamOpen)
+            if (options?.LeaveStreamOpen == true)
             {
                 return;
             }

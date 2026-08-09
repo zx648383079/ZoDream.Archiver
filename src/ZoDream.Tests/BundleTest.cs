@@ -1,3 +1,4 @@
+using ZoDream.QuickBMS;
 using ZoDream.BundleExtractor.Unity.YooAsset;
 using ZoDream.Shared.Bundle;
 using ZoDream.Shared.Interfaces;
