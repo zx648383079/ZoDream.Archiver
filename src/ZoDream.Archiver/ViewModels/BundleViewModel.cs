@@ -400,6 +400,11 @@ namespace ZoDream.Archiver.ViewModels
                 FileItems.Remove(item as EntryViewModel);
             }
             SelectedItems = null;
+            if (FileItems.Count == 0)
+            {
+                _manifestPath = string.Empty;
+                _options = new();
+            }
         }
 
 

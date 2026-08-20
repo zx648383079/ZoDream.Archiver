@@ -10,12 +10,14 @@ namespace ZoDream.BundleExtractor
         {
             var option = options is IBundleOptions o ? o : new BundleOptions(options);
             LoadEnvironment(fileItems, option);
+            var logger = Service.Get<ILogger>();
             if (string.IsNullOrWhiteSpace(option.Platform) 
                 || string.IsNullOrWhiteSpace(option.Engine))
             {
+                logger?.Warning($"Platform is unkown or Engine is unknown");
                 return null;
             }
-            Service.Get<ILogger>().Info($"Platform: {option.Platform}" );
+            logger?.Info($"Platform: {option.Platform}" );
             return new BundleReader(fileItems, option, this);
         }
 
