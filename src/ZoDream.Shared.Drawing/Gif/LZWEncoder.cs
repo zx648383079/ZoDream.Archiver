@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZoDream.Shared.Drawing.Gif
 {
@@ -94,7 +90,7 @@ namespace ZoDream.Shared.Drawing.Gif
         private int _curBits = 0;
 
         private readonly int[] _masks =
-        {
+        [
             0x0000,
             0x0001,
             0x0003,
@@ -111,7 +107,7 @@ namespace ZoDream.Shared.Drawing.Gif
             0x1FFF,
             0x3FFF,
             0x7FFF,
-            0xFFFF };
+            0xFFFF ];
 
         // Number of characters so far in this 'packet'
         private int _aCount;
